@@ -5,13 +5,15 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    savu.core.transports
+   savu.core.transports
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.core.basic_plugin_runner
    savu.core.checkpointing
@@ -23,6 +25,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.core
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

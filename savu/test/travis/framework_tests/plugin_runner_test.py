@@ -26,7 +26,7 @@ from savu.core.plugin_runner import PluginRunner
 
 
 def run_protected_plugin_runner_no_process_list(options, plugin, **kwargs):
-    if 'data' in kwargs.keys():
+    if 'data' in list(kwargs.keys()):
         tu.set_plugin_list(options, plugin, kwargs['data'])
     else:
         tu.set_plugin_list(options, plugin)

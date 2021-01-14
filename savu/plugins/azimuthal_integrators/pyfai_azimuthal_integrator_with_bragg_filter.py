@@ -63,7 +63,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
 #             print i
             idx = mask[:,i] == 1
             if np.sum(idx*1)==0:
-                logging.warn("Found a bin where all the pixels are masked! Bin num: %s" , str(i))
+                logging.warning("Found a bin where all the pixels are masked! Bin num: %s" , str(i))
                 out[i] = 0.0
             else:
                 foo = remapped[:,i][idx]

@@ -2,6 +2,6 @@ savu.tomo\_recon module
 =======================
 
 .. automodule:: savu.tomo_recon
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

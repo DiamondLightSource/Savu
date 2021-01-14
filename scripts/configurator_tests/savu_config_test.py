@@ -3,26 +3,24 @@ Created on 24 May 2016
 
 @author: ssg37927
 '''
-from __future__ import print_function
 
 import sys
 import unittest
 from mock import patch
-from StringIO import StringIO
+from io import StringIO
 
 from scripts.config_generator import savu_config
 
 
 class Test(unittest.TestCase):
-
     def savu_config_runner(self, input_list, output_checks):
-        with patch('__builtin__.raw_input', side_effect=input_list):
+        with patch('builtins.input', side_effect=input_list):
 
             saved_stdout = sys.stdout
             try:
                 out = StringIO()
                 sys.stdout = out
-                savu_config.main()
+                savu_config.main(test=True)
                 output = out.getvalue().strip()
                 for check in output_checks:
                     assert check in output
@@ -36,15 +34,18 @@ class Test(unittest.TestCase):
 
     def testHelpBlank(self):
         input_list = ['', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = [
+            'help :  Display the help information', 'exit :  Close the program'
+        ]
         self.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
         input_list = ['help', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = [
+            'help :  Display the help information', 'exit :  Close the program'
+        ]
         self.savu_config_runner(input_list, output_checks)
+
 
 if __name__ == "__main__":
     unittest.main()

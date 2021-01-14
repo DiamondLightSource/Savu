@@ -8,13 +8,10 @@ def set_template_string_multi(chart_width):
         <head>
         <link rel="stylesheet" type="text/css" href="{{style_sheet}}">
 
-        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
-       'version':'1','packages':['timeline']}]}"></script>
-
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
-
         <script type="text/javascript">
 
         google.setOnLoadCallback(drawChart);
@@ -98,15 +95,11 @@ def set_template_string_vis(nVals, title, size, params, header_shift):
 
         <title> Savu MPI performance tests </title>
 
-        <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
-       'version':'1','packages':['corechart']}]}"></script>
-
+        <script src="https://www.gstatic.com/charts/loader.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
         <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
-
         <script type="text/javascript">
-
         google.setOnLoadCallback(drawSeriesChart);
 
         function drawSeriesChart() {

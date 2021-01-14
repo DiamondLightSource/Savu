@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.fluo_fitters.base_fluo_fitter
    savu.plugins.fluo_fitters.fastxrf_fitting
@@ -14,6 +15,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.plugins.fluo_fitters
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

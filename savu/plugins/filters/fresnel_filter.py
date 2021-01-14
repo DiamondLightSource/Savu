@@ -57,12 +57,12 @@ class FresnelFilter(Plugin, CpuPlugin):
         center_hei = int(np.ceil((height - 1) * 0.5))
         center_wid = int(np.ceil((width - 1) * 0.5))
         if pattern == "PROJECTION":
-            ulist = (1.0 * np.arange(0, width) - center_wid) / width
-            vlist = (1.0 * np.arange(0, height) - center_hei) / height
+            ulist = (1.0 * np.arange(0, width) - center_wid) // width
+            vlist = (1.0 * np.arange(0, height) - center_hei) // height
             u, v = np.meshgrid(ulist, vlist)
             win2d = 1.0 + ratio * (u**2 + v**2)
         else:
-            ulist = (1.0 * np.arange(0, width) - center_wid) / width
+            ulist = (1.0 * np.arange(0, width) - center_wid) // width
             win1d = 1.0 + ratio * ulist**2
             win2d = np.tile(win1d, (height, 1))
         return win2d
@@ -97,7 +97,6 @@ class FresnelFilter(Plugin, CpuPlugin):
             (depth1, height1, width1, _) = self.data_size
         else:
             (depth1, height1, width1) = self.data_size
-        print("Shape of the data {0} {1} {2}".format(depth1, height1, width1))
         ratio = self.parameters['ratio']
         if self.pattern == "PROJECTION":
             self.window = self.make_window(
@@ -111,10 +110,10 @@ class FresnelFilter(Plugin, CpuPlugin):
             data[0], self.window, self.pattern, self.pad_width)
         return mat_filt
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The filter built is based on the Fresnel propagator")
-        cite_info.bibtex = ()
-        cite_info.doi = " "
-        return cite_info
+    # def get_citation_information(self):
+    #     cite_info = CitationInformation()
+    #     cite_info.description = \
+    #         ("The filter built is based on the Fresnel propagator")
+    #     cite_info.bibtex = ()
+    #     cite_info.doi = " "
+    #     return cite_info

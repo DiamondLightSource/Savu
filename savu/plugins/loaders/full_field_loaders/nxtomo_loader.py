@@ -60,7 +60,7 @@ class NxtomoLoader(BaseLoader):
         self.warnings = []
 
     def log_warning(self, msg):
-        logging.warn(msg)
+        logging.warning(msg)
         self.warnings.append(msg)
 
     def setup(self):
@@ -79,7 +79,7 @@ class NxtomoLoader(BaseLoader):
             self.__setup_4d(data_obj)
             self.__setup_3d_to_4d(data_obj, self.nFrames)
         else:
-            if len(data_obj.data.shape) is 3:
+            if len(data_obj.data.shape) == 3:
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
@@ -90,7 +90,7 @@ class NxtomoLoader(BaseLoader):
             control = self._get_h5_path(
                 data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
-        except:
+        except Exception:
             self.log_warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
@@ -111,9 +111,9 @@ class NxtomoLoader(BaseLoader):
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                exec("n_frames = " + self.parameters['angles'])
+                n_frames = eval(self.parameters["angles"], {"builtins": None, "np": np})
                 return np.array(n_frames).shape[0]
-            except:
+            except Exception:
                 raise Exception("Please specify the angles, or the number of "
                                 "frames per scan (via 3d_to_4d param) in the loader.")
         if isinstance(self.parameters['3d_to_4d'], int):
@@ -183,7 +183,7 @@ class NxtomoLoader(BaseLoader):
             self.parameters['ignore_flats'] else None
         try:
             image_key = data_obj.backing_file[
-                'entry1/tomo_entry/instrument/detector/image_key'][...]
+                self.parameters['image_key_path']][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
         except KeyError:
@@ -239,9 +239,9 @@ class NxtomoLoader(BaseLoader):
 
         if nxs_angles is None:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except Exception as e:
-                logging.warn(e.message)
+                logging.warning(e.message)
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:

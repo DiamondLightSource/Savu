@@ -2,7 +2,7 @@ savu.version module
 ===================
 
 .. automodule:: savu.version
-    :members:
-    :private-members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

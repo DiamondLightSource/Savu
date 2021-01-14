@@ -27,8 +27,8 @@ def get_parameter_value(nxsfile, plugin_name, plugin_param):
     
     for plugin in plist:
         if plugin['name'] == plugin_name:
-            if plugin_param in plugin['data'].keys():
-                print plugin_name, plugin['data'][plugin_param]
+            if plugin_param in list(plugin['data'].keys()):
+                print(plugin_name, plugin['data'][plugin_param])
 
 if __name__ == '__main__':
     arg = arg_parser()

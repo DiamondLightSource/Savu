@@ -1,39 +1,24 @@
+dist: bionic
 cache: apt
-sudo: true
 language: python
 python:
-  - "2.7"
-#  - "3.5"
-#addons:
-#  apt:
-#    packages:
-#    - libblas-dev
-#    - liblapack-dev
-#    - gfortran
-#    - libhdf5-serial-dev
-#    - libboost-all-dev
+  - 3.7
 
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
+  - cd $TRAVIS_BUILD_DIR/install/savu_hpc/savu_installer
+  - ls -lah
+#  - touch ~/.condarc
+#  - "echo channel_priority: strict >> ~/.condarc"
 
 install:
-  - conda env create --file environment.yml
-  - source activate test-environment
+  - PREFIX=$HOME bash savu_installer.sh --local --no_prompts
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - export FACILITY=dls
+  - cd $TRAVIS_BUILD_DIR
   - python setup.py install
 
 script:
-  - py.test scripts/configurator_tests/ -v
-  - py.test savu/test/travis -v --cov savu --cov-report term-missing
-
-after_script:
-  - coveralls
-  
-#allow_failures:
-#    - python: "3.5"
-
+  - pip install coverage pytest-cov
+  - cd $TRAVIS_BUILD_DIR
+  - pytest scripts/configurator_tests/ --cov=scripts
+  - pytest savu/test/travis --cov=savu --cov-report term-missing

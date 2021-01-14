@@ -40,14 +40,13 @@ class BaseAstraRecon(BaseRecon):
 
     def setup(self):
         self.alg = self.parameters['algorithm']
-        self.get_max_frames = \
-            self._get_multiple if '3D' in self.alg else self._get_single
+        self.get_max_frames = self._get_multiple if '3D' in self.alg else self._get_single
 
         super(BaseAstraRecon, self).setup()
         out_dataset = self.get_out_datasets()
 
         # if res_norm is required then setup another output dataset
-        if len(out_dataset) is 2:
+        if len(out_dataset) == 2:
             self.res = True
             out_pData = self.get_plugin_out_datasets()
             in_data = self.get_in_datasets()[0]
@@ -169,9 +168,9 @@ class BaseAstraRecon(BaseRecon):
         cfg['ProjectionDataId'] = sino_id
         if 'FBP' in self.alg:
             fbp_filter = self.parameters['FBP_filter'] if 'FBP_filter' in \
-                self.parameters.keys() else 'none'
+                list(self.parameters.keys()) else 'none'
             cfg['FilterType'] = fbp_filter
-        if 'projector' in self.parameters.keys():
+        if 'projector' in list(self.parameters.keys()):
             proj_id = astra.create_projector(
                 self.parameters['projector'], proj_geom, vol_geom)
             cfg['ProjectorId'] = proj_id
