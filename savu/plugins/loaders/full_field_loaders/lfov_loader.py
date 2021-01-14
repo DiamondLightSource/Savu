@@ -47,6 +47,7 @@ class LfovLoader(MultiNxtomoLoader):
     :*param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
     :*param axis_label: New axis label, if required, in the form\
         'name.units'. Default: 'scan.number'.
+    :~param range: No need. Default: None. 
     """
 
     def __init__(self, name='LfovLoader'):
