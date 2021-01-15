@@ -8,9 +8,14 @@ function is_gpfs03 ()
   return=$2
   check=$3
   pathtofile=`readlink -f $file`
-  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
-		echo $file": No such file or directory"
-		return 1
+
+  # is it a file?
+  if [ "$check" = true ] && [ ! -f $pathtofile ]; then
+      # is it a directory?
+	  if [ ! -d $pathtofile ]; then
+        echo $file": No such file or directory"
+        return 1
+      fi
   fi
 
   gpfs03="$(df $pathtofile | grep gpfs03)"
@@ -99,7 +104,7 @@ else
 	nargs=${#args[@]}
 
 	if [ $nargs != 3 ] ; then
-	    tput setaf 1    
+	    tput setaf 1
 	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
 	    tput setaf 6
 	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
@@ -126,7 +131,7 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true 
+    is_gpfs03 $data_file gpfs03 true
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
@@ -150,15 +155,19 @@ else
 			'BIG') nNodes=4 ;;
 			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
+			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
 				exit 1 ;;
 		esac
 	fi
 
 	# which project?
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
+	pathtodatafile=`readlink -f $data_file`
+	# having "/dls/i" handles the case where /dls/staging is in the path
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/i).*?(?=/data)'`
 	if [ -z "$project" ] ; then
-	  project=tomography
+  		project=tomography
+	else
+  		project="i"$project
 	fi
 
 fi
@@ -223,7 +232,7 @@ if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
 	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
 	exit 1
 fi
-	
+
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -260,7 +269,7 @@ savupath=${savupath%/savu}
 # set the suffix
 arg_parse "-suffix" suffix $options
 options=${options//"-suffix $suffix"/}
-if [ ! $suffix ] ; then 
+if [ ! $suffix ] ; then
   suffix=""
 else
   suffix=_$suffix
@@ -389,4 +398,3 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
-
