@@ -10,6 +10,4 @@ class SimpleFitXrfTools(PluginTools):
             dtype: float
             description: An initial guess at the width.
             default: 0.02
-
-
         """

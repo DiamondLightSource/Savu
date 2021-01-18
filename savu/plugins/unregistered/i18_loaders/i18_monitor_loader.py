@@ -21,7 +21,7 @@
 
 """
 
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
+from savu.plugins.unregistered.i18_loaders.\
     base_i18_multi_modal_loader import BaseI18MultiModalLoader
 
 from savu.plugins.utils import register_plugin
@@ -29,10 +29,6 @@ from savu.plugins.utils import register_plugin
 
 class I18MonitorLoader(BaseI18MultiModalLoader):
     """
-    A class to load tomography data from an monitor file
-    :param monitor_detector: path to \
-        monitor. Default:'entry1/raster_counterTimer01/I0'.
-    :param name: The name assigned to the dataset. Default: 'monitor'.
     """
 
     def __init__(self, name='I18MonitorLoader'):

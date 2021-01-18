@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: ring_removal_interpolation
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts
+   :synopsis: Remove stripe artefacts. A plugin working in sinogram space to remove stripe artefacts
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -32,15 +32,6 @@ from scipy.ndimage import binary_dilation
 @register_plugin
 class RingRemovalInterpolation(Plugin, CpuPlugin):
     """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts\
-    in a reconstructed image) using a combination of a detection technique\
-    and an interpolation technique. 
-
-    :u*param size: Size of the median filter window. Greater is stronger\
-    . Default: 31.
-    :u*param snr: Ratio used to locate stripe artifacts. Greater is\
-     less sensitive. Default: 3.0.
     """
 
     def __init__(self):
@@ -57,13 +48,18 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
     def detect_stripe(self, listdata, snr):
         """
         Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
+
+        Parameters
+        ----------
+            listdata : 1D normalized array.
+            snr : ratio used to discriminate between useful
                         information and noise.
+
+        Returns
         ---------
-        Return:     - 1D binary mask.
+            list_mask: 1D binary mask.
         """
+
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
         xlist = np.arange(0, numdata, 1.0)

@@ -24,15 +24,15 @@
 
 import logging
 from savu.plugins.loaders.base_loader import BaseLoader
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
-    base_i18_multi_modal_loader import BaseI18MultiModalLoader
-from savu.plugins.loaders.mapping_loaders.i18_loaders.i18_xrd_loader \
+from savu.plugins.unregistered.i18_loaders.base_i18_multi_modal_loader\
+    import BaseI18MultiModalLoader
+from savu.plugins.unregistered.i18_loaders.i18_xrd_loader \
     import I18XrdLoader as xrd
-from savu.plugins.loaders.mapping_loaders.i18_loaders.i18_fluo_loader \
+from savu.plugins.unregistered.i18_loaders.i18_fluo_loader \
     import I18FluoLoader as fluo
-from savu.plugins.loaders.mapping_loaders.i18_loaders.i18_stxm_loader \
+from savu.plugins.unregistered.i18_loaders.i18_stxm_loader \
     import I18StxmLoader as stxm
-from savu.plugins.loaders.mapping_loaders.i18_loaders.i18_monitor_loader \
+from savu.plugins.unregistered.i18_loaders.i18_monitor_loader \
     import I18MonitorLoader as mon
 
 from savu.plugins.utils import register_plugin

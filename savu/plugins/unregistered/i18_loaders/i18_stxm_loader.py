@@ -21,7 +21,7 @@
 
 """
 
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
+from savu.plugins.unregistered.i18_loaders.\
     base_i18_multi_modal_loader import BaseI18MultiModalLoader
 import logging
 from savu.plugins.utils import register_plugin

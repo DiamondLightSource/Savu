@@ -30,14 +30,6 @@ import numpy as np
 @register_plugin
 class RegionGrow3d(Plugin, MultiThreadedPlugin):
     """
-    Fast 3D segmentation by evolving the user-given mask, the initialised mask should be set \
-    in the central part of the object to be segmented.
-
-    :param threshold: parameter to control mask propagation. Default: 1.0.
-    :param method: a method to collect statistics from the given mask (mean, median, value). Default: 'mean'.
-    :param iterations: number of iterations. Default: 500.
-    :param connectivity: the connectivity of the local neighbourhood, choose 4, 6, 8 or 26. Default: 6.
-    :param out_datasets: The default names . Default: ['MASK_RG_EVOLVED'].
     """
 
     def __init__(self):
