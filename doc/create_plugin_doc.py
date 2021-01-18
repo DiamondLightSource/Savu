@@ -27,7 +27,8 @@ import sys
 
 from collections import OrderedDict
 
-from savu.plugins import utils as pu
+import savu.plugins.utils as pu
+import scripts.config_generator.savu_config as sc
 
 def add_package_entry(f, files_present, output, module_name):
     """Create a contents page for the files and directories contained
@@ -452,6 +453,66 @@ def create_template_class_dict(savu_base_path):
                                         key=lambda i: i[1]['number']))
 
     return docstring_text
+
+
+def create_config_documentation(savu_base_path):
+    """ Look at the available commands inside savu_config
+    Create a rst text file for each.
+    """
+    for command in sc.commands:
+        command_file_path = savu_base_path \
+                             + 'doc/source/reference/commands/' \
+                             + command + '.rst'
+        with open(command_file_path, 'w') as command_file:
+            command_file.write('..argparse::')
+            command_file.write('\n        :module: scripts.config_generator.arg_parsers')
+            command_file.write('\n        :func: _'+command+'_arg_parser')
+            command_file.write('\n        :prog: '+command)
+
+            command_file.write('\n'+command)
+            command_file.write('--------------')
+            command_file.write('\n')
+
+
+def create_savu_config_documentation(savu_base_path):
+    """ Look at the available commands inside savu_config
+    Create a rst text file for each.
+    """
+    command_file_path = savu_base_path \
+                        + 'doc/source/reference/savu_config_commands.rst'
+    with open(command_file_path, 'w') as command_file:
+        savu_command_test_start = '''
+Savu Config Commands
+**********************
+
+The links on this page provide help for each command.
+If you are using the command line please type ``-h`` or ``--help``.
+
+.. code-block:: bash
+
+   savu_config --help
+
+'''
+        # Write contents
+        command_file.write(savu_command_test_start)
+        for command in sc.commands:
+            command_file.write('\n')
+            command_file.write('* :ref:`' + command + '`')
+            command_file.write('\n')
+
+        # Document commands
+        for command in sc.commands:
+            command_file.write('\n')
+            command_file.write('.. _'+command+':')
+            command_file.write('\n\n'+command)
+            command_file.write('\n--------------')
+            command_file.write('\n')
+            command_file.write('.. argparse::')
+            command_file.write('\n        :module: scripts.config_generator.arg_parsers')
+            command_file.write('\n        :func: _'+command+'_arg_parser')
+            command_file.write('\n        :prog: '+command)
+            command_file.write('\n')
+            command_file.write('\n')
 
 
 def create_documentation_directory(savu_base_path, plugin_file):
