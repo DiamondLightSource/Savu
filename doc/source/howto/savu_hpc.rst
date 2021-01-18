@@ -1,5 +1,5 @@
-Installing Savu for a HPC cluster
-=================================
+How to install Savu for a HPC cluster
+======================================
 
 Savu is designed to run on a High Performance Computing cluster.  For optimum 
 performance, we recommend a fast network interconnect, such as infiniBand, and 
@@ -11,7 +11,7 @@ Requirements:
 
 Installation:
 
-1. Download the latest version of :download:`savu <../../install/savu_hpc/savu_installer.tar.gz>` and extract.
+1. Download the latest version of :download:`savu <../../../install/savu_hpc/savu_installer.tar.gz>` and extract.
 
 2. Run the following command and follow the installation instructions:
 

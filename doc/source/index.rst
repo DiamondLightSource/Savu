@@ -14,9 +14,13 @@ Table of Contents
 
 .. toctree::
     :caption: Introduction
+    :maxdepth: 2
     :glob:
 
     introduction/*
+    explanation/process_lists
+    explanation/plugins
+    explanation/faq
 
 .. _how_to_content:
 
@@ -24,11 +28,7 @@ Table of Contents
     :caption: How To's
     :maxdepth: 2
 
-    howto/savu_hpc
-    howto/run_savu
-    howto/process_list
-    howto/special_features
-    howto/view_output
+    howto/user_guide
     dev_guides/dev_overview
 
 .. _tutorials_content:
@@ -37,17 +37,8 @@ Table of Contents
     :caption: Tutorials
     :glob:
 
-    tutorials/*
-
-.. _explanation:
-
-.. toctree::
-    :caption: Explanation
-    :maxdepth: 2
-
-    explanation/process_lists
-    explanation/plugins
-    explanation/confluence_pages
+    tutorials/training_example
+    tutorials/confluence_pages
 
 .. _reference_content:
 
@@ -55,9 +46,9 @@ Table of Contents
     :caption: Reference
     :maxdepth: 2
 
-    .. reference/savu_commands
-    .. reference/savu_config_commands
-
+    reference/savu_commands
+    reference/savu_config_commands
+    reference/confluence_pages
     reference/plugin_documentation
 
 .. _api_content:

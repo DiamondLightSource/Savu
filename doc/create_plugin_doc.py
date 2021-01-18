@@ -89,21 +89,24 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
             # Load the associated class
             plugin_class = pu.load_class(py_module_name)()
             plugin_class._populate_default_parameters()
-            plugin_tools = plugin_class.tools.tools_list
-            if plugin_tools:
-                # Create rst additional documentation directory
-                # and file and image directory
-                create_documentation_directory(savu_base_path, fi)
-                # Create an empty rst file inside this directory where
-                # the plugin tools documentation will be stored
-                full_file_path = savu_base_path + 'doc/source/reference/' \
-                                 + output + '/' + file_path + '.rst'
-                pu.create_dir(full_file_path)
-                new_rst_file = open(full_file_path, 'w+')
-                # Populate this file
-                populate_plugin_doc_files(new_rst_file, plugin_tools,
-                                          file_path, plugin_class,
-                                          savu_base_path)
+            try:
+                plugin_tools = plugin_class.tools.tools_list
+                if plugin_tools:
+                    # Create rst additional documentation directory
+                    # and file and image directory
+                    create_documentation_directory(savu_base_path, fi)
+                    # Create an empty rst file inside this directory where
+                    # the plugin tools documentation will be stored
+                    full_file_path = savu_base_path + 'doc/source/reference/' \
+                                     + output + '/' + file_path + '.rst'
+                    pu.create_dir(full_file_path)
+                    with open(full_file_path, 'w+') as new_rst_file:
+                        # Populate this file
+                        populate_plugin_doc_files(new_rst_file, plugin_tools,
+                                                  file_path, plugin_class,
+                                                  savu_base_path)
+            except:
+                print(f'Tools file missing for {py_module_name}')
         except Exception as e:
             print(e)
 
@@ -258,7 +261,7 @@ def no_yaml_char(s):
 def write_citations_to_file(new_rst_file, plugin_citations):
     """Create the citation text format """
     for name, citation in plugin_citations.items():
-        new_rst_file.write('\n' + name.encode('utf-8').lstrip() +
+        new_rst_file.write('\n' + name.lstrip() +
                            '\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
@@ -292,7 +295,7 @@ def write_citations_to_file(new_rst_file, plugin_citations):
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
             new_rst_file.write(pu.indent_multi_line_str
-                               (endnote.encode('utf-8'), True))
+                               (endnote, True))
             new_rst_file.write('\n')
 
     new_rst_file.write('\n')
@@ -308,44 +311,44 @@ def create_plugin_template_downloads(savu_base_path):
     # Populate dictionary with template class and template class docstring
     docstring_text = create_template_class_dict(savu_base_path)
     if docstring_text:
-        doc_template = open(doc_template_file, 'w')
-        doc_template.write('.. _plugin_templates:\n')
-        doc_template.write('\n')
-        doc_template.write('Plugin templates \n=======================\n')
-        doc_template.write('\n')
-
-        doc_name = 'plugin_template1_with_detailed_notes'
-        detailed_template = docstring_text.get(doc_name)
-
-        if detailed_template:
-            docstring_text.pop(doc_name)
-            title = convert_title(doc_name)
-            title, number = filter_template_numbers(title)
-            # Create the restructured text page for the plugin template
-            # python code
-            generate_template_files(doc_name, title)
-            inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
-            doc_text = detailed_template['docstring'].split(':param')[0]
-            doc_text = " ".join(doc_text.splitlines())
-            doc_template.write(title
-                        + '\n--------------------------------'
-                          '----------------------------------\n')
-            doc_template.write('\nA template to create a simple plugin '
-                               'that takes one dataset as input and returns '
-                               'a similar dataset as output')
+        with open(doc_template_file, 'w') as doc_template:
+            doc_template.write('.. _plugin_templates:\n')
             doc_template.write('\n')
-            doc_template.write('''
+            doc_template.write('Plugin templates \n=======================\n')
+            doc_template.write('\n')
+
+            doc_name = 'plugin_template1_with_detailed_notes'
+            detailed_template = docstring_text.get(doc_name)
+
+            if detailed_template:
+                docstring_text.pop(doc_name)
+                title = convert_title(doc_name)
+                title, number = filter_template_numbers(title)
+                # Create the restructured text page for the plugin template
+                # python code
+                generate_template_files(doc_name, title)
+                inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
+                doc_text = detailed_template['docstring'].split(':param')[0]
+                doc_text = " ".join(doc_text.splitlines())
+                doc_template.write(title
+                            + '\n--------------------------------'
+                              '----------------------------------\n')
+                doc_template.write('\nA template to create a simple plugin '
+                                   'that takes one dataset as input and returns '
+                                   'a similar dataset as output')
+                doc_template.write('\n')
+                doc_template.write('''
 .. list-table::  
    :widths: 10
    
    * - :ref:`'''+doc_name+'''`
 
 ''')
-        doc_template.write('Further Examples'
-                    + '\n--------------------------------'
-                      '----------------------------------\n')
-        # Begin the table layout
-        doc_template.write('''
+            doc_template.write('Further Examples'
+                        + '\n--------------------------------'
+                          '----------------------------------\n')
+            # Begin the table layout
+            doc_template.write('''
 .. list-table::  
    :widths: 10 90
    :header-rows: 1
@@ -353,24 +356,23 @@ def create_plugin_template_downloads(savu_base_path):
    * - Link
      - Description''')
 
-        for doc_name, doc_str in docstring_text.items():
-            title = convert_title(doc_name)
-            title, number = filter_template_numbers(title)
-            # Remove the parameter information from the docstring
-            doc_text = doc_str['docstring'].split(':param')[0]
-            doc_text = " ".join(doc_text.splitlines())
-            # Create a link to the restructured text page view of the python
-            # code for the template
-            doc_template.write('\n   * - :ref:`'+doc_name+'`')
-            # The template description from the docstring
-            doc_template.write('\n     - '+doc_text)
-            doc_template.write('\n')
-            # Create the restructured text page for the plugin template
-            # python code
-            generate_template_files(doc_name, title)
+            for doc_name, doc_str in docstring_text.items():
+                title = convert_title(doc_name)
+                title, number = filter_template_numbers(title)
+                # Remove the parameter information from the docstring
+                doc_text = doc_str['docstring'].split(':param')[0]
+                doc_text = " ".join(doc_text.splitlines())
+                # Create a link to the restructured text page view of the python
+                # code for the template
+                doc_template.write('\n   * - :ref:`'+doc_name+'`')
+                # The template description from the docstring
+                doc_template.write('\n     - '+doc_text)
+                doc_template.write('\n')
+                # Create the restructured text page for the plugin template
+                # python code
+                generate_template_files(doc_name, title)
 
-        doc_template.write('\n')
-        doc_template.close()
+            doc_template.write('\n')
 
 
 def generate_template_files(doc_name, title):
@@ -385,22 +387,20 @@ def generate_template_files(doc_name, title):
     template_file_path = savu_base_path \
                         + 'doc/source/dev_guides/templates/'\
                          + doc_name + '.rst'
-    template_file = open(template_file_path, 'w')
-    # Add the orphan instruction as this file is not inside a toctree
-    template_file.write(':orphan:\n')
-    template_file.write('\n')
-    template_file.write('\n.. _' + doc_name + ':\n')
-    template_file.write('\n')
-    template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
-    template_file.write('\n')
-    template_file.write(':download:`Download <' + inner_file_str
-                + '/' + doc_name + '.py>`\n\n')
-    template_file.write('\n')
-    template_file.write('.. literalinclude:: '
-                       '/../../plugin_examples/plugin_templates/general/'
-                        + doc_name + '.py')
-    template_file.write('\n    :language: python\n')
-    template_file.close()
+    with open(template_file_path, 'w') as template_file:
+        # Add the orphan instruction as this file is not inside a toctree
+        template_file.write(':orphan:\n')
+        template_file.write('\n.. _' + doc_name + ':\n')
+        template_file.write('\n')
+        template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
+        template_file.write('\n')
+        template_file.write(':download:`Download <' + inner_file_str
+                    + '/' + doc_name + '.py>`\n\n')
+        template_file.write('\n')
+        template_file.write('.. literalinclude:: '
+                           '/../../plugin_examples/plugin_templates/general/'
+                            + doc_name + '.py')
+        template_file.write('\n    :language: python\n')
 
 
 def filter_template_numbers(name_string):
@@ -539,14 +539,6 @@ if __name__ == "__main__":
     savu_base_path = \
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
-    # open the autosummary file
-    f = open(savu_base_path + 'doc/source/reference/' + rst_file, 'w')
-
-    document_title = convert_title(out_folder)
-    f.write('.. _' + out_folder+':\n')
-    f.write('\n**********************\n' + document_title
-            +' \n**********************\n\n')
-
     base_path = savu_base_path + 'savu/plugins'
     # create entries in the autosummary for each package
 
@@ -560,27 +552,39 @@ if __name__ == "__main__":
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
 
+    # Create savu_config command rst files
+    # create_config_documentation(savu_base_path)
+    create_savu_config_documentation(savu_base_path)
+
     # Only document the plugin python files
     # Create the directory if it does not exist
     pu.create_dir(savu_base_path + 'doc/source/reference/' + out_folder)
 
-    for root, dirs, files in os.walk(base_path, topdown=True):
-        tools_files = [fi for fi in files if 'tools' in fi]
-        base_files = [fi for fi in files if fi.startswith('base')]
-        driver_files = [fi for fi in files if 'driver' in fi]
-        dirs[:] = [d for d in dirs if d not in exclude_dir]
-        files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-        files[:] = [fi for fi in files if fi not in exclude_file]
-        files[:] = [fi for fi in files if fi not in tools_files]
-        files[:] = [fi for fi in files if fi not in base_files]
-        files[:] = [fi for fi in files if fi not in driver_files]
-        # Exclude the tools files fron html view sidebar
-        if '__' not in root:
-            pkg_path = root.split('Savu/')[1]
-            module_name = pkg_path.replace('/', '.')
-            module_name = module_name.replace('savu.', '')
-            if 'plugins' in module_name:
-                add_package_entry(f, files, out_folder, module_name)
-                if out_folder == 'plugin_documentation':
-                    create_plugin_documentation(files, out_folder,
-                                        module_name, savu_base_path)
+    # open the autosummary file
+    with open(savu_base_path + 'doc/source/reference/' + rst_file, 'w') as f:
+
+        document_title = convert_title(out_folder)
+        f.write('.. _' + out_folder+':\n')
+        f.write('\n**********************\n' + document_title
+                +' \n**********************\n\n')
+
+        for root, dirs, files in os.walk(base_path, topdown=True):
+            tools_files = [fi for fi in files if 'tools' in fi]
+            base_files = [fi for fi in files if fi.startswith('base')]
+            driver_files = [fi for fi in files if 'driver' in fi]
+            dirs[:] = [d for d in dirs if d not in exclude_dir]
+            files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
+            files[:] = [fi for fi in files if fi not in exclude_file]
+            files[:] = [fi for fi in files if fi not in tools_files]
+            files[:] = [fi for fi in files if fi not in base_files]
+            files[:] = [fi for fi in files if fi not in driver_files]
+            # Exclude the tools files fron html view sidebar
+            if '__' not in root:
+                pkg_path = root.split('Savu/')[1]
+                module_name = pkg_path.replace('/', '.')
+                module_name = module_name.replace('savu.', '')
+                if 'plugins' in module_name:
+                    add_package_entry(f, files, out_folder, module_name)
+                    if out_folder == 'plugin_documentation':
+                        create_plugin_documentation(files, out_folder,
+                                            module_name, savu_base_path)

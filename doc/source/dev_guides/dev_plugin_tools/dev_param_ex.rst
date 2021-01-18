@@ -5,5 +5,5 @@ TomobarRecon
 --------------------------------
 
 .. literalinclude:: /../../savu/plugins/reconstructions/tomobar/tomobar_recon_tools.py
-   :language: yaml
+   :language: none
    :lines: 15-248
