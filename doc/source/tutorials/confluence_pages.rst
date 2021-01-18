@@ -3,14 +3,6 @@ Savu Confluence Pages
 
 Documentation from confluence.
 
-General
-----------------------------------------
-.. toctree::
-   :glob:
-
-   confluence/general_info/*
-
-
 Savu
 ----------------------------------------
 .. toctree::
@@ -24,15 +16,6 @@ Reconstruction
    :glob:
 
    confluence/reconstruction/*
-
-
-Plugins
-----------------------------------------
-.. toctree::
-   :glob:
-
-   confluence/plugins/*
-
 
 I12
 ----------------------------------------
