@@ -91,7 +91,7 @@ def __check_input_params(args):
         sys.exit(2)
 
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments.
     """
     version = "%(prog)s " + __version__
@@ -100,11 +100,11 @@ def __option_parser():
     parser.add_argument('out_file', help='Output file to extract citation \
                         information to.')
     parser.add_argument('--version', action='version', version=version)
-    return parser.parse_args()
+    return parser if doc==True else parser.parse_args()
 
 
 def main():
-    args = __option_parser()
+    args = __option_parser(doc=False)
     infile = h5py.File(args.in_file, 'r')
     citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
     if citation_manager is not None:

@@ -31,11 +31,11 @@ with warnings.catch_warnings():
     from savu.plugins import utils as pu
     from scripts.config_generator import config_utils as utils
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments. Use -d for file deletion
     and -q for quick template.
     """
-    parser = argparse.ArgumentParser(prog='savu_plugin_generator.py')
+    parser = argparse.ArgumentParser(prog='savu_plugin_generator')
     parser.add_argument('plugin_name', help='Plugin name to create file',
                         type=str)
     delete_str = 'Delete the plugin file and it\'s tools and documentation files.'
@@ -43,7 +43,7 @@ def __option_parser():
                         help='Create a short template version')
     parser.add_argument('-d', '--delete', action='store_true', default='False',
                         help=delete_str)
-    return parser.parse_args()
+    return parser if doc==True else parser.parse_args()
 
 
 def get_plugin_class(plugin_name):
@@ -237,7 +237,7 @@ def remove_plugin_files(file_path, module, savu_base_path):
     plugin_folder = savu_base_path + file_path
     title = module.split('.')
     file_str = plugin_folder + '.py'
-    if check_decision(check=raw_input('Are you sure you want to '
+    if check_decision(check=input('Are you sure you want to '
         'delete all files for this plugin? [y/n]'))==True:
 
         plugin_error_str = 'No plugin file exists for this plugin.'
@@ -278,7 +278,7 @@ def remove_file(file_str, error_str):
 
 
 def main():
-    args = __option_parser()
+    args = __option_parser(doc=False)
 
     print("Checking if this plugin already exists..")
     if valid_name(args.plugin_name):
