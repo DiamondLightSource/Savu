@@ -79,9 +79,8 @@ def _set_readline(completer):
 def parse_args(function):
     @wraps(function)
     def _parse_args_wrap_function(content, args):
-        doc = function.__doc__
         parser = '%s_arg_parser' % function.__name__
-        args = getattr(parsers, parser)(args.split(), doc)
+        args = getattr(parsers, parser)(args.split(), doc=False)
         if not args:
             return content
         return function(content, args)

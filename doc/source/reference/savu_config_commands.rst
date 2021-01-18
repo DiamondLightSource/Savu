@@ -1,6 +1,5 @@
 
-
-Savu config commands
+Savu Config Commands
 **********************
 
 The links on this page provide help for each command.
@@ -11,121 +10,206 @@ If you are using the command line please type ``-h`` or ``--help``.
    savu_config --help
 
 
-* :ref:`disp`
-
-* :ref:`set`
+* :ref:`open`
 
 * :ref:`help`
 
-* :ref:`level`
-
-* :ref:`ref`
-
-* :ref:`clear`
-
-* :ref:`move`
+* :ref:`disp`
 
 * :ref:`list`
 
-* :ref:`coll`
-
-* :ref:`add`
-
-* :ref:`history`
-
-* :ref:`exit`
-
-* :ref:`rem`
-
 * :ref:`save`
-
-* :ref:`open`
-
-* :ref:`cite`
 
 * :ref:`mod`
 
-.. _disp:
-.. autoprogram:: scripts.config_generator.arg_parsers:_disp_arg_parser()
-    :prog: disp
+* :ref:`set`
 
+* :ref:`add`
 
-.. _set:
-.. autoprogram:: scripts.config_generator.arg_parsers:_set_arg_parser()
-    :prog: set
+* :ref:`rem`
+
+* :ref:`move`
+
+* :ref:`ref`
+
+* :ref:`cite`
+
+* :ref:`coll`
+
+* :ref:`clear`
+
+* :ref:`exit`
+
+* :ref:`level`
+
+* :ref:`history`
+
+.. _open:
+
+open
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _open_arg_parser
+        :prog: open
 
 
 .. _help:
-.. autoprogram:: scripts.config_generator.arg_parsers:_help_arg_parser()
-    :prog: help
+
+help
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _help_arg_parser
+        :prog: help
 
 
-.. _level:
-.. autoprogram:: scripts.config_generator.arg_parsers:_level_arg_parser()
-    :prog: level
+.. _disp:
 
-
-.. _ref:
-.. autoprogram:: scripts.config_generator.arg_parsers:_ref_arg_parser()
-    :prog: ref
-
-
-.. _clear:
-.. autoprogram:: scripts.config_generator.arg_parsers:_clear_arg_parser()
-    :prog: clear
-
-
-.. _move:
-.. autoprogram:: scripts.config_generator.arg_parsers:_move_arg_parser()
-    :prog: move
+disp
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _disp_arg_parser
+        :prog: disp
 
 
 .. _list:
-.. autoprogram:: scripts.config_generator.arg_parsers:_list_arg_parser()
-    :prog: list
 
-
-.. _coll:
-.. autoprogram:: scripts.config_generator.arg_parsers:_coll_arg_parser()
-    :prog: coll
-
-
-.. _add:
-.. autoprogram:: scripts.config_generator.arg_parsers:_add_arg_parser()
-    :prog: add
-
-
-.. _history:
-.. autoprogram:: scripts.config_generator.arg_parsers:_history_arg_parser()
-    :prog: history
-
-
-.. _exit:
-.. autoprogram:: scripts.config_generator.arg_parsers:_exit_arg_parser()
-    :prog: exit
-
-
-.. _rem:
-.. autoprogram:: scripts.config_generator.arg_parsers:_rem_arg_parser()
-    :prog: rem
+list
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _list_arg_parser
+        :prog: list
 
 
 .. _save:
-.. autoprogram:: scripts.config_generator.arg_parsers:_save_arg_parser()
-    :prog: save
 
-
-.. _open:
-.. autoprogram:: scripts.config_generator.arg_parsers:_open_arg_parser()
-    :prog: open
-
-
-.. _cite:
-.. autoprogram:: scripts.config_generator.arg_parsers:_cite_arg_parser()
-    :prog: cite
+save
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _save_arg_parser
+        :prog: save
 
 
 .. _mod:
-.. autoprogram:: scripts.config_generator.arg_parsers:_mod_arg_parser()
-    :prog: mod
+
+mod
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _mod_arg_parser
+        :prog: mod
+
+
+.. _set:
+
+set
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _set_arg_parser
+        :prog: set
+
+
+.. _add:
+
+add
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _add_arg_parser
+        :prog: add
+
+
+.. _rem:
+
+rem
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _rem_arg_parser
+        :prog: rem
+
+
+.. _move:
+
+move
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _move_arg_parser
+        :prog: move
+
+
+.. _ref:
+
+ref
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _ref_arg_parser
+        :prog: ref
+
+
+.. _cite:
+
+cite
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _cite_arg_parser
+        :prog: cite
+
+
+.. _coll:
+
+coll
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _coll_arg_parser
+        :prog: coll
+
+
+.. _clear:
+
+clear
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _clear_arg_parser
+        :prog: clear
+
+
+.. _exit:
+
+exit
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _exit_arg_parser
+        :prog: exit
+
+
+.. _level:
+
+level
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _level_arg_parser
+        :prog: level
+
+
+.. _history:
+
+history
+--------------
+.. argparse::
+        :module: scripts.config_generator.arg_parsers
+        :func: _history_arg_parser
+        :prog: history
 
