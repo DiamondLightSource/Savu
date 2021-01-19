@@ -679,11 +679,4 @@ Save the file as "your_module_name.py"
 
 .. note:: Have a look at the :download:`real test <../files_and_images/median_filter_test.py>` for the median_filter_plugin.py module.
 
-List of test data available.
-What to do if you require different test data.
 
-Internal crossreferences, like example_.
-
-.. _example:
-
-This is an example crossreference target.

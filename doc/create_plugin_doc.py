@@ -488,7 +488,7 @@ If you are using the command line please type ``-h`` or ``--help``.
             command_file.write('\n\n'+command)
             command_file.write('\n--------------')
             command_file.write('\n')
-            command_file.write('\n.. cssclass:: argstyle')
+            command_file.write('\n.. cssclass:: argstyle\n')
             command_file.write('\n    .. argparse::')
             command_file.write('\n            :module: scripts.config_generator.arg_parsers')
             command_file.write('\n            :func: _'+command+'_arg_parser')

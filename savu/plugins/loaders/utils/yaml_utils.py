@@ -61,10 +61,10 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
 
 def check_yaml_errors(data):
     config_file = savu.__path__[0] + '/plugins/loaders/utils/yaml_config.yaml'
-    config_file_data = open(config_file)
-    conf = YamlLintConfig(config_file_data)
-    gen = linter.run(data, conf)
-    errors = list(gen)
+    with open(config_file) as config_file_data:
+        conf = YamlLintConfig(config_file_data)
+        gen = linter.run(data, conf)
+        errors = list(gen)
     return errors
 
 def read_yaml(path):

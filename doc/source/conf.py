@@ -16,10 +16,18 @@ import sys, os
 import savu
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
-                        'dials.array_family', 'dials.algorithms.image.threshold',
-                        'PyQt4','yamllint']
-
+autodoc_mock_imports = [
+    "numpy",
+    "mpi4py",
+    "astra",
+    "scipy",
+    "h5py",
+    "pyfftw",
+    "dials.array_family",
+    "dials.algorithms.image.threshold",
+    "PyQt4",
+    "yamllint",
+]
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -69,13 +77,18 @@ keep_warnings=True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.napoleon',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.doctest',
-              'sphinxarg.ext']
-
+extensions = [
+    # Generates api files
+    "sphinx.ext.autodoc",
+    # Generates a short summary from docstring
+    "sphinx.ext.autosummary",
+    # Allows parsing of google style docstrings
+    "sphinx.ext.napoleon",
+    # Add links to highlighted source code
+    "sphinx.ext.viewcode",
+    # Documents command line tools with argparser library
+    "sphinxarg.ext",
+]
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -285,9 +298,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Savu', 'Savu Documentation',
-   'Mark Basham', 'Savu', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        "index",
+        "Savu",
+        "Savu Documentation",
+        "Mark Basham",
+        "Savu",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -301,10 +320,12 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {"http://docs.python.org/": None}
 
 
 def setup(app):
-    app.add_css_file( "css/general.css" )
-    app.add_css_file( "css/plugin_template.css" )
-    app.add_css_file( "css/plugin_template_download.css" )
+    # General width and navigation bar format
+    app.add_css_file("css/general.css")
+    # Style for plugin template pages
+    app.add_css_file("css/plugin_template.css")
+    app.add_css_file("css/plugin_template_download.css")

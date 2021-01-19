@@ -41,7 +41,8 @@ def create_plugin_doc_testing_file(savu_base_path, module_name, file_path):
     plugin_directory = module_name.split('plugins')[1]
     if testing_lines:
         file_name = file_path.split('.')[0]
-        create_unittest(file_name, testing_lines, process_lists, plugin_directory)
+        create_unittest(file_name, testing_lines, process_lists,
+                                                plugin_directory)
 
 def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
     """ Create a unittest file
@@ -70,8 +71,8 @@ def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
 
     unittest_main = '''
     
-    if __name__ == "__main__":
-           unittest.main()
+if __name__ == "__main__":
+    unittest.main()
     '''
 
     with open(unittest_file_path, "w") as unittest_file:
@@ -107,14 +108,15 @@ def get_logging_set_up(plugin_directory, file_name):
         :param out_path: The file path to the directory to save to
         """
         doc_test_path = 'savu/test/travis/doc_tests/'
-        plugin_log_file = doc_test_path +'logs''' \
-                   + plugin_directory + '/' + folder_name + '''/'
+        plugin_log_file = \\
+            doc_test_path +'logs'''\
+            + plugin_directory + '/' + folder_name + '''/'
         out_path = savu_base_path + plugin_log_file
         # Create directory if it doesn't exist
         pu.create_dir(out_path)
 
-        logging.config.fileConfig(savu_base_path + doc_test_path \\
-                                    + 'logging.conf')
+        logging.config.fileConfig(
+            savu_base_path + doc_test_path + 'logging.conf')
 
         logger = logging.getLogger('documentationLog')
         dtu.add_doc_log_handler(logger, out_path)
@@ -155,19 +157,23 @@ def get_unittest_process_list_function(process_lists):
 
         for process_list_path in process_lists:
             file_exists = os.path.exists(savu_base_path + process_list_path)
-            error_msg = 'The process list at ' + process_list_path + ' does not exist.'
+            error_msg = 'The process list at ' \\
+                         + process_list_path \\
+                         + ' does not exist.'
             self.assertTrue(file_exists, msg=error_msg)
             if file_exists:
                 # Write the process list being tested to the logger
-                logger.debug('TEST PROCESS LIST: ' + savu_base_path + process_list_path)
+                logger.debug('TEST PROCESS LIST: ' \\
+                            + savu_base_path + process_list_path)
                 saved_stdout = sys.stdout
                 try:
                     out = StringIO()
                     sys.stdout = out
-                    tplu.refresh_process_file(savu_base_path + process_list_path)
+                    tplu.refresh_process_file(savu_base_path \\
+                                              + process_list_path)
                     output_value = out.getvalue().strip()
                     for check in output_checks:
-                        error_msg = 'Refresh failed: ' + check + ' in the output.'
+                        error_msg = 'Refresh failed: '+check+' in the output.'
                         assert check not in output_value, error_msg
                 finally:
                     sys.stdout = saved_stdout
@@ -271,7 +277,8 @@ if __name__ == "__main__":
     savu_base_path = \
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
-    plugin_doc_file_path = savu_base_path + 'doc/source/documentation/plugins/'
+    plugin_doc_file_path = savu_base_path \
+                           + 'doc/source/explanation/plugins/'
 
     for root, dirs, files in os.walk(plugin_doc_file_path, topdown=True):
         if '__' not in root:
