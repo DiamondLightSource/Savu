@@ -22,6 +22,7 @@
 """
 
 import os
+import logging
 
 from colorama import Fore
 from collections import OrderedDict
@@ -32,12 +33,14 @@ import savu.plugins.docstring_parser as doc
 import scripts.config_generator.parameter_utils as param_u
 from savu.data.plugin_list import CitationInformation
 
+logger = logging.getLogger('documentationLog')
 
 class PluginParameters(object):
     """ Save the parameters for the plugin and base classes to a
     dictionary. The parameters are in yaml format inside the
     define_parameter function. These are read and checked for problems.
     """
+
     def __init__(self):
         super(PluginParameters, self).__init__()
         self.param = MetaData(ordered=True)
@@ -45,7 +48,8 @@ class PluginParameters(object):
     def populate_parameters(self, tools_list):
         """ Set the plugin parameters for each of the tools classes
         """
-        list(map(lambda tool_class: self._set_plugin_parameters(tool_class),
+        list(map(
+            lambda tool_class: self._set_plugin_parameters(tool_class),
                   tools_list))
 
     def _set_plugin_parameters(self, tool_class):
@@ -77,7 +81,9 @@ class PluginParameters(object):
             if yaml_text is not None:
                 param_info_dict = doc.load_yaml_doc(yaml_text)
                 if not isinstance(param_info_dict, OrderedDict):
-                    error_msg = 'The parameters have not been read in correctly for {}'.format(tool_class.__name__)
+                    error_msg = \
+                        'The parameters have not been read in correctly for {}'.format(
+                         tool_class.__name__)
                     raise Exception(error_msg)
         return param_info_dict
 
@@ -94,8 +100,8 @@ class PluginParameters(object):
         # If found, then the parameter is within the current parameter list
         # displayed to the user
         if current_parameter_details:
-            parameter_valid, error_str = param_u.is_valid(param_name, value,
-                                               current_parameter_details)
+            parameter_valid, error_str = \
+                param_u.is_valid(param_name, value, current_parameter_details)
             # Check that the value is an accepted input for the chosen parameter
             if parameter_valid:
                 value = self.check_for_default(value, param_name, parameters)
@@ -105,7 +111,16 @@ class PluginParameters(object):
                 self.check_dependencies(parameters)
             else:
                 print(error_str)
-                print('This value has not been saved.')
+                print("ERROR: This value has not been saved.")
+                logger.error(
+                    "ERROR: Failed to modify the parameter '{}' to {}".format(
+                        param_name, value))
+                logger.error(
+                    "ERROR: Type should match {}".format(
+                        current_parameter_details["dtype"]))
+                logger.error(
+                    "ERROR: {} set to default value: {}".format(
+                        param_name, current_parameter_details["default"]))
         else:
             print('Not in parameter keys.')
 
@@ -181,7 +196,8 @@ class PluginParameters(object):
             for param, missing_values in missing_key_dict.items():
                 print(f'The missing required keys for \'{param}\' are:')
                 print(*missing_values, sep=', ')
-
+            logger.error('ERROR: Missing keys inside '.format(
+                            tool_class.__name__))
             raise Exception(f'Please edit {tool_class.__name__}')
 
     def _check_dtype(self, param_info_dict, tool_class):
@@ -194,18 +210,18 @@ class PluginParameters(object):
                 for item in p['dtype']:
                     if item not in param_u.type_dict:
                         print('The ', p_key, ' parameter has been assigned '
-                                             'an invalid type \'', item, '\'.', sep='')
+                              'an invalid type \'', item, '\'.', sep='')
             else:
                 if p['dtype'] not in param_u.type_dict:
                     print('The ', p_key, ' parameter has been assigned an '
-                                         'invalid type \'', p['dtype'], '\'.', sep='')
+                          'invalid type \'', p['dtype'], '\'.', sep='')
                     dtype_valid = False
         if not dtype_valid:
             print('The type options are: ')
             type_list = ['    {0}'.format(key)
                          for key in param_u.type_dict.keys()]
             print(*type_list, sep='\n')
-            raise Exception('Please edit %s' % tool_class.__name__)
+            raise Exception(f"Please edit {tool_class.__name__}")
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid
@@ -217,9 +233,9 @@ class PluginParameters(object):
             self._check_data_keys(p_key, p)
             # Check that the data types are valid choices
             if p['visibility'] not in visibility_levels:
-                print('Inside ', tool_class.__name__, ' the ', p_key, ' parameter '
-                                                                 'is assigned an invalid visibility level \'',
-                      p['visibility'], '\'')
+                print(f"Inside {tool_class.__name__} the {p_key}"
+                      f" parameter is assigned an invalid visibility "
+                      f"level '{p['visibility']}'")
                 print('Valid choices are:')
                 print(*visibility_levels, sep=', ')
                 visibility_valid = False
@@ -477,7 +493,9 @@ class PluginCitations(object):
         """
         all_c = OrderedDict()
         # Seperate the citation methods. __dict__ returns instance attributes.
-        citation_methods = {key: value for key, value in tool_class.__dict__.items() if key.startswith('citation')}
+        citation_methods = {key: value
+                            for key, value in tool_class.__dict__.items()
+                            if key.startswith('citation')}
         for c_method_name, c_method in citation_methods.items():
             yaml_text = c_method.__doc__
             if yaml_text is not None:

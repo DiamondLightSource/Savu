@@ -26,6 +26,7 @@ import sys
 import logging
 
 logger = logging.getLogger('documentationLog')
+logger_rst = logging.getLogger('documentationRst')
 
 import warnings
 with warnings.catch_warnings():
@@ -91,7 +92,8 @@ def _list(content, args):
     # Sort the list of dictionaries.
     # Sort by the name of the plugin within each dictionary.
     list_content.plugin_list.plugin_list = \
-        sorted(list_content.plugin_list.plugin_list, key=lambda i: i['name'])
+        sorted(list_content.plugin_list.plugin_list,
+                key=lambda i: i['name'])
 
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
@@ -130,8 +132,10 @@ def _mod(content, args):
         # Get the name of the modified parameter so that the display
         # lists the correct item when the parameter order has been updated
         plugin_position = content.find_position(pos_str)
-        current_parameter_list = content.plugin_list.plugin_list[plugin_position]['param']
-        current_parameter_list_ordered = pu.set_order_by_visibility(current_parameter_list)
+        current_parameter_list = \
+            content.plugin_list.plugin_list[plugin_position]["param"]
+        current_parameter_list_ordered = \
+            pu.set_order_by_visibility(current_parameter_list)
         param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
 
         try:
@@ -276,6 +280,13 @@ commands = {'open': _open,
             'level': _level,
             'history': _history}
 
+def get_description():
+    """ For each command, enter the function and save the docstring to a
+    dictionary
+    """
+    command_desc_dict = {command: function_name.__doc__
+                         for command, function_name in commands.items()}
+    return command_desc_dict
 
 def main(test=False):
     """
@@ -299,7 +310,7 @@ def main(test=False):
             # scripts was not part of the arguments passed in by the test
             pass
 
-    args = parsers._config_arg_parser()
+    args = parsers._config_arg_parser(doc=False)
     if args.error:
         utils.error_level = 1
 
@@ -326,12 +337,13 @@ def main(test=False):
     print("\n*** Press Enter for a list of available commands. ***\n")
 
     utils.load_history_file(utils.histfile)
-
+    accumulative_output = ''
     while True:
         try:
             in_text = input(">>> ").strip()
             in_list = in_text.split(' ', 1)
-            logger.debug('TEST COMMAND: ' + in_text)
+            _write_command_to_log(in_text)
+
         except KeyboardInterrupt:
             print()
             continue
@@ -346,11 +358,60 @@ def main(test=False):
                   "for a list of available commands.")
         else:
             content = commands[command](content, arg)
+            if logger.handlers:
+                # Write the command output to a logger
+                accumulative_output = _write_output_to_log(accumulative_output)
 
         if content.is_finished():
             break
 
     print("Thanks for using the application")
+
+
+def _write_command_to_log(in_text):
+    logger.debug('TEST COMMAND: ' + in_text)
+    block_text = _log_file_code('bash')
+    logger_rst.debug(block_text + pu.indent('>>> ' + in_text))
+
+
+def _write_output_to_log(accumulative_output):
+    """ Seperate the current command output, format it correctly
+    and write this to the restructured text log file.
+
+    :param accumulative_output:
+    :return: accumulative_output
+    """
+    current_output = sys.stdout.getvalue()
+
+    # Find all previous command output
+    length_Str = len(accumulative_output)
+    if length_Str:
+        # If there is previous output, then select only new lines from the
+        # current command. This will demonstrate clearly the output of each
+        # individual command
+        current_output = current_output[length_Str:]
+
+    # Characters used for command line colour
+    unicode_chars = [u'\x1b[100m', u'\x1b[0m', u'\x1b[97m',
+                     u'\x1b[49m', u'\x1b[46m', u'\x1b[39m',
+                     u'\x1b[36m']
+    # Remove unicode characters which cannot be displayed
+    for code in unicode_chars:
+        current_output = current_output.replace(code, '')
+
+    # Indent the text for the rst file format
+    indent_current_output = pu.indent_multi_line_str(current_output)
+    # Write to the rst log file
+    logger_rst.debug(indent_current_output)
+    return sys.stdout.getvalue()
+
+
+def _log_file_code(type):
+    block_text = '''.. code-block:: '''+str(type)+'''
+
+'''
+    return block_text
+
 
 def _reduce_logging_level():
     import logging
