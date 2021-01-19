@@ -9,7 +9,7 @@ python $DIR/create_plugin_doc.py plugin_documentation plugin_documentation.rst p
 
 # members will document all modules
 # undoc keeps modules without docstrings
-sphinx-apidoc -feT -o $DIR/source/api_plugin $DIR/../savu/plugins/ $DIR/../savu/plugins/*tools* $DIR/../savu/plugins/**/*tools* $DIR/../savu/plugins/**/**/*tools* $DIR/../savu/plugins/**/**/**/*tools*
+sphinx-apidoc -feT -o $DIR/source/reference/api_plugin $DIR/../savu/plugins/ $DIR/../savu/plugins/*tools* $DIR/../savu/plugins/**/*tools* $DIR/../savu/plugins/**/**/*tools* $DIR/../savu/plugins/**/**/**/*tools*
 # add -Q to suppress warnings
 
 # Pick up command prompt lines from plugin documentation and create tests
