@@ -66,17 +66,20 @@ class SavuPluginGeneratorTest(unittest.TestCase):
 
         self.check_plugin_tools(savu_base_path, plugin_files)
         self.check_plugin_documentation(savu_base_path, plugin_files)
-        #self.check_plugin_tests(savu_base_path, plugin_folder, plugin_coverage)
+        #self.check_plugin_tests(savu_base_path, plugin_folder,
+        #                                         plugin_coverage)
 
 
     def check_plugin_tools(self, savu_base_path, plugin_files):
         """Check if there is a plugin tools file for each of the
         plugin files
         """
-        plugin_tools_list = [p.split('_tools.py')[0] for p in plugin_files
-                             if 'tools' in p]
-        plugin_list = [p.split('.py')[0] for p in plugin_files
-                       if 'tools' not in p]
+        plugin_tools_list = [p.split('_tools.py')[0]
+                             for p in plugin_files
+                                 if 'tools' in p]
+        plugin_list = [p.split('.py')[0]
+                       for p in plugin_files
+                           if 'tools' not in p]
 
         plugins_with_tools = list(set(plugin_list)
                                   .intersection(set(plugin_tools_list)))
@@ -92,11 +95,13 @@ class SavuPluginGeneratorTest(unittest.TestCase):
         """
         # Get the relevant files with their directories
         plugin_doc_files = tplu.get_all_files_from(savu_base_path
-                                    + 'doc/source/documentation/plugins')
+                                    + 'doc/source/explanation/plugins')
 
-        plugin_list = [p.split('.py')[0] for p in plugin_files
-                       if 'tools' not in p]
-        plugin_doc_list = [p.split('_doc.rst')[0] for p in plugin_doc_files]
+        plugin_list = [p.split('.py')[0]
+                       for p in plugin_files
+                           if 'tools' not in p]
+        plugin_doc_list = [p.split('_doc.rst')[0]
+                           for p in plugin_doc_files]
 
         plugins_with_doc = list(set(plugin_list)
                                 .intersection(set(plugin_doc_list)))
@@ -113,9 +118,9 @@ class SavuPluginGeneratorTest(unittest.TestCase):
         documentation file and image folders
         """
         # Create directories inside
-        doc_path = savu_base_path + 'doc/source/documentation/plugins/'
+        doc_path = savu_base_path + 'doc/source/explanation/plugins/'
         doc_image_path = savu_base_path \
-            + 'doc/source/files_and_images/documentation/plugins/'
+            + 'doc/source/files_and_images/plugin_guides/plugins/'
 
         # find the directories to create
         for file in plugin_files:

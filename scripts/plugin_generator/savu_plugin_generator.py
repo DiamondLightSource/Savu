@@ -165,11 +165,11 @@ class ''' + title + '''Tools(PluginTools):
 def create_documentation_template(file_path, module, savu_base_path):
     # Locate documentation file
     plugin_path = file_path.replace('savu/','')
-    doc_folder = savu_base_path + 'doc/source/documentation/' + plugin_path
+    doc_folder = savu_base_path + 'doc/source/explanation/' + plugin_path
     title = module.split('.')
     file_str = doc_folder + '_doc.rst'
     doc_image_folder = savu_base_path \
-                        + 'doc/source/files_and_images/documentation/' \
+                        + 'doc/source/files_and_images/plugin_guides/' \
                         + plugin_path \
                         + '.png'
 
@@ -191,8 +191,7 @@ def create_documentation_template(file_path, module, savu_base_path):
                                'text format.\n')
             new_rst_file.write('\n..')
             new_rst_file.write('\n    This is a comment. Include an image or file by using the '
-                               'following text \"'
-                               '.. figure:: ../files_and_images/'
+                               'following text \n    \".. figure:: ../files_and_images/'
                                + doc_image_folder_inline + '\"\n')
         new_rst_file.close()
         print('A documentation file has been created at', file_str)
@@ -250,7 +249,7 @@ def remove_plugin_files(file_path, module, savu_base_path):
 
         # Delete documentation file
         doc_file_path = file_path.replace('savu/','')
-        doc_folder = savu_base_path + 'doc/source/documentation/' \
+        doc_folder = savu_base_path + 'doc/source/explanation/' \
                      + doc_file_path
         doc_file_str = doc_folder + '_doc.rst'
         doc_error_str = 'No documentation file was located for this plugin.'

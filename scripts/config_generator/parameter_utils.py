@@ -300,7 +300,7 @@ def _string_list(value):
 
 # If you are editing the type dictionary, please update the documentation
 # file dev_guides/dev_plugin.rst and the files short_parameter_key.yaml
-# and parameter_key.yaml, inside doc/source/files_and_images/documentation/
+# and parameter_key.yaml, inside doc/source/files_and_images/plugin_guides/
 # to provide guidance for plugin creators
 
 type_dict = {'preview': _preview,

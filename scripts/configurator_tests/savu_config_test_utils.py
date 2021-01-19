@@ -46,11 +46,14 @@ def savu_config_runner(input_list, output_checks,
             sys.stdout = out
             savu_config.main(test=True)
             output = out.getvalue().strip()
-            for check in output_checks:
-                if error_str:
-                    error_msg = 'Command failed: '+ check +' in the output.'
-                    assert check not in output, error_msg
-                else:
-                    assert check in output
+            text_present = any(check in output for check in output_checks)
+            if error_str:
+                # Check the error text is not present
+                error_msg = 'Error in command ouput.'
+                assert not text_present, error_msg
+            else:
+                # Check the text is printed to the output
+                assert text_present
+
         finally:
             sys.stdout = saved_stdout
