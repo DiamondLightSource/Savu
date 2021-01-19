@@ -13,7 +13,7 @@ A text description including different steps to follow when using the plugin.
 
 This is an example image:
 
-.. figure:: example.jpg
+.. figure:: ../files_and_images/plugin_guides/plugins/corrections/convert_360_180_sinogram.jpg
   :figwidth: 50 %
   :align: center
   :figclass: align-center
