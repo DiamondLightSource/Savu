@@ -21,11 +21,9 @@
         """
         A description of the citation
         bibtex:
-                A bibtex string with the symbol '|' on the above line to
-                maintain the multiple new line format.
+                A bibtex string.
         endnote:
-                An endnote string with the symbol '|' on the above line to
-                maintain the multiple new line format.
+                An endnote string.
         doi: A link in the form of numbers and letters
         dependency:
             parameter_name_1: The name of the method for which this citation is for
