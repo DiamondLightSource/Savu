@@ -29,7 +29,8 @@ Table of Contents
     :maxdepth: 2
 
     howto/user_guide
-    dev_guides/dev_overview
+    dev_guides/dev_savu_overview
+    dev_guides/dev_plugin_overview
 
 .. _tutorials_content:
 
