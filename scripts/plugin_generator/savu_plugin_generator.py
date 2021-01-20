@@ -28,6 +28,7 @@ import argparse
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
+    import scripts.config_generator.savu_config
     from savu.plugins import utils as pu
     from scripts.config_generator import config_utils as utils
 
@@ -36,12 +37,18 @@ def __option_parser(doc=True):
     and -q for quick template.
     """
     parser = argparse.ArgumentParser(prog='savu_plugin_generator')
-    parser.add_argument('plugin_name', help='Plugin name to create file',
+    parser.add_argument('plugin_name',
+                        help='Plugin name to create file',
                         type=str)
-    delete_str = 'Delete the plugin file and it\'s tools and documentation files.'
-    parser.add_argument('-q', '--quick', action='store_true', default='False',
+    delete_str = 'Delete the plugin file and its tools ' \
+                 'and documentation files.'
+    parser.add_argument('-q', '--quick',
+                        action='store_true',
+                        default='False',
                         help='Create a short template version')
-    parser.add_argument('-d', '--delete', action='store_true', default='False',
+    parser.add_argument('-d', '--delete',
+                        action='store_true',
+                        default='False',
                         help=delete_str)
     return parser if doc==True else parser.parse_args()
 
@@ -53,9 +60,10 @@ def get_plugin_class(plugin_name):
         warnings.simplefilter("ignore")
         failed_plugins = utils.populate_plugins()
 
-    if plugin_name in failed_plugins.keys():
-        print("IMPORT ERROR:", plugin_name, "is unavailable due to the "
-                        "following error:\n\t", failed_plugins[plugin_name])
+    if (failed_plugins is not None) \
+            and (plugin_name in failed_plugins.keys()):
+        print(f"IMPORT ERROR: {plugin_name} is unavailable due to the "
+                    "following error:\n\t {failed_plugins[plugin_name]}")
         # At the moment a new file is then created in the general folder.
         # A yes or no confirmation should be provided before that is created
         plugin_class = None
@@ -72,7 +80,6 @@ def append_file(f, additional_file):
     """ Append the additional_file on to main file f """
     with open(additional_file) as input:
         f.write(input.read())
-        input.close
 
 
 def create_plugin_template(file_path, module, quick_arg, savu_base_path):
@@ -92,7 +99,8 @@ def create_plugin_template(file_path, module, quick_arg, savu_base_path):
     file_str = plugin_folder + '.py'
     generator_dir = savu_base_path + 'scripts/plugin_generator/'
     copyright_template = generator_dir + 'template_elements/copyright.py'
-    detailed_template = generator_dir + 'template_elements/process_and_setup_detailed_notes.py'
+    detailed_template = generator_dir \
+                    + 'template_elements/process_and_setup_detailed_notes.py'
     quick_template = generator_dir + 'template_elements/process_and_setup.py'
 
     if os.path.isfile(file_str):
@@ -102,7 +110,8 @@ def create_plugin_template(file_path, module, quick_arg, savu_base_path):
             append_file(new_py_file, copyright_template)
             new_py_file.write(get_module_info(title[-1]).strip())
             new_py_file.write('\n')
-            new_py_file.write('from savu.plugins.utils import register_plugin\n')
+            new_py_file.write('from savu.plugins.utils '
+                                            'import register_plugin\n')
             new_py_file.write('from savu.plugins.plugin import Plugin\n')
             new_py_file.write('# Import any additional libraries or base '
                               'plugins here.\n')
@@ -124,7 +133,6 @@ def create_plugin_template(file_path, module, quick_arg, savu_base_path):
                 # Detailed template for new users
                 append_file(new_py_file, detailed_template)
 
-        new_py_file.close()
         print('A plugin file has been created at', file_str)
 
 
@@ -138,7 +146,8 @@ def create_tools_template(file_path, module, savu_base_path):
     capital_title = convert_title(title[-1]).replace(' ', '')
     file_str = plugin_folder  +'_tools.py'
     generator_dir = savu_base_path + 'scripts/plugin_generator/'
-    param_definition_template = generator_dir + 'template_elements/parameter_definition.py'
+    param_definition_template = generator_dir \
+                                + 'template_elements/parameter_definition.py'
 
     if os.path.isfile(file_str):
         print('A tools file exists at ' + file_str)
@@ -147,7 +156,6 @@ def create_tools_template(file_path, module, savu_base_path):
             new_tools_file.write(get_tools_info(capital_title))
             append_file(new_tools_file, param_definition_template)
 
-        new_tools_file.close()
         print('A tools file has been created at', file_str)
 
 
@@ -180,7 +188,8 @@ def create_documentation_template(file_path, module, savu_base_path):
         pu.create_dir(file_str)
         # Create the file for the documentation images
         pu.create_dir(doc_image_folder)
-        doc_image_folder_inline = doc_image_folder.split('files_and_images/')[1]
+        doc_image_folder_inline = \
+            doc_image_folder.split('files_and_images/')[1]
         with open(file_str, 'w+') as new_rst_file:
             new_rst_file.write(':orphan:\n\n')
             new_rst_file.write(convert_title(title[-1]) + ' Documentation' +
@@ -190,10 +199,10 @@ def create_documentation_template(file_path, module, savu_base_path):
                                'documentation here. Use a restructured '
                                'text format.\n')
             new_rst_file.write('\n..')
-            new_rst_file.write('\n    This is a comment. Include an image or file by using the '
-                               'following text \n    \".. figure:: ../files_and_images/'
+            new_rst_file.write('\n    This is a comment. Include an image '
+                               'or file by using the following text \n    \"'
+                               '.. figure:: ../files_and_images/'
                                + doc_image_folder_inline + '\"\n')
-        new_rst_file.close()
         print('A documentation file has been created at', file_str)
 
 def get_module_info(title):
@@ -292,10 +301,11 @@ def main():
         savu_base_path = \
             os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
         file_path = module.replace('.', '/')
-        if args.delete:
+        if args.delete == True:
             remove_plugin_files(file_path, module, savu_base_path)
         else:
-            create_plugin_template(file_path, module, args.quick, savu_base_path)
+            create_plugin_template(file_path, module,
+                                   args.quick, savu_base_path)
             create_tools_template(file_path, module, savu_base_path)
             create_documentation_template(file_path, module, savu_base_path)
     else:

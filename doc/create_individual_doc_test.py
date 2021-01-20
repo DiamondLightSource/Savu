@@ -90,7 +90,6 @@ if __name__ == "__main__":
             unittest_file.write(unittest_config_end)
 
         unittest_file.write(unittest_main)
-    unittest_file.close()
 
 def get_logging_set_up(plugin_directory, file_name):
     """ Create the log handlers unittest function
@@ -231,7 +230,6 @@ def read_test_file(doc_file_path):
                 line = line.replace('.. ::process_list::', '')
                 process_lists.append(line.strip())
 
-    doc_file.close()
     return testing_lines, process_lists
 
 def get_unittest_setup(file_name):
