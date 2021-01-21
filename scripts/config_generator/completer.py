@@ -102,7 +102,7 @@ class Completer(object):
         import copy
 
         path = plugins.__path__[0]
-        exclude_dir = ['driver', 'utils']
+        exclude_dir = ['driver', 'utils', '__pycache__']
         arrow = ' ==> '
         for root, dirs, files in os.walk(path):
             depth = root.count(os.path.sep) - path.count(os.path.sep)
