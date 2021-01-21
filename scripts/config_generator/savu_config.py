@@ -192,9 +192,7 @@ def _ref(content, args):
 @parse_args
 @error_catcher
 def _cite(content, args):
-    """ Display citations for a plugin. You can select a plugin number
-    or range. All plugins are selected if there is not a number argument.
-    """
+    """ Display plugin citations."""
     range_dict = utils.__get_start_stop(content, args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
@@ -248,8 +246,9 @@ def _exit(content, arg):
 @parse_args
 @error_catcher
 def _level(content, args):
-    """ Set a visibility level for the program."""
+    """ Set a visibility level for the parameters."""
     content.level(args.level)
+    print(f"Level set to '{args.level}'")
     return content
 
 @parse_args
