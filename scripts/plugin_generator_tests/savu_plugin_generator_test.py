@@ -95,7 +95,7 @@ class SavuPluginGeneratorTest(unittest.TestCase):
         """
         # Get the relevant files with their directories
         plugin_doc_files = tplu.get_all_files_from(savu_base_path
-                                    + 'doc/source/explanation/plugins')
+                                    + 'doc/source/plugin_guides/plugins')
 
         plugin_list = [p.split('.py')[0]
                        for p in plugin_files
@@ -118,7 +118,7 @@ class SavuPluginGeneratorTest(unittest.TestCase):
         documentation file and image folders
         """
         # Create directories inside
-        doc_path = savu_base_path + 'doc/source/explanation/plugins/'
+        doc_path = savu_base_path + 'doc/source/plugin_guides/plugins/'
         doc_image_path = savu_base_path \
             + 'doc/source/files_and_images/plugin_guides/plugins/'
 

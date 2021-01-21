@@ -276,7 +276,7 @@ if __name__ == "__main__":
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
     plugin_doc_file_path = savu_base_path \
-                           + 'doc/source/explanation/plugins/'
+                           + 'doc/source/plugin_guides/plugins/'
 
     for root, dirs, files in os.walk(plugin_doc_file_path, topdown=True):
         if '__' not in root:
