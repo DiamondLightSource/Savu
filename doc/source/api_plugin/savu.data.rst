@@ -5,14 +5,16 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    savu.data.data_structures
-    savu.data.transport_data
+   savu.data.data_structures
+   savu.data.transport_data
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.data.chunking
    savu.data.experiment_collection
@@ -24,6 +26,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.data
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

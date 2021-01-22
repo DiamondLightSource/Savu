@@ -73,7 +73,7 @@ class ReproduceFit(BaseFitter):
                                   axis_labels={in_dataset[-1]: ['~-2.idx.unit']},
                                   shape=new_shape)
 
-        ss_slice = range(len(new_shape) - 2)
+        ss_slice = list(range(len(new_shape) - 2))
 #         print "spectrum stack slice dims are" + str(ss_slice)
         spectrum_stack = {'core_dims': (-2, -1), 'slice_dims': tuple(ss_slice)}
 

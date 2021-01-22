@@ -46,8 +46,8 @@ class PtypyBatch(BasePtycho):
     def pre_process(self):
         b = Ptycho.load_run(self.parameters['ptyr_file'], False) # load in the run but without the data
         p = b.p
-        existing_scan = copy(p.scans[p.scans.keys()[0]])
-        del p.scans[p.scans.keys()[0]]
+        existing_scan = copy(p.scans[list(p.scans.keys())[0]])
+        del p.scans[list(p.scans.keys())[0]]
         p.scans.savu = existing_scan
         p.scans.savu.data.source = 'savu'
         p.scans.savu.data.recipe = u.Param()

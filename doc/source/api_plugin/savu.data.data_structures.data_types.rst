@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.data.data_structures.data_types.base_type
    savu.data.data_structures.data_types.data_plus_darks_and_flats
@@ -18,6 +19,6 @@ Module contents
 ---------------
 
 .. automodule:: savu.data.data_structures.data_types
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

@@ -5,15 +5,15 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.centering.vo_centering
-   savu.plugins.centering.vo_centering_gpu
    savu.plugins.centering.vo_centering_iterative
 
 Module contents
 ---------------
 
 .. automodule:: savu.plugins.centering
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

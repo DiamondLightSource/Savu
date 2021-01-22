@@ -263,7 +263,7 @@ function create_folder()
 # get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
-savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=$(python -c "import savu, os; print (savu.__path__[0])")
 savupath=${savupath%/savu}
 
 # set the suffix
@@ -348,6 +348,10 @@ if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
     cluster=zocalo_cluster
 fi
 
+if [ $cluster = "hamilton" ] && [ $zocalo = true ] ; then
+    cluster=zocalo_hamilton
+fi
+
 case $cluster in
 	"test_cluster")
 		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
@@ -364,6 +368,11 @@ case $cluster in
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
 		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+	"zocalo_hamilton")
+		# RAM 384G per core (but 377G available?) ~ 9G per core
+		# requesting 7G per core as minimum (required to be available on startup),but will use all
+		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
+		qsub -sync y -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
 esac
 
 # get the job number here

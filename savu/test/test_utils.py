@@ -177,6 +177,7 @@ def set_options(path, **kwargs):
     options['template'] = None
     options['checkpoint'] = None
     options['system_params'] = None
+    options['nPlugin'] = 0
     return options
 
 
@@ -209,7 +210,7 @@ def load_test_data(exp_type):
 
 
 def get_data_object(exp):
-    data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
+    data = exp.index['in_data'][list(exp.index['in_data'].keys())[0]]
     data._set_plugin_data(PluginData(data))
     pData = data._get_plugin_data()
     return data, pData
@@ -259,7 +260,7 @@ def plugin_runner_real_plugin_run(options):
     pu.plugin_loader(exp, plugin_list[0])
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
-    in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+    in_data = exp.index["in_data"][list(exp.index["in_data"].keys())[0]]
     out_data_objs, stop = in_data._load_data(1)
     exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)
@@ -287,8 +288,12 @@ def initialise_options(data, experiment, process_path):
     if (experiment is not None) & (data is None):
         options = set_experiment(experiment)
     elif (experiment is not None) & (data is not None):
-        options = set_experiment(experiment)
-        options['data_file'] = data_file
+        if experiment == 'load_data':
+            options = set_experiment('tomo')
+            options['data_file'] = data
+        else:
+            options = set_experiment(experiment)
+            options['data_file'] = data_file
         options['process_file'] = process_file
     else:
         options = set_options(data_file, process_file=process_file)
@@ -301,7 +306,7 @@ def cleanup(options):
     Performs folders cleaning in tmp/.
     using _shutil_ module in order to delete everything recursively
     """
-    shutil.rmtree(options["out_path"])
+    shutil.rmtree(options["out_path"], ignore_errors=True)
     """
     classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
     cp_folder = os.path.join(options["out_path"], 'checkpoint')

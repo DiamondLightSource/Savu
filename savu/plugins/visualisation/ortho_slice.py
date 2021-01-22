@@ -100,8 +100,8 @@ class OrthoSlice(Plugin, CpuPlugin):
             slice_to_take[self.axis_loc[pattern]] = slice(slice_value,
                                                           slice_value+1, 1)
 
-            print("Final slice is : %s of %s" % (str(slice_to_take),
-                                                 str(fullData.data.shape)))
+            print(("Final slice is : %s of %s" % (str(slice_to_take),
+                                                 str(fullData.data.shape))))
             self.exp.log("Final slice is : %s of %s" % (str(slice_to_take),
                                                         str(fullData.data.shape)))
 

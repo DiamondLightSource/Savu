@@ -42,28 +42,27 @@ def get_process_list_in_file(root, files):
     processes = []
     for fname in files:
         fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        for line in in_file:
-            if '.nxs' in line:
-                processes.append(get_nxs_file_name(line))
+        with open(fname, 'r') as in_file:
+            for line in in_file:
+                if '.nxs' in line:
+                    processes.append(get_nxs_file_name(line))
     return processes
-
 
 def get_no_process_list_tests(root, files):
     processes = []
     for fname in files:
         fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        func = 'run_protected_plugin_runner_no_process_list'
-        exclude = ['def', 'search_str']
-        pos = 1
-        param = get_param_name(func, pos, in_file, exclude=exclude)
-        if param:
-            in_file.seek(0)
-            plugin_id_list = get_param_value_from_file(param, in_file)
-            for pid in plugin_id_list:
-                plugin_name = pid.split('.')[-1].split("'")[0]
-                processes.append(plugin_name + '.py')
+        with open(fname, 'r') as in_file:
+            func = 'run_protected_plugin_runner_no_process_list'
+            exclude = ['def', 'search_str']
+            pos = 1
+            param = get_param_name(func, pos, in_file, exclude=exclude)
+            if param:
+                in_file.seek(0)
+                plugin_id_list = get_param_value_from_file(param, in_file)
+                for pid in plugin_id_list:
+                    plugin_name = pid.split('.')[-1].split("'")[0]
+                    processes.append(plugin_name + '.py')
     return processes
 
 

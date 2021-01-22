@@ -32,23 +32,24 @@ class DezingerTest(unittest.TestCase):
     data_file = '24737.nxs'
     experiment = 'tomo'
 
-    def test_dezing_filter(self):
-        options = tu.initialise_options(None, 'tomoRaw', None)
-        plugin = 'savu.plugins.filters.dezinger_simple'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-        tu.cleanup(options)
-
-    def test_dezinger(self):
-        process_list = 'filters/dezinger/dezinger_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
-        run_protected_plugin_runner(options)
-        tu.cleanup(options)
+    #def test_dezing_filter(self):
+    #    options = tu.initialise_options(None, 'tomoRaw', None)
+    #    plugin = 'savu.plugins.filters.dezinger_simple'
+    #    run_protected_plugin_runner_no_process_list(options, plugin)
+    #    tu.cleanup(options)
 
     def test_dezinger_sinogram(self):
         process_list = 'filters/dezinger/dezinger_sinogram_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
+        
+    def test_dezinger(self):
+        process_list = 'filters/dezinger/dezinger_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)              
 
+        
 if __name__ == "__main__":
     unittest.main()

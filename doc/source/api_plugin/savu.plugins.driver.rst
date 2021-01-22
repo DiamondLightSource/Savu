@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    savu.plugins.driver.all_cpus_plugin
    savu.plugins.driver.base_driver
@@ -14,12 +15,11 @@ Submodules
    savu.plugins.driver.iterative_plugin
    savu.plugins.driver.multi_threaded_plugin
    savu.plugins.driver.plugin_driver
-   savu.plugins.driver.single_node_multi_threaded_plugin
 
 Module contents
 ---------------
 
 .. automodule:: savu.plugins.driver
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

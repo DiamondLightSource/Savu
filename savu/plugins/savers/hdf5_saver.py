@@ -85,7 +85,7 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
 
     def __set_current_pattern(self):
         pattern = copy.deepcopy(self.in_data._get_plugin_data().get_pattern())
-        pattern[pattern.keys()[0]]['max_frames'] = self.get_max_frames()
+        pattern[list(pattern.keys())[0]]['max_frames'] = self.get_max_frames()
         return pattern
 
     def get_pattern(self):
@@ -93,8 +93,8 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
             return self.parameters['pattern']
         previous_pattern = self.get_in_datasets()[0].get_previous_pattern()
         if previous_pattern:
-            return previous_pattern.keys()[0]
-        return self.get_in_datasets()[0].get_data_patterns().keys()[0]
+            return list(previous_pattern.keys())[0]
+        return list(self.get_in_datasets()[0].get_data_patterns().keys())[0]
 
     def __get_file_name(self):
         nPlugin = self.exp.meta_data.get('nPlugin')
