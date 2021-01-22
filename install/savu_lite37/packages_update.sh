@@ -80,3 +80,5 @@ done < $filename
 #
 conda list --explicit > spec-savu3_0_lite_nodeps.txt
 sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
+#clean up
+rm -rf 0* 1* 2*
