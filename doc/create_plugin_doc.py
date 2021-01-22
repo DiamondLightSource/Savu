@@ -81,6 +81,7 @@ def add_package_entry(f, files_present, output, module_name):
 
 
 def create_plugin_documentation(files, output, module_name, savu_base_path):
+    plugin_guide_path = 'plugin_guides/'
     for fi in files:
         mod_path = module_name + '.' + fi.split('.py')[0]
         file_path = mod_path.replace('.', '/')
@@ -94,7 +95,8 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
                 if plugin_tools:
                     # Create rst additional documentation directory
                     # and file and image directory
-                    create_documentation_directory(savu_base_path, fi)
+                    create_documentation_directory(savu_base_path,
+                                                   plugin_guide_path, fi)
                     # Create an empty rst file inside this directory where
                     # the plugin tools documentation will be stored
                     full_file_path = savu_base_path + 'doc/source/reference/' \
@@ -104,7 +106,8 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
                         # Populate this file
                         populate_plugin_doc_files(new_rst_file, plugin_tools,
                                                   file_path, plugin_class,
-                                                  savu_base_path)
+                                                  savu_base_path,
+                                                  plugin_guide_path)
             except:
                 print(f'Tools file missing for {py_module_name}')
         except Exception as e:
@@ -117,7 +120,7 @@ def convert_title(original_title):
 
 
 def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
-                              plugin_class, savu_base_path):
+                     plugin_class, savu_base_path, plugin_guide_path):
     """Create the restructured text file containing parameter, citation
     and documentation information for the plugin_class
 
@@ -150,9 +153,14 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             new_rst_file.write(tool_class.__doc__)
 
         # Locate documentation file
-        doc_folder = savu_base_path + 'doc/source/explanation/'
-        file_str = doc_folder + file_path + '_doc.rst'
-        inner_file_str = '/../../../explanation/' + file_path + '_doc.rst'
+        doc_folder = savu_base_path + 'doc/source/'
+        file_str = doc_folder + plugin_guide_path \
+                              + file_path \
+                              + '_doc.rst'
+        inner_file_str = '/../../../' \
+                         + plugin_guide_path \
+                         + file_path \
+                         + '_doc.rst'
 
         if os.path.isfile(file_str):
             # If there is a documentation file
@@ -180,8 +188,9 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
         new_rst_file.write('\nKey\n^^^^^^^^^^\n')
         new_rst_file.write('\n')
         new_rst_file.write('.. literalinclude:: '
-                           '/../source/files_and_images/plugin_guides/'
-                           'short_parameter_key.yaml')
+                           '/../source/files_and_images/'
+                           + plugin_guide_path \
+                           + 'short_parameter_key.yaml')
         new_rst_file.write('\n    :language: yaml\n')
 
     if plugin_citations:
@@ -497,18 +506,22 @@ If you are using the command line please type ``-h`` or ``--help``.
             command_file.write('\n')
 
 
-def create_documentation_directory(savu_base_path, plugin_file):
+def create_documentation_directory(savu_base_path,
+                                   plugin_guide_path,
+                                   plugin_file):
     """ Create plugin directory inside documentation and
     documentation file and image folders
     """
     # Create directory inside
     doc_path = savu_base_path \
-               + 'doc/source/explanation/'
+               + 'doc/source/'
     doc_image_path = savu_base_path \
-        + 'doc/source/files_and_images/plugin_guides/plugins/'
+                     + 'doc/source/files_and_images/'\
+                     + plugin_guide_path \
+                     + 'plugins/'
 
     # find the directories to create
-    doc_dir = doc_path + plugin_file
+    doc_dir = doc_path + plugin_guide_path + plugin_file
     image_dir = doc_image_path + plugin_file
     pu.create_dir(doc_dir)
     pu.create_dir(image_dir)

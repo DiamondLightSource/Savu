@@ -170,14 +170,17 @@ class ''' + title + '''Tools(PluginTools):
     return tools_info
 
 
-def create_documentation_template(file_path, module, savu_base_path):
+def create_documentation_template(file_path, module,
+                                  savu_base_path,
+                                  plugin_guide_path):
     # Locate documentation file
     plugin_path = file_path.replace('savu/','')
-    doc_folder = savu_base_path + 'doc/source/explanation/' + plugin_path
+    doc_folder = savu_base_path + 'doc/source/' + plugin_path
     title = module.split('.')
     file_str = doc_folder + '_doc.rst'
     doc_image_folder = savu_base_path \
-                        + 'doc/source/files_and_images/plugin_guides/' \
+                        + 'doc/source/files_and_images/' \
+                        + plugin_guide_path \
                         + plugin_path \
                         + '.png'
 
@@ -239,7 +242,8 @@ def valid_name(plugin_name):
     return argument_valid
 
 
-def remove_plugin_files(file_path, module, savu_base_path):
+def remove_plugin_files(file_path, module, savu_base_path,
+                                        plugin_guide_path):
     """ Delete plugin file, tools file and documentation file
     """
     plugin_folder = savu_base_path + file_path
@@ -258,7 +262,8 @@ def remove_plugin_files(file_path, module, savu_base_path):
 
         # Delete documentation file
         doc_file_path = file_path.replace('savu/','')
-        doc_folder = savu_base_path + 'doc/source/explanation/' \
+        doc_folder = savu_base_path + 'doc/source/' \
+                     + plugin_guide_path \
                      + doc_file_path
         doc_file_str = doc_folder + '_doc.rst'
         doc_error_str = 'No documentation file was located for this plugin.'
@@ -301,8 +306,10 @@ def main():
         savu_base_path = \
             os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
         file_path = module.replace('.', '/')
+        plugin_guide_path = 'plugin_guides/'
         if args.delete == True:
-            remove_plugin_files(file_path, module, savu_base_path)
+            remove_plugin_files(file_path, module, savu_base_path,
+                                plugin_guide_path)
         else:
             create_plugin_template(file_path, module,
                                    args.quick, savu_base_path)
