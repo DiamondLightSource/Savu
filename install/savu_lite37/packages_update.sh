@@ -44,7 +44,7 @@ while IFS="|" read -r package_name channel_name stable_version failed_version in
           conda install --yes -c $channel_name $package_name --force-reinstall
           # Generate an explicit list file with installed conda packages
           conda list --explicit > spec-savu3_0_lite_nodeps.txt
-          sed -i 's/.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
+          sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
           echo "--> Check that the package is _actually_ updated"
           checkpack_var=$(grep $package_name spec-savu3_0_lite_nodeps.txt)
           if [[ $checkpack_var == *"$new_version_package"* ]]; then
@@ -79,4 +79,4 @@ echo "**********************************************************************"
 done < $filename
 #
 conda list --explicit > spec-savu3_0_lite_nodeps.txt
-sed -i 's/.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
+sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
