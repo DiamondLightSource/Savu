@@ -187,10 +187,3 @@ class BaseAstraRecon(BaseRecon):
 
     def _get_multiple(self):
         return 'multiple'
-
-        """
-            A Plugin to perform Astra toolbox reconstruction
-    
-        :u*param n_iterations: Number of Iterations - only valid for iterative \
-            algorithms. Default: 1.
-        """
