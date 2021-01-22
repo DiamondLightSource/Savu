@@ -21,7 +21,7 @@
 
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
-filename='packages_to_update_test.txt'
+filename='packages_to_update.txt'
 current_date=$(date '+%Y-%m-%d')
 n=1
 # Update each of the packages in a loop
