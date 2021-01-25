@@ -197,12 +197,14 @@ class BaseTransport(object):
         return False
 
     def _transport_kill_signal(self):
-        """ An opportunity to send a kill signal to the framework.  Return
+        """ 
+        An opportunity to send a kill signal to the framework.  Return
         True or False. """
         return False
 
     def _get_all_slice_lists(self, data_list, dtype):
-        """ Get all slice lists for the current process.
+        """ 
+        Get all slice lists for the current process.
 
         :param list(Data) data_list: Datasets
         :returns: A list of dictionaries containing slice lists for each \
@@ -225,7 +227,8 @@ class BaseTransport(object):
         return sl_dict
 
     def _transfer_all_data(self, count):
-        """ Transfer data from file and pad if required.
+        """ 
+        Transfer data from file and pad if required.
 
         :param int count: The current frame index.
         :returns: All data for this frame and associated padded slice lists
@@ -270,7 +273,8 @@ class BaseTransport(object):
         return result
 
     def _return_all_data(self, count, result, end):
-        """ Transfer plugin results for current frame to backing files.
+        """ 
+        Transfer plugin results for current frame to backing files.
 
         :param int count: The current frame index.
         :param list(np.ndarray) result: plugin results
@@ -573,10 +577,8 @@ class BaseTransport(object):
             if isinstance(mData, list):
                 mData = np.array(mData)
 
-            if mData.dtype == np.dtype('<U18'):
+            if 'U' in str(mData.dtype):
                 mData = mData.astype(np.string_)
-            elif 'U' in str(mData.dtype):
-                logging.warning(f"Potentially unhandled Unicode dtype: {mData.dtype}")
 
             axis_entry = entry.require_dataset(name, mData.shape, mData.dtype)
             axis_entry[...] = mData[...]

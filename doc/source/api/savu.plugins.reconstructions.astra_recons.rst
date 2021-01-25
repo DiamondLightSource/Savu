@@ -16,3 +16,4 @@ Submodules
    savu.plugins.reconstructions.astra_recons.astra_recon_cpu
    savu.plugins.reconstructions.astra_recons.astra_recon_gpu
    savu.plugins.reconstructions.astra_recons.base_astra_recon
+   savu.plugins.reconstructions.astra_recons.base_astra_vector_recon

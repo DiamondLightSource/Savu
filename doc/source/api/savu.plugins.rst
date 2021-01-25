@@ -25,7 +25,6 @@ Subpackages
    savu.plugins.driver
    savu.plugins.filters
    savu.plugins.fitters
-   savu.plugins.fluo_fitters
    savu.plugins.kinematics
    savu.plugins.loaders
    savu.plugins.missing_data

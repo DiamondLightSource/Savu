@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: TomoBAR CPU reconstruction
+.. module:: TomoBAR CPU 2D reconstruction
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using CPU (2D case)
@@ -65,58 +65,6 @@ class TomobarReconCpu(BaseRecon, CpuPlugin):
 
     def __init__(self):
         super(TomobarReconCpu, self).__init__("TomobarReconCpu")
-
-    def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-
-        self.preview_flag = \
-            self.set_preview(in_dataset[0], self.parameters['preview'])
-
-        for i in range(len(in_dataset)):
-            in_pData[i].plugin_data_setup('SINOGRAM', 'single')
-
-        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
-
-        dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0])
-
-        axis_labels = [0]*3
-        axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
-
-        shape = list(in_dataset[0].get_shape())
-        if self.parameters['vol_shape'] == 'fixed':
-            shape[dim_volX] = shape[dim_volZ]
-        else:
-            shape[dim_volX] = self.parameters['vol_shape']
-            shape[dim_volZ] = self.parameters['vol_shape']
-
-        if 'resolution' in self.parameters.keys():
-            shape[dim_volX] /= self.parameters['resolution']
-            shape[dim_volZ] /= self.parameters['resolution']
-
-        out_dataset[0].create_dataset(axis_labels=axis_labels,
-                                      shape=tuple(shape))
-        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
-
-        idx = 1
-        # initial volume dataset
-        if 'init_vol' in self.parameters.keys() and \
-                self.parameters['init_vol']:
-            self.init_vol = True
-            in_pData[1].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
-            idx += 1
-
-        # cor dataset
-        if isinstance(self.parameters['centre_of_rotation'], str):
-            self.cor_as_dataset = True
-            in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
-
-        # set pattern_name and nframes to process for all datasets
-        out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
     def pre_process(self):
         # extract given parameters into dictionaries suitable for ToMoBAR input

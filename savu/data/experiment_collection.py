@@ -113,6 +113,9 @@ class Experiment(object):
 
     def _update(self, plugin_dict):
         data = self.index['out_data'].copy()
+        # clear output metadata after first setup
+        for d in list(data.values()):
+            d.meta_data._set_dictionary({})
         self.collection['datasets'].append(data)
         self.collection['plugin_dict'].append(plugin_dict)
 
@@ -217,10 +220,10 @@ class Experiment(object):
 
         self._create_nxs_entry()
 
-    def _create_nxs_entry(self):
+    def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
         import h5py
-        if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1:
+        if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1 and not self.checkpoint:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
                 entry_group = nxs_file.create_group('entry')
                 entry_group.attrs['NX_class'] = 'NXentry'
@@ -252,6 +255,7 @@ class Experiment(object):
             if out_name in list(self.index['in_data'].keys()):
                 finalise['replace'].append(self.index['in_data'][out_name])
 
+        
         return finalise
 
     def _reorganise_datasets(self, finalise):

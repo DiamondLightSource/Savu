@@ -15,6 +15,7 @@ Submodules
 
    savu.plugins.loaders.full_field_loaders.dxchange_loader
    savu.plugins.loaders.full_field_loaders.image_loader
+   savu.plugins.loaders.full_field_loaders.lfov_loader
    savu.plugins.loaders.full_field_loaders.mrc_loader
    savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader
    savu.plugins.loaders.full_field_loaders.nxtomo_loader

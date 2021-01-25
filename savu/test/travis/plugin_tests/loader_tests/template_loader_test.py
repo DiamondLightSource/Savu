@@ -206,9 +206,6 @@ class TemplateLoaderTest(unittest.TestCase):
                                            4: self.detY_axis_label}
 
         self.save_yaml_and_change_process_list()
-        print("*******data_path", self.data_file_path, "process_list", self.process_list_path, "******")
-        print (tu.set_options(self.data_file_path))
-
         run_protected_plugin_runner(tu.set_options(self.data_file_path,
                                                    process_file=self.process_list_path,
                                                    out_path=self.test_folder))

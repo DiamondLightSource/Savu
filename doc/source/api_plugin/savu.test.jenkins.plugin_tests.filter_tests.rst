@@ -17,6 +17,8 @@ Submodules
 
    savu.test.jenkins.plugin_tests.filter_tests.ccpi_denoising_gpu_test
    savu.test.jenkins.plugin_tests.filter_tests.ccpi_ring_artefact_test
+   savu.test.jenkins.plugin_tests.filter_tests.dezinger_gpu_test
+   savu.test.jenkins.plugin_tests.filter_tests.median_filter_gpu_test
 
 Module contents
 ---------------
