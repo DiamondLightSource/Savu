@@ -24,14 +24,28 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-
 class BasicOperations(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_basic_operations(self):
-        process_file = tu.get_test_process_path('basic_operations_test.nxs')
-        options = tu.set_experiment('tomo')
+        process_file = tu.get_test_process_path('basic_operations/basic_operations_test.nxs')
+        options = tu.set_experiment(experiment)
         options['process_file'] = process_file
         run_protected_plugin_runner(options)
+
+    def test_valuemaskreplacement(self):
+        process_list = 'basic_operations/valuemaskreplacement_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_elementwisearraysarithmetics(self):
+        process_list = 'basic_operations/elementwise_arithmetics_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

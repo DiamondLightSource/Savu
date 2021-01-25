@@ -33,6 +33,7 @@ class ElementwiseArraysArithmetics(Plugin, CpuPlugin):
     Basic arithmetic operations on two input datasets: addition, subtraction, multiplication and division.
 
     :param operation: arithmetic operation to apply to data, choose from addition, subtraction, multiplication and division. Default: 'multiplication'.
+    :param pattern: Pattern associated with the datasets. Default: 'PROJECTION'.
     """
 
     def __init__(self):
@@ -41,11 +42,12 @@ class ElementwiseArraysArithmetics(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
+        pattern = self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern, 'single')
+        in_pData[1].plugin_data_setup(pattern, 'single')
 
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        out_pData[0].plugin_data_setup(pattern, 'single')
 
     def process_frames(self, data):
         if (self.parameters['operation'] == 'addition'):
