@@ -47,7 +47,7 @@ class I22TomoLoader(BaseLoader):
             h5py.File(exp.meta_data.get("data_file"), 'r')
         data_obj.data = data_obj.backing_file['entry/result/data']
         data_obj.set_shape(data_obj.data.shape)
-        logging.warn('the data as shape %s' % str(data_obj.data.shape))
+        logging.warning('the data as shape %s' % str(data_obj.data.shape))
         data_obj.set_axis_labels('y.units', 'x.units',
                                  'rotation_angle.degrees', 'Q.angstrom^-1')
 
@@ -56,10 +56,10 @@ class I22TomoLoader(BaseLoader):
         data_obj.add_pattern('SPECTRUM', core_dims=(3,), slice_dims=(0, 1, 2))
 
         mData = data_obj.meta_data
-        mData.set("Q", data_obj.backing_file['entry/result/q'].value)
+        mData.set("Q", data_obj.backing_file['entry/result/q'][()])
         mData.set("x", np.arange(data_obj.data.shape[1]))
         mData.set("y", np.arange(data_obj.data.shape[0]))
         mData.set("rotation_angle", data_obj.backing_file[
-            'entry/result/theta'].value)
+            'entry/result/theta'][()])
 
         self.set_data_reduction_params(data_obj)

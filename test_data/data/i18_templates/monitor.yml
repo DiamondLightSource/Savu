@@ -1,0 +1,46 @@
+inherit: None
+
+monitor:
+    data:
+        path    : raw_entry/I0/data
+
+    params:
+        idx_rot       : 0
+        idx_x         : 1
+        idx_unknown1  : 2
+        idx_unknown2  : 3
+
+    axis_labels:
+        0:
+            dim     : $idx_rot
+            name    : rotation_angle
+            value   : $dfile['entry/result/sc_sample_thetafine'].value
+            units   : degrees
+        1:
+            dim     : $idx_x
+            name    : x
+            value   : $dfile['entry/result/sc_MicroFocusSampleX'].value
+            units   : mm
+        2:
+            dim     : $idx_unknown1
+            name    : unknown_1
+            value   : $None
+            units   : unknown
+        3:
+            dim     : $idx_unknown2
+            name    : unknown_2
+            value   : $None
+            units   : unknown
+
+    patterns:
+        SINOGRAM:
+            core_dims   : $(idx_rot, idx_x)
+            slice_dims  : $(idx_unknown1, idx_unknown2)
+        PROJECTION:
+            core_dims   : $(idx_x,)
+            slice_dims  : $(idx_rot, idx_unknown1, idx_unknown2)
+
+    metadata:
+        mono_energy:
+            value   : $dfile['raw_entry/instrument/DCM/energy'].value/1e3
+            units   : eV

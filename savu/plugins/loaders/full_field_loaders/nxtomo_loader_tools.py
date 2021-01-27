@@ -5,11 +5,6 @@ class NxtomoLoaderTools(PluginTools):
     """
     def define_parameters(self):
         """
-        preview:
-            visibility: basic
-            dtype: int_list
-            description: A slice list of required frames.
-            default: []
         name:
             visibility: basic
             dtype: str
@@ -43,7 +38,7 @@ class NxtomoLoaderTools(PluginTools):
             default: '[None, None, 1]'
         angles:
             visibility: intermediate
-            dtype: list
+            dtype: [int, float, int_list]
             description: If this if 4D data stored in 3D then pass an integer
               value equivalent to the number of projections per 180 degree
               scan. If the angles parameter is set to None, then values from
@@ -57,7 +52,7 @@ class NxtomoLoaderTools(PluginTools):
             default: False
         ignore_flats:
             visibility: intermediate
-            dtype: list
+            dtype: int_list
             description: List of batch numbers of flats to ignore (starting
               at 1). Useful for excluding comprimised flats in combined data
               sets containing multiple batches of interspaced flats. The

@@ -1,3 +1,5 @@
+.. _plugin_guide:
+
 .. raw:: html
 
     <style> .blue {color:#2c7aa3} </style>
@@ -8,16 +10,27 @@
 Developing a Savu plugin
 ************************
 
-A module is a file containing python definitions and statements. To \
-create a plugin for Savu you will need to create two modules:
+To create a plugin for Savu you will need to create two modules:
+
+.. note::
+
+    A module is a file containing python definitions and statements.
 
 1. A plugin module, named :blue:`plugin_name`.py containing a class :blue:`PluginName`
+
+    This file contains your plugin definitions and statements.
+
 2. A plugin tools module named :blue:`plugin_name_tools`.py, containing a class :blue:`PluginNameTools`
+
+    This file contains the parameter details and citations in a yaml format. You can \
+    assign each parameter a data type, a description, a visibility level and a \
+    default value.
 
 .. note::
 
     :blue:`PluginName` should be replaced by the name of your plugin without \
-    any spaces. The words should be capitalised.
+    any spaces. The words should be capitalised. :blue:`plugin_name` should be
+    replaced by the name of your plugin in lowercase, seperated by underscores.
 
 Examples are:
 
@@ -26,6 +39,8 @@ Examples are:
 
 * 1. A plugin module remove_all_rings.py containing a class RemoveAllRings
   2. A plugin tools module remove_all_rings_tools.py containing a class RemoveAllRingsTools
+
+
 
 1. Introduction to creating a Plugin
 ========================================
@@ -89,10 +104,10 @@ Initialise the class example, with the class NoProcess replacing the template na
 
 Below is an example of the template plugin class.
 
-.. literalinclude:: ../files_and_images/documentation/plugin_name_example.py
+.. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
 
-You can download it :download:`here <../files_and_images/documentation/plugin_name_example.py>`.
+You can download it :download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
 An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
 All template downloads are available here: :ref:`plugin_templates`.
 
@@ -147,6 +162,8 @@ Plugin Class example:
 
         def nOutput_datasets(self):
             return 1
+
+.. _toolclassguide:
 
 2. How to create the tools class and documentation
 ===================================================
@@ -268,6 +285,10 @@ Choose the data type. This is used to check the parameter input is valid.
       - A list
     * - int_list
       - A list of integers
+    * - num_list
+      - A list of numbers
+    * - preview
+      - Preview slice list
     * - range
       - A range e.g. (0,1)
     * - yaml_file
@@ -575,7 +596,8 @@ method is ROF_TV.
 Document your plugin in restructured text
 -------------------------------------------
 
-If you are creating your plugin with the 'savu_plugin_generator' command, then
+
+If you are creating your plugin with the :ref:`'savu_plugin_generator'<plugin_generator_guide>` command, then
 the restructured text file will be created automatically for you and the
 link to this file will be printed to the terminal window.
 
@@ -586,7 +608,7 @@ https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
 
 An example would be:
 
-.. literalinclude:: ../files_and_images/documentation/plugin_name_doc.rst
+.. literalinclude:: ../files_and_images/plugin_guides/plugin_name_doc.rst
    :language: rst
    :start-after: :orphan:
 
@@ -600,7 +622,7 @@ search bar on the left to find a specific one.
 .. toctree::
    :maxdepth: 2
 
-   ../plugin_documentation
+   ../reference/plugin_documentation
 
 
 3. How to create a test
@@ -657,11 +679,4 @@ Save the file as "your_module_name.py"
 
 .. note:: Have a look at the :download:`real test <../files_and_images/median_filter_test.py>` for the median_filter_plugin.py module.
 
-List of test data available.
-What to do if you require different test data.
 
-Internal crossreferences, like example_.
-
-.. _example:
-
-This is an example crossreference target.

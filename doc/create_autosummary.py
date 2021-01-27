@@ -62,7 +62,7 @@ if __name__ == "__main__":
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
     # open the autosummary file
-    f = open(savu_base_path + 'doc/source/' + rst_file, 'w')
+    f = open(savu_base_path + 'doc/source/reference/' + rst_file, 'w')
 
     if api_type == 'framework':
         f.write('Framework API \n===================\n')

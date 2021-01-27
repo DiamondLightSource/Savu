@@ -9,5 +9,5 @@ class GmmSegment3dTools(PluginTools):
             visibility: basic
             dtype: int
             description: The number of classes for GMM
-            default: 5
+            default: 4
         """

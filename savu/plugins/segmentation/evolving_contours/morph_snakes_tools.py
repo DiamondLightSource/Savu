@@ -45,4 +45,10 @@ minimum of energy (a possible edge countour).
             description: Pattern to apply to this.
             default: 'VOLUME_YZ'
 
+        out_datasets:
+            visibility: datasets
+            dtype: list
+            description: The default names
+            default: ['MASK_MORPH_EVOLVED']
+
         """

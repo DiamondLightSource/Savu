@@ -32,8 +32,7 @@ inverse radon transform from scikit-image.
             visibility: advanced
             dtype: int
             description: "Interpolation method used in reconstruction.
-              Methods available: 'linear', 'nearest', and 'cubic'
-              ('cubic' is slow)."
+              Methods available: linear, nearest, and cubic (cubic is slow)."
             options: [linear, nearest, cubic]
             default: linear
 
@@ -59,8 +58,8 @@ inverse radon transform from scikit-image.
             dtype: list
             description: "1D array dtype = float Shift the projections
               contained in radon_image (the sinogram) by this many pixels
-              before reconstructing the image. The i'th value defines the
-              shift of the i'th column of radon_image."
+              before reconstructing the image. The ith value defines the
+              shift of the ith column of radon_image."
             default: None
 
         clip:

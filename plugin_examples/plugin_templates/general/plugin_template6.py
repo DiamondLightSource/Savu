@@ -78,7 +78,7 @@ e.g. downsample_filter.
         core_dirs = data.get_core_dimensions()
         new_shape = list(full_shape)
         for dim in core_dirs:
-            new_shape[dim] = full_shape[dim]/self.parameters['bin_size']
+            new_shape[dim] = full_shape[dim] // self.parameters['bin_size']
         return tuple(new_shape)
 
     def pre_process(self):

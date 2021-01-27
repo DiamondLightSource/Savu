@@ -54,7 +54,7 @@ class I13StxmLoader(BaseLoader):
         #print sh
         ### set the rotation
         rotation_angle = \
-            data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'].value.astype(float)[:,0]
+            data_obj.backing_file['entry1/merlin_sw_hdf/t1_theta'][()].astype(float)[:,0]
         #print rotation_angle.shape
         data_obj.meta_data.set('rotation_angle', rotation_angle)
         data_obj.set_axis_labels('rotation_angle.degrees',
@@ -64,6 +64,6 @@ class I13StxmLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dims=(0,1),slice_dims=())
 #         data_obj.add_pattern('PROJECTION', core_dir=(0,), slice_dir=(1,2,3))
 #         data_obj.add_pattern('SPECTRUM', core_dir=(3,), slice_dir=(0,1,2))
-        
+
         data_obj.set_shape(sh)
         self.set_data_reduction_params(data_obj)

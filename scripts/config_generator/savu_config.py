@@ -20,28 +20,31 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division
 
 import re
 import sys
+import logging
+
+logger = logging.getLogger('documentationLog')
+logger_rst = logging.getLogger('documentationRst')
 
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    from content import Content
-    from completer import Completer
-    from display_formatter import ListDisplay, DispDisplay, CiteDisplay
-    import arg_parsers as parsers
+    from .content import Content
+    from .completer import Completer
+    from .display_formatter import ListDisplay, DispDisplay, CiteDisplay
+    from . import arg_parsers as parsers
     from savu.plugins import utils as pu
-    import config_utils as utils
-    from config_utils import parse_args
-    from config_utils import error_catcher
+    from . import config_utils as utils
+    from .config_utils import parse_args
+    from .config_utils import error_catcher
 
 
 def _help(content, args):
     """ Display the help information"""
-    print('%s Savu (local) configurator commands %s\n' % tuple(['*'*21]*2))
-    for key in commands.keys():
+    print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
+    for key in list(commands.keys()):
         doc = commands[key].__doc__
         if doc:
             print("%8s : %s" % (key, commands[key].__doc__))
@@ -89,7 +92,8 @@ def _list(content, args):
     # Sort the list of dictionaries.
     # Sort by the name of the plugin within each dictionary.
     list_content.plugin_list.plugin_list = \
-        sorted(list_content.plugin_list.plugin_list, key=lambda i: i['name'])
+        sorted(list_content.plugin_list.plugin_list,
+                key=lambda i: i['name'])
 
     formatter = ListDisplay(list_content.plugin_list)
     verbosity = parsers._get_verbosity(args)
@@ -107,8 +111,9 @@ def _save(content, args):
         content.plugin_list._check_loaders()
         out_file = content.filename if args.input else args.filepath
         content.check_file(out_file)
+        print()
         DispDisplay(content.plugin_list)._notices()
-        content.save(out_file, check=raw_input("Are you sure you want to save the "
+        content.save(out_file, check=input("Are you sure you want to save the "
                      "current data to %s' [y/N]" % (out_file)),
                      template=args.template)
     else:
@@ -127,8 +132,10 @@ def _mod(content, args):
         # Get the name of the modified parameter so that the display
         # lists the correct item when the parameter order has been updated
         plugin_position = content.find_position(pos_str)
-        current_parameter_list = content.plugin_list.plugin_list[plugin_position]['param']
-        current_parameter_list_ordered = pu.set_order_by_visibility(current_parameter_list)
+        current_parameter_list = \
+            content.plugin_list.plugin_list[plugin_position]["param"]
+        current_parameter_list_ordered = \
+            pu.set_order_by_visibility(current_parameter_list)
         param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
 
         try:
@@ -185,9 +192,7 @@ def _ref(content, args):
 @parse_args
 @error_catcher
 def _cite(content, args):
-    """ Display citations for a plugin. You can select a plugin number
-    or range. All plugins are selected if there is not a number argument.
-    """
+    """ Display plugin citations."""
     range_dict = utils.__get_start_stop(content, args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
@@ -223,28 +228,33 @@ def _coll(content, arg):
     print('-'*40, '\n')
     return content
 
-
+@parse_args
+@error_catcher
 def _clear(content, arg):
     """ Clear the current plugin list."""
-    content.clear(check=raw_input("Are you sure you want to clear the current "
+    content.clear(check=input("Are you sure you want to clear the current "
                   "plugin list? [y/N]"))
     return content
 
-
+@parse_args
+@error_catcher
 def _exit(content, arg):
     """ Close the program."""
-    content.set_finished(check=raw_input("Are you sure? [y/N]"))
+    content.set_finished(check=input("Are you sure? [y/N]"))
     return content
 
 @parse_args
 @error_catcher
 def _level(content, args):
-    """ Set a visibility level for the program."""
+    """ Set a visibility level for the parameters."""
     content.level(args.level)
+    print(f"Level set to '{args.level}'")
     return content
 
-
+@parse_args
+@error_catcher
 def _history(content, arg):
+    """ View the history of previous commands """
     hlen = utils.readline.get_current_history_length()
     for i in range(hlen):
         print("%5i : %s" % (i, utils.readline.get_history_item(i)))
@@ -269,15 +279,37 @@ commands = {'open': _open,
             'level': _level,
             'history': _history}
 
+def get_description():
+    """ For each command, enter the function and save the docstring to a
+    dictionary
+    """
+    command_desc_dict = {command: function_name.__doc__
+                         for command, function_name in commands.items()}
+    return command_desc_dict
 
-def main():
+def main(test=False):
+    """
+    :param test: If test is True the last argument from sys.argv is removed,
+                 as it contains the directory of the test scripts, which fails the
+                 parsing of the arguments as it has an unexpected argument.
+
+                 If test is False then nothing is touched.
+    """
 
     print("Running the configurator")
-    # required for travis tests
-    if len(sys.argv) > 2 and sys.argv[-2] == 'scripts/configurator_tests/':
-        sys.argv = [sys.argv[:-2]]
+    # required for running the tests locally or on travis
+    # drops the last argument from pytest which is the test file/module
+    if test:
+        try:
+            # find where the /scripts argument is
+            index_of_scripts_argument = ["scripts" in arg for arg in sys.argv].index(True)
+            # remove it, including every arguments after it (e.g --cov)
+            sys.argv = sys.argv[:index_of_scripts_argument]
+        except ValueError:
+            # scripts was not part of the arguments passed in by the test
+            pass
 
-    args = parsers._config_arg_parser()
+    args = parsers._config_arg_parser(doc=False)
     if args.error:
         utils.error_level = 1
 
@@ -289,6 +321,7 @@ def main():
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
+        # imports all the (working) plugin modules
         content.failed = utils.populate_plugins(error_mode=args.error,
                                                 examples=args.examples)
 
@@ -303,13 +336,19 @@ def main():
     print("\n*** Press Enter for a list of available commands. ***\n")
 
     utils.load_history_file(utils.histfile)
-
+    accumulative_output = ''
     while True:
         try:
-            in_list = raw_input(">>> ").strip().split(' ', 1)
+            in_text = input(">>> ").strip()
+            in_list = in_text.split(' ', 1)
+            _write_command_to_log(in_text)
+
         except KeyboardInterrupt:
             print()
             continue
+        except EOFError:
+            # makes possible exiting on CTRL + D (EOF, like Python interpreter)
+            break
 
         command, arg = in_list if len(in_list) == 2 else in_list+['']
         command = command if command else 'help'
@@ -318,11 +357,60 @@ def main():
                   "for a list of available commands.")
         else:
             content = commands[command](content, arg)
+            if logger.handlers:
+                # Write the command output to a logger
+                accumulative_output = _write_output_to_log(accumulative_output)
 
         if content.is_finished():
             break
 
     print("Thanks for using the application")
+
+
+def _write_command_to_log(in_text):
+    logger.debug('TEST COMMAND: ' + in_text)
+    block_text = _log_file_code('bash')
+    logger_rst.debug(block_text + pu.indent('>>> ' + in_text))
+
+
+def _write_output_to_log(accumulative_output):
+    """ Seperate the current command output, format it correctly
+    and write this to the restructured text log file.
+
+    :param accumulative_output:
+    :return: accumulative_output
+    """
+    current_output = sys.stdout.getvalue()
+
+    # Find all previous command output
+    length_Str = len(accumulative_output)
+    if length_Str:
+        # If there is previous output, then select only new lines from the
+        # current command. This will demonstrate clearly the output of each
+        # individual command
+        current_output = current_output[length_Str:]
+
+    # Characters used for command line colour
+    unicode_chars = [u'\x1b[100m', u'\x1b[0m', u'\x1b[97m',
+                     u'\x1b[49m', u'\x1b[46m', u'\x1b[39m',
+                     u'\x1b[36m']
+    # Remove unicode characters which cannot be displayed
+    for code in unicode_chars:
+        current_output = current_output.replace(code, '')
+
+    # Indent the text for the rst file format
+    indent_current_output = pu.indent_multi_line_str(current_output)
+    # Write to the rst log file
+    logger_rst.debug(indent_current_output)
+    return sys.stdout.getvalue()
+
+
+def _log_file_code(type):
+    block_text = '''.. code-block:: '''+str(type)+'''
+
+'''
+    return block_text
+
 
 def _reduce_logging_level():
     import logging

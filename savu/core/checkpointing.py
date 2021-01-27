@@ -61,7 +61,7 @@ class Checkpointing(object):
         self._exp._barrier(communicator=comm, msg=msg)
 
     def _create_dataset(self, f, name, val):
-        if name in f.keys():
+        if name in list(f.keys()):
             f[name][...] = val
         else:
             f.create_dataset(name, data=val, dtype=np.int16)
@@ -110,12 +110,12 @@ class Checkpointing(object):
 
     def __set_dataset_metadata(self, f, dtype):
         self.meta_data.set(dtype, {})
-        if dtype not in f.keys():
+        if dtype not in list(f.keys()):
             return
         entry = f[dtype]
-        for name, gp in entry.iteritems():
+        for name, gp in entry.items():
             data_entry = gp.require_group('meta_data')
-            for key, value in data_entry.iteritems():
+            for key, value in data_entry.items():
                 self.meta_data.set([dtype, name, key], value[key][...])
 
     def _get_dataset_metadata(self, dtype, name):

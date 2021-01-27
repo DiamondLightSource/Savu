@@ -15,7 +15,7 @@
 .. module:: vo_centering
    :platform: Unix
    :synopsis: A plugin to find the center of rotation per frame
-.. moduleauthor:: Mark Basham, Nghia Vo, Nicola Wadeson \ 
+.. moduleauthor:: Mark Basham, Nghia Vo, Nicola Wadeson \
                     <scientificsoftware@diamond.ac.uk>
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
@@ -84,12 +84,12 @@ class VoCentering(BaseFilter, CpuPlugin):
         if minpos==0:
             self.error_msg_1 = "!!! WARNING !!! Global minimum is out of "\
             "the searching range. Please extend smin"
-            logging.warn(self.error_msg_1)
+            logging.warning(self.error_msg_1)
             cu.user_message(self.error_msg_1)
         if minpos==len(list_metric)-1:
             self.error_msg_2 = "!!! WARNING !!! Global minimum is out of "\
              "the searching range. Please extend smax"
-            logging.warn(self.error_msg_2)
+            logging.warning(self.error_msg_2)
             cu.user_message(self.error_msg_2)
         rot_centre = list_cor[minpos]
         return rot_centre
@@ -142,11 +142,11 @@ class VoCentering(BaseFilter, CpuPlugin):
             image_dsp : Downsampled image.
         """
         (height, width) = image.shape
-        dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height//2)
-        dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width//2)
+        dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height // 2)
+        dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width // 2)
         height_dsp = height//dsp_fact0
         width_dsp = width//dsp_fact1
-        if  (dsp_fact0 == 1) and (dsp_fact1 ==1):
+        if dsp_fact0 == 1 and dsp_fact1 == 1:
             image_dsp = image
         else:
             image_dsp = image[0:dsp_fact0*height_dsp,0:dsp_fact1*width_dsp]
@@ -156,7 +156,7 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         padding = np.int16(self.parameters['average_radius'])
-        if padding>0: 
+        if padding>0:
             in_data[0].padding = {'pad_multi_frames': padding}
 
     def pre_process(self):
@@ -169,14 +169,14 @@ class VoCentering(BaseFilter, CpuPlugin):
         self.broadcast_method = str(self.parameters['broadcast_method'])
         self.error_msg_1 = ""
         self.error_msg_2 = ""
-        self.error_msg_3 = "" 
+        self.error_msg_3 = ""
         if not((self.broadcast_method == 'mean')
                 or (self.broadcast_method == 'median')
                  or (self.broadcast_method == 'linear_fit')
                   or (self.broadcast_method == 'nearest')):
             self.error_msg_3 = "!!! WARNING !!! Selected broadcasting "\
              "method is out of the list. Use the default option: 'median'"
-            logging.warn(self.error_msg_3)
+            logging.warning(self.error_msg_3)
             cu.user_message(self.error_msg_3)
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
@@ -211,9 +211,9 @@ class VoCentering(BaseFilter, CpuPlugin):
         sino_fsearch = ndi.gaussian_filter(sino, (2,2), mode='reflect')
         sino_dsp = self._downsample(sino_csearch, dsp_row, dsp_col)
         fine_srange = max(self.search_radius, dsp_col)
-        off_set = 0.5*dsp_col if dsp_col>1 else 0.0
+        off_set = 0.5*dsp_col if dsp_col > 1 else 0.0
         if self.est_cor is None:
-            self.est_cor = (ncol-1.0)/2.0
+            self.est_cor = (ncol-1.0) / 2.0
         else:
             self.est_cor = np.float32(self.est_cor)
         start_cor = np.int16(
@@ -323,30 +323,3 @@ class VoCentering(BaseFilter, CpuPlugin):
                 self.cor_for_executive_summary))
             cu.user_message(msg2)
         return [msg]
-
-    '''
-        
-    A plugin to calculate the centre of rotation using the Vo Method
-    :u*param preview: A slice list of required frames (sinograms) to use in \
-    the calulation of the centre of rotation (this will not reduce the data \
-    size for subsequent plugins). Default: [].
-    :u*param start_pixel: The estimated centre of rotation. If value is None,\
-        use the horizontal centre of the image. Default: None.
-    :u*param search_area: Search area around the estimated centre of rotation\
-        . Default: (-50, 50).
-    :u*param ratio: The ratio between the size of object and FOV of \
-        the camera. Default: 0.5.
-    :param search_radius: Use for fine searching. Default: 6.
-    :param step: Step of fine searching. Default: 0.5.
-    :param datasets_to_populate: A list of datasets which require this \
-        information. Default: [].
-    :param out_datasets: The default names\
-        . Default: ['cor_preview','cor_broadcast'].
-    :param broadcast_method: Method of broadcasting centre values calculated\
-        from preview slices to full dataset. Available option: 'median', \
-        'mean', 'nearest', 'linear_fit'. Default: 'median'.
-    :param row_drop: Drop lines around vertical center of the \
-        mask. Default: 20.
-    :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 5.
-    '''

@@ -50,7 +50,7 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     def _dict_representer(dumper, data):
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
+            list(data.items()))
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     
     def represent_none(self, _):
@@ -61,10 +61,10 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
 
 def check_yaml_errors(data):
     config_file = savu.__path__[0] + '/plugins/loaders/utils/yaml_config.yaml'
-    config_file_data = open(config_file)
-    conf = YamlLintConfig(config_file_data)
-    gen = linter.run(data, conf)
-    errors = list(gen)
+    with open(config_file) as config_file_data:
+        conf = YamlLintConfig(config_file_data)
+        gen = linter.run(data, conf)
+        errors = list(gen)
     return errors
 
 def read_yaml(path):

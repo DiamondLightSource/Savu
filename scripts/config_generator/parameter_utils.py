@@ -20,7 +20,6 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
 
 import os
 import h5py
@@ -31,15 +30,29 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
-from savu.plugins.utils import parse_config_string as parse_str
 from savu.plugins.utils import convert_multi_params
 
-def _intlist(value):
-    '''['int'] '''
+def _preview(value):
+    ''' preview value '''
     parameter_valid = False
-    # Currently the check is for a list, but this can later be more extensive
     if isinstance(value, list):
         parameter_valid = True
+    return parameter_valid
+
+def _intlist(value):
+    ''' int_list '''
+    parameter_valid = False
+    if isinstance(value, list):
+        if all(_integer(item) for item in value):
+            parameter_valid = True
+    return parameter_valid
+
+def _numlist(value):
+    ''' int or float list '''
+    parameter_valid = False
+    if isinstance(value, list):
+        if all((_integer(item) or _float(item)) for item in value):
+            parameter_valid = True
     return parameter_valid
 
 def _range(value):
@@ -256,9 +269,10 @@ def _tuple(value):
 
 
 def _list(value):
+    # List of digits or strings
     parameter_valid = False
     if isinstance(value, list):
-        # This is a list of integer values
+        # This is a list of integer or float values
         parameter_valid = True
     else:
         parameter_valid = _string_list(value)
@@ -272,7 +286,7 @@ def _string_list(value):
         if '[' and ']' in value:
             bracket_value = value.split('[')
             first_bracket_value = bracket_value[1].split(']')
-            if first_bracket_value < 2:
+            if len(first_bracket_value) <= 2:
                 if first_bracket_value[1]:
                     print('There are values outside of the square brackets')
                 else:
@@ -280,15 +294,18 @@ def _string_list(value):
                     str_list = [v for v in entries]
                     parameter_valid = True
             else:
-                print('Please enter three values inside your list.')
+                print('Please enter values inside your list.')
     finally:
         return parameter_valid
 
 # If you are editing the type dictionary, please update the documentation
-# files dev_plugin.rst and the files included inside
-# doc/source/files_and_images/dev_param_key.rst to provide guidance for
-# plugin creators
-type_dict = {'int_list': _intlist,
+# file dev_guides/dev_plugin.rst and the files short_parameter_key.yaml
+# and parameter_key.yaml, inside doc/source/files_and_images/plugin_guides/
+# to provide guidance for plugin creators
+
+type_dict = {'preview': _preview,
+            'int_list': _intlist,
+            'num_list': _numlist,
             'range': _range,
             'yaml_file': _yamlfile,
             'file_int_path_int': _intgroup,
@@ -307,8 +324,10 @@ type_dict = {'int_list': _intlist,
             'tuple': _tuple,
             'list': _list}
 
-type_error_dict = {'int_list': 'list of integers',
-            'range': 'range\'. Valid items have a format \'<value 1>, <value 2>',
+type_error_dict = {'preview': 'preview slices',
+            'int_list': 'list of integers',
+            'num_list': 'list of numbers',
+            'range': 'range\'. For example \'<value 1>, <value 2>',
             'yaml_file': 'yaml format',
             'file_int_path_int': '[filepath, interior file path, int]',
             'int_path_int': '[interior file path, int]',
@@ -356,7 +375,7 @@ def is_valid(param_name, value, current_parameter_details):
             pvalid, type_error_str = _check_type(dtype, param_name, value,
                                                  current_parameter_details)
         # Then check if the option is valid
-        if not _is_multi_param(param_name, value):
+        if not is_multi_param(param_name, value):
             # If it is a multi parameter, each item is checked individually
             pvalid, option_error_str = _check_options\
                 (current_parameter_details, value, pvalid)
@@ -382,7 +401,7 @@ def _check_type(dtype, param_name, value, current_parameter_details):
     if dtype not in type_dict.keys():
         type_error_str = 'That type definition is not configured properly.'
         pvalid = False
-    elif _is_multi_param(param_name, value):
+    elif is_multi_param(param_name, value):
         # If there are multiple parameters, check each individually
         pvalid, type_error_str = _check_multi_params(param_name, value,
                                                 current_parameter_details)
@@ -405,7 +424,7 @@ def _check_multi_params(param_name, value,
     """
     type_error_str = ''
     parameter_valid = False
-    if _is_multi_param(param_name, value):
+    if is_multi_param(param_name, value):
         val_list, type_error_str = convert_multi_params(param_name, value)
         if not type_error_str:
             for item in val_list:
@@ -418,7 +437,7 @@ def _check_multi_params(param_name, value,
     return parameter_valid, type_error_str
 
 
-def _is_multi_param(param_name, value):
+def is_multi_param(param_name, value):
     """Return True if the value is made up of multiple parameters"""
     return (isinstance(value, str) and (';' in value)
      and param_name != 'preview')
@@ -459,4 +478,12 @@ def _error_message(dtype, param_name):
         error_str = 'Your input for the parameter \'{}\' must match' \
                     ' the type \'{}\'.'.format(param_name,
                                                type_error_dict[dtype])
+    return error_str
+
+def _gui_error_message(dtype, param_name):
+    if isinstance(dtype, list):
+        type_options = '\' or \''.join([str(t) for t in dtype])
+        error_str = 'Type must match \'{}\'.'.format(type_options)
+    else:
+        error_str = 'Type must match \'{}\'.'.format(type_error_dict[dtype])
     return error_str

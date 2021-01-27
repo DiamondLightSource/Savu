@@ -8,7 +8,7 @@ data loader plugins should inherit.
         """
         preview:
               visibility: basic
-              dtype: int_list
+              dtype: preview
               description: A slice list of required frames.
               default: []
         data_file:

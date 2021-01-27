@@ -22,8 +22,6 @@
 
 """
 
-from __future__ import print_function, division, absolute_import
-
 import unittest
 
 import savu.plugins.utils as pu
@@ -152,6 +150,86 @@ class ParameterTypeTest(unittest.TestCase):
         value = 'Testing str'
         valid_modification = plugin.tools.modify(plugin.parameters, value, key)
         self.assertFalse(valid_modification)
+
+    def test_int_list(self):
+        # Check that int list is accepted
+        plugin = self.initial_setup()
+        key = 'integer_list_param'
+        value = [2,3,4,5]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_int_list_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = 'integer_list_param'
+        value = 8
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_list_2(self):
+        # Check that str is not accepted
+        plugin = self.initial_setup()
+        key = 'integer_list_param'
+        value = 'Testing str'
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_list_3(self):
+        # Check that str list is not accepted
+        plugin = self.initial_setup()
+        key = 'integer_list_param'
+        value = ['value','second6']
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_num_list(self):
+        # Check that int list is accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = [2,3,4,5]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_num_list_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = 8
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_num_list_2(self):
+        # Check that str is not accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = 'Testing str'
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_num_list_3(self):
+        # Check that str list is not accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = ['value','second6']
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_num_list_4(self):
+        # Check that float and int list is accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = [10.4,30.6,5]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_num_list_5(self):
+        # Check that float only list is accepted
+        plugin = self.initial_setup()
+        key = 'num_list_param'
+        value = [10.4,30.6,5.9]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
 
     def test_pos_int(self):
         # Check that positive integers are accepted

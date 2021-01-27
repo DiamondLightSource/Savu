@@ -22,11 +22,9 @@
 
 """
 
-from __future__ import print_function, division, absolute_import
-
 import sys
 import unittest
-import StringIO
+from io import StringIO
 
 from savu.plugins.plugin_tools import PluginTools, PluginParameters
 
@@ -42,7 +40,7 @@ class YamlParameterTest(unittest.TestCase):
         :return: dictionary of parameters
         """
         parameter_class = PluginParameters()
-        PluginToolTestingClass.define_parameters.__func__.__doc__ \
+        PluginToolTestingClass.define_parameters.__doc__ \
             = test_function.__doc__
         parameter_class._set_plugin_parameters(PluginToolTestingClass)
         param_dict = parameter_class.param.get_dictionary()
@@ -111,7 +109,7 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        printOutput = StringIO.StringIO()  # Create StringIO object
+        printOutput = StringIO()  # Create StringIO object
         sys.stdout = printOutput
 
         with self.assertRaises(Exception):
@@ -140,7 +138,7 @@ class YamlParameterTest(unittest.TestCase):
             dtype: int
             description:
         """
-        printOutput = StringIO.StringIO()  # Create StringIO object
+        printOutput = StringIO()  # Create StringIO object
         sys.stdout = printOutput
 
         with self.assertRaises(Exception):
@@ -173,7 +171,7 @@ class YamlParameterTest(unittest.TestCase):
             default: 8
 
         """
-        printOutput = StringIO.StringIO()  # Create StringIO object
+        printOutput = StringIO()  # Create StringIO object
         sys.stdout = printOutput
 
         with self.assertRaises(Exception):

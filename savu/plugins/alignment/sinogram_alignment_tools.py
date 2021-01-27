@@ -20,10 +20,11 @@ each centre of mass and the sine function is then used to align each row.
               default: (1, 1, 1)
         type:
               visibility: intermediate
-              dtype: list
+              dtype: str
               description: Either centre_of_mass or shift, with the latter requiring
                 ProjectionVerticalAlignment prior to this plugin.
               default: centre_of_mass
+              options: [centre_of_mass, shift]
 
         """
 

@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class GeoDistanceTools(PluginTools):
-    """Geodesic transformation of images with manual initialisation.
+    """Geodesic transformation of images with mask initialisation.
     """
     def define_parameters(self):
         """

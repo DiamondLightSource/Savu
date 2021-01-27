@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -49,7 +48,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
 
         self.center = 0.0
         key = "centre_of_rotation"
-        if key in in_dataset[0].meta_data.get_dictionary().keys():
+        if key in list(in_dataset[0].meta_data.get_dictionary().keys()):
             self.center = in_dataset[0].meta_data.get(key)
 
         old_shape = in_dataset[0].get_shape()

@@ -63,30 +63,30 @@ class BaseMultiModalLoader(BaseLoader):
             self.exp.meta_data.set('control', control)
             logging.debug('adding the ion chamber to the meta data')
         else:
-            logging.warn('No ion chamber information. Leaving this blank')
+            logging.warning('No ion chamber information. Leaving this blank')
 
     def set_motors(self, data_obj, entry, ltype):
-        labels = list(entry['data'].attrs['axes'])
+        labels = [e.decode("ascii") for e in entry['data'].attrs['axes']]
         motors = [entry['data/' + e] for e in labels]
         units = self._get_attrs(motors, 'units', 'unit')
         self._mtype = self._get_attrs(motors, 'transformation_type', 'None')
         self._set_axis_labels(data_obj, motors, labels, units)
 
     def _get_attrs(self, entries, key, default):
-        return [e.attrs[key] if key in e.attrs.keys() else
+        return [e.attrs[key].decode("ascii") if key in list(e.attrs.keys()) else
                 default for e in entries]
 
     def _set_axis_labels(self, dObj, motors, labels, units):
         trans = self.get_motor_dims('translation')
         rot_dim = self._mtype.index('rotation')
-        angles = motors[rot_dim].value
+        angles = motors[rot_dim][()]
         labels[rot_dim] = 'rotation_angle'
         self._set_meta_data(dObj, 'rotation_angle', angles)
         if trans:
-            self._set_meta_data(dObj, 'x', motors[trans[-1]].value)
+            self._set_meta_data(dObj, 'x', motors[trans[-1]][()])
             labels[trans[-1]] = 'x'
             if len(trans) > 1:
-                self._set_meta_data(dObj, 'y', motors[trans[-2]].value)
+                self._set_meta_data(dObj, 'y', motors[trans[-2]][()])
                 labels[trans[-2]] = 'y'
         labels = [labels[i] + '.' + units[i] for i in range(len(labels))]
         dObj.set_axis_labels(*tuple(labels))
@@ -99,7 +99,7 @@ class BaseMultiModalLoader(BaseLoader):
         return [i for i in range(len(self._mtype)) if self._mtype[i] == key]
 
     def add_patterns_based_on_acquisition(self, data_obj, ltype):
-        dims = range(len(self._mtype))
+        dims = list(range(len(self._mtype)))
 
         proj_dims = tuple(self.get_motor_dims('translation'))
         if proj_dims:

@@ -20,7 +20,6 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-from __future__ import print_function, division, absolute_import
 
 import ast
 import copy
@@ -36,8 +35,8 @@ from savu.plugins.plugin_datasets import PluginDatasets
 class Plugin(PluginDatasets):
     """
     """
-    def __init__(self, name='Plugin'):
-        super(Plugin, self).__init__()
+    def __init__(self, name="Plugin"):
+        super(Plugin, self).__init__(name)
         self.name = name
         self.chunk = False
         self.docstring_info = {}
@@ -54,7 +53,8 @@ class Plugin(PluginDatasets):
         self.check = check
         self.exp = exp
         self._populate_default_parameters()
-        self._set_parameters(copy.deepcopy(params))
+        self.initialise_parameters()
+        self.tools.set_parameters(copy.deepcopy(params))
         self._main_setup()
 
     def _main_setup(self):
@@ -64,12 +64,9 @@ class Plugin(PluginDatasets):
         in/out_dataset strings in ``self.parameters`` with the relevant data
         objects. It then creates PluginData objects for each of these datasets.
         """
-        # Don't do this step if loaders haven't been loaded yet
-        if self.exp and self.exp.index['in_data']:
-            self._set_plugin_datasets()
+        self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.setup()
-        
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
@@ -132,8 +129,8 @@ class Plugin(PluginDatasets):
                              for k, v in self.p_dict.items()])
             # parameters holds current values, this is edited outside of the
             # tools class so default and dependency display values are updated here
-            self.tools.update_defaults(self.parameters, self.p_dict)
-            self.tools.check_dependencies(self.parameters, self.p_dict)
+            self.tools.update_defaults(self.parameters)
+            self.tools.check_dependencies(self.parameters)
 
     def set_docstring(self, doc_str):
         desc = doc.find_args(self)
@@ -143,7 +140,7 @@ class Plugin(PluginDatasets):
         self.docstring_info['synopsis'] = desc['synopsis']
 
     def delete_parameter_entry(self, param):
-        if param in self.parameters.keys():
+        if param in list(self.parameters.keys()):
             del self.parameters[param]
 
     def initialise_parameters(self):
@@ -152,43 +149,6 @@ class Plugin(PluginDatasets):
         self._populate_default_parameters()
         self.multi_params_dict = {}
         self.extra_dims = []
-
-    def _set_parameters(self, parameters):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework.  It replaces ``self.parameters`` default values
-        with those given in the input process list. It checks for multi
-        parameter strings, eg. 57;68;56;
-
-        :param dict parameters: A dictionary of the parameters for this \
-        plugin, or None if no customisation is required.
-        """
-        self.initialise_parameters()
-        for key in parameters.keys():
-            if key in self.parameters.keys():
-                self.tools.modify(self.parameters, parameters[key], key)
-                self.__check_multi_params(self.parameters, parameters[key], key)
-            else:
-                error = ("Parameter '%s' is not valid for plugin %s. \nTry "
-                         "opening and re-saving the process list in the "
-                         "configurator to auto remove \nobsolete parameters."
-                         % (key, self.name))
-                raise ValueError(error)
-
-    def __check_multi_params(self, parameters, value, key):
-        """ Convert parameter value to a list if it uses parameter tuning and set
-        associated parameters, so the framework knows the new size of the data
-        and which plugins to re-run.
-        """
-        # If the value is in a split string format then the value is returned
-        # as a list
-        value, error_str = pu.convert_multi_params(key, value)
-        if not error_str:
-            parameters[key] = value
-            label = key + '_params.' + type(value[0]).__name__
-            self.multi_params_dict[len(self.multi_params_dict)] = \
-                {'label': label, 'values': value}
-            self.extra_dims.append(len(value))
 
     def get_parameters(self, name):
         """ Return a plugin parameter

@@ -41,19 +41,12 @@ lambda: weighting betwween 0.0 and 1.0
           if lambda==0.0, return spatial euclidean distance without considering gradient
           if lambda==1.0, the distance is based on gradient only without using spatial distance
 """
-#  Geodesic distance transform, the software can be installed from
-#  https://github.com/taigw/geodesic_distance with
-import geodesic_distance
+import GeodisTK
 import numpy as np
 
 @register_plugin
 class GeoDistance3d(Plugin, MultiThreadedPlugin):
     """
-    3D geodesic transformation of images with manual initialisation.
-
-    :param lambda: weighting betwween 0 and 1 . Default: 0.5.
-    :param iterations: number of iteration for raster scanning . Default: 4.
-    :param out_datasets: The default names . Default: ['GeoDist'].
     """
 
     def __init__(self):
@@ -62,11 +55,15 @@ class GeoDistance3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_3D', 'single') # the initialisation (mask)
+
+        # If VOLUME_3D pattern doesn't exist then use "VOlUME_XZ" pattern with
+        # all of voxel_y dimension as this is equivalent to one VOLUME_3D scan.
+        getall = ['VOLUME_XZ', 'voxel_y']
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        in_pData[1].plugin_data_setup('VOLUME_3D', 'single', getall=getall) # the mask initialisation
 
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
 
     def pre_process(self):
         # extract given parameters
@@ -77,8 +74,9 @@ class GeoDistance3d(Plugin, MultiThreadedPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
+        spacing = [1.0, 1.0, 1.0]
         if (np.sum(data[1]) > 0):
-            geoDist = geodesic_distance.geodesic3d_raster_scan(input_temp, data[1], self.lambda_par, self.iterations)
+            geoDist = GeodisTK.geodesic3d_raster_scan(input_temp, data[1], spacing, self.lambda_par, self.iterations)
         else:
             geoDist = np.float32(np.zeros(np.shape(data[0])))
         return geoDist

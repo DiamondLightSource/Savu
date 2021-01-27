@@ -37,7 +37,7 @@ class MRC(BaseType):
 
     def __getitem__(self, idx):
         data = self.file.data[idx].astype(np.float32)
-        data = data/1000.0
+        data /= 1000.0
         return data
 
     def get_shape(self):

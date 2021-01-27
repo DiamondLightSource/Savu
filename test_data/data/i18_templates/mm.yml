@@ -1,0 +1,6 @@
+inherit:
+    - test_data/data/i18_templates/fluo.yml
+    - test_data/data/i18_templates/stxm.yml
+    - test_data/data/i18_templates/monitor.yml
+    - test_data/data/i18_templates/xrd_tiff.yml
+

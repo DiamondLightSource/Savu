@@ -20,7 +20,6 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
-from __future__ import print_function, division, absolute_import
 
 import os
 import copy
@@ -54,6 +53,7 @@ class Experiment(object):
         self.plugin = None
         self._transport = None
         self._barrier_count = 0
+        self._dataset_names_complete = False
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -72,6 +72,7 @@ class Experiment(object):
             template = self.meta_data.get('template')
             self.meta_data.plugin_list._populate_plugin_list(process_file,
                                                              template=template)
+        self.meta_data.set("nPlugin", 0) # initialise
 
     def create_data_object(self, dtype, name, override=True):
         """ Create a data object.
@@ -80,7 +81,7 @@ class Experiment(object):
 
         :params str dtype: either "in_data" or "out_data".
         """
-        if name not in self.index[dtype].keys() or override:
+        if name not in list(self.index[dtype].keys()) or override:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
             data_obj._set_transport_data(self.meta_data.get('transport'))
@@ -97,18 +98,23 @@ class Experiment(object):
 
     def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')
+        self._set_dataset_names_complete()
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
+                len(self.meta_data.get('processes'))-1 and not checkpoint:
             # links the input data to the nexus file
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             self._add_input_data_to_nxs_file(self._get_transport())
+        self._set_dataset_names_complete()
 
     def _set_initial_datasets(self):
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
 
     def _update(self, plugin_dict):
         data = self.index['out_data'].copy()
+        # clear output metadata after first setup
+        for d in list(data.values()):
+            d.meta_data._set_dictionary({})
         self.collection['datasets'].append(data)
         self.collection['plugin_dict'].append(plugin_dict)
 
@@ -151,6 +157,14 @@ class Experiment(object):
             self.meta_data.set(['filename', name], data.backing_file)
             transport._populate_nexus_file(data)
             h5._link_datafile_to_nexus_file(data)
+
+    def _set_dataset_names_complete(self):
+        """ Missing in/out_datasets fields have been populated
+        """
+        self._dataset_names_complete = True
+
+    def _get_dataset_names_complete(self):
+        return self._dataset_names_complete
 
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
@@ -205,11 +219,10 @@ class Experiment(object):
 
         self._create_nxs_entry()
 
-    def _create_nxs_entry(self):
+    def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
         import h5py
-        if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1:
+        if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1 and not self.checkpoint:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
                 entry_group = nxs_file.create_group('entry')
                 entry_group.attrs['NX_class'] = 'NXentry'
@@ -235,12 +248,13 @@ class Experiment(object):
             else:
                 finalise['keep'].append(data)
 
-        # find in datasets to replace 
+        # find in datasets to replace
         finalise['replace'] = []
-        for out_name in self.index['out_data'].keys():
-            if out_name in self.index['in_data'].keys():
+        for out_name in list(self.index['out_data'].keys()):
+            if out_name in list(self.index['in_data'].keys()):
                 finalise['replace'].append(self.index['in_data'][out_name])
 
+        
         return finalise
 
     def _reorganise_datasets(self, finalise):
@@ -260,13 +274,13 @@ class Experiment(object):
     def __unreplicate_data(self):
         in_data_list = self.index['in_data']
         from savu.data.data_structures.data_types.replicate import Replicate
-        for in_data in in_data_list.values():
+        for in_data in list(in_data_list.values()):
             if isinstance(in_data.data, Replicate):
                 in_data.data = in_data.data._reset()
 
     def _set_all_datasets(self, name):
         data_names = []
-        for key in self.index["in_data"].keys():
+        for key in list(self.index["in_data"].keys()):
             if 'itr_clone' not in key:
                 data_names.append(key)
         return data_names

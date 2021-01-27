@@ -27,7 +27,8 @@ import sys
 
 from collections import OrderedDict
 
-from savu.plugins import utils as pu
+import savu.plugins.utils as pu
+import scripts.config_generator.savu_config as sc
 
 def add_package_entry(f, files_present, output, module_name):
     """Create a contents page for the files and directories contained
@@ -80,6 +81,7 @@ def add_package_entry(f, files_present, output, module_name):
 
 
 def create_plugin_documentation(files, output, module_name, savu_base_path):
+    plugin_guide_path = 'plugin_guides/'
     for fi in files:
         mod_path = module_name + '.' + fi.split('.py')[0]
         file_path = mod_path.replace('.', '/')
@@ -88,21 +90,26 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
             # Load the associated class
             plugin_class = pu.load_class(py_module_name)()
             plugin_class._populate_default_parameters()
-            plugin_tools = plugin_class.tools.tools_list
-            if plugin_tools:
-                # Create rst additional documentation directory
-                # and file and image directory
-                create_documentation_directory(savu_base_path, fi)
-                # Create an empty rst file inside this directory where
-                # the plugin tools documentation will be stored
-                full_file_path = savu_base_path + 'doc/source/' + output \
-                                 + '/' + file_path + '.rst'
-                pu.create_dir(full_file_path)
-                new_rst_file = open(full_file_path, 'w+')
-                # Populate this file
-                populate_plugin_doc_files(new_rst_file, plugin_tools,
-                                          file_path, plugin_class,
-                                          savu_base_path)
+            try:
+                plugin_tools = plugin_class.tools.tools_list
+                if plugin_tools:
+                    # Create rst additional documentation directory
+                    # and file and image directory
+                    create_documentation_directory(savu_base_path,
+                                                   plugin_guide_path, fi)
+                    # Create an empty rst file inside this directory where
+                    # the plugin tools documentation will be stored
+                    full_file_path = savu_base_path + 'doc/source/reference/' \
+                                     + output + '/' + file_path + '.rst'
+                    pu.create_dir(full_file_path)
+                    with open(full_file_path, 'w+') as new_rst_file:
+                        # Populate this file
+                        populate_plugin_doc_files(new_rst_file, plugin_tools,
+                                                  file_path, plugin_class,
+                                                  savu_base_path,
+                                                  plugin_guide_path)
+            except:
+                print(f'Tools file missing for {py_module_name}')
         except Exception as e:
             print(e)
 
@@ -113,7 +120,7 @@ def convert_title(original_title):
 
 
 def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
-                              plugin_class, savu_base_path):
+                     plugin_class, savu_base_path, plugin_guide_path):
     """Create the restructured text file containing parameter, citation
     and documentation information for the plugin_class
 
@@ -146,9 +153,14 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             new_rst_file.write(tool_class.__doc__)
 
         # Locate documentation file
-        doc_folder = savu_base_path + 'doc/source/documentation/'
-        file_str = doc_folder + file_path + '_doc.rst'
-        inner_file_str = '/../documentation/' + file_path + '_doc.rst'
+        doc_folder = savu_base_path + 'doc/source/'
+        file_str = doc_folder + plugin_guide_path \
+                              + file_path \
+                              + '_doc.rst'
+        inner_file_str = '/../../../' \
+                         + plugin_guide_path \
+                         + file_path \
+                         + '_doc.rst'
 
         if os.path.isfile(file_str):
             # If there is a documentation file
@@ -169,15 +181,16 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
             # Go through all plugin parameters
             for p_name, p_dict in plugin_data.items():
                 new_rst_file.write('\n'
-                       + indent_multi_line_str
+                       + pu.indent_multi_line_str
                            (get_parameter_info(p_name, p_dict), 2))
 
         # Key to explain parameters
         new_rst_file.write('\nKey\n^^^^^^^^^^\n')
         new_rst_file.write('\n')
         new_rst_file.write('.. literalinclude:: '
-                           '/../source/files_and_images/documentation/'
-                           'short_parameter_key.yaml')
+                           '/../source/files_and_images/'
+                           + plugin_guide_path \
+                           + 'short_parameter_key.yaml')
         new_rst_file.write('\n    :language: yaml\n')
 
     if plugin_citations:
@@ -198,16 +211,16 @@ def get_parameter_info(p_name, parameter):
         val_p = parameter[key]
         if isinstance(val_p, dict):
             str_dict = print_parameter_dict(val_p, '', 2)
-            parameter_info += indent(key + ': \n' + str_dict )
+            parameter_info += pu.indent(key + ': \n' + str_dict )
         elif isinstance(val_p, str):
             if no_yaml_char(val_p):
-                parameter_info += indent(key + ': ' + str(val_p) + '\n')
+                parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
             else:
-                parameter_info += indent(key + ': "' + str(val_p) + '"\n')
+                parameter_info += pu.indent(key + ': "' + str(val_p) + '"\n')
         elif isinstance(val_p, type(None)):
-            parameter_info += indent(key + ':\n')
+            parameter_info += pu.indent(key + ':\n')
         else:
-            parameter_info += indent(key + ': ' + str(val_p) + '\n')
+            parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
 
     return parameter_info
 
@@ -221,28 +234,28 @@ def print_parameter_dict(input_dict, parameter_info, indent_level):
             indent_level += 1
             dict_str = print_parameter_dict(v, '', indent_level)
             indent_level -= 1
-            parameter_info += indent(k + ': \n' + dict_str , indent_level)
+            parameter_info += pu.indent(k + ': \n' + dict_str , indent_level)
         elif isinstance(v, str):
             # Check if the string contains characters which may need
             # to be surrounded by quotes
             if no_yaml_char(v):
-                parameter_info += indent(k + ': ' + str(v)
+                parameter_info += pu.indent(k + ': ' + str(v)
                                          + '\n', indent_level)
             else:
                 # Encase the string with quotation marks
-                parameter_info += indent(k + ': "' + str(v)
+                parameter_info += pu.indent(k + ': "' + str(v)
                                          + '"\n', indent_level)
         elif isinstance(v, type(None)):
-            parameter_info += indent(k + ':\n', indent_level)
+            parameter_info += pu.indent(k + ':\n', indent_level)
         elif isinstance(v, list):
             indent_level += 1
             list_str = ''
             for item in v:
-                list_str += indent( item + '\n', indent_level)
+                list_str += pu.indent( item + '\n', indent_level)
             indent_level -= 1
-            parameter_info += indent(k + ': \n' + list_str, indent_level)
+            parameter_info += pu.indent(k + ': \n' + list_str, indent_level)
         else:
-            parameter_info += indent(k + ': ' + str(v) + '\n', indent_level)
+            parameter_info += pu.indent(k + ': ' + str(v) + '\n', indent_level)
 
     return parameter_info
 
@@ -254,26 +267,10 @@ def no_yaml_char(s):
     return bool(re.match(r'^[a-zA-Z0-9()%|#\"/._,+\-=: {}<>]*$', s))
 
 
-def indent_multi_line_str(text, indent_level=1, justify=False):
-    text = text.split('\n')
-    # Remove additional spacing on the left side so that text aligns
-    if justify is False:
-        text = [(' '*4*indent_level) + line for line in text]
-    else:
-        text = [(' '*4*indent_level) + line.lstrip() for line in text]
-    text = '\n'.join(text)
-    return text
-
-
-def indent(text, indent_level=1):
-    text = (' '*4*indent_level) + text
-    return text
-
-
 def write_citations_to_file(new_rst_file, plugin_citations):
     """Create the citation text format """
     for name, citation in plugin_citations.items():
-        new_rst_file.write('\n' + name.encode('utf-8').lstrip() +
+        new_rst_file.write('\n' + name.lstrip() +
                            '\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
                            '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
@@ -297,7 +294,7 @@ def write_citations_to_file(new_rst_file, plugin_citations):
                                '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
-            new_rst_file.write(indent_multi_line_str(bibtex, True))
+            new_rst_file.write(pu.indent_multi_line_str(bibtex, True))
             new_rst_file.write('\n')
 
         if endnote:
@@ -306,8 +303,8 @@ def write_citations_to_file(new_rst_file, plugin_citations):
                                '""""""""""""""""""""""\n')
             new_rst_file.write('\n.. code-block:: none')
             new_rst_file.write('\n\n')
-            new_rst_file.write(indent_multi_line_str
-                               (endnote.encode('utf-8'), True))
+            new_rst_file.write(pu.indent_multi_line_str
+                               (endnote, True))
             new_rst_file.write('\n')
 
     new_rst_file.write('\n')
@@ -323,34 +320,44 @@ def create_plugin_template_downloads(savu_base_path):
     # Populate dictionary with template class and template class docstring
     docstring_text = create_template_class_dict(savu_base_path)
     if docstring_text:
-        doc_template = open(doc_template_file, 'w')
-        doc_template.write('.. _plugin_templates:\n')
-        doc_template.write('\n')
-        doc_template.write('Plugin templates \n=======================\n')
-        doc_template.write('\n')
+        with open(doc_template_file, 'w') as doc_template:
+            doc_template.write('.. _plugin_templates:\n')
+            doc_template.write('\n')
+            doc_template.write('Plugin templates \n=======================\n')
+            doc_template.write('\n')
 
-        doc_name = 'plugin_template1_with_detailed_notes'
-        detailed_template = docstring_text.get(doc_name)
-        if detailed_template:
-            docstring_text.pop(doc_name)
-            title = convert_title(doc_name)
-            title, number = filter_template_numbers(title)
-            inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
-            doc_text = detailed_template['docstring'].split(':param')[0]
-            doc_text = " ".join(doc_text.splitlines())
-            doc_template.write(title
+            doc_name = 'plugin_template1_with_detailed_notes'
+            detailed_template = docstring_text.get(doc_name)
+
+            if detailed_template:
+                docstring_text.pop(doc_name)
+                title = convert_title(doc_name)
+                title, number = filter_template_numbers(title)
+                # Create the restructured text page for the plugin template
+                # python code
+                generate_template_files(doc_name, title)
+                inner_file_str = '../../../' + 'plugin_examples/plugin_templates/general'
+                doc_text = detailed_template['docstring'].split(':param')[0]
+                doc_text = " ".join(doc_text.splitlines())
+                doc_template.write(title
+                            + '\n--------------------------------'
+                              '----------------------------------\n')
+                doc_template.write('\nA template to create a simple plugin '
+                                   'that takes one dataset as input and returns '
+                                   'a similar dataset as output')
+                doc_template.write('\n')
+                doc_template.write('''
+.. list-table::  
+   :widths: 10
+   
+   * - :ref:`'''+doc_name+'''`
+
+''')
+            doc_template.write('Further Examples'
                         + '\n--------------------------------'
                           '----------------------------------\n')
-            doc_template.write(doc_text)
-            doc_template.write('\n')
-            doc_template.write('\n')
-            doc_template.write(':download:`' + title + ' <' + inner_file_str
-                        + '/' + doc_name + '.py>`\n\n')
-        doc_template.write('Further Examples'
-                    + '\n--------------------------------'
-                      '----------------------------------\n')
-        # Begin the table layout
-        doc_template.write('''
+            # Begin the table layout
+            doc_template.write('''
 .. list-table::  
    :widths: 10 90
    :header-rows: 1
@@ -358,24 +365,23 @@ def create_plugin_template_downloads(savu_base_path):
    * - Link
      - Description''')
 
-        for doc_name, doc_str in docstring_text.items():
-            title = convert_title(doc_name)
-            title, number = filter_template_numbers(title)
-            # Remove the parameter information from the docstring
-            doc_text = doc_str['docstring'].split(':param')[0]
-            doc_text = " ".join(doc_text.splitlines())
-            # Create a link to the restructured text page view of the python
-            # code for the template
-            doc_template.write('\n   * - :ref:`'+doc_name+'`')
-            # The template description from the docstring
-            doc_template.write('\n     - '+doc_text)
-            doc_template.write('\n')
-            # Create the restructured text page for the plugin template
-            # python code
-            generate_template_files(doc_name, title)
+            for doc_name, doc_str in docstring_text.items():
+                title = convert_title(doc_name)
+                title, number = filter_template_numbers(title)
+                # Remove the parameter information from the docstring
+                doc_text = doc_str['docstring'].split(':param')[0]
+                doc_text = " ".join(doc_text.splitlines())
+                # Create a link to the restructured text page view of the python
+                # code for the template
+                doc_template.write('\n   * - :ref:`'+doc_name+'`')
+                # The template description from the docstring
+                doc_template.write('\n     - '+doc_text)
+                doc_template.write('\n')
+                # Create the restructured text page for the plugin template
+                # python code
+                generate_template_files(doc_name, title)
 
-        doc_template.write('\n')
-        doc_template.close()
+            doc_template.write('\n')
 
 
 def generate_template_files(doc_name, title):
@@ -390,22 +396,20 @@ def generate_template_files(doc_name, title):
     template_file_path = savu_base_path \
                         + 'doc/source/dev_guides/templates/'\
                          + doc_name + '.rst'
-    template_file = open(template_file_path, 'w')
-    # Add the orphan instruction as this file is not inside a toctree
-    template_file.write(':orphan:\n')
-    template_file.write('\n')
-    template_file.write('\n.. _' + doc_name + ':\n')
-    template_file.write('\n')
-    template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
-    template_file.write('\n')
-    template_file.write(':download:`Download <' + inner_file_str
-                + '/' + doc_name + '.py>`\n\n')
-    template_file.write('\n')
-    template_file.write('.. literalinclude:: '
-                       '/../../plugin_examples/plugin_templates/general/'
-                        + doc_name + '.py')
-    template_file.write('\n    :language: python\n')
-    template_file.close()
+    with open(template_file_path, 'w') as template_file:
+        # Add the orphan instruction as this file is not inside a toctree
+        template_file.write(':orphan:\n')
+        template_file.write('\n.. _' + doc_name + ':\n')
+        template_file.write('\n')
+        template_file.write(title+'\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')
+        template_file.write('\n')
+        template_file.write(':download:`Download <' + inner_file_str
+                    + '/' + doc_name + '.py>`\n\n')
+        template_file.write('\n')
+        template_file.write('.. literalinclude:: '
+                           '/../../plugin_examples/plugin_templates/general/'
+                            + doc_name + '.py')
+        template_file.write('\n    :language: python\n')
 
 
 def filter_template_numbers(name_string):
@@ -460,17 +464,64 @@ def create_template_class_dict(savu_base_path):
     return docstring_text
 
 
-def create_documentation_directory(savu_base_path, plugin_file):
+def create_savu_config_documentation(savu_base_path):
+    """ Look at the available commands inside savu_config
+    Create a rst text file for each.
+    """
+    command_file_path = savu_base_path \
+                        + 'doc/source/reference/savu_config_commands.rst'
+    with open(command_file_path, 'w') as command_file:
+        savu_command_test_start = '''
+Savu Config Commands
+**********************
+
+The links on this page provide help for each command.
+If you are using the command line please type ``-h`` or ``--help``.
+
+.. code-block:: bash
+
+   savu_config --help
+
+'''
+        # Write contents
+        command_file.write(savu_command_test_start)
+        for command in sc.commands:
+            command_file.write('\n')
+            command_file.write('* :ref:`' + command + '`')
+            command_file.write('\n')
+
+        # Document commands
+        for command in sc.commands:
+            command_file.write('\n')
+            command_file.write('.. _'+command+':')
+            command_file.write('\n\n'+command)
+            command_file.write('\n--------------')
+            command_file.write('\n')
+            command_file.write('\n.. cssclass:: argstyle\n')
+            command_file.write('\n    .. argparse::')
+            command_file.write('\n            :module: scripts.config_generator.arg_parsers')
+            command_file.write('\n            :func: _'+command+'_arg_parser')
+            command_file.write('\n            :prog: '+command)
+            command_file.write('\n')
+            command_file.write('\n')
+
+
+def create_documentation_directory(savu_base_path,
+                                   plugin_guide_path,
+                                   plugin_file):
     """ Create plugin directory inside documentation and
     documentation file and image folders
     """
     # Create directory inside
-    doc_path = savu_base_path + 'doc/source/documentation/plugins/'
+    doc_path = savu_base_path \
+               + 'doc/source/'
     doc_image_path = savu_base_path \
-        + 'doc/source/files_and_images/documentation/plugins/'
+                     + 'doc/source/files_and_images/'\
+                     + plugin_guide_path \
+                     + 'plugins/'
 
     # find the directories to create
-    doc_dir = doc_path + plugin_file
+    doc_dir = doc_path + plugin_guide_path + plugin_file
     image_dir = doc_image_path + plugin_file
     pu.create_dir(doc_dir)
     pu.create_dir(image_dir)
@@ -482,14 +533,6 @@ if __name__ == "__main__":
     # determine Savu base path
     savu_base_path = \
         os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
-
-    # open the autosummary file
-    f = open(savu_base_path + 'doc/source/' + rst_file, 'w')
-
-    document_title = convert_title(out_folder)
-    f.write('.. _' + out_folder+':\n')
-    f.write('\n**********************\n' + document_title
-            +' \n**********************\n\n')
 
     base_path = savu_base_path + 'savu/plugins'
     # create entries in the autosummary for each package
@@ -504,27 +547,39 @@ if __name__ == "__main__":
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
 
+    # Create savu_config command rst files
+    # create_config_documentation(savu_base_path)
+    create_savu_config_documentation(savu_base_path)
+
     # Only document the plugin python files
     # Create the directory if it does not exist
-    pu.create_dir(savu_base_path + 'doc/source/' + out_folder)
+    pu.create_dir(savu_base_path + 'doc/source/reference/' + out_folder)
 
-    for root, dirs, files in os.walk(base_path, topdown=True):
-        tools_files = [fi for fi in files if 'tools' in fi]
-        base_files = [fi for fi in files if fi.startswith('base')]
-        driver_files = [fi for fi in files if 'driver' in fi]
-        dirs[:] = [d for d in dirs if d not in exclude_dir]
-        files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-        files[:] = [fi for fi in files if fi not in exclude_file]
-        files[:] = [fi for fi in files if fi not in tools_files]
-        files[:] = [fi for fi in files if fi not in base_files]
-        files[:] = [fi for fi in files if fi not in driver_files]
-        # Exclude the tools files fron html view sidebar
-        if '__' not in root:
-            pkg_path = root.split('Savu/')[1]
-            module_name = pkg_path.replace('/', '.')
-            module_name = module_name.replace('savu.', '')
-            if 'plugins' in module_name:
-                add_package_entry(f, files, out_folder, module_name)
-                if out_folder == 'plugin_documentation':
-                    create_plugin_documentation(files, out_folder,
-                                        module_name, savu_base_path)
+    # open the autosummary file
+    with open(savu_base_path + 'doc/source/reference/' + rst_file, 'w') as f:
+
+        document_title = convert_title(out_folder)
+        f.write('.. _' + out_folder+':\n')
+        f.write('\n**********************\n' + document_title
+                +' \n**********************\n\n')
+
+        for root, dirs, files in os.walk(base_path, topdown=True):
+            tools_files = [fi for fi in files if 'tools' in fi]
+            base_files = [fi for fi in files if fi.startswith('base')]
+            driver_files = [fi for fi in files if 'driver' in fi]
+            dirs[:] = [d for d in dirs if d not in exclude_dir]
+            files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
+            files[:] = [fi for fi in files if fi not in exclude_file]
+            files[:] = [fi for fi in files if fi not in tools_files]
+            files[:] = [fi for fi in files if fi not in base_files]
+            files[:] = [fi for fi in files if fi not in driver_files]
+            # Exclude the tools files fron html view sidebar
+            if '__' not in root:
+                pkg_path = root.split('Savu/')[1]
+                module_name = pkg_path.replace('/', '.')
+                module_name = module_name.replace('savu.', '')
+                if 'plugins' in module_name:
+                    add_package_entry(f, files, out_folder, module_name)
+                    if out_folder == 'plugin_documentation':
+                        create_plugin_documentation(files, out_folder,
+                                            module_name, savu_base_path)

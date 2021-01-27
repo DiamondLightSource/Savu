@@ -1,0 +1,49 @@
+visibility:
+    description: The visibility level of the parameter
+    values:
+        basic: Visible to all users
+        intermediate: Visibile when altering the parameter more closely
+        advanced: Visible when specific parameter alterations are required, and for developers
+        datasets: Specifically for in_datasets, out_datasets
+
+dtype:
+    description: The type of data
+    values:
+        int: integer
+        pos_int: positive integer
+        bool: boolean
+        str: string
+        float: float
+        tuple: tuple
+        list: list
+        int_list: List of integers
+        num_list: List of numbers including int and float
+        preview: Preview slice list for data
+        range: A range (0,1)
+        yaml_file: Yaml file
+        file_int_path_int: [<file path>, <interior path>, <integer>]
+        int_path_int : [<interior path> , <integer>]
+        filepath: File path
+        directory: File directory
+        int_path: Interior path
+        config_file: Configuration file
+        filename: File name
+        nptype: numpy type
+
+description:
+    description: A short explanation of the parameter
+    optional_values:
+        verbose: A more in depth explanation of the parameter
+        options: A list containing explanations of option values
+
+default:
+    description: The default value
+
+options:
+    description: A list of permitted values
+
+dependency:
+    description: The name of the parameter and value which this parameter depends upon
+
+range:
+    description: A guide for the range of the parameter

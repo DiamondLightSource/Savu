@@ -165,6 +165,8 @@ The output file for this example is a example.so file.  Transfer this file to \l
 
 The class and header files example.cpp and example.hpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension. 
 
+.. TODO file missing
+
 .. literalinclude:: ../../../extension_examples/example.hpp
    :linenos:
 

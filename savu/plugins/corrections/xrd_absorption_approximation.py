@@ -61,7 +61,7 @@ class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
         theta = mData.get('rotation_angle')
         self.dtheta = theta[1]-theta[0]
         if np.abs(self.dtheta) > 10.0:
-            logging.warn('Theta step is greater than 10 degrees! Watch out!')
+            logging.warning('Theta step is greater than 10 degrees! Watch out!')
         self.npix_displacement = \
             self.parameters['azimuthal_offset']//self.dtheta
         logging.debug('This gives a pixel offset of %s'

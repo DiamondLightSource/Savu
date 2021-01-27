@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2019 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,18 +35,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 @register_plugin
 class Mipmap(Plugin, CpuPlugin):
     """
-    A plugin to downsample multidimensional data successively by powers of 2.\
-    The output is multiple 'mipmapped' datasets, each a power of 2 smaller in \
-    each dimension than the previous dataset.
-    
-    :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
-    :u*param n_mipmaps:  The number of successive downsamples of powers of 2 \
-        (e.g. n_mipmaps=3 implies downsamples (of the original data) of \
-        binsize 1, 2 and 4 in each dimension).  Default: 3.
-    :param out_dataset_prefix: The name of the dataset, to which the binsize \
-        will be appended for each instance.  Default: 'Mipmap'.
-    :*param out_datasets: Hidden out_datasets list as this is created \
-        dynamically. Default: []
     """
 
     def __init__(self):
@@ -79,7 +67,7 @@ class Mipmap(Plugin, CpuPlugin):
         full_data_shape = list(in_dataset[0].get_shape())
         axis_labels = in_dataset[0].get_axis_labels()
         voxel_dims = \
-            [i for i, e in enumerate(axis_labels) if 'voxel' in e.keys()[0]]
+            [i for i, e in enumerate(axis_labels) if 'voxel' in list(e.keys())[0]]
 
         # Sort out input data
         max_frames = self.get_max_frames()
@@ -96,8 +84,7 @@ class Mipmap(Plugin, CpuPlugin):
             out_dataset[i].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape)
-            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames/2**i,
-                     slice_axis='voxel_y')
+            out_pData[i].plugin_data_setup('VOLUME_XZ', max_frames // 2**i, slice_axis='voxel_y')
 
     def nInput_datasets(self):
         return 1
@@ -106,7 +93,7 @@ class Mipmap(Plugin, CpuPlugin):
         n_mipmaps = self.parameters['n_mipmaps']
         name = self.parameters['out_dataset_prefix']
         self.parameters['out_datasets'] = \
-            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]        
+            ['%s_%i' % (name, 2**i) for i in range(n_mipmaps)]
         return n_mipmaps
 
     def get_max_frames(self):

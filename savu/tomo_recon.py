@@ -33,7 +33,7 @@ from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
 
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments.
     """
     version = "%(prog)s " + __version__
@@ -110,10 +110,12 @@ def __option_parser():
     choices = ['plugin', 'subplugin']
     parser.add_argument("--checkpoint", nargs="?", choices=choices,
                         const='plugin', help=check_help, default=None)
-
-    args = parser.parse_args()
-    __check_conditions(parser, args)
-    return args
+    if doc==False:
+        args = parser.parse_args()
+        __check_conditions(parser, args)
+        return args
+    else:
+        return parser
 
 
 def __check_conditions(parser, args):
@@ -203,7 +205,7 @@ def __create_output_folder(path, folder_name):
 
 
 def main(input_args=None):
-    args = __option_parser()
+    args = __option_parser(doc=False)
 
     if input_args:
         args = input_args
@@ -219,7 +221,7 @@ def main(input_args=None):
             plugin_runner = pRunner(options)
             plugin_runner._run_plugin_list()
         except Exception as error:
-            print error.message
+            print(error)
             traceback.print_exc(file=sys.stdout)
             MPI.COMM_WORLD.Abort(1)
 

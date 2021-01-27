@@ -16,17 +16,25 @@ import sys, os
 import savu
 from os import path
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
-                        'dials.array_family', 'dials.algorithms.image.threshold',
-                        'PyQt4']
-
+autodoc_mock_imports = [
+    "numpy",
+    "mpi4py",
+    "astra",
+    "scipy",
+    "h5py",
+    "pyfftw",
+    "dials.array_family",
+    "dials.algorithms.image.threshold",
+    "PyQt4",
+    "yamllint",
+]
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../savu'))
 
-print sys.path
+print(sys.path)
 # -- General configuration -----------------------------------------------------
 
 keep_warnings=True
@@ -69,13 +77,18 @@ keep_warnings=True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
-#              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
-              'sphinx.ext.napoleon', 'sphinx.ext.viewcode']
-
-# have a look at this extension 'sphinx.ext.doctest',
-
+extensions = [
+    # Generates api files
+    "sphinx.ext.autodoc",
+    # Generates a short summary from docstring
+    "sphinx.ext.autosummary",
+    # Allows parsing of google style docstrings
+    "sphinx.ext.napoleon",
+    # Add links to highlighted source code
+    "sphinx.ext.viewcode",
+    # Documents command line tools with argparser library
+    "sphinxarg.ext",
+]
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -91,8 +104,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Savu'
-copyright = u'2014, Mark Basham'
+project = 'Savu'
+copyright = '2014, Mark Basham'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -148,7 +161,6 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -242,8 +254,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Savu.tex', u'Savu Documentation',
-   u'Mark Basham', 'manual'),
+  ('index', 'Savu.tex', 'Savu Documentation',
+   'Mark Basham', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -272,8 +284,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'savu', u'Savu Documentation',
-     [u'Mark Basham'], 1)
+    ('index', 'savu', 'Savu Documentation',
+     ['Mark Basham'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -286,9 +298,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Savu', u'Savu Documentation',
-   u'Mark Basham', 'Savu', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        "index",
+        "Savu",
+        "Savu Documentation",
+        "Mark Basham",
+        "Savu",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -302,9 +320,12 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {"http://docs.python.org/": None}
 
 
 def setup(app):
-    app.add_stylesheet( "css/plugin_template.css" )
-    app.add_stylesheet( "css/plugin_template_download.css" )
+    # General width and navigation bar format
+    app.add_css_file("css/general.css")
+    # Style for plugin template pages
+    app.add_css_file("css/plugin_template.css")
+    app.add_css_file("css/plugin_template_download.css")
