@@ -127,6 +127,16 @@ else
 	shift 3
 	options=$@
 
+	# which project?
+	pathtodatafile=`readlink -f $data_file`
+	if [[ $pathtodatafile == /dls/staging* ]] ; then
+		pathtodatafile=${pathtodatafile#/dls/staging}
+	fi
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
+	if [ -z "$project" ] ; then
+	  project=tomography
+	fi
+
 	# determine the cluster from the data path
     is_gpfs03 $data_file gpfs03 true 
 	if [ "$gpfs03" = false ] ; then
@@ -145,7 +155,12 @@ else
 	else
 		cluster='hamilton'
 		# determine cluster setup based on type
-		gpu_arch=Pascal
+
+		case $project in
+			"k11") gpu_arch='Volta' ;;
+			*) gpu_arch='Pascal' ;;
+		esac
+
 		case $type in
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
@@ -155,16 +170,6 @@ else
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
 		esac
-	fi
-
-	# which project?
-	pathtodatafile=`readlink -f $data_file`
-	if [[ $pathtodatafile == /dls/staging* ]] ; then
-		pathtodatafile=${pathtodatafile#/dls/staging}
-	fi
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
-	if [ -z "$project" ] ; then
-	  project=tomography
 	fi
 
 fi
@@ -207,7 +212,10 @@ case $cluster in
 
     	# which gpu architecture?
 		if [ -z $gpu_arch ] ; then
-			gpu_arch='Pascal' # don't set GPU architecture 
+			case $project in
+				"k11") gpu_arch='Volta' ;;
+				*) gpu_arch = 'Pascal' ;;
+			esac
 		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
 			echo -e "Please choose from 'Pascal' or 'Volta'\n"
@@ -337,46 +345,44 @@ process_file=$interfolder/$basename
 # =========================== qsub =======================================
 # general arguments
 # openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
-# requirements are not satisfied.
+# requirements are not satisfied.'
+
 qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
--q $cluster_queue -P $project $filepath"
-echo $qsub_args
+-q $cluster_queue -P $project"
 
 # blocking
 if [ $zocalo == true ] ; then
-	echo "setting the zocalo flag"
 	qsub_args="${qsub_args} -sync y"
 fi
 
-# cpu processing
+# gpu processing
 if [ $cpu == false ] ; then
+	#qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
 	qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
 fi
 
 # savu_mpijob.sh args
-mpijob_args="$version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
+mpijob_args="$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
 $gpus_to_use_per_node $delete"
 
 # savu args
 savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
-qsub_args="${qsub_args} ${mpijob_args} ${savu_args}"
-
-echo $gpu_args
+args="${qsub_args} ${mpijob_args} ${savu_args}"
 
 case $cluster in
 	"test_cluster")
-		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+		qsub -l infiniband $args > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
 		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
-		-l infiniband $qsub_args > /dls/tmp/savu/$USER.out ;;
+		-l infiniband $args > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -l m_mem_free=7G $qsub_args > /dls/tmp/savu/$USER.out ;;
+		qsub -l m_mem_free=7G $args > /dls/tmp/savu/$USER.out ;;
 esac
 
 # =========================== end qsub ===================================
