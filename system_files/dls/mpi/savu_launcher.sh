@@ -8,14 +8,9 @@ function is_gpfs03 ()
   return=$2
   check=$3
   pathtofile=`readlink -f $file`
-
-  # is it a file?
-  if [ "$check" = true ] && [ ! -f $pathtofile ]; then
-      # is it a directory?
-	  if [ ! -d $pathtofile ]; then
-        echo $file": No such file or directory"
-        return 1
-      fi
+  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+		echo $file": No such file or directory"
+		return 1
   fi
 
   gpfs03="$(df $pathtofile | grep gpfs03)"
@@ -29,12 +24,14 @@ function is_gpfs03 ()
 # input optional arguments
 zocalo=false
 keep=false
-while getopts ":t:i:s:z:k::" opt; do
+cpu=false
+while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
 		t ) type=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
         z ) zocalo=$OPTARG ;;
+		c ) cpu=true ;;
         k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
@@ -104,7 +101,7 @@ else
 	nargs=${#args[@]}
 
 	if [ $nargs != 3 ] ; then
-	    tput setaf 1
+	    tput setaf 1    
 	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
 	    tput setaf 6
 	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
@@ -131,7 +128,7 @@ else
 	options=$@
 
 	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true
+    is_gpfs03 $data_file gpfs03 true 
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
@@ -155,19 +152,19 @@ else
 			'BIG') nNodes=4 ;;
 			'') type="STANDARD"; nNodes=2 ;;
 			 *) echo -e "\nUnknown 'type' optional argument\n"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
+			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
 		esac
 	fi
 
 	# which project?
 	pathtodatafile=`readlink -f $data_file`
-	# having "/dls/i" handles the case where /dls/staging is in the path
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/i).*?(?=/data)'`
+	if [[ $pathtodatafile == /dls/staging* ]] ; then
+		pathtodatafile=${pathtodatafile#/dls/staging}
+	fi
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
 	if [ -z "$project" ] ; then
-  		project=tomography
-	else
-  		project="i"$project
+	  project=tomography
 	fi
 
 fi
@@ -210,7 +207,7 @@ case $cluster in
 
     	# which gpu architecture?
 		if [ -z $gpu_arch ] ; then
-			gpu_arch='Pascal'
+			gpu_arch='Pascal' # don't set GPU architecture 
 		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
 			echo -e "Please choose from 'Pascal' or 'Volta'\n"
@@ -232,7 +229,7 @@ if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
 	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
 	exit 1
 fi
-
+	
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -269,7 +266,7 @@ savupath=${savupath%/savu}
 # set the suffix
 arg_parse "-suffix" suffix $options
 options=${options//"-suffix $suffix"/}
-if [ ! $suffix ] ; then
+if [ ! $suffix ] ; then 
   suffix=""
 else
   suffix=_$suffix
@@ -336,21 +333,37 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+
+# =========================== qsub =======================================
+# general arguments
 # openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
 # requirements are not satisfied.
-generic="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
--l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
+qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
+-q $cluster_queue -P $project $filepath"
+echo $qsub_args
+
+# blocking
+if [ $zocalo == true ] ; then
+	echo "setting the zocalo flag"
+	qsub_args="${qsub_args} -sync y"
+fi
+
+# cpu processing
+if [ $cpu == false ] ; then
+	qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
+fi
+
+# savu_mpijob.sh args
+mpijob_args="$version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
+$gpus_to_use_per_node $delete"
+
+# savu args
+savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
-if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
-    cluster=zocalo_cluster
-fi
+qsub_args="${qsub_args} ${mpijob_args} ${savu_args}"
 
-if [ $cluster = "hamilton" ] && [ $zocalo = true ] ; then
-    cluster=zocalo_hamilton
-fi
+echo $gpu_args
 
 case $cluster in
 	"test_cluster")
@@ -358,22 +371,15 @@ case $cluster in
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
 		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
-		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
-	"zocalo_cluster")
-		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
-		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+		-l infiniband $qsub_args > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
-	"zocalo_hamilton")
-		# RAM 384G per core (but 377G available?) ~ 9G per core
-		# requesting 7G per core as minimum (required to be available on startup),but will use all
-		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -sync y -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+		qsub -l m_mem_free=7G $qsub_args > /dls/tmp/savu/$USER.out ;;
 esac
+
+# =========================== end qsub ===================================
 
 # get the job number here
 filename=`echo $outname.o`
@@ -407,3 +413,4 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
+
