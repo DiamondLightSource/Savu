@@ -94,6 +94,9 @@ class Content(object):
             raise Exception(file_error)
 
     def save(self, filename, check='y', template=False):
+        self.check_plugin_list_exists()
+        # Check if a loader and saver are present.
+        self.plugin_list._check_loaders()
         if check.lower() == 'y':
             print(f"Saving file {filename}")
             if template:
@@ -105,6 +108,13 @@ class Content(object):
     def clear(self, check='y'):
         if check.lower() == 'y':
             self.plugin_list.plugin_list = []
+
+    def check_plugin_list_exists(self):
+        """ Check if plugin list is populated. """
+        pos_list = self.get_positions()
+        if not pos_list:
+            print('There are no items to access in your list.')
+            raise Exception('Please add an item to the process list.')
 
     def add(self, name, str_pos):
         if name not in list(pu.plugins.keys()):

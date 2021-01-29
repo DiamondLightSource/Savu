@@ -104,21 +104,13 @@ def _list(content, args):
 @error_catcher
 def _save(content, args):
     """ Save the current process list to file."""
-
-    # Check if the plug in list has been populated.
-    if len(content.plugin_list.plugin_list) > 0:
-        # Check if a loader and saver are present.
-        content.plugin_list._check_loaders()
-        out_file = content.filename if args.input else args.filepath
-        content.check_file(out_file)
-        print()
-        DispDisplay(content.plugin_list)._notices()
-        content.save(out_file, check=input("Are you sure you want to save the "
-                     "current data to %s' [y/N]" % (out_file)),
-                     template=args.template)
-    else:
-        raise Exception("No items were found in your process list. "
-                    "Type 'add' to add a plugin to the list.")
+    out_file = content.filename if args.input else args.filepath
+    content.check_file(out_file)
+    print()
+    DispDisplay(content.plugin_list)._notices()
+    content.save(out_file, check=input("Are you sure you want to save the "
+                 "current data to %s' [y/N]" % (out_file)),
+                 template=args.template)
     return content
 
 
