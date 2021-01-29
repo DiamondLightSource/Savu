@@ -395,6 +395,20 @@ class Content(object):
             pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
+    def get_start_stop(self, start, stop):
+        """Find the start and stop number for the plugin range selected
+        """
+        range_dict = {}
+        if start:
+            if '.' in start:
+                start, subelem = start.split('.')
+                range_dict['subelem'] = subelem
+            start = self.find_position(start)
+            stop = self.find_position(stop) + 1 if stop else start + 1
+            range_dict['start'] = start
+            range_dict['stop'] = stop
+        return range_dict
+
     def insert(self, plugin, pos, str_pos, replace=False):
         plugin_dict = self.create_plugin_dict(plugin)
         plugin_dict['pos'] = str_pos

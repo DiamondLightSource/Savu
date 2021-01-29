@@ -68,7 +68,7 @@ def _open(content, args):
 def _disp(content, args):
     """ Display the plugins in the current list."""
     try:
-        range_dict = utils.__get_start_stop(content, args.start, args.stop)
+        range_dict = content.get_start_stop(content, args.start, args.stop)
         formatter = DispDisplay(content.plugin_list)
         verbosity = parsers._get_verbosity(args)
         level = 'advanced' if args.all else content.disp_level
@@ -193,7 +193,7 @@ def _ref(content, args):
 @error_catcher
 def _cite(content, args):
     """ Display plugin citations."""
-    range_dict = utils.__get_start_stop(content, args.start, args.stop)
+    range_dict = content.get_start_stop(content, args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
     return content
