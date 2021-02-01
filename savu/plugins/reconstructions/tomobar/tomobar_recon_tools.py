@@ -13,7 +13,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
         """
         output_size:
             visibility: advanced
-            dtype: str
+            dtype: tuple
             description: Number of rows and columns in the reconstruction.
             default: auto
 
