@@ -67,17 +67,15 @@ def _open(content, args):
 @error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    try:
-        range_dict = content.get_start_stop(content, args.start, args.stop)
-        formatter = DispDisplay(content.plugin_list)
-        verbosity = parsers._get_verbosity(args)
-        level = 'advanced' if args.all else content.disp_level
-        datasets = True if args.datasets else False
-        content.display(formatter, level=level, verbose=verbosity,
-                        datasets=datasets, **range_dict)
-        return content
-    except:
-        raise
+    range_dict = content.get_start_stop(args.start, args.stop)
+    formatter = DispDisplay(content.plugin_list)
+    verbosity = parsers._get_verbosity(args)
+    level = 'advanced' if args.all else content.disp_level
+    datasets = True if args.datasets else False
+    content.display(formatter, level=level, verbose=verbosity,
+                    datasets=datasets, **range_dict)
+    return content
+
 
 @parse_args
 @error_catcher
@@ -118,29 +116,14 @@ def _save(content, args):
 @error_catcher
 def _mod(content, args):
     """ Modify plugin parameters. """
-    try:
-        pos_str, subelem = args.param.split('.')
-
-        # Get the name of the modified parameter so that the display
-        # lists the correct item when the parameter order has been updated
-        plugin_position = content.find_position(pos_str)
-        current_parameter_list = \
-            content.plugin_list.plugin_list[plugin_position]["param"]
-        current_parameter_list_ordered = \
-            pu.set_order_by_visibility(current_parameter_list)
-        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
-
-        try:
-            content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
-            if content_modified:
-                # Use the param_name str instead of a number, as after the
-                # modification new dependent parameter may appear inside the list
-                # and mean the parameter has moved
-                args.param = pos_str + '.' + param_name
-                _disp(content, str(args.param))
-        except Exception:
-            print('Error modifying the parameter.')
-            raise
+    pos_str, subelem = content.split_plugin_and_parameter(args.param)
+    # Use the parameter name location
+    args.param = content.get_param_arg_str(pos_str, subelem)
+    content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
+    if content_modified:
+        # Display the selected parameter only
+        _disp(content, str(args.param))
+    return content
 
     except ValueError:
         print('Incorrect parameter number: Please enter the parameter number to'
@@ -185,7 +168,7 @@ def _ref(content, args):
 @error_catcher
 def _cite(content, args):
     """ Display plugin citations."""
-    range_dict = content.get_start_stop(content, args.start, args.stop)
+    range_dict = content.get_start_stop(args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
     return content

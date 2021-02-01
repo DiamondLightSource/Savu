@@ -365,6 +365,23 @@ class Content(object):
             pos_list.append(e['pos'])
         return pos_list
 
+    def get_param_arg_str(self, pos_str, subelem):
+        """Get the name of the parameter so that the display lists the
+        correct item when the parameter order has been updated
+
+        :param pos_str: The plugin position
+        :param subelem: The parameter
+        :return: The plugin.parameter_name argument
+        """
+        pos = self.find_position(pos_str)
+        current_parameter_list = \
+            self.plugin_list.plugin_list[pos]["param"]
+        current_parameter_list_ordered = \
+            pu.set_order_by_visibility(current_parameter_list)
+        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
+        param_argument = pos_str + '.' + param_name
+        return param_argument
+
     def get_split_positions(self):
         """ Separate numbers and letters in positions. """
         positions = self.get_positions()
@@ -404,6 +421,17 @@ class Content(object):
         for i in idx:
             pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+
+    def split_plugin_and_parameter(self, param):
+        """Separate the plugin number and parameter
+        """
+        if len(param.split('.')) is 2:
+            pos_str, param = param.split('.')
+            return pos_str, param
+        else:
+            raise Exception('Incorrect parameter number: Please enter the '
+                  'plugin number, followed by the parameter number. '
+                  'Use a decimal format.')
 
     def get_start_stop(self, start, stop):
         """Find the start and stop number for the plugin range selected
