@@ -126,11 +126,6 @@ def _mod(content, args):
         _disp(content, str(args.param))
     return content
 
-    except ValueError:
-        print('Incorrect parameter number: Please enter the parameter number to'
-              ' select the parameter you want to modify. Use a decimal format.')
-    return content
-
 
 @parse_args
 @error_catcher

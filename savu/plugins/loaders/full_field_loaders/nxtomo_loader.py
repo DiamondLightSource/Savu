@@ -33,6 +33,7 @@ import savu.core.utils as cu
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
 
+
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
@@ -52,7 +53,7 @@ class NxtomoLoader(BaseLoader):
         data_obj.backing_file = self._get_data_file()
 
         data_obj.data = self._get_h5_entry(
-                data_obj.backing_file, self.parameters['data_path'])
+            data_obj.backing_file, self.parameters['data_path'])
 
         self._set_dark_and_flat(data_obj)
 
@@ -69,8 +70,8 @@ class NxtomoLoader(BaseLoader):
         self._set_rotation_angles(data_obj)
 
         try:
-            control = self._get_h5_entry(
-                    data_obj.backing_file, 'entry1/tomo_entry/control/data')
+            control = self._get_h5_path(
+                data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
         except Exception:
             self.log_warning("No Control information available")
@@ -199,7 +200,8 @@ class NxtomoLoader(BaseLoader):
         if path.split('/')[0] == 'test_data':
             import os
             path = \
-                os.path.dirname(os.path.abspath(__file__))+'/../../../../'+path
+                os.path.dirname(os.path.abspath(__file__)) + \
+                '/../../../../' + path
 
         ffile = h5py.File(path, 'r')
         try:
@@ -255,13 +257,14 @@ class NxtomoLoader(BaseLoader):
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
-                    full_rotations = n_angles/data_angles
-                    cleaned_size = full_rotations*data_angles
+                    full_rotations = n_angles / data_angles
+                    cleaned_size = full_rotations * data_angles
                     if cleaned_size != n_angles:
                         rot_angles = rot_angles[0:cleaned_size]
-                        self.log_warning("the angle list has more values than expected in it")
+                        self.log_warning(
+                            "the angle list has more values than expected in it")
                     rot_angles = np.reshape(
-                            rot_angles, [full_rotations, data_angles])
+                        rot_angles, [full_rotations, data_angles])
                     data_obj.meta_data.set("rotation_angle",
                                            np.transpose(rot_angles))
                     return

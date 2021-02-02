@@ -56,7 +56,6 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             'detector_x')
         self.height1_dim = in_dataset[0].get_data_dimension_by_axis_label(
             'detector_y')
-
         height_dim = in_dataset[0].get_data_dimension_by_axis_label(
             'rotation_angle')
         new_shape = list(old_shape)
@@ -82,6 +81,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
 
     def pre_process(self):
         out_dataset = self.get_out_datasets()[0]
+        in_dataset = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()
         width_dim = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         height_dim = in_pData[0].get_data_dimension_by_axis_label(
@@ -105,7 +105,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             self.cor = center_int
 
         self.new_height = np.int16(np.ceil(self.height / 2.0))
-        list_angle = out_dataset.meta_data.get("rotation_angle")
+        list_angle = in_dataset.meta_data.get("rotation_angle")
         list_angle = list_angle[0:self.new_height]
 
         out_dataset.meta_data.set("rotation_angle", list_angle)
