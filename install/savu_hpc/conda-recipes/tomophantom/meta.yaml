@@ -1,4 +1,4 @@
-{% set CIL_VERSION = "1.4.5" %}
+{% set CIL_VERSION = "1.4.7" %}
 
 package:
   name: tomophantom
@@ -34,4 +34,3 @@ about:
   home: https://github.com/dkazanc/TomoPhantom
   license:  Apache 2.0 license
   summary: 'Tomography Phantom Data generator'
-
