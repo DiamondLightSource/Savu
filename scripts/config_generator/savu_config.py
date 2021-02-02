@@ -98,6 +98,7 @@ def _list(content, args):
     list_content.display(formatter, verbose=verbosity)
     return content
 
+
 @parse_args
 @error_catcher
 def _save(content, args):

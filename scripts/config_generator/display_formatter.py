@@ -131,7 +131,7 @@ class DisplayFormatter(object):
         :param width: The terminal display width for output strings
         :param display_args: A dictionary with subelem and datasets.
           This filters the visible parameters again. If subelem is chosen,
-          only that one parameter is shoen (this is useful when ONE parameter
+          only that one parameter is shown (this is useful when ONE parameter
           is modified in the terminal). If datasets is chosen, ONLY the
           in/out dataset parameters are shown
         :param desc: The description for use later on within the display
@@ -286,7 +286,7 @@ class DisplayFormatter(object):
         return info, warn
 
     def _get_equal_lines(self, string, width, colour_on, colour_off, offset,
-                         option_colour = False):
+                         option_colour=False):
         """ Format the input string so that it is the width specified.
         Surround the string with provided colour.
         """
@@ -368,25 +368,29 @@ class DispDisplay(DisplayFormatter):
         title = self._get_quiet(p_dict, count, width, quiet=False)
         colour_on = Back.LIGHTBLACK_EX + Fore.LIGHTWHITE_EX
         colour_off = Back.RESET + Fore.RESET
-        synopsis = \
-            self._get_synopsis(p_dict, width, colour_on, colour_off)
-        param_desc = {k: v['description'] for k, v in p_dict['param'].items()}
-        params = \
-            self._get_param_details(level, p_dict, width, display_args,
-                                    desc=param_desc)
+        synopsis = self._get_synopsis(p_dict, width, colour_on, colour_off)
+        param_desc = {k: v["description"] for k, v in p_dict["param"].items()}
+        params = self._get_param_details(
+            level, p_dict, width, display_args, desc=param_desc
+        )
         if breakdown:
-            params = \
-                self._get_param_details(level, p_dict, width, display_args,
-                                        desc=param_desc, breakdown=breakdown)
+            params = self._get_param_details(
+                level,
+                p_dict,
+                width,
+                display_args,
+                desc=param_desc,
+                breakdown=breakdown,
+            )
             return title, synopsis, params
         return title + synopsis + params
 
-    def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
-        title, synopsis, param_details = \
-            self._get_verbose(level, p_dict, count, width, display_args,
-                              breakdown=True)
+    def _get_verbose_verbose(self, level, p_dict, count, width,
+                             display_args):
+        title, synopsis, param_details = self._get_verbose(
+            level, p_dict, count, width, display_args, breakdown=True)
         info_c = Back.CYAN + Fore.LIGHTWHITE_EX
-        warn_c =  Style.RESET_ALL + Fore.RED
+        warn_c = Style.RESET_ALL + Fore.RED
         c_off = Back.RESET + Fore.RESET
         info, warn = self._get_extra_info(p_dict, width, c_off, info_c, warn_c)
         # Synopsis and get_extra info both call plugin instance and populate
