@@ -107,7 +107,7 @@ def _disp_arg_parser(args=None, doc=True):
                         default=False)
 
     dataset_str = "Display in_datasets and out_datasets."
-    parser.add_argument("-datasets", "--datasets", action='store_true', help=dataset_str,
+    parser.add_argument("-d", "--datasets", action='store_true', help=dataset_str,
                         default=False)
 
     parser.add_argument("start", nargs='?', help="Display this list entry.")
