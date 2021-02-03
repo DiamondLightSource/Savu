@@ -33,16 +33,16 @@ class PluginCoverageTest(unittest.TestCase):
 
     def test_coverage(self):
         savu_base_path = \
-            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+            os.path.dirname(os.path.abspath(__file__)).split('savu/test/travis/framework_tests')[0]
 
         # lists all .nxs process lists used in the tests, and all plugins
         # directly called in the tests
-        tests_plugins_dir = savu_base_path + '/savu/test'
+        tests_plugins_dir = savu_base_path + 'savu/test'
         [nxs_in_tests, plugins_in_tests] = \
             tplu.get_process_list(tests_plugins_dir)
 
         # remove data files from the list
-        data_list = self.get_data_list(savu_base_path + '/test_data/data')
+        data_list = self.get_data_list(savu_base_path + 'test_data/data')
         nxs_in_tests = list(set(nxs_in_tests).difference(set(data_list)))
 
         # since now some nxs files are in the subfolders, we need to make sure
@@ -56,10 +56,10 @@ class PluginCoverageTest(unittest.TestCase):
                 print("The failed basename file:", nxs)
 
         # list all test process lists available in test_process_lists folder
-        test_process_path = savu_base_path + '/test_data/test_process_lists'
+        test_process_path = savu_base_path + 'test_data/test_process_lists'
         self.nxs_avail = tplu.get_test_process_list(test_process_path)
 
-        dir_plugin_path = savu_base_path + '/savu/plugins'
+        dir_plugin_path = savu_base_path + 'savu/plugins'
         # list the .nxs found in tests that are located in the
         # test_process_lists folder
         self.nxs_used = \
@@ -89,8 +89,10 @@ class PluginCoverageTest(unittest.TestCase):
         for plugin in uncovered:
             for root, dirs, files in os.walk(dir_plugin_path):
                 for name in files:
-                    if fnmatch.fnmatch(name, plugin):
-                        print("-->", name, "|||", os.path.relpath(root, savu_base_path))
+                    fname_type = os.path.splitext(name)[1]
+                    if (fname_type == '.py'):
+                        if fnmatch.fnmatch(name, plugin):
+                            print("-->", name, "|||", os.path.relpath(root, savu_base_path))
         print ("===============================================================")
         print ("===============================================================")
         print("\nThe following process lists are redundant:\n")
@@ -151,8 +153,8 @@ class PluginCoverageTest(unittest.TestCase):
         exclude_file = ['__init__.py']
         for root, dirs, files in os.walk(folder, topdown=True):
             dirs[:] = [d for d in dirs if d not in exclude_dir]
-            files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
             files[:] = [fi for fi in files if fi not in exclude_file]
+            files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
             for f in files:
                 plugin_list.append(f)
         return plugin_list

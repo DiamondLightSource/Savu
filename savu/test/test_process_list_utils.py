@@ -54,7 +54,9 @@ def find_plugin_for_process_list(folder, proc_list):
     for root, dirs, files in os.walk(folder):
         for name in files:
             fname = root + '/' + name
-            if (fname.split('.')[1] == 'py'):
+            fname_nohead = fname.rsplit('/',1)[1]
+            fname_type = os.path.splitext(fname_nohead)[1]
+            if (fname_type == '.py'):
                 in_file = open(fname, 'r')
                 for line in in_file:
                     if '.nxs' in line:
