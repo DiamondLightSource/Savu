@@ -289,13 +289,15 @@ class PluginParameters(object):
         value of the given parameter
         """
         param_info_dict = self.param.get_dictionary()
+        # Default values which are of the type dictionary are also currently
+        # selected here
         default_list = {k: v['default'] for k, v in param_info_dict.items()
                         if isinstance(v['default'], OrderedDict)}
         for p_name, default in default_list.items():
             desc = param_info_dict[p_name]['description']
             parent_param = list(default.keys())[0] if default.keys() else ''
-
-            if parent_param:
+            if parent_param in param_info_dict.keys():
+                # Check that the dictionary key is a valid parameter name
                 dep_param_choices = {k: v
                                      for k, v in default[parent_param].items()}
                 if mod:

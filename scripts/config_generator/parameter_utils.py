@@ -268,6 +268,29 @@ def _tuple(value):
     return parameter_valid
 
 
+def _dict(value):
+    parameter_valid = False
+    if isinstance(value, dict):
+        parameter_valid = True
+    return parameter_valid
+
+
+def _int_float_dict(value):
+    """Dictionary to hold integer keys and float values only
+    {integer:float}
+    """
+    parameter_valid = False
+    if isinstance(value, dict):
+        if all(_integer(k) for k in value.keys()):
+            if all(_float(v) for v in value.values()):
+                parameter_valid=True
+            else:
+                print('Ensure dictionary values are floats.')
+        else:
+            print('Ensure dictionary keys are integers.')
+    return parameter_valid
+
+
 def _list(value):
     # List of digits or strings
     parameter_valid = False
@@ -322,7 +345,9 @@ type_dict = {'preview': _preview,
             'str': _string,
             'float': _float,
             'tuple': _tuple,
-            'list': _list}
+            'list': _list,
+            'dict': _dict,
+            'int_float_dict': _int_float_dict}
 
 type_error_dict = {'preview': 'preview slices',
             'int_list': 'list of integers',
@@ -343,7 +368,9 @@ type_error_dict = {'preview': 'preview slices',
             'str': 'string',
             'float': 'float',
             'tuple': 'tuple',
-            'list': 'list'}
+            'list': 'list',
+            'dict': 'dict',
+            'int_float_dict': "{int:float}"}
 
 
 def is_valid(param_name, value, current_parameter_details):
@@ -468,10 +495,10 @@ def _check_options(current_parameter_details, value, pvalid):
             option_error_str += '\n'.join(options) + Fore.RESET
     return pvalid, option_error_str
 
-
 def _error_message(dtype, param_name):
+    """Create an error message"""
     if isinstance(dtype, list):
-        type_options = ' or '.join([str(t) for t in dtype])
+        type_options = ' or '.join([str(type_error_dict[t]) for t in dtype])
         error_str = 'Your input for the parameter \'{}\' must match' \
                     ' the type {}.'.format(param_name, type_options)
     else:
@@ -481,6 +508,9 @@ def _error_message(dtype, param_name):
     return error_str
 
 def _gui_error_message(dtype, param_name):
+    """Create an error string for the GUI
+    Remove the paramter name, as the GUI message will be displayed below
+    each paramter input box"""
     if isinstance(dtype, list):
         type_options = '\' or \''.join([str(t) for t in dtype])
         error_str = 'Type must match \'{}\'.'.format(type_options)

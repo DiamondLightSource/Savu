@@ -324,6 +324,10 @@ Choose the data type. This is used to check the parameter input is valid.
       - A file name
     * - nptype
       - A numpy type
+    * - dict
+      - A dictionary
+    * - int_float_dict
+      - A dictionary holding ineteger keys and float values. {int:float}
 
 
 If more than one data type is allowed, then include these in a list format.
