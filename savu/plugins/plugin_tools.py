@@ -156,16 +156,18 @@ class PluginParameters(object):
                 dep_param_choices = {k: v
                                      for k, v
                                      in default[parent_param].items()}
-                # Find current parent value
-                parent_value = parameters[parent_param]
-                if parent_value in dep_param_choices.keys():
-                    desc['range'] = 'The recommended value with the ' \
-                                    'chosen', parent_param, 'would be', \
-                                    dep_param_choices[parent_value]
-                    value = dep_param_choices[parent_value]
-                else:
-                    # The default value was not found in the dictionary
-                    value = None
+                # If the parameter name exists in the current plugin
+                if parent_param in parameters:
+                    # Find current parent value
+                    parent_value = parameters[parent_param]
+                    if parent_value in dep_param_choices.keys():
+                        desc['range'] = 'The recommended value with the ' \
+                                        'chosen', parent_param, 'would be', \
+                                        dep_param_choices[parent_value]
+                        value = dep_param_choices[parent_value]
+                    else:
+                        # The default value was not found in the dictionary
+                        value = None
         else:
             value = default
         return value
@@ -296,20 +298,23 @@ class PluginParameters(object):
         for p_name, default in default_list.items():
             desc = param_info_dict[p_name]['description']
             parent_param = list(default.keys())[0] if default.keys() else ''
+
+            # Check that the dictionary key is a valid parameter name
             if parent_param in param_info_dict.keys():
-                # Check that the dictionary key is a valid parameter name
-                dep_param_choices = {k: v
-                                     for k, v in default[parent_param].items()}
-                if mod:
-                    # If there was a modification, find current parent value
-                    parent_value = parameters[parent_param]
-                else:
-                    # If there was no modification, on load, find the
-                    # parent default
-                    temp_default = param_info_dict[parent_param]['default']
-                    parent_value = \
-                        self._set_default(temp_default, parameters,
-                                          parent_param)
+                # Check that each parameter choice key has a matching dictionary value
+                if isinstance(default[parent_param], dict):
+                    dep_param_choices = {k: v
+                                         for k, v in default[parent_param].items()}
+                    if mod:
+                        # If there was a modification, find current parent value
+                        parent_value = parameters[parent_param]
+                    else:
+                        # If there was no modification, on load, find the
+                        # parent default
+                        temp_default = param_info_dict[parent_param]['default']
+                        parent_value = \
+                            self._set_default(temp_default, parameters,
+                                              parent_param)
 
                 if parent_value in dep_param_choices.keys():
                     desc['range'] = 'The recommended value with the chosen ' \
