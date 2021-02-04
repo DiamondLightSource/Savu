@@ -43,5 +43,11 @@ class CcpiDenoisingGpuTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
+    def test_ccpi_denoise3d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising3d_gpu_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
 if __name__ == "__main__":
     unittest.main()

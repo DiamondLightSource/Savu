@@ -63,7 +63,7 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         getall = ['VOLUME_XZ', 'voxel_y']
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
         out_dataset[0].create_dataset(in_dataset[0])
