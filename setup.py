@@ -8,6 +8,7 @@ from savu.test.test_process_list_utils import get_all_files_from
 
 facility = 'dls'
 facility_path = 'system_files/dls'
+utils_path = 'savu/plugins/loaders/utils'
 
 from savu.version import __version__, __install__
 
@@ -66,6 +67,7 @@ install_test_files = glob.glob(os.path.join('install/tests', '*.sh'))
 version_file = os.path.join(__install__, 'version.txt')
 env_file = os.path.join(__install__, 'environment.yml')
 sys_file = os.path.join(facility_path, "system_parameters.yml")
+utils_file = os.path.join(utils_path, "yaml_config.yaml")
 mod_file = os.path.join(facility_path, "modulefile", __version__)
 conda_recipes = get_files(os.path.join(__install__, '..', 'conda-recipes'))
 test_data = get_files("test_data")
@@ -109,6 +111,7 @@ setup(name='savu',
       data_files=[(os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(mod_file), [mod_file]),
+                  (os.path.dirname(utils_file), [utils_file]),
                   (os.path.dirname(env_file), [env_file])] \
                   + conda_recipes + test_data,
 
