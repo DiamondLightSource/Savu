@@ -1,7 +1,7 @@
 .. _plugin_generator_guide:
 
-Generating a Savu Plugin
-**************************
+How to generate a Savu Plugin
+********************************
 
 Use the command: ``savu_plugin_generator`` to create a plugin and it's required files.
 
@@ -26,14 +26,15 @@ displayed on the command line. If it doesn't exist, then a file will be created 
 3. If a plugin documentation file exists, then the file location will be found. If it does exist, then this file path will be
 displayed on the command line. If it doesn't exist, then a file will be created inside the savu/plugins directory.
 
-The detailed template for the plugin class is here and can be downloaded here.
+The template for the plugin class is below.
 
 .. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
 
 You can download it
 :download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
-An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
+An extended version is available
+:download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
 
 For a list of templates visit the :ref:`plugin template<plugin_templates>` page.
 

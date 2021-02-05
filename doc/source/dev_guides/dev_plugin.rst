@@ -6,15 +6,26 @@
 
 .. role:: blue
 
+How to develop a Savu plugin
+******************************
 
-Developing a Savu plugin
-************************
+The architecture of the savu package is that new plugins can be easily developed
+without having to take the framework into consideration.  This is mostly true for
+simple cases, however there are some things which cannot be done with such
+simple methodologies and the developer may need to take more into consideration.
+
+Every plugin in Savu needs to be a subclass of the Plugin class, however there
+are several convenience subclasses which already exist for doing standard
+processes such as filtering, reconstruction and augmentation/passthrough
+
+Although there are many plugins defined in the core savu code, plugins can be
+written anywhere and included easily as shown below without having to be submitted
+to the core code.
+
+Required Files
+=======================
 
 To create a plugin for Savu you will need to create two modules:
-
-.. note::
-
-    A module is a file containing python definitions and statements.
 
 1. A plugin module, named :blue:`plugin_name`.py containing a class :blue:`PluginName`
 
@@ -25,6 +36,10 @@ To create a plugin for Savu you will need to create two modules:
     This file contains the parameter details and citations in a yaml format. You can \
     assign each parameter a data type, a description, a visibility level and a \
     default value.
+
+.. note::
+
+    A module is a file containing python definitions and statements.
 
 .. note::
 
@@ -40,7 +55,7 @@ Examples are:
 * 1. A plugin module remove_all_rings.py containing a class RemoveAllRings
   2. A plugin tools module remove_all_rings_tools.py containing a class RemoveAllRingsTools
 
-
+The plugin file and the plugin tools file should both be stored at the same directory inside ../Savu/savu/plugins/.
 
 1. Introduction to creating a Plugin
 ========================================
@@ -93,27 +108,21 @@ Initialise the class template:
         def __init__(self):
             super(PluginName, self).__init__("PluginName")
 
-Initialise the class example, with the class NoProcess replacing the template name:
-
-.. code-block:: python
-
-    @register_plugin
-    class NoProcess(Plugin, CpuPlugin):
-        def __init__(self):
-            super(NoProcess, self).__init__("NoProcess")
-
-Below is an example of the template plugin class.
+Below is the template plugin class.
 
 .. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
 
 You can download it :download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
 An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
+
 All template downloads are available here: :ref:`plugin_templates`.
 
 Below is an example of the entire NoProcess plugin class.
 
 Plugin Class example:
+
+.. TODO insert raw code in place of text
 
 .. code-block:: python
 
@@ -169,6 +178,7 @@ Plugin Class example:
 ===================================================
 
 This tools class holds the parameter details in a yaml format.
+There is advice on this format :ref:`here<yaml_format>`.
 To begin, import the PluginTools class.
 
 .. code-block:: python
@@ -185,7 +195,7 @@ with a sentence to describe in further detail what your plugin does.
         """
 
 Inside the method define_parameters you should write a docstring which will \
-contain the parameter details. The text should be in a yaml format.
+contain the parameter details. The text should be in a :ref:`yaml<yaml_format>` format.
 
 An example of a plugin tools class.
 
@@ -244,18 +254,19 @@ consistent.
 
 The parameter information included should be:
 
-* visibility - The level of understanding needed to edit the parameter
+* visibility - There are five visibility levels. The level helps the user to identify which parameters must be changed on every savu run and which need to be changed less frequently.
 * dtype - The data type of the parameter value
 * description - A description of the parameter
 * default - A default value
 
 Visibility
 ''''''''''
-You should choose one of four options.
+You should choose one of five options.
 
-* basic - A basic parameter will need to be adjusted with each use of the plugin and will be on display to all users
+* basic - A basic parameter will need to be adjusted with each use of the plugin and will be on display to all users as default.
 * intermediate - An intermediate parameter can be used to tailor the plugin result more carefully.
 * advanced - Advanced parameters should only need to be changed occasionally by developers.
+* datasets - This is used for the in_datasets and out_datasets parameter only.
 * hidden - Hidden parameters are not editable from the user interface. This may be useful during plugin development.
 
 Dtype
@@ -313,6 +324,10 @@ Choose the data type. This is used to check the parameter input is valid.
       - A file name
     * - nptype
       - A numpy type
+    * - dict
+      - A dictionary
+    * - int_float_dict
+      - A dictionary holding ineteger keys and float values. {int:float}
 
 
 If more than one data type is allowed, then include these in a list format.
@@ -355,11 +370,18 @@ ROF_TV, then the iterations value should be 1000.
 Optional fields:
 ----------------
 
-Three additional fields may be included:
+Additional fields whaich may be included:
 
 * dependency
+* options
+
+and additional fields which should be included within the description key are:
+
+* summary
+* verbose
 * range
 * options
+
 
 Dependency
 ''''''''''
@@ -404,6 +426,51 @@ The indentation level should be consistent.
              Huber: Huber
              Perona: Perona-Malik model
              Tukey: Tukey
+
+Description
+'''''''''''''
+
+If you are giving a more detailed description, then you can extend the description key.
+Summary, verbose, range, and options descriptions can be included here.
+
+
+Summary
+:::::::::
+
+The summary holds a short description of your parameter.
+
+.. code-block:: yaml
+
+    data_Huber_thresh:
+        description:
+            summary: Threshold parameter for Huber data fidelity.
+
+
+Verbose
+::::::::
+
+Verbose is for a more in depth explanation of your parameter.
+
+.. code-block:: yaml
+
+    data_Huber_thresh:
+        description:
+            summary: Threshold parameter for Huber data fidelity.
+            verbose: Parameter which controls the level of suppression
+             of outliers in the data
+
+Range
+::::::
+
+If you have a value which must be within a certain range, describe this range here.
+
+Range is a descriptor key at the moment, and it does not perform a validation check.
+
+.. code-block:: yaml
+
+    iteration:
+        description:
+            range: Between 10 and 100
 
 
 Citation Text
@@ -680,3 +747,27 @@ Save the file as "your_module_name.py"
 .. note:: Have a look at the :download:`real test <../files_and_images/median_filter_test.py>` for the median_filter_plugin.py module.
 
 
+..
+    Median Filter Example
+    ---------------------
+
+    This examples recreates one of the core plugins, a median filter.  The code is
+    available in the main Savu repository under the plugin_examples folder.
+
+    .. literalinclude:: ../../../plugin_examples/example_median_filter.py
+       :linenos:
+
+    As you can see this is a pretty small implementation, and the key features of
+    which are detailed in the comments associated with the code.
+
+..
+    Testing the new plugin
+    ======================
+
+    So now that you have the new plugin written, you can test it using the following
+    command, you will need to make sure that savu is installed or included in your
+    $PYTHON_PATH
+
+    .. code:: bash
+
+       python $SAVU_HOME/savu/test/framework_test.py -p $SAVU_HOME/plugin_examples/example_median_filter /tmp/savu_output/

@@ -43,5 +43,9 @@ class LfovLoaderTools(PluginTools):
             description: "New axis label, if required, in the form
              'name.units'."
             default: 'scan.number'
-
+        range:
+            visibility: hidden
+            dtype: str
+            description: No need
+            default: None
         """

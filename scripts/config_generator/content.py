@@ -94,6 +94,9 @@ class Content(object):
             raise Exception(file_error)
 
     def save(self, filename, check='y', template=False):
+        self.check_plugin_list_exists()
+        # Check if a loader and saver are present.
+        self.plugin_list._check_loaders()
         if check.lower() == 'y':
             print(f"Saving file {filename}")
             if template:
@@ -105,6 +108,13 @@ class Content(object):
     def clear(self, check='y'):
         if check.lower() == 'y':
             self.plugin_list.plugin_list = []
+
+    def check_plugin_list_exists(self):
+        """ Check if plugin list is populated. """
+        pos_list = self.get_positions()
+        if not pos_list:
+            print('There are no items to access in your list.')
+            raise Exception('Please add an item to the process list.')
 
     def add(self, name, str_pos):
         if name not in list(pu.plugins.keys()):
@@ -355,6 +365,23 @@ class Content(object):
             pos_list.append(e['pos'])
         return pos_list
 
+    def get_param_arg_str(self, pos_str, subelem):
+        """Get the name of the parameter so that the display lists the
+        correct item when the parameter order has been updated
+
+        :param pos_str: The plugin position
+        :param subelem: The parameter
+        :return: The plugin.parameter_name argument
+        """
+        pos = self.find_position(pos_str)
+        current_parameter_list = \
+            self.plugin_list.plugin_list[pos]["param"]
+        current_parameter_list_ordered = \
+            pu.set_order_by_visibility(current_parameter_list)
+        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
+        param_argument = pos_str + '.' + param_name
+        return param_argument
+
     def get_split_positions(self):
         """ Separate numbers and letters in positions. """
         positions = self.get_positions()
@@ -394,6 +421,31 @@ class Content(object):
         for i in idx:
             pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
+
+    def split_plugin_and_parameter(self, param):
+        """Separate the plugin number and parameter
+        """
+        if len(param.split('.')) is 2:
+            pos_str, param = param.split('.')
+            return pos_str, param
+        else:
+            raise Exception('Incorrect parameter number: Please enter the '
+                  'plugin number, followed by the parameter number. '
+                  'Use a decimal format.')
+
+    def get_start_stop(self, start, stop):
+        """Find the start and stop number for the plugin range selected
+        """
+        range_dict = {}
+        if start:
+            if '.' in start:
+                start, subelem = start.split('.')
+                range_dict['subelem'] = subelem
+            start = self.find_position(start)
+            stop = self.find_position(stop) + 1 if stop else start + 1
+            range_dict['start'] = start
+            range_dict['stop'] = stop
+        return range_dict
 
     def insert(self, plugin, pos, str_pos, replace=False):
         plugin_dict = self.create_plugin_dict(plugin)

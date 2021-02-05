@@ -477,5 +477,86 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertTrue(valid_modification)
 
 
+    def test_dict(self):
+        # Check that dict is accepted
+        plugin = self.initial_setup()
+        key = 'dict_param'
+        value = {1:2}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_dict_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = 'dict_param'
+        value = 8
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_dict_2(self):
+        # Check that list is not accepted
+        plugin = self.initial_setup()
+        key = 'dict_param'
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_dict_3(self):
+        # Check that str dict is accepted
+        plugin = self.initial_setup()
+        key = 'dict_param'
+        value = {'example_key':'method'}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_int_float_dict(self):
+        # Check that dict with integer keys and float values is accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = {1:2.0}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertTrue(valid_modification)
+
+    def test_int_float_dict_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = 8
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_2(self):
+        # Check that list is not accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_3(self):
+        # Check that incorrect str dict is not accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = {3:'true'}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_4(self):
+        # Check that incorrect str dict is not accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = {3:5}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_5(self):
+        # Check that incorrect str dict is not accepted
+        plugin = self.initial_setup()
+        key = 'cor_dict_param'
+        value = {3.8:5.0}
+        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        self.assertFalse(valid_modification)
+
+
 if __name__ == "__main__":
     unittest.main()

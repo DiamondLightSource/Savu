@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+set -e
 # change to 'latest' for the latest version
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 versions_file=$DIR/versions_file.txt
@@ -266,14 +267,84 @@ if [ ! $test_flag ]; then
     conda env update -n root -f $DIR/environment_ci.yml
   fi
 
+  echo "Checking that mpi4py/hdf5/h5py are installed into conda environment"
+
+  string=$(awk '/^hdf5/' $versions_file)
+  hdf5_version=$(echo $string | cut -d " " -f 2)
+  export PACKAGE=hdf5
+  export VER_PACKAGE=$hdf5_version
+  conda list $PACKAGE > check_conda_package.txt
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+      rm -f check_conda_package.txt
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      rm -f check_conda_package.txt
+      exit 0
+  fi
+
+  string=$(awk '/^h5py/' $versions_file)
+  h5py_version=$(echo $string | cut -d " " -f 2)
+  export PACKAGE=h5py
+  export VER_PACKAGE=$h5py_version
+  conda list $PACKAGE > check_conda_package.txt
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+      rm -f check_conda_package.txt
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      rm -f check_conda_package.txt
+      exit 0
+  fi
+
+  export PACKAGE=mpi4py
+  string=$(awk '/^mpi4py/' $versions_file)
+  mpi4py_version=$(echo $string | cut -d " " -f 2)
+  export VER_PACKAGE=$mpi4py_version
+  conda list $PACKAGE > check_conda_package.txt
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+      rm -f check_conda_package.txt
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      rm -f check_conda_package.txt
+      exit 0
+  fi
+
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
   cudatoolkit_version=$(echo $string | cut -d " " -f 2)
   conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
 
+  export PACKAGE=cudatoolkit
+  string=$(awk '/^cudatoolkit/' $versions_file)
+  cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+  export VER_PACKAGE=$cudatoolkit_version
+  conda list $PACKAGE > check_conda_package.txt
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+      rm -f check_conda_package.txt
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      rm -f check_conda_package.txt
+      exit 0
+  fi
+
   conda env update -n root -f $DIR/environment.yml
 
   . $recipes/installer.sh "tomophantom"
+
+  export PACKAGE=tomophantom
+  export VER_PACKAGE=1.4.7
+  conda list $PACKAGE > check_conda_package.txt
+  if grep -q $VER_PACKAGE check_conda_package.txt; then
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+      rm -f check_conda_package.txt
+  else
+      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+      rm -f check_conda_package.txt
+      exit 0
+  fi
 
   # cleanup build artifacts
   rm $PREFIX/miniconda.sh

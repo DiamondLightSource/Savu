@@ -213,14 +213,3 @@ def __get_filtered_plugins(pfilter):
     return key_list
 
 
-def __get_start_stop(content, start, stop):
-    range_dict = {}
-    if start:
-        if '.' in start:
-            start, subelem = start.split('.')
-            range_dict['subelem'] = subelem
-        start = content.find_position(start)
-        stop = content.find_position(stop) + 1 if stop else start + 1
-        range_dict['start'] = start
-        range_dict['stop'] = stop
-    return range_dict

@@ -88,7 +88,8 @@ def read_yaml_from_doc(docstring):
     """
     errors = check_yaml_errors(docstring)
     try:
-        # SafeLoader loads a subset of the YAML language, safely. This is recommended for loading untrusted input
+        # SafeLoader loads a subset of the YAML language, safely.
+        # This is recommended for loading untrusted input
         data_dict = ordered_load(docstring, yaml.SafeLoader)
         return data_dict
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
@@ -97,7 +98,7 @@ def read_yaml_from_doc(docstring):
             print(e)
         raise
     except yaml.YAMLError as ye:
-        print('Error reading the yaml structure with YamlLoader.')
+        print("Error reading the yaml structure with YamlLoader.")
         raise Exception(sys.exc_info())
 
 def dump_yaml(template, stream):

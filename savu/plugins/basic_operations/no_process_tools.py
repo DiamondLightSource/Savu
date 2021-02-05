@@ -156,6 +156,16 @@ class NoProcessTools(PluginTools):
             dtype: num_list
             description: list of numbers required
             default: [0,1]
+        dict_param:
+            visibility: basic
+            dtype: dict
+            description: dictionary required
+            default: "{'2':4}"
+        cor_dict_param:
+            visibility: basic
+            dtype: int_float_dict
+            description: dictionary required
+            default: "{'2':4.0}"
 
 
 """

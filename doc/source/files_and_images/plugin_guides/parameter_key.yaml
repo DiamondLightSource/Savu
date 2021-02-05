@@ -29,6 +29,8 @@ dtype:
         config_file: Configuration file
         filename: File name
         nptype: numpy type
+        dict: dictionary
+        int_float_dict: Dictionary with interger keys and float values. {int:float}
 
 description:
     description: A short explanation of the parameter
