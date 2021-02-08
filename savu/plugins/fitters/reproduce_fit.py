@@ -46,7 +46,7 @@ class ReproduceFit(BaseFitter):
         npts = len(FitWeights)
         params = []
         params.extend(FitWeights)
-        params.extend(FitWidths) 
+        params.extend(FitWidths)
         Sum = self._spectrum_sum(self.function, self.energy, self.PeakEnergy, *params) + Backgrounds
         Individual_curves = np.zeros((len(self.PeakEnergy), len(self.energy)))
         for i in range(npts):
@@ -91,6 +91,6 @@ class ReproduceFit(BaseFitter):
 
     def nInput_datasets(self):
         return 4
-    
+
     def nOutput_datasets(self):
         return 2
