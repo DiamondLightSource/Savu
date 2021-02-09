@@ -110,8 +110,7 @@ class TomopyRecon(BaseRecon, CpuPlugin):
     def _apply_mask(self, recon):
         if isinstance(self.ratio_mask, float):
             recon = tomopy.circ_mask(recon, axis=0, ratio=self.ratio_mask)
-            recon = recon[0] + self.manual_mask
-            recon = np.expand_dims(recon, 0)
+            recon = recon + self.manual_mask
         return self._transpose(recon)
 
     def _transpose(self, recon):
