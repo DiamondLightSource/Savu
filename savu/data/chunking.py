@@ -284,7 +284,7 @@ class Chunking(object):
     def __get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
         sl = slice(None, None, -1)
-        if direction is 'up':
+        if direction == 'up':
             sl = slice(None, None, 1)
             process_order = process_order[::-1]
 

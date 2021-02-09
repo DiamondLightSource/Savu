@@ -71,7 +71,7 @@ class P2rFlyScanDetectorLoader(BaseLoader):
             n_angles = self.__set_rotation_angles(data_obj)
             shape = self.__setup_3d_to_4d(data_obj, n_angles)
         else:
-            if len(data_obj.data.shape) is 3:
+            if len(data_obj.data.shape) == 3:
                 shape = self._setup_3d(data_obj)
             else:
                 shape = self.__setup_4d(data_obj)

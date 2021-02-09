@@ -62,7 +62,7 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
         nDims = len(in_pData.get_shape())
         self.sslice = [slice(None)]*nDims
         sino_shape = list(in_pData.get_shape())
-        if len(sino_shape) is 3:
+        if len(sino_shape) == 3:
             del sino_shape[self.slice_dir]
 
         self.width1 = sino_shape[1] + 2*self.pad
@@ -116,4 +116,3 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'multiple'
-
