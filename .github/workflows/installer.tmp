@@ -1,0 +1,44 @@
+name: installer
+
+on: [push]
+
+jobs:
+  build-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # 18.04 supports CUDA 10.1+ (gxx <= 8)
+          #- os: ubuntu-18.04
+          #  cuda: "10.1"
+          #  gcc: 8
+          # 16.04 supports CUDA 8+
+          - os: ubuntu-16.04
+            cuda: "10.1"
+            gcc: 7
+          #- os: ubuntu-16.04
+          #  cuda: "9.2"
+          #  gcc: 7
+          #- os: ubuntu-16.04
+          #  cuda: "9.1"
+          #  gcc: 6
+      max-parallel: 5
+    env:
+      build_dir: "build"
+      config: "Release"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Running Savu installer
+      run: |
+        bash ./install/savu_hpc/savu_installer/savu_installer.sh --local --no_prompts
+
+    - name: conda test
+      run: |
+        $CONDA/bin/conda info --envs
+        $CONDA/bin/conda activate root
+        $CONDA/bin/conda list

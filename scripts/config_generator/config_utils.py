@@ -98,11 +98,11 @@ def error_catcher(function):
             err_msg_list = str(e).split()
             savu_error = True if len(err_msg_list) > 1 and err_msg_list[1] == 'ERROR:' else False
 
-            if error_level is 0 and savu_error:
+            if error_level == 0 and savu_error:
                 print(e)
-            elif error_level is 0:
+            elif error_level == 0:
                 print(f"{type(e).__name__}: {e}")
-            elif error_level is 1:
+            elif error_level == 1:
                 traceback.print_exc(file=sys.stdout)
 
             return content
@@ -119,7 +119,7 @@ def populate_plugins(error_mode=False, examples=False):
         for finder, module_name, is_pkg in pkgutil.walk_packages([path], name):
             if not is_pkg:
                 _load_module(finder, module_name, failed_imports, error_mode)
-    
+
 
 def _load_module(finder, module_name, failed_imports, error_mode):
     try:
@@ -129,7 +129,7 @@ def _load_module(finder, module_name, failed_imports, error_mode):
         sys.modules[spec.name] = mod
         spec.loader.exec_module(mod)
     except Exception as e:
-        if _is_registered_plugin(mod):       
+        if _is_registered_plugin(mod):
             clazz = pu._get_cls_name(module_name)
             failed_imports[clazz] = e
             if error_mode:
