@@ -31,7 +31,7 @@ import h5py as h5
 class I08FluoLoader(BaseLoader):
     """
     A class to load i08s xrf data
-    :param mono_path: The mono energy. Default: '/entry/instrument/PlaneGratingMonochromator/pgm_energy'. 
+    :param mono_path: The mono energy. Default: '/entry/instrument/PlaneGratingMonochromator/pgm_energy'.
     """
 
     def __init__(self, name='I08FluoLoader'):
@@ -59,7 +59,7 @@ class I08FluoLoader(BaseLoader):
             logging.debug("Detector channels not summed.")
 
             for axis in scan_axis:
-                if axis is not '.':
+                if axis != '.':
                     axis_data = entry[str(axis)][...]
                     data_obj.meta_data.set(axis,axis_data)
             scan_axis[-2] = 'idx'
@@ -69,7 +69,7 @@ class I08FluoLoader(BaseLoader):
         else:
             logging.debug("Detector channels summed.")
             for axis in scan_axis:
-                if axis is not '.':
+                if axis != '.':
                     axis_data = entry[str(axis)][...]
 
                     data_obj.meta_data.set(axis,axis_data)
@@ -86,7 +86,7 @@ class I08FluoLoader(BaseLoader):
         dims = list(range(len(data_obj.get_shape())))
         spec_core = (-1,) # it will always be this
 #         print spec_core
-        
+
         spec_slice = tuple(dims[:-1])
 
         logging.debug("is a spectrum")

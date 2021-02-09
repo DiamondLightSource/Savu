@@ -97,7 +97,7 @@ class Padding(object):
         pad_vals = pad_str.split('.')
         pplace = None
         pad_place = ['before', 'after']
-        if len(pad_vals) is 3:
+        if len(pad_vals) == 3:
             pdir, pplace, pval = pad_vals
             remove = list(set(pad_place).difference(set([pplace])))[0]
             pad_place.remove(remove)
@@ -122,7 +122,7 @@ class Padding(object):
         :rtype: dict
         """
         for key in list(self.padding_dirs.keys()):
-            if sum(self.padding_dirs[key].values()) is 0:
+            if sum(self.padding_dirs[key].values()) == 0:
                 del self.padding_dirs[key]
         return self.padding_dirs
 
@@ -133,7 +133,7 @@ class Padding(object):
         :rtype: dict
         """
         for key in list(self.padding_dirs.keys()):
-            if sum(self.padding_dirs[key].values()) is 0:
+            if sum(self.padding_dirs[key].values()) == 0:
                 del self.padding_dirs[key]
         return self.padding_dirs
 

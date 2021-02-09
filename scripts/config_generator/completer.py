@@ -92,7 +92,7 @@ class Completer(object):
     def complete_add(self, args):
         "Completions for the add commands."
         list_args = self.plugin_list
-        if not args[0] or len(args) is 2:
+        if not args[0] or len(args) == 2:
             return list_args
         return [x for x in list_args if x.lower().startswith(args[0].lower())]
 

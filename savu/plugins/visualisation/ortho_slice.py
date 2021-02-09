@@ -109,7 +109,7 @@ class OrthoSlice(Plugin, CpuPlugin):
             ortho_data = fullData.data[tuple(slice_to_take)].squeeze()
             output_slices.append(ortho_data)
 
-            if ext is not 'None':
+            if ext != 'None':
                 image_data = ortho_data - ortho_data.min()
                 image_data /= image_data.max()
                 image_data = colourmap(image_data, bytes=True)

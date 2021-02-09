@@ -59,7 +59,7 @@ class I14FluoLoader(BaseLoader):
             logging.debug("Detector channels not summed.")
 
             for axis in scan_axis:
-                if axis is not '.':
+                if axis != '.':
                     axis_data = entry[str(axis)][...]
                     data_obj.meta_data.set(axis,axis_data)
             scan_axis[-2] = 'idx'
@@ -69,7 +69,7 @@ class I14FluoLoader(BaseLoader):
         else:
             logging.debug("Detector channels summed.")
             for axis in scan_axis:
-                if axis is not '.':
+                if axis != '.':
                     axis_data = entry[str(axis)][...]
 
                     data_obj.meta_data.set(axis,axis_data)
