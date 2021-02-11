@@ -29,11 +29,11 @@ import savu
 import os
 import sys
 from . import test
+from unittest import defaultTestLoader, TestLoader, TextTestRunner
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 os.environ['savu_mode'] = 'hdf5'
-
 
 def run_full_tests():
     import unittest
@@ -44,17 +44,24 @@ def run_full_tests():
     print("The key information is in the final test results")
 
     path = os.path.split(test.travis.__file__)[0]
-    suite = unittest.defaultTestLoader.discover(path, pattern='*test.py')
-    unittest.TextTestRunner(buffer=True).run(suite)
-
+    tests = defaultTestLoader.discover(path, pattern='*test.py')
+    testRunner = TextTestRunner(buffer=True)
+    test_results = testRunner.run(tests)
+    if test_results.wasSuccessful():
+        exit(0)
+    else:
+        exit(1)
 
 def run_tests():
     import unittest
     from savu.test.travis.plugin_tests.reconstruction_tests.tomo_pipeline_preview_test \
         import TomoPipelinePreviewTest
     print("Running a quick test...")
-
-    suite = \
-        unittest.TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
-    unittest.TextTestRunner(verbosity=1, buffer=True).run(suite)
+    tests = TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
+    testRunner = TextTestRunner(verbosity=1, buffer=True)
+    test_results = testRunner.run(tests)
     print("Test complete...")
+    if test_results.wasSuccessful():
+        exit(0)
+    else:
+        exit(1) 
