@@ -5,9 +5,9 @@ scikit-image       |   conda-forge   |    0.17.2     |    0.0     |    0.18.1   
 scikit-learn       |   conda-forge   |    0.23.1     |    0.0     |    0.24.1      |2021-01-21|
 astra-toolbox      |   astra-toolbox/label/dev   |    1.9.9.dev4     |   0.0  | 0.1|2021-01-15|
 tomopy             |   conda-forge   |    1.9.1     |    0.0    |0.1 | 2021-01-15|
-larix              |   dkazanc   |    2020.12     |    0.0     | 0.1 |2021-01-15|
-tomophantom        |   dkazanc   |    1.4.8     |    0.0     |0.1 |2021-01-15|
-tomobar            |   dkazanc   |    2020.12     |    0.0     |0.1 |2021-01-15|
-ccpi-regulariser   |   dkazanc   |    20.04     |    0.0     |0.1 |2021-01-15|
+larix              |   savu-dep   |    2021.02     |    0.0     | 0.1 |2021-01-15|
+tomophantom        |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
+tomobar            |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
+ccpi-regulariser   |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
 ccpi-reconstruction|   ccpi      |    20.09     |    0.0     |0.1 | 2021-01-15|
 # -------------------------------------------------------------------------------------------
