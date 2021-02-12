@@ -1,6 +1,6 @@
 name: env_tests
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build-linux:
