@@ -1,6 +1,10 @@
 name: env_tests
 
-on: [push]
+on:  
+  push:
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build-linux:
@@ -41,19 +45,9 @@ jobs:
     - name: Installing savu-lite
       shell: bash -l {0}
       run: |
-        rm -rf ~/.condarc
-        conda config --add channels defaults
-        conda config --append channels conda-forge
-        conda config --append channels astra-toolbox/label/dev
-        conda config --append channels ccpi
-        conda config --append channels dkazanc
-        conda config --append channels savu-dep
-        conda config --set anaconda_upload no
-        conda config --set channel_priority flexible
-        conda config --set auto_activate_base false
-        conda config --set show_channel_urls true
         conda activate /usr/share/miniconda3/envs/savu
         conda install --yes --name savu --file ./install/savu_lite37/spec-savu3_0_lite.txt
+        python setup.py install
         conda list
 
     - name: Running savu_full_tests
