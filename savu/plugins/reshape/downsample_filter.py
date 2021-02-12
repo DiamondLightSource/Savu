@@ -40,7 +40,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
     :u*param bin_size: Bin Size for the downsample. Default: 3.
     :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
     :u*param pattern: One of 'PROJECTION', 'SINOGRAM', or 'VOLUME_XZ'. \
-        Default: 'VOLUME_XZ'.
+        Default: 'PROJECTION'.
     :u*param num_bit: Bit depth of the rescaled data (8, 16 or 32). \
         Default: 32.
     :u*param flip_updown: Flip images up-down. Default: True.
@@ -67,7 +67,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
         self.pattern = self.parameters['pattern']
         self.num_bit = self.parameters['num_bit']
         self.bin_size = int(self.parameters["bin_size"])  
-        if self.pattern == "SINOGRAM" or self.pattern == "PROJECTION":        
+        if self.pattern == "SINOGRAM" or self.pattern == "PROJECTION":
             in_pData[0].plugin_data_setup(self.pattern, 'single')
             self.out_shape = \
                 self.get_new_shape(in_dataset[0].get_shape(), in_dataset[0])
