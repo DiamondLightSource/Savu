@@ -44,7 +44,7 @@ def run_full_tests():
     print("The key information is in the final test results")
 
     path = os.path.split(test.travis.__file__)[0]
-    subprocess.run(["pytest", path])
+    subprocess.run(["python", path+'/tests.py'])    
     """
     tests = defaultTestLoader.discover(path, pattern='*test.py')
     testRunner = TextTestRunner(buffer=True)
