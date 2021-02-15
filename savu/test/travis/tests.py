@@ -10,8 +10,7 @@ os.chdir( savuPath )
 #if __name__ == '__main__':
 #sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
 #
-exit(main(["-n", "4"]))
-
+sys.exit(main(["-n", "4"]))
 """
 exitcode = pytest.main()
 print(exitcode)
