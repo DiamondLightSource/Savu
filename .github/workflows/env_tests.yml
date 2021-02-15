@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: 4.6.14
+        miniconda-version: latest  
         activate-environment: savu
         python-version: 3.7
     - uses: actions/checkout@v2
