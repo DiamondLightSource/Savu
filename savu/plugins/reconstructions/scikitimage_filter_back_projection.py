@@ -83,7 +83,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         result = \
             transform.iradon(sinogram, theta=theta,
                              output_size=(size),
-                             filter=self.parameters['filter'],
+                             filter_name=self.parameters['filter'],
                              interpolation=self.parameters['interpolation'],
                              circle=self.parameters['circle'])
         return result
