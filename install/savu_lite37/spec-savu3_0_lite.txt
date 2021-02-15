@@ -243,3 +243,4 @@ https://conda.anaconda.org/conda-forge/linux-64/pyfai-0.19.0-py37hb3f55d8_0.tar.
 https://conda.anaconda.org/conda-forge/linux-64/spyder-4.2.0-py37h89c1867_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/noarch/pytest-xdist-2.2.0-pyhd3eb1b0_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/noarch/execnet-1.8.0-pyhd3eb1b0_0.tar.bz2
+https://repo.anaconda.com/pkgs/main/linux-64/apipkg-1.5-py37_0.tar.bz2
