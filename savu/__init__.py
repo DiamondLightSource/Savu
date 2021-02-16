@@ -38,26 +38,18 @@ os.environ['savu_mode'] = 'hdf5'
 
 def run_full_tests():
 
-    print("Tests will run shortly, and may take some time to complete")
+    print("Tests may take some time to complete...")
     print("The tests may raise errors, please don't worry about these as "
           "they may be raised deliberately.")
-    print("The key information is in the final test results")
 
     path = os.path.split(test.travis.__file__)[0]
     result = subprocess.run(["python", path+'/tests.py'])
     if (result.returncode == 1):
+        print("Tests FAILED, please see the report")
         exit(1)
     else:
+        print("Tests PASSED")
         exit(0)
-    """
-    tests = defaultTestLoader.discover(path, pattern='*test.py')
-    testRunner = TextTestRunner(buffer=True)
-    test_results = testRunner.run(tests)
-    if test_results.wasSuccessful():
-        exit(0)
-    else:
-        exit(1)
-    """
 
 def run_tests():
     import unittest
