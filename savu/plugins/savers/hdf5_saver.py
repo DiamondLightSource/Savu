@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_tomo_saver
+.. module:: hdf5_saver
    :platform: Unix
    :synopsis: A class to save data to a hdf5 output file.
 

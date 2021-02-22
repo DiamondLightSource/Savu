@@ -14,13 +14,13 @@ using the inverse radon transform from scikit-image.
 
         outer_pad:
             visibility: hidden
-            dtype: str
+            dtype: [bool,int,float]
             description: Not required.
             default: False
 
         centre_pad:
             visibility: hidden
-            dtype: int
+            dtype: [bool,int,float]
             description: Not required.
             default: False
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: i18s_txm_loader
+.. module:: i18_stxm_loader
    :platform: Unix
    :synopsis: A class for loading I18's stxm data
 
