@@ -1,4 +1,4 @@
-.. image:: https://github.com/DiamondLightSource/Savu/workflows/env_tests/badge.svg
+.. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
     :target: https://github.com/DiamondLightSource/Savu/actions
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
@@ -14,9 +14,6 @@
 
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
-
-.. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
 
 .. image:: https://badge.fury.io/py/savu.svg
     :target: http://badge.fury.io/py/savu
