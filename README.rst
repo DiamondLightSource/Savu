@@ -18,6 +18,9 @@
 .. image:: https://www.codefactor.io/repository/github/diamondlightsource/savu/badge
     :target: https://www.codefactor.io/repository/github/diamondlightsource/savu
 
+.. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
+
 :Date: 2014-11-14
 :Version: 0.1
 :Authors: Mark Basham - *Diamond Light Source*
