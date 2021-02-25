@@ -56,10 +56,8 @@ def load_yaml_doc(lines):
 
     Returns
     ----------
-    param_entry: OrderedDict
+    all_params: OrderedDict
         Ordered dict of parameters
-    verbose: str
-        Further description
 
     """
     all_params = ''
@@ -70,8 +68,6 @@ def load_yaml_doc(lines):
     return all_params
 
 def _parse_args(mod_doc_lines, lines):
-    param_list, user, hide, not_param, param_lines = __get_params(lines)
-
     warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
     warn, idx1 = __find_regexp(warn_regexp, lines)
     warn = '' if not warn else '.\n'.join(warn)+'.'
@@ -79,11 +75,9 @@ def _parse_args(mod_doc_lines, lines):
     synopsis, idx2 = __find_regexp(syn_regexp, mod_doc_lines)
     synopsis = '' if not synopsis else synopsis[0]+'.'
 
-    info = __find_docstring_info(param_lines+idx1+idx2, lines)
+    info = __find_docstring_info(idx1+idx2, lines)
 
-    return {'warn': warn, 'info': info, 'synopsis': synopsis,
-            'param': param_list, 'hide_param': hide, 'user_param': user,
-            'not_param': not_param}
+    return {'warn': warn, 'info': info, 'synopsis': synopsis}
 
 
 def _get_doc_lines(doc):
