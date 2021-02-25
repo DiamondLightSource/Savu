@@ -68,7 +68,7 @@ install_test_files = glob.glob(os.path.join('install/tests', '*.sh'))
 version_file = os.path.join(__install__, 'version.txt')
 env_file = os.path.join(__install__, 'environment.yml')
 sys_file = os.path.join(facility_path, "system_parameters.yml")
-#mod_file = os.path.join(facility_path, "modulefile", __version__)
+mod_file = os.path.join(facility_path, "modulefile", __version__)
 templates_file = os.path.join(templates_path, "malcolm.yml")
 templates_file1 = os.path.join(templates_path, "max.yml")
 templates_file2 = os.path.join(templates_path, "mean.yml")
@@ -119,7 +119,7 @@ setup(name='savu',
                   ('css', ['scripts/log_evaluation/style_sheet.css']),
                   (os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
-                  #(os.path.dirname(mod_file), [mod_file]),
+                  (os.path.dirname(mod_file), [mod_file]),
                   (os.path.dirname(templates_file), [templates_file]),
                   (os.path.dirname(templates_file1), [templates_file1]),
                   (os.path.dirname(templates_file2), [templates_file2]),
