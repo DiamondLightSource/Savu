@@ -10,8 +10,8 @@ facility = 'dls'
 facility_path = 'system_files/dls'
 templates_path = 'savu/plugins/loaders/templates/malcolm_templates/'
 
-from savu.version import __version__, __install__
-
+#from savu.version import __version__, __install__
+__version__ = 3.0
 def readme():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                            'README.rst')) as f:

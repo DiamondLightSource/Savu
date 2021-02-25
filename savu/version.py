@@ -20,6 +20,6 @@ import pathlib
 # for the savu_installer
 __install__ = "install/savu_hpc/savu_installer"
 # find version.txt file in subfolders
-paths = sorted(pathlib.Path('../../').glob('**/version.txt'))
+paths = sorted(pathlib.Path('..').glob('**/version.txt'))
 with open(paths[0]) as f:
     __version__ = f.readline().strip()
