@@ -15,11 +15,12 @@
 """
 Get the Savu version
 """
+import os
 import pathlib
 
 # for the savu_installer
+savu_path = pathlib.Path(__file__).parent.absolute()
 __install__ = "install/savu_hpc/savu_installer"
-# find version.txt file in subfolders
-paths = sorted(pathlib.Path('..').glob('**/version.txt'))
-with open(paths[0]) as f:
+with open(os.path.join(
+        os.path.join(savu_path, "..", __install__, "version.txt"))) as f:
     __version__ = f.readline().strip()
