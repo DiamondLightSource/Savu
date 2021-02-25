@@ -134,7 +134,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
 
         regularisation_parameter:
              visibility: basic
-             dtype: [float, int]
+             dtype: float
              description:
                summary: Regularisation parameter could control the level
                  of smoothing or denoising.

@@ -38,7 +38,7 @@ class NxtomoLoaderTools(PluginTools):
             default: '[None, None, 1]'
         angles:
             visibility: intermediate
-            dtype: [int, float, int_list]
+            dtype: [float, num_list]
             description: If this if 4D data stored in 3D then pass an integer
               value equivalent to the number of projections per 180 degree
               scan. If the angles parameter is set to None, then values from
