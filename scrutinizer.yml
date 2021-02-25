@@ -2,17 +2,6 @@ checks:
     python:
         code_rating: true
         duplicate_code: true
-        variables_used_before_assignment: true
-        variables_unused_import: true
-        variables_unused_wildcard_import: true
-        variables_no_name_in_module: true
-        typecheck_not_callable: true
-        typecheck_no_value_for_parameter: true
-        imports_import_self: true
-        imports_reimported: true
-        format_mixed_indentation: true
-        basic_unreachable: true
-
 build:
     nodes:
         analysis:
@@ -25,7 +14,7 @@ build:
                     -
                         command: pylint-run
                         use_website_config: true
-        tests: false
+        tests: true
 
 filter:
     excluded_paths:
