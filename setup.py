@@ -12,6 +12,7 @@ templates_path = 'savu/plugins/loaders/templates/malcolm_templates/'
 
 #from savu.version import __version__, __install__
 __version__ = 3.0
+__install__ = "install/savu_hpc/savu_installer"
 def readme():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                            'README.rst')) as f:
@@ -64,7 +65,7 @@ mpi_files = [mfile for mfile in mpi_all_files if 'dev' not in mfile]
 install_test_files = glob.glob(os.path.join('install/tests', '*.sh'))
 
 # data file locations
-#version_file = os.path.join(__install__, 'version.txt')
+version_file = os.path.join(__install__, 'version.txt')
 env_file = os.path.join(__install__, 'environment.yml')
 sys_file = os.path.join(facility_path, "system_parameters.yml")
 mod_file = os.path.join(facility_path, "modulefile", __version__)
@@ -116,7 +117,7 @@ setup(name='savu',
                   ('htmls', ['scripts/log_evaluation/string_multi.html']),
                   ('htmls', ['scripts/log_evaluation/testing.html']),
                   ('css', ['scripts/log_evaluation/style_sheet.css']),
-                  #(os.path.dirname(version_file), [version_file]),
+                  (os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(mod_file), [mod_file]),
                   (os.path.dirname(templates_file), [templates_file]),
