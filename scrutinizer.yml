@@ -29,4 +29,4 @@ build:
 
 filter:
     excluded_paths:
-        - "test_data/"
+        - '*/test/*'
