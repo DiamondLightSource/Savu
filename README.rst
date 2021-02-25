@@ -9,14 +9,14 @@
    :target: https://readthedocs.org/projects/savu/?badge=latest
    :alt: Documentation Status
 
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.32840.svg
-    :target: https://doi.org/10.5281/zenodo.32840
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.3541873.svg
+    :target: https://doi.org/10.5281/zenodo.3541873
 
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 
-.. image:: https://badge.fury.io/py/savu.svg
-    :target: http://badge.fury.io/py/savu
+.. image:: https://www.codefactor.io/repository/github/diamondlightsource/savu/badge
+    :target: https://www.codefactor.io/repository/github/diamondlightsource/savu
 
 :Date: 2014-11-14
 :Version: 0.1
