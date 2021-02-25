@@ -8,7 +8,7 @@ build:
             version: 3.7.5
             # Whether to setup a virtual environment in the repository root directory.
             # Defaults to true if omitted.
-            virtualenv: false
+            virtualenv: true
 
 filter:
     excluded_paths:
