@@ -14,7 +14,7 @@ build:
                     -
                         command: pylint-run
                         use_website_config: true
-        tests: false
+        tests: true
 
 filter:
     excluded_paths:
