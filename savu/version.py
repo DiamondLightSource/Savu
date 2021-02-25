@@ -21,8 +21,6 @@ import pathlib
 # for the savu_installer
 savu_path = pathlib.Path(__file__).parent.absolute()
 __install__ = "install/savu_hpc/savu_installer"
-with open(os.path.join(
-        os.path.join(savu_path, "..", __install__, "version.txt"))) as f:
+version_filepath =savu_path.joinpath("..", __install__, "version.txt")
+with open(version_filepath) as f:
     __version__ = f.readline().strip()
-
-
