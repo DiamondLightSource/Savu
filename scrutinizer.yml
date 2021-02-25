@@ -13,6 +13,20 @@ checks:
         format_mixed_indentation: true
         basic_unreachable: true
 
+build:
+    nodes:
+        analysis:
+            project_setup:
+                override:
+                    - 'true'
+            tests:
+                override:
+                    - py-scrutinizer-run
+                    -
+                        command: pylint-run
+                        use_website_config: true
+        tests: false
+
 filter:
     excluded_paths:
         - "test_data/"
