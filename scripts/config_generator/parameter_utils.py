@@ -258,6 +258,10 @@ def _float(value):
     parameter_valid = False
     if isinstance(value, float):
         parameter_valid = True
+    elif _integer(value):
+        # Allow integer values as well
+        float(value)
+        parameter_valid = True
     return parameter_valid
 
 

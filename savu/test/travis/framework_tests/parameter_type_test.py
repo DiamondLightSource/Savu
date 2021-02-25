@@ -542,12 +542,12 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertFalse(valid_modification)
 
     def test_int_float_dict_4(self):
-        # Check that incorrect str dict is not accepted
+        # Check that int and int(accepted as float) dict is accepted
         plugin = self.initial_setup()
         key = 'cor_dict_param'
         value = {3:5}
         valid_modification = plugin.tools.modify(plugin.parameters, value, key)
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_int_float_dict_5(self):
         # Check that incorrect str dict is not accepted
