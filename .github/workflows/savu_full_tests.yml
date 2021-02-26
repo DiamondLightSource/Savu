@@ -55,3 +55,9 @@ jobs:
       run: |
         conda activate /usr/share/miniconda3/envs/savu
         savu_full_tests
+
+    - name: Wemake Python Stylguide
+      uses: wemake-services/wemake-python-styleguide@0.13.4
+      continue-on-error: true
+      with:
+        reporter: 'github-pr-review'      
