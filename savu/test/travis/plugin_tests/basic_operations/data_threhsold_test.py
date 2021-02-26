@@ -29,14 +29,13 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class DataThresholdTest(unittest.TestCase):
-    global data_file
-    global experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def __init__(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_datathreshold(self):
         process_list = 'basic_operations/data_threhsold_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, elf.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
