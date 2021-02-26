@@ -1,0 +1,39 @@
+name: wemakepython
+
+on:
+  push:
+
+jobs:
+  build-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-18.04
+            gcc: 8
+      max-parallel: 5
+    env:
+      build_dir: "build"
+      config: "Release"
+    steps:
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: latest
+        activate-environment: wemakepython
+        python-version: 3.7
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Installing wemakepytest
+      shell: bash -l {0}
+      run: |
+        conda activate /usr/share/miniconda3/envs/wemakepython
+        conda install --yes -c conda-forge pytest-flake8
+        conda install --yes -c anaconda flake8
+
+    - name: Wemake Python Stylguide
+      uses: wemake-services/wemake-python-styleguide@0.13.4
+      continue-on-error: true
