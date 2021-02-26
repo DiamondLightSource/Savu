@@ -60,4 +60,4 @@ jobs:
       uses: wemake-services/wemake-python-styleguide@0.13.4
       continue-on-error: true
       with:
-        reporter: 'github-pr-review'      
+        reporter: 'github-pr-review'
