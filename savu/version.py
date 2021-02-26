@@ -24,5 +24,3 @@ __install__ = "install/savu_hpc/savu_installer"
 with open(os.path.join(
         os.path.join(savu_path, "..", __install__, "version.txt"))) as f:
     __version__ = f.readline().strip()
-
-
