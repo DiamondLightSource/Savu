@@ -94,7 +94,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
             transform.iradon(sino, theta=theta,
                              output_size=(in_pData.get_shape()[1]),
                              # self.parameters['output_size'],
-                             filter='ramp',  # self.parameters['filter'],
+                             filter_name='ramp',  # self.parameters['filter'],
                              interpolation='linear',
                              # self.parameters['linear'],
                              circle=False)  # self.parameters[False])

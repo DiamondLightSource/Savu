@@ -115,7 +115,18 @@ class MinAndMax(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self._get_pattern(), 'single')
+        try:
+            in_pData[0].plugin_data_setup(self._get_pattern(), 'single')
+        except:
+            msg = "\n***************************************************"\
+            "**********\n"\
+            "Can't find the data pattern: {}.\nYou may need to add " \
+            "this plugin after a reconstruction plugin\n" \
+            "*************************************************************\n"\
+            "".format(self._get_pattern())
+            logging.warning(msg)
+            cu.user_message(msg)
+            raise ValueError(msg)
 
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
         orig_shape = in_dataset[0].get_shape()
