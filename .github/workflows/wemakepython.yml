@@ -35,5 +35,5 @@ jobs:
         conda install --yes -c anaconda flake8
 
     - name: Wemake Python Stylguide
-      uses: wemake-services/wemake-python-styleguide@0.13.4
+      uses: wemake-services/wemake-python-styleguide
       continue-on-error: true
