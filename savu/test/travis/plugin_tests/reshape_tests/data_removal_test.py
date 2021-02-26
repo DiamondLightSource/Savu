@@ -29,7 +29,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class DataRemovalTest(unittest.TestCase):
-    global data_file, experiment
+    global data_file
+    global experiment
     data_file = '24737.nxs'
     experiment = 'tomo'
 
