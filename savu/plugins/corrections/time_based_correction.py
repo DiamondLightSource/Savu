@@ -23,6 +23,7 @@
 """
 
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.corrections.base_correction import BaseCorrection

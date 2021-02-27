@@ -66,7 +66,7 @@ class DataCreate(object):
             self.exp.meta_data.set('transport', self.transport)
             self._set_transport_data(self.transport)
 
-        if len(args) is 1:
+        if len(args) == 1:
             self.__create_dataset_from_object(args[0])
         else:
             self.__create_dataset_from_kwargs(kwargs)
@@ -141,7 +141,7 @@ class DataCreate(object):
         copy_patterns = {}
         for new_pattern in pattern_list:
             name, all_dims = new_pattern.split('.')
-            if name is '*':
+            if name == '*':
                 copy_patterns = all_patterns
             else:
                 copy_patterns[name] = all_patterns[name]
@@ -212,11 +212,11 @@ class DataCreate(object):
         """
         removed_dims = 0
         for arg in args[0]:
-            if len(arg.split('.')) is 1:
+            if len(arg.split('.')) == 1:
                 self.__remove_axis_labels(arg, removed_dims)
                 removed_dims += 1
             else:
-                if len(arg.split('~')) is 1:
+                if len(arg.split('~')) == 1:
                     self.__replace_axis_labels(arg)
                 else:
                     self.__insert_axis_labels(arg)

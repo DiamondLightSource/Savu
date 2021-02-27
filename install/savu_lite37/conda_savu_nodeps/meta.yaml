@@ -1,0 +1,40 @@
+{% set repo = "master" %}
+{% set version = "3.0" %}
+
+package:
+  name: savu-lite-nodeps
+  version: {{ version }}
+
+source:
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
+
+build:
+  preserve_egg_dir: True
+  number: 0
+  script: python setup.py install
+
+requirements:
+  host:
+    - python 3.7.3 h0371630_0
+    - pip 20.3.3 pyhd8ed1ab_0
+    - wheel 0.33.1 py37_0
+
+  run:
+    - python 3.7.3 h0371630_0
+    - numpy 1.15.4 py37h8b7e671_1002
+
+test:
+  imports:
+    - numpy
+
+about:
+  home: https://github.com/DiamondLightSource/Savu
+  license: Apache V2 and GPL V3
+  license_family: GPL3
+  doc_url: https://savu-lite.readthedocs.io/en/latest/
+  dev_url: https://github.com/DiamondLightSource/Savu/
+  summary: "Savu-Lite - Minimal version of Savu Tomography Reconstruction and Processing Pipeline"
+
+extra:
+  recipe-maintainers:
+    - DaniilKazantsev
