@@ -115,7 +115,7 @@ def get_machine_names(all_frames):
 
 
 def get_base_path(filename):
-    if len(filename[0].split('/')) is 0:
+    if len(filename[0].split('/')) == 0:
         dir_path = os.getcwd()
     else:
         dir_path = os.path.dirname(filename[0])

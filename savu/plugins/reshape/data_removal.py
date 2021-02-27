@@ -87,7 +87,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         else:
             indices_list = indices.split(':')
             indices_list = [int(i) for i in indices_list]
-            if len(indices_list) is 2:
+            if len(indices_list) == 2:
                 indices_list.append(1)
             self.indices = np.arange(*indices_list)
         return np.setxor1d(np.arange(orig_shape), self.indices)

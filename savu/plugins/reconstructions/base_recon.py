@@ -22,6 +22,7 @@
 """
 import math
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 import savu.core.utils as cu
 from savu.plugins.plugin import Plugin
@@ -173,7 +174,7 @@ class BaseRecon(Plugin):
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
         if total_frames > len(cor):
-            cor = np.tile(cor, total_frames / len(cor))
+            cor = np.tile(cor, int(total_frames / len(cor)))
         return cor
 
     def __polyfit_cor(self, cor_dict, inData):
@@ -405,7 +406,7 @@ class BaseRecon(Plugin):
             self.parameters['init_vol'] else 0
         self.cor_as_dataset = 1 if isinstance(
             self.parameters['centre_of_rotation'], str) else 0
-            
+
         for i in range(len(in_dataset) - self.init_vol - self.cor_as_dataset):
             in_pData[i].plugin_data_setup('SINOGRAM', self.get_max_frames(),
                                           slice_axis=self.get_slice_axis())
@@ -495,7 +496,7 @@ class BaseRecon(Plugin):
                                              frames MUST be fixed.)
         """
         return 'multiple'
-    
+
     def get_slice_axis(self):
         """
         Fix the fastest changing slice dimension

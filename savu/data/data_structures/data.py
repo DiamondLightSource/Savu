@@ -382,7 +382,7 @@ class Data(DataCreate):
         dimension
         """
         patterns = self.get_data_patterns()
-        n1 = 'PROJECTION' if pname is 'SINOGRAM' else 'SINOGRAM'
+        n1 = 'PROJECTION' if pname == 'SINOGRAM' else 'SINOGRAM'
         d1 = patterns[n1]['core_dims']
         d2 = patterns[pname]['slice_dims']
         tdir = set(d1).intersection(set(d2))

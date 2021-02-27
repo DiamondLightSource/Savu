@@ -163,7 +163,7 @@ class VoCenteringIterative(BaseFilter, IterativePlugin):
         return rotcenter
 
     def _get_listshift(self):
-        smin, smax = self.search_area if self.get_iteration() is 0 \
+        smin, smax = self.search_area if self.get_iteration() == 0 \
             else self._expand_search()
         list_shift = np.arange(smin, smax+2, 2) - self.start_shift
         logging.debug('list shift is %s', list_shift)

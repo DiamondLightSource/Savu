@@ -328,8 +328,8 @@ class Content(object):
         num_list = [pos_list[i][0] for i in range(len(pos_list))]
         if entry[0] in num_list:
             start = num_list.index(entry[0])
-            if len(entry) is 2:
-                if len(pos_list[start]) is 2:
+            if len(entry) == 2:
+                if len(pos_list[start]) == 2:
                     idx = int([i for i in range(len(num_list)) if
                                (num_list[i] == entry[0])][-1]) + 1
                     entry = [entry[0], str(chr(ord(pos_list[idx - 1][1]) + 1))]
@@ -344,7 +344,7 @@ class Content(object):
 
         # number not in list
         entry[0] = str(int(num_list[-1]) + 1 if num_list else 1)
-        if len(entry) is 2:
+        if len(entry) == 2:
             entry[1] = 'a'
         return len(self.plugin_list.plugin_list), ''.join(entry)
 
@@ -404,7 +404,7 @@ class Content(object):
             return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
-        if len(entry) is 1:
+        if len(entry) == 1:
             self.inc_numbers(start, pos_list, inc)
         else:
             idx = [i for i in range(start, len(pos_list)) if
