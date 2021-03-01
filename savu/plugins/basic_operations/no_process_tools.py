@@ -151,6 +151,11 @@ class NoProcessTools(PluginTools):
             dtype: int_list
             description: int list required
             default: [0,1]
+        string_list_param:
+            visibility: basic
+            dtype: string_list
+            description: string list required
+            default: ['item_one','item_two']
         num_list_param:
             visibility: basic
             dtype: num_list
