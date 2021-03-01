@@ -41,10 +41,19 @@ def _preview(value):
     return parameter_valid
 
 def _intlist(value):
-    """ int_list """
+    """ A list containing integer values """
     parameter_valid = False
     if isinstance(value, list):
         if all(_integer(item) for item in value):
+            parameter_valid = True
+    return parameter_valid
+
+
+def _stringlist(value):
+    """ A list containing string values """
+    parameter_valid = False
+    if isinstance(value, list):
+        if all(_string(item) for item in value):
             parameter_valid = True
     return parameter_valid
 
@@ -316,12 +325,12 @@ def _list(value):
         # This is a list of integer or float values
         parameter_valid = True
     else:
-        parameter_valid = _string_list(value)
+        parameter_valid = _list_as_string(value)
     return parameter_valid
 
 
-def _string_list(value):
-    """ A list of string values"""
+def _list_as_string(value):
+    """ A value of type string, which is written in a list format"""
     parameter_valid = False
     try:
         if "[" and "]" in value:
@@ -348,6 +357,7 @@ def _string_list(value):
 type_dict = {
     "preview": _preview,
     "int_list": _intlist,
+    "string_list": _stringlist,
     "num_list": _numlist,
     "range": _range,
     "yaml_file": _yamlfile,
@@ -373,6 +383,7 @@ type_dict = {
 type_error_dict = {
     "preview": "preview slices",
     "int_list": "list of integers",
+    "string_list": "list of strings",
     "num_list": "list of numbers",
     "range": "range'. For example '<value 1>, <value 2>",
     "yaml_file": "yaml format",
