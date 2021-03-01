@@ -32,13 +32,13 @@ algorithm.
 
         outer_pad:
             visibility: advanced
-            dtype: str
+            dtype: [bool,int,float]
             description: Not an option.
             default: False
 
         centre_pad:
             visibility: hidden
-            dtype: int
+            dtype: [bool,int,float]
             description: Not an option.
             default: False
 

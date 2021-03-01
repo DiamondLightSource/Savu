@@ -107,7 +107,7 @@ class MultiSavuLoader(BaseLoader):
         return data_obj_list
 
     def _get_savu_loader(self):
-        savu = SavuLoader()
+        savu = SavuNexusLoader()
         savu.exp = self.exp
         savu._populate_default_parameters()
         savu.parameters['data_path'] = self.parameters['data_path']

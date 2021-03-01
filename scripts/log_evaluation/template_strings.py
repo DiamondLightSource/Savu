@@ -66,7 +66,7 @@ def set_template_string_vis(nVals, title, size, params, header_shift):
     total_size[1] = total_size[1]
     sub_size = list(size[1])
 
-    plot_per_x = (1 if nVals is 1 else 2)
+    plot_per_x = (1 if nVals == 1 else 2)
     nSubplots = int(np.ceil(float(nVals)/plot_per_x))*plot_per_x
 
     size = [total_size[0]/plot_per_x, total_size[1]/(nSubplots/plot_per_x)]

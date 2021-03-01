@@ -45,7 +45,7 @@ class BaseAstraVectorRecon(BaseRecon):
         out_dataset = self.get_out_datasets()
 
         # if res_norm is required then setup another output dataset
-        if len(out_dataset) is 2:
+        if len(out_dataset) == 2:
             self.res = True
             out_pData = self.get_plugin_out_datasets()
             in_data = self.get_in_datasets()[0]

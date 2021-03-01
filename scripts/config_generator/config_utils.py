@@ -31,7 +31,6 @@ import pkgutil
 
 import importlib.util
 from functools import wraps
-from . import arg_parsers as parsers
 import savu.plugins.utils as pu
 import savu.data.data_structures.utils as du
 
@@ -80,6 +79,7 @@ def parse_args(function):
     @wraps(function)
     def _parse_args_wrap_function(content, args):
         parser = '%s_arg_parser' % function.__name__
+        from . import arg_parsers as parsers
         args = getattr(parsers, parser)(args.split(), doc=False)
         if not args:
             return content
@@ -97,11 +97,11 @@ def error_catcher(function):
             err_msg_list = str(e).split()
             savu_error = True if len(err_msg_list) > 1 and err_msg_list[1] == 'ERROR:' else False
 
-            if error_level is 0 and savu_error:
+            if error_level == 0 and savu_error:
                 print(e)
-            elif error_level is 0:
+            elif error_level == 0:
                 print(f"{type(e).__name__}: {e}")
-            elif error_level is 1:
+            elif error_level == 1:
                 traceback.print_exc(file=sys.stdout)
 
             return content

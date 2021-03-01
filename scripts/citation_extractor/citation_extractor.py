@@ -80,7 +80,7 @@ class NXciteVisitor(object):
 def __check_input_params(args):
     """ Check for required input arguments.
     """
-    if len(args) is not 2:
+    if len(args) != 2:
         print("Input and output filename need to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
         sys.exit(1)

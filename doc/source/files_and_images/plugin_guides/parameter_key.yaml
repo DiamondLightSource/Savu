@@ -9,14 +9,15 @@ visibility:
 dtype:
     description: The type of data
     values:
-        int: integer
-        pos_int: positive integer
-        bool: boolean
-        str: string
-        float: float
-        tuple: tuple
-        list: list
+        int: Integer
+        pos_int: Positive integer
+        bool: Boolean
+        str: String
+        float: Float
+        tuple: Tuple
+        list: List
         int_list: List of integers
+        string_list: List of strings
         num_list: List of numbers including int and float
         preview: Preview slice list for data
         range: A range (0,1)
@@ -28,9 +29,9 @@ dtype:
         int_path: Interior path
         config_file: Configuration file
         filename: File name
-        nptype: numpy type
-        dict: dictionary
-        int_float_dict: Dictionary with interger keys and float values. {int:float}
+        nptype: Numpy type
+        dict: Dictionary
+        int_float_dict: Dictionary with integer keys and float values. {int:float}
 
 description:
     description: A short explanation of the parameter

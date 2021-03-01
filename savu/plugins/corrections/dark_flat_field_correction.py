@@ -83,7 +83,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.mfp = pData._get_max_frames_process()
         self.reps_at = int(np.ceil(self.length / float(self.mfp)))
 
-        if len(full_shape) is 3:
+        if len(full_shape) == 3:
             self.convert_size = lambda a, b, x, pad: np.pad(
                 np.tile(x[a:b], tile), pad, 'edge')
         else:

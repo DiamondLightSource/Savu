@@ -7,7 +7,7 @@ class BaseReconTools(PluginTools):
         """
         centre_of_rotation:
              visibility: basic
-             dtype: [float, int, str, int_float_dict]
+             dtype: [float, str, num_list, int_float_dict]
              description: Centre of rotation to use for the
                reconstruction.
              default: 0.0
@@ -25,7 +25,7 @@ class BaseReconTools(PluginTools):
 
         centre_pad:
              visibility: intermediate
-             dtype: float
+             dtype: [bool,int,float]
              description: Pad the sinogram to centre it in order
                to fill the reconstructed volume ROI for asthetic
                purposes.
@@ -40,7 +40,7 @@ class BaseReconTools(PluginTools):
 
         outer_pad:
              visibility: intermediate
-             dtype: float
+             dtype: [bool,int,float]
              description: 'Pad the sinogram width to fill the
                reconstructed volume for asthetic purposes. Choose
                from True (defaults to sqrt(2)), False or

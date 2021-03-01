@@ -296,6 +296,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - A list
     * - int_list
       - A list of integers
+    * - string_list
+      - A list of strings
     * - num_list
       - A list of numbers
     * - preview
