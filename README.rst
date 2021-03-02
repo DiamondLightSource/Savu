@@ -21,6 +21,7 @@
 
 .. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
   :scale: 100%
+  :align: center
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
