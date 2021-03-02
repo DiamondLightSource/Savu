@@ -19,8 +19,8 @@
 
 .. start_of_main_text
 
-.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans.png
-   :width: 200
+.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
+  :scale: 100%
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
@@ -57,14 +57,14 @@ The full documentation is available at https://savu.readthedocs.org/en/latest/
 
 Installation (Linux only)
 ========
-Install Savu-lite package into **empty** `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with
-``conda install -c savu-dep savu-lite``
+| Install Savu-lite package into empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
+| ``conda install -c savu-dep savu-lite``
 
 
 License
 ========
-The project is licensed under the Apache License, Version 2.0.
-Copyright 2014 Diamond Light Source Ltd.
+| The project is licensed under the Apache License, Version 2.0.
+| Copyright 2014 Diamond Light Source Ltd.
 
 Contacts
 ========
