@@ -20,14 +20,14 @@
 .. start_of_main_text
 
 .. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans.png
-   :scale: 20 %
+   :width: 400
    :align: center
 
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
 
-Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the [Diamond Light Source](https://www.diamond.ac.uk/) (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
+Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the `Diamond Light Source <https://www.diamond.ac.uk/>`_ (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
 
 Designed to allow greater flexibility in tomography data processing, Savu is capable of processing N-dimensional full-field tomography and mapping tomography data, along with concurrent processing of multiple datasets such as those collected as part of a multi-modal setup.  Savu process lists, tailored to a specific experiment and passed to the framework at runtime along with the data, detail the processing steps that are required.
 
@@ -59,10 +59,9 @@ The full documentation is available at https://savu.readthedocs.org/en/latest/
 
 Installation (Linux only)
 ========
-#### Install Savu-lite package into _empty_ [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) environment
-```
-conda install -c savu-dep savu-lite
-```
+- Install Savu-lite package into **empty** `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html`_ environment:
+``conda install -c savu-dep savu-lite``
+
 
 License
 ========
