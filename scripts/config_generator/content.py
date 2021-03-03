@@ -471,7 +471,11 @@ class Content(object):
 
     def level(self, level):
         """ Set the visibility level of parameters """
-        self.disp_level = level
+        if level:
+            self.disp_level = level
+            print(f"Level set to '{level}'")
+        else:
+            print(f"Level is set at '{self.disp_level}'")
 
     def remove(self, pos):
         if pos >= self.size:
