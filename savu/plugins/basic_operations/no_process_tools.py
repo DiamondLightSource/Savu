@@ -171,6 +171,15 @@ class NoProcessTools(PluginTools):
             dtype: int_float_dict
             description: dictionary required
             default: "{'2':4.0}"
-
+        file_path_param:
+            visibility: basic
+            dtype: filepath
+            description: Filepath required
+            default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        savu_file_path_param:
+            visibility: basic
+            dtype: savufilepath
+            description: Savu Filepath required
+            default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
 """

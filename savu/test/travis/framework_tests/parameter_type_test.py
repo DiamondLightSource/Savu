@@ -86,7 +86,156 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_yaml_3(self):
+        # Check that yaml file is accepted
+        plugin = self.initial_setup()
+        key = "yaml_file"
+        value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
 
+    def test_yaml_4(self):
+        # Check that incorrect yaml file is not accepted
+        plugin = self.initial_setup()
+        key = "yaml_file"
+        value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_file_path(self):
+        # Check that filepath is accepted
+        plugin = self.initial_setup()
+        key = "file_path_param"
+
+        import os
+        savu_base_path = \
+            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+
+        value = savu_base_path + "system_files/dls/test_dev_script.txt"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_file_path_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = "file_path_param"
+        value = 8
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_file_path_2(self):
+        # Check that list is not accepted
+        plugin = self.initial_setup()
+        key = "file_path_param"
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_file_path_3(self):
+        # Check that yaml filepath is accepted
+        plugin = self.initial_setup()
+        key = "file_path_param"
+        value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_file_path_4(self):
+        # Check that incorrect filepath is not accepted
+        plugin = self.initial_setup()
+        key = "file_path_param"
+        value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_savu_file_path(self):
+        # Check that savu filepath is accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = "doc/update_api.sh"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_savu_file_path_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = 8
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_savu_file_path_2(self):
+        # Check that list is not accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_savu_file_path_3(self):
+        # Check that yaml file is accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_savu_file_path_4(self):
+        # Check that incorrect filepath is not accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_savu_file_path_5(self):
+        # Check that yml filepath is accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+        value = "savu/plugins/loaders/templates/malcolm_templates/malcolm.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_savu_file_path_6(self):
+        # Check that full filepath is not accepted
+        plugin = self.initial_setup()
+        key = "savu_file_path_param"
+
+        import os
+        savu_base_path = \
+            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+
+        value = savu_base_path + \
+                "savu/plugins/loaders/templates/malcolm_templates/malcolm.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
 
     def test_string(self):
         # Check that string is accepted

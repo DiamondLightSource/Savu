@@ -25,6 +25,7 @@ dtype:
         file_int_path_int: [<file path>, <interior path>, <integer>]
         int_path_int : [<interior path> , <integer>]
         filepath: File path
+        savufilepath: File path within the Savu directory
         directory: File directory
         int_path: Interior path
         config_file: Configuration file

@@ -316,6 +316,8 @@ Choose the data type. This is used to check the parameter input is valid.
         [<interior path> , <integer>]
     * - filepath
       - A file path
+    * - savufilepath
+      - A file path within the Savu directory
     * - directory
       - A file directory
     * - int_path

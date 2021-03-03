@@ -82,17 +82,26 @@ def _range(value):
 def _yamlfile(value):
     """ yaml_file """
     parameter_valid = False
+    file_path_str = ''
     if _filepath(value):
-        f = open(value)
-        errors = yu.check_yaml_errors(f)
-        try:
-            yu.read_yaml(value)
-            parameter_valid = True
-        except:
-            if errors:
-                print("There were some errors with your yaml file structure.")
-                for e in errors:
-                    print(e)
+        file_path_str = value
+    elif _savufilepath(value):
+        # If the file path is not valid, try preprending the savu base path
+        savu_base_path = \
+            os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+        file_path_str = savu_base_path+value
+
+    if file_path_str:
+        with open(file_path_str, 'r') as f:
+            errors = yu.check_yaml_errors(f)
+            try:
+                yu.read_yaml(value)
+                parameter_valid = True
+            except:
+                if errors:
+                    print("There were some errors with your yaml file structure.")
+                    for e in errors:
+                        print(e)
     return parameter_valid
 
 
@@ -186,6 +195,17 @@ def _filepath(value):
     parameter_valid = False
     if _string(value):
         if os.path.isfile(value):
+            parameter_valid = True
+    return parameter_valid
+
+
+def _savufilepath(value):
+    """ A file path inside the Savu directory"""
+    parameter_valid = False
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+    if _string(value):
+        if os.path.isfile(savu_base_path+value):
             parameter_valid = True
     return parameter_valid
 
@@ -364,6 +384,7 @@ type_dict = {
     "file_int_path_int": _intgroup,
     "int_path_int": _intgroup1,
     "filepath": _filepath,
+    "savufilepath": _savufilepath,
     "directory": _directory,
     "int_path": _intpathway,
     "config_file": _configfile,
@@ -390,6 +411,7 @@ type_error_dict = {
     "file_int_path_int": "[filepath, interior file path, int]",
     "int_path_int": "[interior file path, int]",
     "filepath": "filepath",
+    "savufilepath": "filepath within the savu directory",
     "directory": "directory",
     "int_path": "string",
     "config_file": "configuration file",
