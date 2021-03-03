@@ -80,13 +80,17 @@ class PluginParameters(object):
         param_info_dict = None
         if hasattr(tool_class, "define_parameters"):
             yaml_text = tool_class.define_parameters.__doc__
-            if yaml_text is not None:
+            if yaml_text and yaml_text.strip():
+                # If yaml_text is not None and not empty or consisting of spaces
                 param_info_dict = doc.load_yaml_doc(yaml_text)
-                if not isinstance(param_info_dict, OrderedDict):
-                    error_msg = \
-                        'The parameters have not been read in correctly for {}'.format(
-                         tool_class.__name__)
-                    raise Exception(error_msg)
+                if param_info_dict:
+                    if not isinstance(param_info_dict, OrderedDict):
+                        error_msg = (
+                            f"The parameters have not been read "
+                            f"in correctly for {tool_class.__name__}"
+                        )
+                        raise Exception(error_msg)
+
         return param_info_dict
 
     def modify(self, parameters, value, param_name):
