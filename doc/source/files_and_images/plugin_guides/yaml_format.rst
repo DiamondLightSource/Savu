@@ -63,6 +63,7 @@ Format examples
 
 * By prefixing a multi-line string with | you can preserve new lines​.
 * By prefixing a multi-line string with > each line is interpreted as a space.
+* Indenting each new line of a multi-line string will also mean that each new line is interpreted as a space.
 
 
 .. code-block::
@@ -75,6 +76,14 @@ Format examples
         be​
         one​
         line​
+
+.. code-block::
+
+    # Write a multi-line string you don't want to appear as multi-line​
+    # Each line interpreted as a space ​
+    single-line-string: This is also a multi line ​
+        string. Each yaml line should be indented and then
+        each new line will be interpreted as a space.
 
 
 .. code-block::

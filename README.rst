@@ -1,17 +1,6 @@
 .. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
     :target: https://github.com/DiamondLightSource/Savu/actions
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
-   :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
-.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
-   :target: https://readthedocs.org/projects/savu/?badge=latest
-   :alt: Documentation Status
-
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.3541873.svg
-    :target: https://doi.org/10.5281/zenodo.3541873
-
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 
@@ -21,16 +10,16 @@
 .. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
     :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
 
-:Date: 2014-11-14
-:Version: 0.1
-:Authors: Mark Basham - *Diamond Light Source*
-:Authors: Nicola Wadeson - *Diamond Light Source*
+.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
+   :target: https://readthedocs.org/projects/savu/?badge=latest
+   :alt: Documentation Status
 
-This documentation in full is available at https://savu.readthedocs.org/en/latest/
+.. image:: https://zenodo.org/badge/26539525.svg
+  :target: https://zenodo.org/badge/latestdoi/26539525
 
 .. start_of_main_text
 
-.. image:: ../source/files_and_images/Savu_logo_2_L_Res_trans.png
+.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans.png
    :scale: 40 %
    :align: right
 
@@ -38,7 +27,7 @@ This documentation in full is available at https://savu.readthedocs.org/en/lates
 Tomography Reconstruction and Processing Pipeline
 =================================================
 
-Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the Diamond Light Source (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
+Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the `Diamond Light Source <https://www.diamond.ac.uk/>`_ (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
 
 Designed to allow greater flexibility in tomography data processing, Savu is capable of processing N-dimensional full-field tomography and mapping tomography data, along with concurrent processing of multiple datasets such as those collected as part of a multi-modal setup.  Savu process lists, tailored to a specific experiment and passed to the framework at runtime along with the data, detail the processing steps that are required.
 
@@ -51,7 +40,6 @@ Savu is currently in use across the tomography beamlines at Diamond to reconstru
 
 Features
 ========
-
 - Full-field and mapping tomography data processing
 - multi-modal data processing
 - Absorption, fluorescence, diffraction and ptychography data processing
@@ -65,6 +53,24 @@ Features
 - Processing tailored to a specific experimental setup
 - Easy integration of new functionality
 
+Documentation
+========
+The full documentation is available at https://savu.readthedocs.org/en/latest/
+
+Installation (Linux only)
+========
+| Install Savu-lite package into empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
+| ``conda install -c savu-dep savu-lite``
+
+
+License
+========
+| The project is licensed under the Apache License, Version 2.0.
+| Copyright 2014 Diamond Light Source Ltd.
+
+Contacts
+========
+Any questions regarding software can be addressed to scientificsoftware@diamond.ac.uk.
 
 .. image:: https://codescene.io/projects/3730/status.svg
     :target: https://codescene.io/projects/3730/jobs/latest-successful/results

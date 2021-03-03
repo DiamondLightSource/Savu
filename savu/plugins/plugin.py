@@ -133,11 +133,10 @@ class Plugin(PluginDatasets):
             self.tools.check_dependencies(self.parameters)
 
     def set_docstring(self, doc_str):
-        desc = doc.find_args(self)
         self.docstring_info['info'] = doc_str.get('verbose')
         self.docstring_info['warn'] = doc_str.get('warn')
         self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
-        self.docstring_info['synopsis'] = desc['synopsis']
+        self.docstring_info['synopsis'] = doc.find_synopsis(self)
 
     def delete_parameter_entry(self, param):
         if param in list(self.parameters.keys()):

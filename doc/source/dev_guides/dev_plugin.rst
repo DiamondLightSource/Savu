@@ -336,7 +336,8 @@ If more than one data type is allowed, then include these in a list format.
 e.g. [int, float] would mean that integers or floats are valid data types.
 
 If you are a developer and would like to create your own data type then you
-should edit the file parameter_utils.py.
+should edit the file parameter_utils.py. This file is inside the directory
+Savu/scripts/config_generator/.
 
 Description
 '''''''''''
