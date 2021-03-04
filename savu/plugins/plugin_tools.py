@@ -486,7 +486,7 @@ class PluginCitations(object):
 
     def set_cite(self, tools_list):
         """Set the citations for each of the tools classes
-        Change to list() for Python 3
+        :param tools_list: List containing tool classes of parent plugins
         """
         list(
             map(

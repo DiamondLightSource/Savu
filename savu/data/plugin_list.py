@@ -576,7 +576,6 @@ class CitationInformation(object):
         and a new line
 
         :param seperation_char: Character to split the string at
-        :param endnote:
         :return: The string contained between start characters and a new line
         """
         item = self.endnote.partition(seperation_char)[2].split('\n')[0]
@@ -587,7 +586,6 @@ class CitationInformation(object):
 
         :param start_char: Character to split the string at
         :param end_char: Character to end the split at
-        :param bibtex:
         :return: The string contained between both characters
         """
         item = self.bibtex.partition(start_char)[2].split(end_char)[0]
