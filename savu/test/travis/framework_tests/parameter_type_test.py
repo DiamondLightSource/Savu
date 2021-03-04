@@ -106,6 +106,16 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_yaml_5(self):
+        # Check that yaml file is accepted
+        plugin = self.initial_setup()
+        key = "yaml_file"
+        value = "savu/plugins/loaders/templates/nexus_templates/mm.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
     def test_file_path(self):
         # Check that filepath is accepted
         plugin = self.initial_setup()
@@ -915,6 +925,45 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_config(self):
+        # Check that config is accepted (same as default value)
+        plugin = self.initial_setup()
+        key = "pymca_config"
+        value = "Savu/test_data/data/test_config.cfg"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_config_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = "pymca_config"
+        value = 8
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_config_2(self):
+        # Check that list is not accepted
+        plugin = self.initial_setup()
+        key = "pymca_config"
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_config_3(self):
+        # Check that yeml file is not accepted
+        plugin = self.initial_setup()
+        key = "pymca_config"
+        value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
 
 if __name__ == "__main__":
     unittest.main()
