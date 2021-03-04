@@ -30,27 +30,26 @@ import os
 import sys
 from . import test
 from unittest import defaultTestLoader, TestLoader, TextTestRunner
+import subprocess
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 os.environ['savu_mode'] = 'hdf5'
 
 def run_full_tests():
-    import unittest
 
-    print("Tests will run shortly, and may take some time to complete")
+    print("Tests may take some time to complete...")
     print("The tests may raise errors, please don't worry about these as "
           "they may be raised deliberately.")
-    print("The key information is in the final test results")
 
     path = os.path.split(test.travis.__file__)[0]
-    tests = defaultTestLoader.discover(path, pattern='*test.py')
-    testRunner = TextTestRunner(buffer=True)
-    test_results = testRunner.run(tests)
-    if test_results.wasSuccessful():
-        exit(0)
-    else:
+    result = subprocess.run(["python", path+'/tests.py'])
+    if (result.returncode == 1):
+        print("Tests FAILED, please see the report")
         exit(1)
+    else:
+        print("Tests PASSED")
+        exit(0)
 
 def run_tests():
     import unittest
@@ -64,4 +63,4 @@ def run_tests():
     if test_results.wasSuccessful():
         exit(0)
     else:
-        exit(1) 
+        exit(1)

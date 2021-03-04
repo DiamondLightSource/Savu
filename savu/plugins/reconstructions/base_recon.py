@@ -22,6 +22,7 @@
 """
 import math
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 import savu.core.utils as cu
 from savu.plugins.plugin import Plugin
