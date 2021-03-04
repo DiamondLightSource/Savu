@@ -17,6 +17,20 @@
 .. image:: https://zenodo.org/badge/26539525.svg
   :target: https://zenodo.org/badge/latestdoi/26539525
 
+|
+.. image:: https://anaconda.org/savu-dep/savu-lite/badges/version.svg
+  :target: https://anaconda.org/savu-dep/savu-lite
+
+.. image:: https://anaconda.org/savu-dep/savu-lite/badges/latest_release_date.svg
+  :target: https://anaconda.org/savu-dep/savu-lite
+
+.. image:: https://anaconda.org/savu-dep/savu-lite/badges/platforms.svg
+  :target: https://anaconda.org/savu-dep/savu-lite
+
+.. image:: https://anaconda.org/savu-dep/savu-lite/badges/downloads.svg
+  :target: https://anaconda.org/savu-dep/savu-lite
+
+
 .. start_of_main_text
 
 .. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
