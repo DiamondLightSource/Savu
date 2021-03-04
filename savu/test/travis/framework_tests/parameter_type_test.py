@@ -367,6 +367,26 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_int_list_4(self):
+        # Check that int list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "integer_list_param"
+        value = "[3,7,8]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_int_list_5(self):
+        # Check that str list is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "integer_list_param"
+        value = "[value, second6]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
     def test_string_list(self):
         # Check that string list is accepted
         plugin = self.initial_setup()
@@ -402,6 +422,26 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_string_list_4(self):
+        # Check that string list without quotes is accepted
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[another, example]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_5(self):
+        # Check that mixed list without quotes is declined
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[another, 5, 8.0]"
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
@@ -462,6 +502,36 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = [10.4, 30.6, 5.9]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_num_list_6(self):
+        # Check that str list is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = "[value, second6]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_num_list_7(self):
+        # Check that float and int list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = "[10.4, 30.6, 5]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_num_list_8(self):
+        # Check that float only list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = "[10.4, 30.6, 5.9]"
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )

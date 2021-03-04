@@ -30,7 +30,7 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
-from savu.plugins.utils import convert_multi_params
+import savu.plugins.utils as pu 
 
 
 def _preview(value):
@@ -40,11 +40,16 @@ def _preview(value):
         parameter_valid = True
     return parameter_valid
 
+
 def _intlist(value):
     """ A list containing integer values """
     parameter_valid = False
     if isinstance(value, list):
         if all(_integer(item) for item in value):
+            parameter_valid = True
+    elif _list_as_string(value):
+        value_list = pu._cast_str_to_type(value)
+        if all(_integer(item) for item in value_list):
             parameter_valid = True
     return parameter_valid
 
@@ -55,6 +60,10 @@ def _stringlist(value):
     if isinstance(value, list):
         if all(_string(item) for item in value):
             parameter_valid = True
+    elif _list_as_string(value):
+        value_list = pu._cast_str_to_type(value)
+        if all(_string(item) for item in value_list):
+            parameter_valid = True
     return parameter_valid
 
 
@@ -63,6 +72,10 @@ def _numlist(value):
     parameter_valid = False
     if isinstance(value, list):
         if all( _float(item) for item in value):
+            parameter_valid = True
+    elif _list_as_string(value):
+        value_list = pu._cast_str_to_type(value)
+        if all(_float(item) for item in value_list):
             parameter_valid = True
     return parameter_valid
 
@@ -517,7 +530,7 @@ def _check_multi_params(param_name, value, current_parameter_details):
     type_error_str = ""
     parameter_valid = False
     if is_multi_param(param_name, value):
-        val_list, type_error_str = convert_multi_params(param_name, value)
+        val_list, type_error_str = pu.convert_multi_params(param_name, value)
         if not type_error_str:
             for item in val_list:
                 parameter_valid, type_error_str = is_valid(
