@@ -108,7 +108,7 @@ def _yamlfile(value):
         with open(file_path_str, 'r') as f:
             errors = yu.check_yaml_errors(f)
             try:
-                yu.read_yaml(value)
+                yu.read_yaml(file_path_str)
                 parameter_valid = True
             except:
                 if errors:
