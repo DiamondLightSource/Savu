@@ -426,7 +426,7 @@ class DispDisplay(DisplayFormatter):
                 warn = doc_str.get('warn')
                 if warn:
                     for w in warn.split('\n'):
-                        string = plugin['name'] + ": " + w + '.'
+                        string = plugin['name'] + ": " + w
                         warnings.append(self._get_equal_lines(
                             string, width-1, colour, colour, " "*2))
         return "\n".join(

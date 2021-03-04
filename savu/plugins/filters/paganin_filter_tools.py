@@ -52,9 +52,9 @@ class PaganinFilterTools(PluginTools):
 
     def config_warn(self):
         """The 'log' parameter in the reconstruction should be set to
-FALSE. Previewing a subset of sinograms will alter the result, due
-to the global nature of this filter. If this is necessary, ensure they
-are consecutive.
+        FALSE. Previewing a subset of sinograms will alter the result, due
+        to the global nature of this filter. If this is necessary, ensure they
+        are consecutive.
         """
 
     def citation(self):

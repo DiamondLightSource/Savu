@@ -569,12 +569,13 @@ class PluginCitations(object):
         :param yaml_text:
         :return: Reformatted yaml text
         """
-        description = yaml_text.partition("bibtex:")[0].splitlines()
-        description = [l.strip() for l in description]
-        desc_str = "        description:" + " ".join(description)
+        description = doc.remove_new_lines(yaml_text.partition("bibtex:")[0])
+        desc_str = "        description:" + description
 
-        bibtex_text = yaml_text.partition("bibtex:")[2].partition("endnote:")[0]
-        end_text = yaml_text.partition("bibtex:")[2].partition("endnote:")[2]
+        bibtex_text = \
+            yaml_text.partition("bibtex:")[2].partition("endnote:")[0]
+        end_text = \
+            yaml_text.partition("bibtex:")[2].partition("endnote:")[2]
 
         if bibtex_text and end_text:
             final_str = desc_str + '\n        bibtex: |' + bibtex_text \
@@ -602,8 +603,14 @@ class PluginDocumentation(object):
     def set_doc(self, tools_list):
         # Use the tools class at the 'top'
         self.doc.set("verbose", tools_list[-1].__doc__)
-        self.doc.set("warn", tools_list[-1].config_warn.__doc__)
+        self.doc.set("warn", self.set_warn(tools_list))
         self.set_doc_link()
+
+    def set_warn(self, tools_list):
+        """Remove new lines and save config warnings
+        for the child tools class only"""
+        config_warn = doc.remove_new_lines(tools_list[-1].config_warn.__doc__)
+        return config_warn
 
     def set_doc_link(self):
         """If there is a restructured text documentation file inside the
