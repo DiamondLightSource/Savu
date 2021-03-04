@@ -1,11 +1,10 @@
-name: build
+name: savu-build
 
 on:
   push:
     # Sequence of patterns matched against refs/heads
     branches:
-      # Push events on main branch
-      - main
+      - master
 
 jobs:
   build-linux:
@@ -34,8 +33,8 @@ jobs:
     steps:
     - uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: 4.6.14
-        activate-environment: savu
+        miniconda-version: latest
+        activate-environment: savu_lite
         python-version: 3.7
     - uses: actions/checkout@v2
     - name: Set up Python 3.7
@@ -76,6 +75,6 @@ jobs:
     - name: Install dev-savu and run savu_full_tests
       shell: bash -l {0}
       run: |
-        conda activate /usr/share/miniconda3/envs/savu
+        conda activate /usr/share/miniconda3/envs/savu_lite
         conda install --yes -c savu-dep/label/dev savu-lite
         savu_full_tests
