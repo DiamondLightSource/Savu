@@ -607,10 +607,15 @@ class PluginDocumentation(object):
         self.set_doc_link()
 
     def set_warn(self, tools_list):
-        """Remove new lines and save config warnings
-        for the child tools class only"""
-        config_warn = doc.remove_new_lines(tools_list[-1].config_warn.__doc__)
-        return config_warn
+        """Remove new lines and save config warnings for the child tools
+        class only.
+        """
+        config_str = tools_list[-1].config_warn.__doc__
+        if config_str and "\n\n" in config_str:
+            # Separate multiple warnings with two new lines \n\n
+            config_warn_list = [doc.remove_new_lines(l) for l in config_str.split("\n\n")]
+            config_str = '\n'.join(config_warn_list)
+        return config_str
 
     def set_doc_link(self):
         """If there is a restructured text documentation file inside the
