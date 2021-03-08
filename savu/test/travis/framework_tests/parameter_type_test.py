@@ -277,6 +277,16 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_string_3(self):
+        # Check that None as a string is accepted
+        plugin = self.initial_setup()
+        key = "pattern"
+        value = 'None'
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
     def test_tuple(self):
         # Check that tuple is accepted
         plugin = self.initial_setup()
@@ -307,6 +317,26 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_tuple_3(self):
+        # Check that list is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "vocentering_search_area"
+        value = "[2, 3, 4, 5]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_tuple_4(self):
+        # Check that tuple is accepted (string format)
+        plugin = self.initial_setup()
+        key = "vocentering_search_area"
+        value = "(1, 2)"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
     def test_list(self):
         # Check that list is accepted
         plugin = self.initial_setup()
@@ -336,6 +366,46 @@ class ParameterTypeTest(unittest.TestCase):
             plugin.parameters, value, key
         )
         self.assertFalse(valid_modification)
+
+    def test_list_3(self):
+        # Check that list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "ica_w_init"
+        value = "[2, 3, 4, 5]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_list_4(self):
+        # Check that str list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "ica_w_init"
+        value = "[one,two,three]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_list_5(self):
+        # Check that str list is accepted
+        plugin = self.initial_setup()
+        key = "ica_w_init"
+        value = ['one', 'two', 'three']
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_list_6(self):
+        # Check that str list is accepted
+        plugin = self.initial_setup()
+        key = "ica_w_init"
+        value = ['A longer sentence', 'two', 'three']
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
 
     def test_int_list(self):
         # Check that int list is accepted
@@ -397,6 +467,16 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_int_list_6(self):
+        # Check that str of numbers is not accepted
+        plugin = self.initial_setup()
+        key = "integer_list_param"
+        value = "6 8 9"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
     def test_string_list(self):
         # Check that string list is accepted
         plugin = self.initial_setup()
@@ -421,7 +501,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that str is not accepted
         plugin = self.initial_setup()
         key = "string_list_param"
-        value = "Testing str"
+        value = "Testing str with multiple words"
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
@@ -452,6 +532,26 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "[another, 5, 8.0]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_string_list_6(self):
+        # Check that string is declined
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "example"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_string_list_7(self):
+        # Check that multiple integers inside a string are declined
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "4 6 7 86"
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
@@ -546,6 +646,16 @@ class ParameterTypeTest(unittest.TestCase):
             plugin.parameters, value, key
         )
         self.assertTrue(valid_modification)
+
+    def test_num_list_9(self):
+        # Check that multiple floats inside a string are not accepted
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = "10.4, 30.6, 5.9"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
 
     def test_pos_int(self):
         # Check that positive integers are accepted
@@ -810,14 +920,14 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertFalse(valid_modification)
 
     def test_multi_param_14(self):
-        # Check that one value inside a tuple list is accepted
+        # Check that tuples are accepted
         plugin = self.initial_setup()
         key = "vocentering_search_area"
-        value = "(4,5);(7);"
+        value = "(4,5);(7,0);"
 
         # Check the multi parameter value is changed to a list correctly
         val_list, error_str = pu.convert_multi_params(key, value)
-        result = [(4, 5), (7,)]
+        result = [(4, 5), (7,0)]
         self.assertEqual(val_list, result)
 
         valid_modification = plugin.tools.modify(
@@ -860,6 +970,46 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = {"example_key": "method"}
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_dict_4(self):
+        # Check that dict within a dict is accepted
+        plugin = self.initial_setup()
+        key = "dict_param"
+        value = {"example_key": {"second_dict":"method"}}
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_dict_5(self):
+        # Check that dict within a dict is accepted (string format)
+        plugin = self.initial_setup()
+        key = "dict_param"
+        value = "{'example_key': {'second_dict':'method'}}"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_dict_6(self):
+        # Check that list within a dict is accepted (string format)
+        plugin = self.initial_setup()
+        key = "dict_param"
+        value = "{'example_key': [4,5,6,7]}"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_dict_7(self):
+        # Check that list within a dict is accepted
+        plugin = self.initial_setup()
+        key = "dict_param"
+        value = {'example_key': [4,5,6,7]}
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
@@ -920,6 +1070,48 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = {3.8: 5.0}
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_6(self):
+        # Check that incorrect int dict is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{3.8: 5.0}"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_7(self):
+        # Check that incorrect str dict is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "cor_dict_param"
+        # True is recognised as an integer value of 1
+        value = "{3: true}"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        # Fails and returns true with {3:1}
+        self.assertFalse(valid_modification)
+
+    def test_int_float_dict_8(self):
+        # Check that correct dict is accepted (string format)
+        plugin = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{3: 9.0}"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_int_float_dict_9(self):
+        # Check that incorrect str dict is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{3: Another entry}"
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
