@@ -283,6 +283,8 @@ def _integer(value):
     parameter_valid = False
     if isinstance(value, int):
         parameter_valid = True
+    if isinstance(value, np.integer):
+        parameter_valid = True
     return parameter_valid
 
 
@@ -313,6 +315,8 @@ def _string(value):
 def _float(value):
     parameter_valid = False
     if isinstance(value, float):
+        parameter_valid = True
+    if isinstance(value, np.float):
         parameter_valid = True
     elif _integer(value):
         # Allow integer values as well
