@@ -9,7 +9,7 @@ and an interpolation technique.
         """
         size:
             visibility: basic
-            dtype: int
+            dtype: [float, tuple]
             description: Size of the median filter window. Greater is stronger.
             default: 31
         snr:

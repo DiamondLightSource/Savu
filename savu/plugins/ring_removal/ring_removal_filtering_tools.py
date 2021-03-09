@@ -17,7 +17,7 @@ method.
             default: 3
         size:
             visibility: intermediate
-            dtype: int
+            dtype: [float, tuple]
             description:  Size of the median filter window. Used to
               clean stripes.
             default: 31
