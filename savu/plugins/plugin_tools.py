@@ -424,7 +424,7 @@ class PluginParameters(object):
                 )
             else:
                 error = (
-                    f"Parameter '{key}' is not valid for plugin {self.name}."
+                    f"Parameter '{key}' is not valid for plugin {self.plugin_class.name}."
                     f" \nTry opening and re-saving the process list in the "
                     f"configurator to auto remove \nobsolete parameters."
                 )
