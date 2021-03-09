@@ -906,7 +906,7 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertFalse(valid_modification)
 
     def test_multi_param_13(self):
-        # One tuple, one list, should fail
+        # One tuple, one list, the range type check should allow a list as well
         plugin = self.initial_setup()
         key = "range_param"
         value = "(2,7);[3,8];(0,4)"
@@ -917,7 +917,7 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_multi_param_14(self):
         # Check that tuples are accepted

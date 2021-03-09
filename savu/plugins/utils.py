@@ -313,7 +313,7 @@ def convert_multi_params(param_name, value):
         if ":" in value[0]:
             seq = value[0].split(":")
             try:
-                seq = [eval(s) for s in seq]
+                seq = [ast.literal_eval(s) for s in seq]
                 if len(value) == 0:
                     error_str = (
                         f"No values for tuned parameter "
@@ -333,54 +333,45 @@ def convert_multi_params(param_name, value):
         )
         # Remove blank list entries
         # Change type to int, float or str
-        val_list = [_cast_str_to_type(val) for val in val_list if val]
+        val_list = [cast_str_to_type(val) for val in value if val]
         value = val_list
     return value, error_str
 
 
-def _cast_str_to_type(value):
-    """Change the string to an integer, float, tuple, list or str
-    TODO Check that this works correctly for log value
+def cast_str_to_type(val):
+    """ Replace any missing quotes around variables.
+    Change the string to an integer, float, tuple, list, str, dict
+
+    This is based on __dumps inside savu/data/plugin_list.py
     """
-    try:
-        val = int(value)
-    except:
+    import yaml
+    value = ''
+    if isinstance(val, str):
         try:
-            val = float(value)
-        except:
-            if "(" and ")" in value:
-                val = _cast_to_tuple(value)
-            elif "[" and "]" in value:
-                val = _cast_to_list(value)
-            else:
-                # Return the string
-                val = value
-    return val
-
-
-def _cast_to_list(value):
-    # Change type to list
-    inner_list = value.replace("[", "").replace("]", "")
-    if "," in inner_list:
-        list_content = inner_list.split(",")
-        list_content = [_cast_str_to_type(i) for i in list_content]
-        val = list_content
+            # Safely evaluate an expression node or a string containing
+            # a Python literal or container display
+            value = ast.literal_eval(val)
+        except Exception:
+            try:
+                value = yaml.load(val, Loader=yaml.SafeLoader)
+            except Exception:
+                try:
+                    isdict = re.findall(r"[\{\}]+", val)
+                    # Matches { } between one and unlimited number of times
+                    if isdict:
+                        val = val.replace("[", "'[").replace("]", "]'")
+                        value = cast_str_to_type(yaml.load(val))
+                    else:
+                        value = parse_config_string(val)
+                except Exception:
+                    # for when parameter tuning with lists is added to the framework
+                    if len(val.split(';')) > 1:
+                        pass
+                    else:
+                        raise Exception("Invalid string %s" % val)
     else:
-        val = [_cast_str_to_type(inner_list)]
-    return val
-
-
-def _cast_to_tuple(value):
-    # Change type to tuple
-    inner_tuple = value.replace("(", "").replace(")", "")
-    if "," in inner_tuple:
-        tuple_content = inner_tuple.split(",")
-        tuple_content = [_cast_str_to_type(i) for i in tuple_content]
-        val = tuple(tuple_content)
-    else:
-        inner_tuple_iterable = [_cast_str_to_type(inner_tuple)]
-        val = tuple(inner_tuple_iterable)
-    return val
+        value = val
+    return value
 
 
 def create_dir(file_path):
