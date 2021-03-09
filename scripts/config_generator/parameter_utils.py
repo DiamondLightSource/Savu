@@ -85,7 +85,13 @@ def _range(value):
     parameter_valid = False
     if isinstance(value, tuple):
         if len(value) == 2:
-            if _integer(value[0]) and _integer(value[1]):
+            if _float(value[0]) and _float(value[1]):
+                parameter_valid = True
+        else:
+            print(Fore.RED + "Please enter two values." + Fore.RESET)
+    elif _numlist(value):
+        if len(value) == 2:
+            if _float(value[0]) and _float(value[1]):
                 parameter_valid = True
         else:
             print(Fore.RED + "Please enter two values." + Fore.RESET)
