@@ -229,7 +229,7 @@ def _level_arg_parser(args=None, doc=True):
     """ Argument parser for level command. """
     desc = sc.get_description()['level']
     parser = ArgumentParser(prog='level', description=desc)
-    parser.add_argument("level", type = str, help="The visibility level."
+    parser.add_argument("level",  nargs='?', help="The visibility level."
                         , choices=['basic', 'intermediate', 'advanced'])
     return __arg_parser(parser, args, 'level', doc)
 

@@ -7,13 +7,13 @@ class DataRemovalTools(PluginTools):
         """
         indices:
             visibility: intermediate
-            dtype: list
+            dtype: [list, range]
             description: A list or range of values to remove, e.g. [0, 1, 2]
               , 0:2 (start:stop) or 0:2:1 (start:stop:step).
             default: None
         pattern:
             visibility: intermediate
-            dtype: int
+            dtype: str
             description: Explicitly state the slicing pattern.
             default: 'SINOGRAM'
         dim:
