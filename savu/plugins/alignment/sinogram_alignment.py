@@ -34,18 +34,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class SinogramAlignment(BaseFilter, CpuPlugin):
-    """
-    The centre of mass of each row is determined and then a sine function fit
-    through these to determine the centre of rotation.  The residual between\
-    each centre of mass and the sine function is then used to align each row.
-
-    :param threshold: e.g. a.b will set all values above a to b. Default: None.
-    :param p0: Initial guess for the parameters of \
-        scipy.optimize.curve_fit. Default: (1, 1, 1).
-    :param type: Either centre_of_mass or shift, with the latter requiring\
-        ProjectionVerticalAlignment prior to this \
-        plugin. Default: 'centre_of_mass'.
-    """
 
     def __init__(self):
         logging.debug("initialising Sinogram Alignment")
@@ -62,28 +50,6 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         data = self.get_in_datasets()[0]
         self.sl = [slice(None)]*len(data.get_shape())
         self.slice_dir = self.get_plugin_in_datasets()[0].get_slice_dimension()
-
-#    def filter_frames(self, data):
-#        """
-#        Should be overloaded by filter classes extending this one
-#
-#        :param data: The data to filter
-#        :type data: ndarray
-#        :returns:  The filtered image
-#        """
-#        nFrames = data[0].shape[self.slice_dir]
-#        result = np.empty_like(data[0])
-#        for i in range(nFrames):
-#            self.sl[self.slice_dir] = i
-#            sino = data[0][self.sl]
-#            if self.parameters['threshold']:
-#                a, b = self.parameters['threshold'].split('.')
-#                sino[sino > a] = b
-#            com_y = self.com_y if self.com_y is not None else self._com_y(sino)
-#            shifted = self._shift(sino, self.com_x, com_y)
-#            result[self.sl] = \
-#                shifted.reshape(shifted.shape[0], shifted.shape[1])
-#        return data
 
     def process_frames(self, data):
         """
@@ -103,7 +69,8 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
                 sino[sino > a] = b
             com_y = self.com_y if self.com_y is not None else self._com_y(sino)
             shifted = self._shift(sino, self.com_x, com_y)
-            result[tuple(self.sl)] = shifted.reshape(shifted.shape[0], shifted.shape[1])
+            result[tuple(self.sl)] = shifted.reshape(
+                shifted.shape[0], shifted.shape[1])
         return result
 
     def _sinfunc(self, data, a, b, c):
@@ -113,7 +80,7 @@ class SinogramAlignment(BaseFilter, CpuPlugin):
         fitpars, covmat = \
             curve_fit(self._sinfunc, com_x, com_y, p0=self.parameters['p0'])
         variances = covmat.diagonal()
-        std_devs = np.sqrt(variances)
+        #std_devs = np.sqrt(variances)
         #residual = com_y - self._sinfunc(com_x, *fitpars)
         residual = self._sinfunc(com_x, *fitpars) - com_y
         centre_of_rotation_shift = residual

@@ -8,7 +8,7 @@ class BaseAzimuthalIntegratorTools(PluginTools):
         use_mask:
             visibility: basic
             dtype: bool
-            description: Should we mask.
+            description: Option to apply a mask.
             default: False
 
         num_bins:
