@@ -14,7 +14,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
             description:  "The dimension of the reconstructed volume (only X-Y dimension)."
             default: auto
 
-        param_padding:
+        padding:
             visibility: advanced
             dtype: int
             description: The amount of pixels to pad each slab of the cropped projection data.
