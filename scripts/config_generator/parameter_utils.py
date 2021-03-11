@@ -48,7 +48,7 @@ def _intlist(value):
         if all(_integer(item) for item in value):
             parameter_valid = True
     elif _string(value):
-        value_list = pu.cast_str_to_type(value)
+        value_list = pu._dumps(value)
         if isinstance(value_list, list):
             if all(_integer(item) for item in value_list):
                 parameter_valid = True
@@ -62,7 +62,7 @@ def _stringlist(value):
         if all(_string(item) for item in value):
             parameter_valid = True
     elif _string(value):
-        value_list = pu.cast_str_to_type(value)
+        value_list = pu._dumps(value)
         if isinstance(value_list, list):
             if all(_string(item) for item in value_list):
                 parameter_valid = True
@@ -76,7 +76,7 @@ def _numlist(value):
         if all( _float(item) for item in value):
             parameter_valid = True
     elif _string(value):
-        value_list = pu.cast_str_to_type(value)
+        value_list = pu._dumps(value)
         if isinstance(value_list, list):
             if all(_float(item) for item in value_list):
                 parameter_valid = True
@@ -339,7 +339,7 @@ def _tuple(value):
     if isinstance(value, tuple):
         parameter_valid = True
     elif _string(value):
-        tuple_from_string = pu.cast_str_to_type(value)
+        tuple_from_string = pu._dumps(value)
         if isinstance(tuple_from_string, tuple):
             parameter_valid = True
     return parameter_valid
@@ -350,7 +350,7 @@ def _dict(value):
     if isinstance(value, dict):
         parameter_valid = True
     elif _string(value):
-        dict_from_string = pu.cast_str_to_type(value)
+        dict_from_string = pu._dumps(value)
         if isinstance(dict_from_string, dict):
             parameter_valid = True
     return parameter_valid
@@ -370,7 +370,7 @@ def _int_float_dict(value):
         else:
             print("Ensure dictionary keys are integers.")
     elif _string(value):
-        dict_from_string = pu.cast_str_to_type(value)
+        dict_from_string = pu._dumps(value)
         if isinstance(dict_from_string, dict):
             if all(_integer(k) for k in dict_from_string.keys()):
                 if all(_float(v) for v in dict_from_string.values()):
@@ -389,7 +389,7 @@ def _list(value):
         # This is a list of integer or float values
         parameter_valid = True
     elif _string(value):
-        list_from_string = pu.cast_str_to_type(value)
+        list_from_string = pu._dumps(value)
         if isinstance(list_from_string, list):
             parameter_valid = True
     return parameter_valid

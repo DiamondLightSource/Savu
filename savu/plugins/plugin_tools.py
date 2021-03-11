@@ -71,6 +71,8 @@ class PluginParameters(object):
             # Use a display option to apply to dependent parameters later.
             self._set_display(param_info_dict)
             for p_name, p_value in param_info_dict.items():
+                # Change the string to an integer, float, tuple, list, str, dict
+                p_value['default'] = pu._dumps(p_value['default'])
                 self.param.set(p_name, p_value)
 
     def _load_param_from_doc(self, tool_class):

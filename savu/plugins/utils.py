@@ -333,16 +333,13 @@ def convert_multi_params(param_name, value):
         )
         # Remove blank list entries
         # Change type to int, float or str
-        val_list = [cast_str_to_type(val) for val in value if val]
+        val_list = [_dumps(val) for val in value if val]
         value = val_list
     return value, error_str
 
-
-def cast_str_to_type(val):
-    """ Replace any missing quotes around variables.
+def _dumps(val):
+    """ Replace any missing quotes around variables
     Change the string to an integer, float, tuple, list, str, dict
-
-    This is based on __dumps inside savu/data/plugin_list.py
     """
     import yaml
     value = ''
@@ -351,28 +348,35 @@ def cast_str_to_type(val):
             # Safely evaluate an expression node or a string containing
             # a Python literal or container display
             value = ast.literal_eval(val)
+            return value
         except Exception:
-            try:
-                value = yaml.load(val, Loader=yaml.SafeLoader)
-            except Exception:
-                try:
-                    isdict = re.findall(r"[\{\}]+", val)
-                    # Matches { } between one and unlimited number of times
-                    if isdict:
-                        val = val.replace("[", "'[").replace("]", "]'")
-                        value = cast_str_to_type(yaml.load(val))
-                    else:
-                        value = parse_config_string(val)
-                except Exception:
-                    # for when parameter tuning with lists is added to the framework
-                    if len(val.split(';')) > 1:
-                        pass
-                    else:
-                        raise Exception("Invalid string %s" % val)
+            pass
+        try:
+            value = yaml.load(val, Loader=yaml.SafeLoader)
+            return value
+        except Exception:
+            pass
+        try:
+            isdict = re.findall(r"[\{\}]+", val)
+            # Matches { } between one and unlimited number of times
+            if isdict:
+                value_dict = {}
+                for k, v in val.items():
+                    v = v.replace("[", "'[").replace("]", "]'")
+                    value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
+                return value_dict
+            else:
+                value = parse_config_string(val)
+                return value
+        except Exception:
+            # for when parameter tuning with lists is added to the framework
+            if len(val.split(';')) > 1:
+                pass
+            else:
+                raise Exception("Invalid string %s" % val)
     else:
         value = val
     return value
-
 
 def create_dir(file_path):
     """Check if directories provided exist at this file path. If they don't
