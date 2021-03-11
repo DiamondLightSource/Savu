@@ -219,7 +219,6 @@ def _exit(content, arg):
 def _level(content, args):
     """ Set a visibility level for the parameters."""
     content.level(args.level)
-    print(f"Level set to '{args.level}'")
     return content
 
 @parse_args

@@ -9,7 +9,7 @@ It works particularly well for removing partial rings.
         """
         size:
             visibility: intermediate
-            dtype: int
+            dtype: [float, tuple]
             description: Size of the median filter window. Greater is stronger.
             default: 31
         """

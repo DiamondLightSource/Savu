@@ -47,7 +47,6 @@ class NoProcessTools(PluginTools):
             description: Path to config file
             default: 'Savu/test_data/data/test_config.cfg'
             visibility: intermediate
-            dtype: str
             description: Pattern used to create and store the hdf5 dataset
               default is the first pattern in the pattern dictionary.
         medianfilt_kernel_size:
@@ -171,6 +170,15 @@ class NoProcessTools(PluginTools):
             dtype: int_float_dict
             description: dictionary required
             default: "{'2':4.0}"
-
+        file_path_param:
+            visibility: basic
+            dtype: filepath
+            description: Filepath required
+            default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        savu_file_path_param:
+            visibility: basic
+            dtype: savufilepath
+            description: Savu Filepath required
+            default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
 """

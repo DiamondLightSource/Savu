@@ -49,9 +49,10 @@ OUTPUT_TYPE_METADATA_AND_DATA = 2
 def register_plugin(clazz):
     """decorator to add plugins to a central register"""
     plugins[clazz.__name__] = clazz
-    if clazz.__module__.split('.')[0] != 'savu':
+    if clazz.__module__.split(".")[0] != "savu":
         plugins_path[clazz.__name__] = clazz.__module__
     return clazz
+
 
 def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
     def _dawn_compatible(clazz):
@@ -79,7 +80,7 @@ def dawn_compatible(plugin_output_type=OUTPUT_TYPE_METADATA_AND_DATA):
 
 
 def get_plugin(plugin_name, params, exp, check=False):
-    """ Get an instance of the plugin class and populate default parameters.
+    """Get an instance of the plugin class and populate default parameters.
 
     :param plugin_name: Name of the plugin to import
     :type plugin_name: str.
@@ -92,11 +93,11 @@ def get_plugin(plugin_name, params, exp, check=False):
 
 
 def _get_cls_name(name):
-    return ''.join(x.capitalize() for x in name.split('.')[-1].split('_'))
+    return "".join(x.capitalize() for x in name.split(".")[-1].split("_"))
 
 
 def load_class(name, cls_name=None):
-    """ Returns an instance of the class associated with the module name.
+    """Returns an instance of the class associated with the module name.
 
     :param name: Module name or path to a module file
     :returns: An instance of the class associated with module.
@@ -132,14 +133,15 @@ def plugin_loader(exp, plugin_dict, check=False):
     logging.debug("finished plugin loader")
     return plugin
 
+
 def get_tools_class(plugin_tools_id, cls=False):
     tool_class = None
-    if plugin_tools_id == 'savu.plugins.plugin_tools':
-        plugin_tools_id = 'savu.plugins.base_tools'
+    if plugin_tools_id == "savu.plugins.plugin_tools":
+        plugin_tools_id = "savu.plugins.base_tools"
 
     # determine Savu base path
-    path_name = plugin_tools_id.replace('.', '/')
-    file_path =  savu.__path__[0] + '/../' + path_name + '.py'
+    path_name = plugin_tools_id.replace(".", "/")
+    file_path = savu.__path__[0] + "/../" + path_name + ".py"
     if os.path.isfile(file_path):
         if cls:
             tool_class = load_class(plugin_tools_id)(cls)
@@ -165,14 +167,14 @@ def get_plugins_paths(examples=True):
             ''.join(['savu.plugins.', path, '.'])
 
     # get user, environment and example plugin paths
-    user_path = [os.path.join(os.path.expanduser("~"), 'savu_plugins')]
+    user_path = [os.path.join(os.path.expanduser("~"), "savu_plugins")]
     env_paths = os.getenv("SAVU_PLUGINS_PATH", "").replace(" ", "").split(":")
     templates = "../plugin_examples/plugin_templates"
     eg_path = [os.path.join(savu.__path__[0], templates)] if examples else []
 
     for ppath in env_paths + user_path + eg_path:
         if os.path.exists(ppath):
-            plugins_paths[ppath] = os.path.basename(ppath) + '.'
+            plugins_paths[ppath] = os.path.basename(ppath) + "."
             if ppath not in sys.path:
                 sys.path.append(os.path.dirname(ppath))
 
@@ -220,7 +222,7 @@ def parse_config_string(string):
     delimitors = re.findall(regex, string)
     split_vals = [repr(a.strip()) for a in split_vals]
     zipped = itertools.zip_longest(delimitors, split_vals)
-    string = ''.join([i for l in zipped for i in l if i is not None])
+    string = "".join([i for l in zipped for i in l if i is not None])
     try:
         return ast.literal_eval(string)
     except ValueError:
@@ -232,29 +234,31 @@ def parse_array_index_as_string(string):
     for m in p.finditer(string):
         offset = m.start() - count + 3
         end = string[offset:].index("']") + offset
-        string = string[:end] + "]'" + string[end + 2:]
-    string = string.replace("'['", '[')
+        string = string[:end] + "]'" + string[end + 2 :]
+    string = string.replace("'['", "[")
     return string
 
 
 def param_to_str(param_name, keys):
-    """ Check the parameter is within the provided list and
+    """Check the parameter is within the provided list and
     return the string name.
     """
     if param_name.isdigit():
         param_name = int(param_name)
         if param_name <= len(keys):
-            param_name = keys[param_name-1]
+            param_name = keys[param_name - 1]
         else:
-            raise Exception('This parameter number is not valid for this plugin')
+            raise Exception(
+                "This parameter number is not valid for this plugin"
+            )
     elif param_name not in keys:
-        raise Exception('This parameter is not present in this plug in.')
+        raise Exception("This parameter is not present in this plug in.")
 
     return param_name
 
 
 def set_order_by_visibility(parameters, level=False):
-    """ Return an ordered list of parameters depending on the
+    """Return an ordered list of parameters depending on the
     visibility level
 
     :param parameters: The dictionary of parameters
@@ -266,23 +270,23 @@ def set_order_by_visibility(parameters, level=False):
     interm_keys = []
     adv_keys = []
     for k, v in parameters.items():
-        if v['display'] == 'on':
-            if v['visibility'] == 'datasets':
+        if v["display"] == "on":
+            if v["visibility"] == "datasets":
                 data_keys.append(k)
-            if v['visibility'] == 'basic':
+            if v["visibility"] == "basic":
                 basic_keys.append(k)
-            if v['visibility'] == 'intermediate':
+            if v["visibility"] == "intermediate":
                 interm_keys.append(k)
-            if v['visibility'] == 'advanced':
+            if v["visibility"] == "advanced":
                 adv_keys.append(k)
     if level:
-        if level == 'datasets':
+        if level == "datasets":
             keys = data_keys
-        elif level == 'basic':
+        elif level == "basic":
             keys = basic_keys
-        elif level == 'intermediate':
+        elif level == "intermediate":
             keys = basic_keys + interm_keys + data_keys
-        elif level == 'advanced':
+        elif level == "advanced":
             keys = basic_keys + interm_keys + adv_keys + data_keys
         else:
             keys = basic_keys + interm_keys + adv_keys + data_keys
@@ -293,109 +297,103 @@ def set_order_by_visibility(parameters, level=False):
 
 
 def convert_multi_params(param_name, value):
-    """ Check if value is a multi parameter and check if each item is valid.
+    """Check if value is a multi parameter and check if each item is valid.
     Change from the input multi parameter string to a list
 
     :param param_name: Name of the parameter
     :param value: Parameter value
     :return: List or unchanged value
     """
-    error_str = ''
-    multi_parameters = (isinstance(value, str) and (';' in value)
-                        and param_name != 'preview')
+    error_str = ""
+    multi_parameters = (
+        isinstance(value, str) and (";" in value) and param_name != "preview"
+    )
     if multi_parameters:
-        value = value.split(';')
+        value = value.split(";")
         if ":" in value[0]:
-            seq = value[0].split(':')
+            seq = value[0].split(":")
             try:
-                seq = [eval(s) for s in seq]
+                seq = [ast.literal_eval(s) for s in seq]
                 if len(value) == 0:
-                    error_str = 'No values for tuned parameter "{}" ' \
-                                'ensure start:stop:step; values are ' \
-                                'valid.'.format(param_name)
+                    error_str = (
+                        f"No values for tuned parameter "
+                        f"'{param_name}' ensure start:stop:step; values "
+                        f"are valid"
+                    )
                 elif len(seq) == 2:
                     value = list(np.arange(seq[0], seq[1]))
                 elif len(seq) > 2:
                     value = list(np.arange(seq[0], seq[1], seq[2]))
                 else:
-                    error_str = 'Ensure start:stop:step; values are ' \
-                                'valid.'
+                    error_str = "Ensure start:stop:step; values are valid."
             except:
-                error_str = 'Ensure start:stop:step; values are ' \
-                            'valid.'
-        val_list = parse_config_string(value) if isinstance(value, str) else value
+                error_str = "Ensure start:stop:step; values are valid."
+        val_list = (
+            parse_config_string(value) if isinstance(value, str) else value
+        )
         # Remove blank list entries
         # Change type to int, float or str
-        val_list = [_cast_str_to_type(val)
-                    for val in val_list if val]
+        val_list = [cast_str_to_type(val) for val in value if val]
         value = val_list
     return value, error_str
 
 
-def _cast_str_to_type(value):
-    """ Change the string to an integer, float, tuple, list or str
-    TODO Check that this works correctly for log value
+def cast_str_to_type(val):
+    """ Replace any missing quotes around variables.
+    Change the string to an integer, float, tuple, list, str, dict
+
+    This is based on __dumps inside savu/data/plugin_list.py
     """
-    try:
-        val = int(value)
-    except:
+    import yaml
+    value = ''
+    if isinstance(val, str):
         try:
-            val = float(value)
-        except:
-            if '(' and ')' in value:
-                val = _cast_to_tuple(value)
-            elif '[' and ']' in value:
-                val = _cast_to_list(value)
-            else:
-                # Return the string
-                val = value
-    return val
-
-
-def _cast_to_list(value):
-    # Change type to list
-    inner_list = value.replace('[', '').replace(']', '')
-    if ',' in inner_list:
-        list_content = inner_list.split(',')
-        list_content = [_cast_str_to_type(i) for i in list_content]
-        val = list_content
+            # Safely evaluate an expression node or a string containing
+            # a Python literal or container display
+            value = ast.literal_eval(val)
+        except Exception:
+            try:
+                value = yaml.load(val, Loader=yaml.SafeLoader)
+            except Exception:
+                try:
+                    isdict = re.findall(r"[\{\}]+", val)
+                    # Matches { } between one and unlimited number of times
+                    if isdict:
+                        val = val.replace("[", "'[").replace("]", "]'")
+                        value = cast_str_to_type(yaml.load(val))
+                    else:
+                        value = parse_config_string(val)
+                except Exception:
+                    # for when parameter tuning with lists is added to the framework
+                    if len(val.split(';')) > 1:
+                        pass
+                    else:
+                        raise Exception("Invalid string %s" % val)
     else:
-        val = [_cast_str_to_type(inner_list)]
-    return val
-
-
-def _cast_to_tuple(value):
-    # Change type to tuple
-    inner_tuple = value.replace('(', '').replace(')', '')
-    if ',' in inner_tuple:
-        tuple_content = inner_tuple.split(',')
-        tuple_content = [_cast_str_to_type(i) for i in tuple_content]
-        val = tuple(tuple_content)
-    else:
-        inner_tuple_iterable = [_cast_str_to_type(inner_tuple)]
-        val = tuple(inner_tuple_iterable)
-    return val
+        value = val
+    return value
 
 
 def create_dir(file_path):
-    """ Check if directories provided exist at this file path. If they don't
+    """Check if directories provided exist at this file path. If they don't
     create the directories.
     """
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+
 def indent_multi_line_str(text, indent_level=1, justify=False):
-    text = text.split('\n')
+    text = text.split("\n")
     # Remove additional spacing on the left side so that text aligns
     if justify is False:
-        text = [(' '*4*indent_level) + line for line in text]
+        text = [(" " * 4 * indent_level) + line for line in text]
     else:
-        text = [(' '*4*indent_level) + line.lstrip() for line in text]
-    text = '\n'.join(text)
+        text = [(" " * 4 * indent_level) + line.lstrip() for line in text]
+    text = "\n".join(text)
     return text
 
 
 def indent(text, indent_level=1):
-    text = (' '*4*indent_level) + text
+    text = (" " * 4 * indent_level) + text
     return text

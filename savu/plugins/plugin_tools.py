@@ -424,7 +424,7 @@ class PluginParameters(object):
                 )
             else:
                 error = (
-                    f"Parameter '{key}' is not valid for plugin {self.name}."
+                    f"Parameter '{key}' is not valid for plugin {self.plugin_class.name}."
                     f" \nTry opening and re-saving the process list in the "
                     f"configurator to auto remove \nobsolete parameters."
                 )
@@ -486,7 +486,7 @@ class PluginCitations(object):
 
     def set_cite(self, tools_list):
         """Set the citations for each of the tools classes
-        Change to list() for Python 3
+        :param tools_list: List containing tool classes of parent plugins
         """
         list(
             map(
@@ -569,12 +569,13 @@ class PluginCitations(object):
         :param yaml_text:
         :return: Reformatted yaml text
         """
-        description = yaml_text.partition("bibtex:")[0].splitlines()
-        description = [l.strip() for l in description]
-        desc_str = "        description:" + " ".join(description)
+        description = doc.remove_new_lines(yaml_text.partition("bibtex:")[0])
+        desc_str = "        description:" + description
 
-        bibtex_text = yaml_text.partition("bibtex:")[2].partition("endnote:")[0]
-        end_text = yaml_text.partition("bibtex:")[2].partition("endnote:")[2]
+        bibtex_text = \
+            yaml_text.partition("bibtex:")[2].partition("endnote:")[0]
+        end_text = \
+            yaml_text.partition("bibtex:")[2].partition("endnote:")[2]
 
         if bibtex_text and end_text:
             final_str = desc_str + '\n        bibtex: |' + bibtex_text \
@@ -602,8 +603,19 @@ class PluginDocumentation(object):
     def set_doc(self, tools_list):
         # Use the tools class at the 'top'
         self.doc.set("verbose", tools_list[-1].__doc__)
-        self.doc.set("warn", tools_list[-1].config_warn.__doc__)
+        self.doc.set("warn", self.set_warn(tools_list))
         self.set_doc_link()
+
+    def set_warn(self, tools_list):
+        """Remove new lines and save config warnings for the child tools
+        class only.
+        """
+        config_str = tools_list[-1].config_warn.__doc__
+        if config_str and "\n\n" in config_str:
+            # Separate multiple warnings with two new lines \n\n
+            config_warn_list = [doc.remove_new_lines(l) for l in config_str.split("\n\n")]
+            config_str = '\n'.join(config_warn_list)
+        return config_str
 
     def set_doc_link(self):
         """If there is a restructured text documentation file inside the

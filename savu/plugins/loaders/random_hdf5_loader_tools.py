@@ -10,7 +10,7 @@ will be ignored (use a dummy).
         """
         size:
               visibility: basic
-              dtype: list
+              dtype: [list, tuple]
               description: A list specifiying the required data size.
               default: []
         axis_labels:

@@ -30,7 +30,7 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
-from savu.plugins.utils import convert_multi_params
+import savu.plugins.utils as pu 
 
 
 def _preview(value):
@@ -40,12 +40,18 @@ def _preview(value):
         parameter_valid = True
     return parameter_valid
 
+
 def _intlist(value):
     """ A list containing integer values """
     parameter_valid = False
     if isinstance(value, list):
         if all(_integer(item) for item in value):
             parameter_valid = True
+    elif _string(value):
+        value_list = pu.cast_str_to_type(value)
+        if isinstance(value_list, list):
+            if all(_integer(item) for item in value_list):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -55,6 +61,11 @@ def _stringlist(value):
     if isinstance(value, list):
         if all(_string(item) for item in value):
             parameter_valid = True
+    elif _string(value):
+        value_list = pu.cast_str_to_type(value)
+        if isinstance(value_list, list):
+            if all(_string(item) for item in value_list):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -64,6 +75,11 @@ def _numlist(value):
     if isinstance(value, list):
         if all( _float(item) for item in value):
             parameter_valid = True
+    elif _string(value):
+        value_list = pu.cast_str_to_type(value)
+        if isinstance(value_list, list):
+            if all(_float(item) for item in value_list):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -72,7 +88,13 @@ def _range(value):
     parameter_valid = False
     if isinstance(value, tuple):
         if len(value) == 2:
-            if _integer(value[0]) and _integer(value[1]):
+            if _float(value[0]) and _float(value[1]):
+                parameter_valid = True
+        else:
+            print(Fore.RED + "Please enter two values." + Fore.RESET)
+    elif _numlist(value):
+        if len(value) == 2:
+            if _float(value[0]) and _float(value[1]):
                 parameter_valid = True
         else:
             print(Fore.RED + "Please enter two values." + Fore.RESET)
@@ -82,17 +104,26 @@ def _range(value):
 def _yamlfile(value):
     """ yaml_file """
     parameter_valid = False
+    file_path_str = ''
     if _filepath(value):
-        f = open(value)
-        errors = yu.check_yaml_errors(f)
-        try:
-            yu.read_yaml(value)
-            parameter_valid = True
-        except:
-            if errors:
-                print("There were some errors with your yaml file structure.")
-                for e in errors:
-                    print(e)
+        file_path_str = value
+    elif _savufilepath(value):
+        # If the file path is not valid, try preprending the savu base path
+        savu_base_path = \
+            os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+        file_path_str = savu_base_path+value
+
+    if file_path_str:
+        with open(file_path_str, 'r') as f:
+            errors = yu.check_yaml_errors(f)
+            try:
+                yu.read_yaml(file_path_str)
+                parameter_valid = True
+            except:
+                if errors:
+                    print("There were some errors with your yaml file structure.")
+                    for e in errors:
+                        print(e)
     return parameter_valid
 
 
@@ -190,11 +221,22 @@ def _filepath(value):
     return parameter_valid
 
 
+def _savufilepath(value):
+    """ A file path inside the Savu directory"""
+    parameter_valid = False
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+    if _string(value):
+        if os.path.isfile(savu_base_path+value):
+            parameter_valid = True
+    return parameter_valid
+
+
 def _intpathway(value):
     # Interior file path
     parameter_valid = False
     # Could check if valid, but only if file_path known for another parameter
-    if isinstance(value, str):
+    if _string(value):
         parameter_valid = True
     return parameter_valid
 
@@ -250,12 +292,14 @@ def _integer(value):
     parameter_valid = False
     if isinstance(value, int):
         parameter_valid = True
+    if isinstance(value, np.integer):
+        parameter_valid = True
     return parameter_valid
 
 
 def _positive_integer(value):
     parameter_valid = False
-    if isinstance(value, int):
+    if _integer(value):
         if value > 0:
             parameter_valid = True
     return parameter_valid
@@ -281,6 +325,8 @@ def _float(value):
     parameter_valid = False
     if isinstance(value, float):
         parameter_valid = True
+    if isinstance(value, np.float):
+        parameter_valid = True
     elif _integer(value):
         # Allow integer values as well
         float(value)
@@ -292,6 +338,10 @@ def _tuple(value):
     parameter_valid = False
     if isinstance(value, tuple):
         parameter_valid = True
+    elif _string(value):
+        tuple_from_string = pu.cast_str_to_type(value)
+        if isinstance(tuple_from_string, tuple):
+            parameter_valid = True
     return parameter_valid
 
 
@@ -299,6 +349,10 @@ def _dict(value):
     parameter_valid = False
     if isinstance(value, dict):
         parameter_valid = True
+    elif _string(value):
+        dict_from_string = pu.cast_str_to_type(value)
+        if isinstance(dict_from_string, dict):
+            parameter_valid = True
     return parameter_valid
 
 
@@ -315,6 +369,16 @@ def _int_float_dict(value):
                 print("Ensure dictionary values are floats.")
         else:
             print("Ensure dictionary keys are integers.")
+    elif _string(value):
+        dict_from_string = pu.cast_str_to_type(value)
+        if isinstance(dict_from_string, dict):
+            if all(_integer(k) for k in dict_from_string.keys()):
+                if all(_float(v) for v in dict_from_string.values()):
+                    parameter_valid = True
+                else:
+                    print("Ensure dictionary values are floats.")
+            else:
+                print("Ensure dictionary keys are integers.")
     return parameter_valid
 
 
@@ -324,8 +388,10 @@ def _list(value):
     if isinstance(value, list):
         # This is a list of integer or float values
         parameter_valid = True
-    else:
-        parameter_valid = _list_as_string(value)
+    elif _string(value):
+        list_from_string = pu.cast_str_to_type(value)
+        if isinstance(list_from_string, list):
+            parameter_valid = True
     return parameter_valid
 
 
@@ -364,6 +430,7 @@ type_dict = {
     "file_int_path_int": _intgroup,
     "int_path_int": _intgroup1,
     "filepath": _filepath,
+    "savufilepath": _savufilepath,
     "directory": _directory,
     "int_path": _intpathway,
     "config_file": _configfile,
@@ -390,6 +457,7 @@ type_error_dict = {
     "file_int_path_int": "[filepath, interior file path, int]",
     "int_path_int": "[interior file path, int]",
     "filepath": "filepath",
+    "savufilepath": "filepath within the savu directory",
     "directory": "directory",
     "int_path": "string",
     "config_file": "configuration file",
@@ -495,7 +563,7 @@ def _check_multi_params(param_name, value, current_parameter_details):
     type_error_str = ""
     parameter_valid = False
     if is_multi_param(param_name, value):
-        val_list, type_error_str = convert_multi_params(param_name, value)
+        val_list, type_error_str = pu.convert_multi_params(param_name, value)
         if not type_error_str:
             for item in val_list:
                 parameter_valid, type_error_str = is_valid(
@@ -511,7 +579,7 @@ def _check_multi_params(param_name, value, current_parameter_details):
 def is_multi_param(param_name, value):
     """Return True if the value is made up of multiple parameters"""
     return (
-        isinstance(value, str) and (";" in value) and param_name != "preview"
+        _string(value) and (";" in value) and param_name != "preview"
     )
 
 

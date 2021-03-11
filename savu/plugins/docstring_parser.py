@@ -54,6 +54,16 @@ def __find_regexp(regexp, str_list):
     return args, index
 
 
+def remove_new_lines(in_string):
+    """Remove new lines between text"""
+    out_string = in_string
+    if out_string:
+        out_string = in_string.splitlines()
+        out_string = [l.strip() for l in out_string]
+        out_string = " ".join(out_string)
+    return out_string
+
+
 def load_yaml_doc(lines):
     """Load in the yaml format. Call yaml_utils.py
 
