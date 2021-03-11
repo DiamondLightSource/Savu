@@ -4,7 +4,7 @@
 #author          :Daniil Kazantsev
 #date            :18.01.2021
 #version         :0.1
-#requirements    :installed Savu conda environment with all dependencies
+#requirements    :installed Savu conda environment with all dependencies satisfied
 #usage           :bash packages_update.sh
 
 # Update strategy steps:

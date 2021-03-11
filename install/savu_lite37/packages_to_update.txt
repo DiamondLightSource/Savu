@@ -1,13 +1,13 @@
 # -------------------------------------------------------------------------------------------
 #  Package name    |   Channel   | Stable version | Failed version | Incompatible |  Date   |
 # -------------------------------------------------------------------------------------------
-scikit-image       |   conda-forge   |    0.17.2     |    0.0     |    0.18.1      |2021-01-21|
-scikit-learn       |   conda-forge   |    0.23.1     |    0.0     |    0.24.1      |2021-01-21|
+scikit-image       |   conda-forge   |    0.17.2     |    0.0     |    0.18.1      |2021-03-11|
+scikit-learn       |   conda-forge   |    0.23.1     |    0.0     |    0.24.1      |2021-03-11|
 astra-toolbox      |   astra-toolbox/label/dev   |    1.9.9.dev4     |   0.0  | 0.1|2021-01-15|
 tomopy             |   conda-forge   |    1.9.1     |    0.0    |0.1 | 2021-01-15|
-larix              |   savu-dep   |    2021.02     |    0.0     | 0.1 |2021-01-15|
-tomophantom        |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
-tomobar            |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
-ccpi-regulariser   |   savu-dep   |    2021.02     |    0.0     |0.1 |2021-01-15|
-ccpi-reconstruction|   ccpi      |    20.09     |    0.0     |0.1 | 2021-01-15|
+larix              |   savu-dep   |    2021.02     |    2021.03      |    0.0      |2021-03-11|
+tomophantom        |   savu-dep   |    2021.01     |    0.0     |    2021.03      |2021-03-11|
+tomobar            |   savu-dep   |    2021.02     |    0.0     |    2021.03      |2021-03-11|
+ccpi-regulariser   |   savu-dep   |    2021.02     |    0.0     |    2021.03      |2021-03-11|
+ccpi-reconstruction|   ccpi      |    20.09     |    0.0     |    2021.03      |2021-03-11|
 # -------------------------------------------------------------------------------------------

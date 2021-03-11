@@ -15,12 +15,12 @@ build:
 
 requirements:
   host:
-    - python 3.7.5 h0371630_0
-    - pip 20.3.3 pyhd8ed1ab_0
-    - wheel 0.36.2 pyhd3eb1b0_0
+    - python
+    - pip
+    - wheel
 
   run:
-    - python 3.7.5 h0371630_0
+    - python 3.7.3 h0371630_0
     - ipython
     - numpy 1.15.4 py37h8b7e671_1002
     - tomopy 1.9.1 py37h8342161_101
@@ -36,7 +36,7 @@ requirements:
     - geodistk 0.1.6 py37hdeaff10_0
     - morphsnakes 1.0 py37hdeaff10_0
     - tomobar 2021.02 py37hdeaff10_0
-    - tomophantom 2021.02 np115py37_0
+    - tomophantom 2021.01 np115py37_0
     - larix 2021.02 py37hdeaff10_0
     - ccpi-reconstruction 20.09 np115py37h3be76a2_0
     - ccpi-regulariser 2021.02 np115py37_0
