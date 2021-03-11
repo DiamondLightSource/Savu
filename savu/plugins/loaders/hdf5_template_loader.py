@@ -110,6 +110,10 @@ class Hdf5TemplateLoader(YamlConverter):
             raise Exception(msg)
 
     def _setup_data(self, dObj, path):
-        dObj.data = dObj.backing_file[self.update_value(dObj, path)]
-        dObj.set_shape(dObj.data.shape)
+        path = self.update_value(dObj, path)
+        if path in dObj.backing_file:
+            dObj.data = dObj.backing_file[self.update_value(dObj, path)]
+            dObj.set_shape(dObj.data.shape)
+        else:
+            raise Exception("The path '%s' was not found in %s" % (path, dObj.backing_file.filename))
         return dObj
