@@ -647,6 +647,36 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_string_list_10(self):
+        # Check that string list is accepted
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = ['5:600']
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_11(self):
+        # Check that string list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[5:600]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_12(self):
+        # Check that string list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[5:600,5:7]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
     def test_num_list(self):
         # Check that int list is accepted
         plugin = self.initial_setup()
