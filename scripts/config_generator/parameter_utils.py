@@ -45,8 +45,10 @@ def _intlist(value):
     """ A list containing integer values """
     parameter_valid = False
     if isinstance(value, list):
-        if all(_integer(item) for item in value):
-            parameter_valid = True
+        if value:
+            # If the list is not empty
+            if all(_integer(item) for item in value):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -54,8 +56,10 @@ def _stringlist(value):
     """ A list containing string values """
     parameter_valid = False
     if isinstance(value, list):
-        if all(_string(item) for item in value):
-            parameter_valid = True
+        if value:
+            # If the list is not empty
+            if all(_string(item) for item in value):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -63,8 +67,10 @@ def _numlist(value):
     """ int or float list """
     parameter_valid = False
     if isinstance(value, list):
-        if all( _float(item) for item in value):
-            parameter_valid = True
+        if value:
+            # If the list is not empty
+            if all( _float(item) for item in value):
+                parameter_valid = True
     return parameter_valid
 
 
@@ -354,7 +360,9 @@ def _list(value):
     parameter_valid = False
     if isinstance(value, list):
         # This is a list of integer or float values
-        parameter_valid = True
+        if value:
+            # If the list is not empty
+            parameter_valid = True
     return parameter_valid
 
 
