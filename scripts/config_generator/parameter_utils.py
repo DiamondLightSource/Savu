@@ -74,6 +74,16 @@ def _numlist(value):
     return parameter_valid
 
 
+def _emptylist(value):
+    """ empty list """
+    parameter_valid = False
+    if isinstance(value, list):
+        if len(value) == 0:
+            # If the list is empty
+            parameter_valid = True
+    return parameter_valid
+
+
 def _range(value):
     """range"""
     parameter_valid = False
@@ -376,6 +386,7 @@ type_dict = {
     "int_list": _intlist,
     "string_list": _stringlist,
     "num_list": _numlist,
+    "empty_list": _emptylist,
     "range": _range,
     "yaml_file": _yamlfile,
     "file_int_path_int": _intgroup,
@@ -403,6 +414,7 @@ type_error_dict = {
     "int_list": "list of integers",
     "string_list": "list of strings",
     "num_list": "list of numbers",
+    "empty_list": "empty list",
     "range": "range'. For example '<value 1>, <value 2>",
     "yaml_file": "yaml format",
     "file_int_path_int": "[filepath, interior file path, int]",

@@ -417,6 +417,66 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_empty_list(self):
+        # Check that int list is not accepted
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = [2, 3, 4, 5]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_empty_list_1(self):
+        # Check that integer is not accepted
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = 8
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_empty_list_2(self):
+        # Check that str is not accepted
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = "Testing str"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_empty_list_3(self):
+        # Check that str list is not accepted
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = ["value", "second6"]
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_empty_list_4(self):
+        # Check that empty list is accepted
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = []
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
+    def test_empty_list_5(self):
+        # Check that empty list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "empty_list_param"
+        value = "[]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertTrue(valid_modification)
+
     def test_int_list(self):
         # Check that int list is accepted
         plugin = self.initial_setup()
