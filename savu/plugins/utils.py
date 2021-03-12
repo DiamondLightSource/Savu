@@ -342,7 +342,6 @@ def _dumps(val):
     Change the string to an integer, float, tuple, list, str, dict
     """
     import yaml
-    value = ''
     if isinstance(val, str):
         try:
             # Safely evaluate an expression node or a string containing
@@ -371,7 +370,7 @@ def _dumps(val):
         except Exception:
             # for when parameter tuning with lists is added to the framework
             if len(val.split(';')) > 1:
-                pass
+                value = val
             else:
                 raise Exception("Invalid string %s" % val)
     else:
