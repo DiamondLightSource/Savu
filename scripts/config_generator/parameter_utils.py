@@ -47,11 +47,6 @@ def _intlist(value):
     if isinstance(value, list):
         if all(_integer(item) for item in value):
             parameter_valid = True
-    elif _string(value):
-        value_list = pu._dumps(value)
-        if isinstance(value_list, list):
-            if all(_integer(item) for item in value_list):
-                parameter_valid = True
     return parameter_valid
 
 
@@ -61,11 +56,6 @@ def _stringlist(value):
     if isinstance(value, list):
         if all(_string(item) for item in value):
             parameter_valid = True
-    elif _string(value):
-        value_list = pu._dumps(value)
-        if isinstance(value_list, list):
-            if all(_string(item) for item in value_list):
-                parameter_valid = True
     return parameter_valid
 
 
@@ -75,11 +65,6 @@ def _numlist(value):
     if isinstance(value, list):
         if all( _float(item) for item in value):
             parameter_valid = True
-    elif _string(value):
-        value_list = pu._dumps(value)
-        if isinstance(value_list, list):
-            if all(_float(item) for item in value_list):
-                parameter_valid = True
     return parameter_valid
 
 
@@ -338,10 +323,6 @@ def _tuple(value):
     parameter_valid = False
     if isinstance(value, tuple):
         parameter_valid = True
-    elif _string(value):
-        tuple_from_string = pu._dumps(value)
-        if isinstance(tuple_from_string, tuple):
-            parameter_valid = True
     return parameter_valid
 
 
@@ -349,10 +330,6 @@ def _dict(value):
     parameter_valid = False
     if isinstance(value, dict):
         parameter_valid = True
-    elif _string(value):
-        dict_from_string = pu._dumps(value)
-        if isinstance(dict_from_string, dict):
-            parameter_valid = True
     return parameter_valid
 
 
@@ -369,16 +346,6 @@ def _int_float_dict(value):
                 print("Ensure dictionary values are floats.")
         else:
             print("Ensure dictionary keys are integers.")
-    elif _string(value):
-        dict_from_string = pu._dumps(value)
-        if isinstance(dict_from_string, dict):
-            if all(_integer(k) for k in dict_from_string.keys()):
-                if all(_float(v) for v in dict_from_string.values()):
-                    parameter_valid = True
-                else:
-                    print("Ensure dictionary values are floats.")
-            else:
-                print("Ensure dictionary keys are integers.")
     return parameter_valid
 
 
@@ -388,31 +355,7 @@ def _list(value):
     if isinstance(value, list):
         # This is a list of integer or float values
         parameter_valid = True
-    elif _string(value):
-        list_from_string = pu._dumps(value)
-        if isinstance(list_from_string, list):
-            parameter_valid = True
     return parameter_valid
-
-
-def _list_as_string(value):
-    """ A value of type string, which is written in a list format"""
-    parameter_valid = False
-    try:
-        if "[" and "]" in value:
-            bracket_value = value.split("[")
-            first_bracket_value = bracket_value[1].split("]")
-            if len(first_bracket_value) <= 2:
-                if first_bracket_value[1]:
-                    print("There are values outside of the square brackets")
-                else:
-                    entries = first_bracket_value[0].split(",")
-                    str_list = [v for v in entries]
-                    parameter_valid = True
-            else:
-                print("Please enter values inside your list.")
-    finally:
-        return parameter_valid
 
 
 # If you are editing the type dictionary, please update the documentation
@@ -476,10 +419,20 @@ type_error_dict = {
 
 
 def is_valid(param_name, value, current_parameter_details):
-    """Check if the value matches the default value.
+    """Check if the parameter value (value) is a valid data type
+    for the parameter (param_name)
+
+    Check if the value matches the default value.
     Then type check, followed by a check on whether it is present in options
     If the items in options have not been type checked, or have errors,
     it may cause problems.
+
+    :param param_name: The name of the parameter
+    :param value: The new value of the parameter
+    :param current_parameter_details: Dictionary of information about the
+      parameter, such as description, dtype, default
+    :return: boolean True if the value is a valid parameter value
+
     """
     option_error_str = ""
     type_error_str = ""
@@ -536,9 +489,10 @@ def _check_type(dtype, param_name, value, current_parameter_details):
     :return: pvalid, True if the value type matches the required dtype
              type_error_str, Error message
     """
+    type_error_str = ""
+    pvalid = False
     if dtype not in type_dict.keys():
         type_error_str = "That type definition is not configured properly."
-        pvalid = False
     elif is_multi_param(param_name, value):
         # If there are multiple parameters, check each individually
         pvalid, type_error_str = _check_multi_params(
@@ -546,7 +500,6 @@ def _check_type(dtype, param_name, value, current_parameter_details):
         )
     else:
         pvalid = type_dict[dtype](value)
-        type_error_str = ""
     return pvalid, type_error_str
 
 
