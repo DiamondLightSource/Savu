@@ -19,6 +19,7 @@ dtype:
         int_list: List of integers
         string_list: List of strings
         num_list: List of numbers including int and float
+        empty_list: An empty list
         preview: Preview slice list for data
         range: A range (0,1)
         yaml_file: Yaml file

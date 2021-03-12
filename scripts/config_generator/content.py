@@ -259,30 +259,24 @@ class Content(object):
         """
         valid_modification = False
         pos = self.find_position(pos_str)
-        tools = self.plugin_list.plugin_list[pos]['tools']
-        params = self.plugin_list.plugin_list[pos]['param']
-        parameters = self.plugin_list.plugin_list[pos]['data']
-        # Select the correct group and order of parameters according to that
-        # on display to the user. This ensures correct parameter is modified.
+
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        tools = plugin_entry['tools']
+        params = plugin_entry['param']
+        parameters = plugin_entry['data']
 
         if ref:
             # For a refresh, refresh all keys, including those with
             # dependencies (which have the display off)
             keys = params.keys()
         else:
+            # Select the correct group and order of parameters according to that
+            # on display to the user. This ensures correct parameter is modified.
             keys = pu.set_order_by_visibility(params)
+            value = self.value(value)
+
         param_name = pu.param_to_str(param_name, keys)
-        try:
-            if not ref:
-                value = self.value(value)
-            valid_modification = tools.modify(parameters, value, param_name)
-        except SyntaxError:
-            print ("There is a syntax error. Please check your input.")
-        except EOFError:
-            print ("There is an end of line error. Please check your"
-                   " input for the character \"\'\".")
-        except Exception as e:
-            print(e)
+        valid_modification = tools.modify(parameters, value, param_name)
         return valid_modification
 
     def value(self, value):
@@ -290,7 +284,17 @@ class Content(object):
             try:
                 value = eval(value)
             except (NameError, SyntaxError):
-                value = eval(f"'{value}'")
+                try:
+                    value = eval(f"'{value}'")
+                    # if there is one quotation mark there will be an error
+                except EOFError:
+                    raise Exception("There is an end of line error. Please check your"
+                          " input for the character \"\'\".")
+                except SyntaxError:
+                    raise Exception("There is a syntax error. Please check your input.")
+                except:
+                    raise Exception("Please check your input.")
+
         return value
 
     def convert_to_ascii(self, value):

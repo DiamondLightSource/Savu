@@ -160,6 +160,11 @@ class NoProcessTools(PluginTools):
             dtype: num_list
             description: list of numbers required
             default: [0,1]
+        empty_list_param:
+            visibility: basic
+            dtype: empty_list
+            description: empty list required
+            default: None
         dict_param:
             visibility: basic
             dtype: dict

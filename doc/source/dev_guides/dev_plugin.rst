@@ -300,6 +300,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - A list of strings
     * - num_list
       - A list of numbers
+    * - empty_list
+      - An empty list
     * - preview
       - Preview slice list
     * - range

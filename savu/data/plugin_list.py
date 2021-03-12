@@ -177,7 +177,13 @@ class PluginList(object):
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
-            data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
+            if key == 'data':
+                data = {}
+                for k, v in plugin[key].items():
+                    #  Replace any missing quotes around variables.
+                    data[k] = pu._dumps(v)
+            else:
+                data = plugin[key]
 
             # get the string value
             data = json.dumps(data) if key in json_keys else plugin[key]
@@ -187,37 +193,6 @@ class PluginList(object):
                 data = data.encode("ascii")
             data = np.array([data])
             plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
-
-    def __dumps(self, data_dict):
-        """ Replace any missing quotes around variables
-        """
-        for key, val in data_dict.items():
-            if isinstance(val, str):
-                try:
-                    data_dict[key] = ast.literal_eval(val)
-                    continue
-                except Exception:
-                    pass
-                try:
-                    data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
-                    continue
-                except Exception:
-                    pass
-                try:
-                    isdict = re.findall(r"[\{\}]+", val)
-                    if isdict:
-                        val = val.replace("[", "'[").replace("]", "]'")
-                        data_dict[key] = self.__dumps(yaml.load(val))
-                    else:
-                        data_dict[key] = pu.parse_config_string(val)
-                    continue
-                except Exception:
-                    # for when parameter tuning with lists is added to the framework
-                    if len(val.split(';')) > 1:
-                        pass
-                    else:
-                        raise Exception("Invalid string %s" % val)
-        return data_dict
 
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)

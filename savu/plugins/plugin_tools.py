@@ -71,6 +71,8 @@ class PluginParameters(object):
             # Use a display option to apply to dependent parameters later.
             self._set_display(param_info_dict)
             for p_name, p_value in param_info_dict.items():
+                # Change the string to an integer, float, tuple, list, str, dict
+                p_value['default'] = pu._dumps(p_value['default'])
                 self.param.set(p_name, p_value)
 
     def _load_param_from_doc(self, tool_class):
@@ -106,6 +108,7 @@ class PluginParameters(object):
         # If found, then the parameter is within the current parameter list
         # displayed to the user
         if current_parameter_details:
+            value = pu._dumps(value)
             parameter_valid, error_str = param_u.is_valid(
                 param_name, value, current_parameter_details
             )
@@ -119,16 +122,23 @@ class PluginParameters(object):
             else:
                 print(error_str)
                 print("ERROR: This value has not been saved.")
-                logger.error(f"ERROR: Failed to modify the parameter "
-                             f"'{param_name}' to {value}")
-                logger.error(f"ERROR: Type should match "
-                             f"{current_parameter_details['dtype']}")
-                logger.error(f"ERROR: {param_name} set to default value: "
-                             f"{current_parameter_details['default']}")
+                self.test_log(param_name, value, current_parameter_details)
         else:
             print("Not in parameter keys.")
 
         return parameter_valid
+
+
+    def test_log(self, param_name, value, current_parameter_details):
+        logger.error(f"ERROR: Failed to modify the parameter "
+                     f"'{param_name}' to {value}")
+        logger.error(f"ERROR: Type should match "
+                     f"{current_parameter_details['dtype']}")
+        logger.error(f"ERROR: {param_name} set to default value: "
+                     f"{current_parameter_details['default']}")
+        logger.error(f"Please contact us at scientific.software@diamond.ac.uk "
+                     f"to let us know if this is incorrect.")
+
 
     def check_for_default(self, value, param_name, parameters):
         """If the value is changed to be 'default', then set the original
@@ -326,7 +336,8 @@ class PluginParameters(object):
 
             # Check that the dictionary key is a valid parameter name
             if parent_param in param_info_dict.keys():
-                # Check that each parameter choice key has a matching dictionary value
+                # Check that each parameter choice key has a matching
+                # dictionary value
                 if isinstance(default[parent_param], dict):
                     dep_param_choices = {
                         k: v for k, v in default[parent_param].items()
@@ -409,31 +420,35 @@ class PluginParameters(object):
 
         :param dict input_parameters: A dictionary of the input parameters
         for this plugin, or None if no customisation is required.
-
-        parameters is part of the plugin
-        it is a current value list
-        the default would not be a multi param string
         """
         for key in input_parameters.keys():
             if key in self.plugin_class.parameters.keys():
+                new_value = input_parameters[key]
                 self.modify(
-                    self.plugin_class.parameters, input_parameters[key], key
+                    self.plugin_class.parameters, new_value, key
                 )
                 self.__check_multi_params(
-                    self.plugin_class.parameters, input_parameters[key], key
+                    self.plugin_class.parameters, new_value, key
                 )
             else:
                 error = (
-                    f"Parameter '{key}' is not valid for plugin {self.plugin_class.name}."
-                    f" \nTry opening and re-saving the process list in the "
-                    f"configurator to auto remove \nobsolete parameters."
+                    f"Parameter '{key}' is not valid for plugin "
+                    f"{self.plugin_class.name}. \nTry opening and re-saving "
+                    f"the process list in the configurator to auto remove "
+                    f"\nobsolete parameters."
                 )
                 raise ValueError(error)
 
     def __check_multi_params(self, parameters, value, key):
-        """Convert parameter value to a list if it uses parameter tuning
+        """
+        Convert parameter value to a list if it uses parameter tuning
         and set associated parameters, so the framework knows the new size
         of the data and which plugins to re-run.
+
+        :param parameters: Dictionary of parameters and current values
+        :param value: Value to set parameter to
+        :param key: Parameter name
+        :return:
         """
         plugin = self.plugin_class
         if param_u.is_multi_param(key, value):
@@ -446,8 +461,7 @@ class PluginParameters(object):
                     {"label": label, "values": value},
                 )
                 plugin.append_extra_dims(len(value))
-        else:
-            parameters[key] = value
+
 
     def define_parameters(self):
         pass
@@ -613,7 +627,8 @@ class PluginDocumentation(object):
         config_str = tools_list[-1].config_warn.__doc__
         if config_str and "\n\n" in config_str:
             # Separate multiple warnings with two new lines \n\n
-            config_warn_list = [doc.remove_new_lines(l) for l in config_str.split("\n\n")]
+            config_warn_list = [doc.remove_new_lines(l)
+                                for l in config_str.split("\n\n")]
             config_str = '\n'.join(config_warn_list)
         return config_str
 
