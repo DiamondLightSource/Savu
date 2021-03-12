@@ -407,6 +407,16 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_list_7(self):
+        # Check that empty list is rejected
+        plugin = self.initial_setup()
+        key = "ica_w_init"
+        value = []
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
     def test_int_list(self):
         # Check that int list is accepted
         plugin = self.initial_setup()
@@ -567,6 +577,16 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_string_list_9(self):
+        # Check that empty list is rejected
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
     def test_num_list(self):
         # Check that int list is accepted
         plugin = self.initial_setup()
@@ -662,6 +682,26 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "10.4, 30.6, 5.9"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_num_list_10(self):
+        # Check that empty lists are not accepted
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = "[]"
+        valid_modification = plugin.tools.modify(
+            plugin.parameters, value, key
+        )
+        self.assertFalse(valid_modification)
+
+    def test_num_list_11(self):
+        # Check that empty lists are not accepted
+        plugin = self.initial_setup()
+        key = "num_list_param"
+        value = []
         valid_modification = plugin.tools.modify(
             plugin.parameters, value, key
         )
