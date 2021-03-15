@@ -8,7 +8,8 @@ class PyfaiAzimuthalIntegratorSeparateTools(PluginTools):
         out_datasets:
               visibility: datasets
               dtype: list
-              description: A
+              description: Names assigned to datasets created as output to the
+                  plugin.
               default: ['powder','spots']
         percentile:
               visibility: intermediate

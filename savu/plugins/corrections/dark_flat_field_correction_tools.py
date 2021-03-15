@@ -6,27 +6,27 @@ class DarkFlatFieldCorrectionTools(PluginTools):
     def define_parameters(self):
         """
         pattern:
-            visibility: advanced
+            visibility: intermediate
             dtype: str
             options: [SINOGRAM, PROJECTION]
             description: Data processing pattern
             default: PROJECTION
         lower_bound:
-            visibility: advanced
+            visibility: intermediate
             dtype: float
             description: Set all values below the lower_bound to this value.
             default: None
         upper_bound:
-            visibility: advanced
+            visibility: intermediate
             dtype: float
             description: Set all values above the upper bound to this value.
             default: None
         warn_proportion:
-            visibility: advanced
+            visibility: intermediate
             dtype: float
-            description:
-              summary: Output a warning if this proportion of values, or greater, are below and/or above the lower/upper bounds
-              verbose: 'Enter 0.05 for 5%'
+            description: Output a warning if this proportion of values, or 
+                  greater, are below and/or above the lower/upper bounds. 
+                  E.g. Enter 0.05 for 5%.
             default: 0.05
 
         """

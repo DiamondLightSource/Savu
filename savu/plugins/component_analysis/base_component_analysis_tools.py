@@ -1,18 +1,13 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BaseComponentAnalysisTools(PluginTools):
-    """A base plugin for doing component analysis. This sorts out the main
-features of a component analysis
+    """
+    A base plugin for doing component analysis. This sorts out the main
+    features of a component analysis
     """
 
     def define_parameters(self):
         """
-        in_datasets:
-            visibility: datasets
-            dtype: list
-            description: "A list of the dataset(s) to process."
-            default: []
-
         out_datasets:
             visibility: datasets
             dtype: list

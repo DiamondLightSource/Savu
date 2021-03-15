@@ -31,8 +31,7 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
-    """
-    """
+
     def __init__(self):
         super(DarkFlatFieldCorrection,
               self).__init__("DarkFlatFieldCorrection")

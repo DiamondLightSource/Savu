@@ -30,8 +30,7 @@ import numpy as np
 
 @register_plugin
 class Pca(BaseComponentAnalysis):
-    """
-    """
+
     def __init__(self):
         super(Pca, self).__init__("Pca")
 

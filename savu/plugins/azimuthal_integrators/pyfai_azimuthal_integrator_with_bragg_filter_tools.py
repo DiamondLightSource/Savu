@@ -1,9 +1,11 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class PyfaiAzimuthalIntegratorWithBraggFilterTools(PluginTools):
-    """Uses pyfai to remap the data. We then remap, percentile file and
+    """
+    Uses pyfai to remap the data. We then remap, percentile file and
     integrate.
     """
+    
     def define_parameters(self):
         """
         num_bins_azim:
@@ -13,8 +15,8 @@ class PyfaiAzimuthalIntegratorWithBraggFilterTools(PluginTools):
               default: 200
         thresh:
               visibility: intermediate
-              dtype: list
+              dtype: int_list
               description: Threshold of the percentile filter
-              default: '[5,95]'
-
+              default: [5, 95]
+    
         """
