@@ -5,7 +5,7 @@
 #date            :18.01.2021
 #version         :0.1
 #requirements    :installed Savu conda environment with all dependencies satisfied
-#usage           :bash packages_update.sh
+#usage           :bash packages_update.sh branch_name
 
 # Update strategy steps:
 # 1. Use freshly created conda environment with Savu+dependencies using spec-file.txt
@@ -21,6 +21,7 @@
 
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
+label="$1"
 filename='packages_to_update.txt'
 current_date=$(date '+%Y-%m-%d')
 n=1
@@ -43,22 +44,33 @@ while IFS="|" read -r package_name channel_name stable_version failed_version in
           echo "--> Installing a NEW version of the package"
           conda install --yes -c $channel_name $package_name --force-reinstall
           # Generate an explicit list file with installed conda packages
-          conda list --explicit > spec-savu3_0_lite_nodeps.txt
-          sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
+          conda list --explicit > spec-savu3_0_lite_"$label".txt
+          sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_"$label".txt
           echo "--> Check that the package is _actually_ updated"
-          checkpack_var=$(grep $package_name spec-savu3_0_lite_nodeps.txt)
+          checkpack_var=$(grep $package_name spec-savu3_0_lite_"$label".txt)
           if [[ $checkpack_var == *"$new_version_package"* ]]; then
             echo "--> The package $package_name is truly updated to version $new_version_package continue with savu_full_tests" | xargs
             savu_full_tests  2>&1 | tee savu_full_tests_log.txt
             # grep OK variable in the output log
-            VAR_OK=$(grep OK savu_full_tests_log.txt)
-              if [ "$VAR_OK" = "OK (skipped=1)" ]; then
-                echo "--> Tests PASS, update the STABLE version and timestamp"
+            VAR_PASS=$(grep "Tests PASSED" savu_full_tests_log.txt)
+              if [ "$VAR_PASS" = "Tests PASSED" ]; then
+                echo "--> Tests PASSED, update the STABLE version and the timestamp"
                 sed -i -e "/$package_name/s/$stable_version/\ \ \ \ $new_version_package \ \ \ \ \ /" "$filename"
               else
-                echo "--> Tests FAILED, update the FAILED version and timestamp"
+                echo "--> Tests FAILED, update the FAILED version and the timestamp"
                 sed -i -e "/$package_name/s/$failed_version/\ \ \ \ $new_version_package \ \ \ \ \ /" "$filename"
-                # Downgrade the package
+                echo "--> Downgrading the package to STABLE version"
+                #conda uninstall $package_name
+                # remove leading whitespace characters
+                stable_version="${stable_version#"${stable_version%%[![:space:]]*}"}"
+                # remove trailing whitespace characters
+                stable_version="${stable_version%"${stable_version##*[![:space:]]}"}"
+                package_name="${package_name#"${package_name%%[![:space:]]*}"}"
+                # remove trailing whitespace characters
+                package_name="${package_name%"${package_name##*[![:space:]]}"}"
+                channel_name="${channel_name#"${channel_name%%[![:space:]]*}"}"
+                # remove trailing whitespace characters
+                channel_name="${channel_name%"${channel_name##*[![:space:]]}"}"
                 conda install --yes -c $channel_name $package_name=$stable_version --force-reinstall
               fi
           else
@@ -78,7 +90,7 @@ n=$((n+1))
 echo "**********************************************************************"
 done < $filename
 #
-conda list --explicit > spec-savu3_0_lite_nodeps.txt
-sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_nodeps.txt
+conda list --explicit > spec-savu3_0_lite_"$label".txt
+sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_"$label".txt
 #clean up
 rm -rf 0* 1* 2*
