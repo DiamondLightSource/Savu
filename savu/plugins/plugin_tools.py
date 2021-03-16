@@ -130,14 +130,12 @@ class PluginParameters(object):
 
 
     def test_log(self, param_name, value, current_parameter_details):
-        logger.error(f"ERROR: Failed to modify the parameter "
-                     f"'{param_name}' to {value}")
-        logger.error(f"ERROR: Type should match "
-                     f"{current_parameter_details['dtype']}")
-        logger.error(f"ERROR: {param_name} set to default value: "
-                     f"{current_parameter_details['default']}")
-        logger.error(f"Please contact us at scientific.software@diamond.ac.uk "
-                     f"to let us know if this is incorrect.")
+        logging_str = \
+            f"ERROR: Failed to modify the parameter '{param_name}' to '{value}'\n" \
+            f"ERROR: Type should match {current_parameter_details['dtype']}\n" \
+            f"ERROR: {param_name} set to default value: " \
+            f"{current_parameter_details['default']}"
+        logger.error(logging_str)
 
 
     def check_for_default(self, value, param_name, parameters):
