@@ -1,9 +1,8 @@
 {% set repo = "master" %}
-{% set version = "3.0" %}
 
 package:
   name: savu-lite
-  version: {{ version }}
+  version: {{ environ['VERSION'] }}
 
 source:
   url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
