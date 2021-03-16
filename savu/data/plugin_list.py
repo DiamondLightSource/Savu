@@ -206,9 +206,13 @@ class PluginList(object):
         """Set the inner file path of the nexus file to be the citation
         id to avoid using long titles including spaces.
         """
+        cite_count = 1
         for cite in citations.values():
-            citation_group = group.create_group(cite.id.encode("ascii"))
+            # In case of a duplicate id, use the citation count number
+            str_id = cite.id + str(cite_count)
+            citation_group = group.create_group(str_id.encode("ascii"))
             cite.write(citation_group)
+            cite_count += 1
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
