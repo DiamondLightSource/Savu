@@ -1,0 +1,29 @@
+{% set repo = "master" %}
+{% set release = "0-4" %}
+
+package:
+  name: pmacparser
+  version: "4.0"
+
+source:
+  url: https://github.com/dls-controls/pmacparser/archive/{{ release }}.tar.gz
+
+requirements:
+  build:
+    - python
+    - pip
+    - numpy
+    - setuptools
+
+  run:
+    - python
+    - numpy
+    - setuptools
+
+build:
+  preserve_egg_dir: False
+  number: 0
+
+about:
+  home: https://github.com/dls-controls/pmacparser
+  license: Apache V2 and GPL V3
