@@ -108,7 +108,7 @@ class PluginList(object):
                 plugin['doc'] = plugin_class.docstring_info
                 plugin['tools'] = plugin_class.tools
                 plugin['param'] = plugin_class.p_dict
-                plugin['pos'] = group.encode('ascii').strip()
+                plugin['pos'] = group.strip()
 
                 for param in parameters:
                     try:
@@ -314,8 +314,6 @@ class PluginList(object):
             if loaders[0] != 0 or loaders[-1] + 1 != len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the process list")
-            if len(loaders) > 1:
-                print('You have more than one loader plugin.')
         else:
             raise Exception("The first plugin in the process list must be a "
                             "loader plugin.")
