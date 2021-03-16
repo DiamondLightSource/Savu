@@ -27,6 +27,8 @@ import inspect
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
+import scripts.config_generator.parameter_utils as param_u
+
 from . import mutations
 
 
@@ -254,17 +256,28 @@ class Content(object):
         :param ref: boolean Refresh the plugin
 
         returns: A boolean True if the value is a valid input for the
-          selected parameter and a str of the parameter name to use inside
-          the display
+          selected parameter
         """
-        valid_modification = False
         pos = self.find_position(pos_str)
-
         plugin_entry = self.plugin_list.plugin_list[pos]
         tools = plugin_entry['tools']
-        params = plugin_entry['param']
         parameters = plugin_entry['data']
+        params = plugin_entry['param']
+        param_name, value = self.setup_modify(params, param_name, value, ref)
+        valid_modification = self.modify_main(param_name, value, tools, parameters)
+        return valid_modification
 
+    def setup_modify(self, params, param_name, value, ref):
+        """ Get the parameter keys in the correct order and find
+        the parameter name string
+
+        :param params: The plugin parameters
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param ref: boolean Refresh the plugin
+
+        return: param_name str to avoid discrepancy, value
+        """
         if ref:
             # For a refresh, refresh all keys, including those with
             # dependencies (which have the display off)
@@ -274,10 +287,44 @@ class Content(object):
             # on display to the user. This ensures correct parameter is modified.
             keys = pu.set_order_by_visibility(params)
             value = self.value(value)
-
         param_name = pu.param_to_str(param_name, keys)
-        valid_modification = tools.modify(parameters, value, param_name)
-        return valid_modification
+        return param_name, value
+
+    def modify_main(self, param_name, value, tools, parameters):
+        """Check the parameter is within the current parameter list.
+        Check the new parameter value is valid, modify the parameter
+        value, update defaults, check if dependent parameters should
+        be made visible or hidden.
+
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param tools: The plugin tools
+        :param parameters: The plugin parameters
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter
+        """
+        parameter_valid = False
+        current_parameter_details = tools.param.get(param_name)
+        # If found, then the parameter is within the current parameter list
+        # displayed to the user
+        if current_parameter_details:
+            value_check = pu._dumps(value)
+            parameter_valid, error_str = param_u.is_valid(
+                param_name, value_check, current_parameter_details
+            )
+            if parameter_valid:
+                value = tools.check_for_default(value, param_name, parameters)
+                parameters[param_name] = value
+                tools.update_defaults(parameters, mod=param_name)
+                # Update the list of parameters to hide those dependent on others
+                tools.check_dependencies(parameters)
+            else:
+                print(error_str)
+                print("ERROR: This value has not been saved.")
+        else:
+            print("Not in parameter keys.")
+        return parameter_valid
 
     def value(self, value):
         if not value.count(';'):
@@ -294,7 +341,6 @@ class Content(object):
                     raise Exception("There is a syntax error. Please check your input.")
                 except:
                     raise Exception("Please check your input.")
-
         return value
 
     def convert_to_ascii(self, value):
