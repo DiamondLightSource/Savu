@@ -108,9 +108,9 @@ class PluginParameters(object):
         # If found, then the parameter is within the current parameter list
         # displayed to the user
         if current_parameter_details:
-            value = pu._dumps(value)
+            value_check = pu._dumps(value)
             parameter_valid, error_str = param_u.is_valid(
-                param_name, value, current_parameter_details
+                param_name, value_check, current_parameter_details
             )
             # Check that the value is an accepted input for the chosen parameter
             if parameter_valid:
