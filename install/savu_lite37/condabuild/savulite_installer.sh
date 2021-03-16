@@ -1,16 +1,6 @@
 #!/bin/bash
 
-rm -rf ~/.condarc
-conda config --append channels conda-forge
-conda config --append channels astra-toolbox/label/dev
-conda config --append channels ccpi
-conda config --append channels dkazanc
-
-conda config --set anaconda_upload no
-conda config --set channel_priority flexible
-conda config --set auto_activate_base false
-conda config --set show_channel_urls true
-conda config --set unsatisfiable_hints true
-
 conda install --yes conda-build anaconda-client setuptools
-conda build .
+#conda build . -c https://conda.anaconda.org/conda-forge/ -c https://conda.anaconda.org/astra-toolbox/label/dev/ -c https://conda.anaconda.org/savu-dep/ -c https://conda.anaconda.org/ccpi/ --numpy 1.15 --python 3.7 --override-channels
+conda build . -c defaults -c conda-forge -c astra-toolbox/label/dev/ -c savu-dep -c ccpi --override-channels
+#conda build . --numpy 1.15 --python 3.7
