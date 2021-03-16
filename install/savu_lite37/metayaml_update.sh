@@ -22,7 +22,6 @@ while IFS="|" read -r line ; do
     line_to_replace_meta="$package_name$blankspace$version$blankspace$build_version"
     while IFS="|" read -r line_explicit_list ; do
       shortened_string=${line_explicit_list##*/}
-      #shortened_string= echo $line_explicit_list | sed 's|.*/||'
       if [[ $package_name == "python" ]]; then
         package_name+="-3."
       fi
@@ -32,7 +31,10 @@ while IFS="|" read -r line ; do
       if [[ $package_name == "openmpi" ]]; then
         package_name+="-4."
       fi
-      if [[ $shortened_string == *"$package_name"* ]]; then
+      if [[ $package_name == "pytest" ]]; then
+        package_name+="-6."
+      fi
+      if [[ $shortened_string =~ .*$package_name.* ]]; then
         # ready to initialise variables from the explicit list
         package_name_explicit_t="$(cut -d'.' -f1 <<<"$shortened_string")"
         package_name_explicit=${package_name_explicit_t%-*}
