@@ -1,6 +1,9 @@
 .. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
     :target: https://github.com/DiamondLightSource/Savu/actions
 
+.. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_install/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 
@@ -73,8 +76,8 @@ The full documentation is available at https://savu.readthedocs.org/en/latest/
 
 Installation (Linux only)
 ========
-| Install Savu-lite package into empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
-| ``conda install -c savu-dep savu-lite``
+| Install Savu-lite package into an empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
+| ``conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev``
 
 
 License
