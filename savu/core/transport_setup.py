@@ -38,7 +38,7 @@ class MPI_setup(object):
         """
         processes = options["process_names"].split(',')
 
-        if len(processes) is 1:
+        if len(processes) == 1:
             options["mpi"] = False
             options["process"] = 0
             options["processes"] = processes

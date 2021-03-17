@@ -59,7 +59,7 @@ class MrcLoader(BaseLoader):
         self._set_rotation_angles(data_obj)
 
         nDims = len(data_obj.data.get_shape())
-        if nDims is 3:
+        if nDims == 3:
             rot = 0
             detY = 1
             detX = 2
@@ -71,7 +71,7 @@ class MrcLoader(BaseLoader):
                                  slice_dims=(rot,))
             data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                                  slice_dims=(detY,))
-        elif nDims is 4:
+        elif nDims == 4:
             # 4D patterns need to be set here
             pass
         else:
@@ -101,4 +101,3 @@ class MrcLoader(BaseLoader):
             raise Exception("The number of angles %s does not match the data "
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set("rotation_angle", angles)
-

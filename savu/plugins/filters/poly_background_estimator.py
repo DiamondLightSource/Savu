@@ -25,7 +25,13 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
+def division_zero(x,y):
+    try:
+        return x/y
+    except ZeroDivisionError:
+        return 0
 
 @register_plugin
 class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
@@ -48,9 +54,9 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         x = self.axis
         n = self.parameters['n']
         if self.parameters['weights'] == '1/data':
-            weights = 1.0 / data
+            weights = division_zero(1.0, data)
         elif self.parameters['weights'] == '1/data^2':
-            weights = 1.0 / data**2
+            weights =  division_zero(1.0,data**2)
         pvalue = self.parameters['pvalue']
         MaxIterations = self.parameters['MaxIterations']
         zu, _c, _poly, _weight, _index = \
@@ -186,4 +192,3 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
             c_old = c
         #print "finished", index.sum(), len(zu), Npoints, n, m
         return zu, c, poly, weight, index
-

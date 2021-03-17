@@ -206,28 +206,25 @@ def _get_log_level(options):
 def _send_email(address):
     import smtplib
     from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
 
-    me = 'nicola.wadeson@diamond.ac.uk'
-    you = address
-    # Open a plain text file for reading.  For this example, assume that
-    # the text file contains only ASCII characters.
-    #    fp = open(textfile, 'rb')
-    #    # Create a text/plain message
-    #    msg = MIMEText(fp.read())
-    #    fp.close()
+    email = 'scientificsoftware@diamond.ac.uk'
+    send_to_email = address
+    subject = 'Your Savu job has been completed'
+    message = 'Some message'
 
-    # me == the sender's email address
-    # you == the recipient's email address
-    msg['Subject'] = 'Your Savu job has completed'
-    msg['From'] = me
-    msg['To'] = you
+    msg = MIMEMultipart()
+    msg['From'] = email
+    msg['To'] = send_to_email
+    msg['Subject'] = subject
 
-    # Send the message via our own SMTP server, but don't include the
-    # envelope header.
-    s = smtplib.SMTP('localhost')
-    s.sendmail(me, [you], msg.as_string('write something here'))
-    s.quit()
+     # Attach the message to the MIMEMultipart object
+    msg.attach(MIMEText(message, 'plain'))
 
+    server = smtplib.SMTP('localhost')
+    text = msg.as_string() # You now need to convert the MIMEMultipart object to a string to send
+    server.sendmail(email, send_to_email, text)
+    server.quit()
 
 def _savu_encoder(data):
     return f'#savu_encoded#{data}'.encode("ascii")

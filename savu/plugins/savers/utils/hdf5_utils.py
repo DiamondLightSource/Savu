@@ -148,7 +148,7 @@ class Hdf5Utils(object):
 
         if 'data' in group:
             data.data = group['data']
-        elif current_and_next is 0:
+        elif current_and_next == 0:
             logging.warning('Creating the dataset without chunks')
             data.data = group.create_dataset("data", shape, data.dtype)
         else:

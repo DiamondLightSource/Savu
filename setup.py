@@ -8,6 +8,7 @@ from savu.test.test_process_list_utils import get_all_files_from
 
 facility = 'dls'
 facility_path = 'system_files/dls'
+templates_path = 'savu/plugins/loaders/templates/malcolm_templates/'
 
 from savu.version import __version__, __install__
 
@@ -67,6 +68,10 @@ version_file = os.path.join(__install__, 'version.txt')
 env_file = os.path.join(__install__, 'environment.yml')
 sys_file = os.path.join(facility_path, "system_parameters.yml")
 mod_file = os.path.join(facility_path, "modulefile", __version__)
+templates_file = os.path.join(templates_path, "malcolm.yml")
+templates_file1 = os.path.join(templates_path, "max.yml")
+templates_file2 = os.path.join(templates_path, "mean.yml")
+templates_file3 = os.path.join(templates_path, "min.yml")
 conda_recipes = get_files(os.path.join(__install__, '..', 'conda-recipes'))
 test_data = get_files("test_data")
 
@@ -81,7 +86,7 @@ setup(name='savu',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: Apache Software License',
           'Natural Language :: English',
-          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.7',
           'Topic :: Scientific/Engineering'
           'Operating System :: POSIX :: Linux'
       ],
@@ -103,11 +108,21 @@ setup(name='savu',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
       ], },
 
-      package_data={'savu.test.travis.framework_tests': ['*.yml']},
+      package_data={
+           'savu.test.travis.framework_tests': ['*.yml'],
+      },
 
-      data_files=[(os.path.dirname(version_file), [version_file]),
+      data_files=[('htmls', ['scripts/log_evaluation/string_single.html']),
+                  ('htmls', ['scripts/log_evaluation/string_multi.html']),
+                  ('htmls', ['scripts/log_evaluation/testing.html']),
+                  ('css', ['scripts/log_evaluation/style_sheet.css']),
+                  (os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(mod_file), [mod_file]),
+                  (os.path.dirname(templates_file), [templates_file]),
+                  (os.path.dirname(templates_file1), [templates_file1]),
+                  (os.path.dirname(templates_file2), [templates_file2]),
+                  (os.path.dirname(templates_file3), [templates_file3]),
                   (os.path.dirname(env_file), [env_file])] \
                   + conda_recipes + test_data,
 

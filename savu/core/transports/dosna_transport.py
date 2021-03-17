@@ -107,7 +107,7 @@ class DosnaTransport(BaseTransport):
             self._set_file_details(self.files[plugin_index])
             self._setup_dosna_objects()  # creates the dosna objects
 
-        if self.n_plugins is not 1:
+        if self.n_plugins != 1:
             self.exp.meta_data.set('transport', 'dosna')
 
     def _transport_post_plugin_list_run(self):
@@ -143,7 +143,7 @@ class DosnaTransport(BaseTransport):
         dataset_name = "{}_{}".format(group_name,
                                       self._extract_digits(object_id))
 
-        if current_and_next is 0:
+        if current_and_next == 0:
             data.data = self.dosna_connection.create_dataset(dataset_name,
                                                              shape,
                                                              data.dtype)

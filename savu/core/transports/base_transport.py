@@ -466,7 +466,7 @@ class BaseTransport(object):
             group_name = self.exp.meta_data.get(['group_name', name])
             link_type = self.exp.meta_data.get(['link_type', name])
 
-            if link_type is 'final_result':
+            if link_type == 'final_result':
                 group_name = 'final_result_' + data.get_name()
             else:
                 link = nxs_entry.require_group(link_type.encode("ascii"))
