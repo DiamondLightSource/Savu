@@ -95,50 +95,6 @@ class PluginParameters(object):
 
         return param_info_dict
 
-    def modify(self, parameters, value, param_name):
-        """Check the parameter is within the current parameter list.
-        Check the new parameter value is valid, modify the parameter
-        value, update defaults, check if dependent parameters should
-        be made visible or hidden.
-        """
-        # This is accessed from outside this class
-
-        parameter_valid = False
-        current_parameter_details = self.param.get(param_name)
-        # If found, then the parameter is within the current parameter list
-        # displayed to the user
-        if current_parameter_details:
-            value = pu._dumps(value)
-            parameter_valid, error_str = param_u.is_valid(
-                param_name, value, current_parameter_details
-            )
-            # Check that the value is an accepted input for the chosen parameter
-            if parameter_valid:
-                value = self.check_for_default(value, param_name, parameters)
-                parameters[param_name] = value
-                self.update_defaults(parameters, mod=param_name)
-                # Update the list of parameters to hide those dependent on others
-                self.check_dependencies(parameters)
-            else:
-                print(error_str)
-                print("ERROR: This value has not been saved.")
-                self.test_log(param_name, value, current_parameter_details)
-        else:
-            print("Not in parameter keys.")
-
-        return parameter_valid
-
-
-    def test_log(self, param_name, value, current_parameter_details):
-        logger.error(f"ERROR: Failed to modify the parameter "
-                     f"'{param_name}' to {value}")
-        logger.error(f"ERROR: Type should match "
-                     f"{current_parameter_details['dtype']}")
-        logger.error(f"ERROR: {param_name} set to default value: "
-                     f"{current_parameter_details['default']}")
-        logger.error(f"Please contact us at scientific.software@diamond.ac.uk "
-                     f"to let us know if this is incorrect.")
-
 
     def check_for_default(self, value, param_name, parameters):
         """If the value is changed to be 'default', then set the original
@@ -424,9 +380,6 @@ class PluginParameters(object):
         for key in input_parameters.keys():
             if key in self.plugin_class.parameters.keys():
                 new_value = input_parameters[key]
-                self.modify(
-                    self.plugin_class.parameters, new_value, key
-                )
                 self.__check_multi_params(
                     self.plugin_class.parameters, new_value, key
                 )
@@ -461,7 +414,8 @@ class PluginParameters(object):
                     {"label": label, "values": value},
                 )
                 plugin.append_extra_dims(len(value))
-
+        else:
+            parameters[key] = value
 
     def define_parameters(self):
         pass

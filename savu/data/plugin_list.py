@@ -108,7 +108,7 @@ class PluginList(object):
                 plugin['doc'] = plugin_class.docstring_info
                 plugin['tools'] = plugin_class.tools
                 plugin['param'] = plugin_class.p_dict
-                plugin['pos'] = group.encode('ascii').strip()
+                plugin['pos'] = group.strip()
 
                 for param in parameters:
                     try:
@@ -206,9 +206,13 @@ class PluginList(object):
         """Set the inner file path of the nexus file to be the citation
         id to avoid using long titles including spaces.
         """
+        cite_count = 1
         for cite in citations.values():
-            citation_group = group.create_group(cite.id.encode("ascii"))
+            # In case of a duplicate id, use the citation count number
+            str_id = cite.id + str(cite_count)
+            citation_group = group.create_group(str_id.encode("ascii"))
             cite.write(citation_group)
+            cite_count += 1
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
@@ -314,8 +318,6 @@ class PluginList(object):
             if loaders[0] != 0 or loaders[-1] + 1 != len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
                                 "of the process list")
-            if len(loaders) > 1:
-                print('You have more than one loader plugin.')
         else:
             raise Exception("The first plugin in the process list must be a "
                             "loader plugin.")

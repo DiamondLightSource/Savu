@@ -24,6 +24,7 @@
 import unittest
 
 import savu.plugins.utils as pu
+import scripts.config_generator.parameter_utils as param_u
 
 
 class ParameterTypeTest(unittest.TestCase):
@@ -37,15 +38,21 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that integer is accepted
         plugin = self.initial_setup()
         key = "other"
-        valid_modification = plugin.tools.modify(plugin.parameters, 7, key)
+        value = 7
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
         self.assertTrue(valid_modification)
 
     def test_int_1(self):
         # Check that string is declined
         plugin = self.initial_setup()
         key = "other"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, "hello", key
+        value = "hello"
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -53,7 +60,11 @@ class ParameterTypeTest(unittest.TestCase):
         # Should float be changed to an integer?
         plugin = self.initial_setup()
         key = "other"
-        valid_modification = plugin.tools.modify(plugin.parameters, 7.0, key)
+        value = 7.0
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
         self.assertFalse(valid_modification)
 
     def test_yaml(self):
@@ -61,8 +72,9 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = "savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -71,8 +83,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -81,8 +95,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -91,8 +107,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -101,8 +119,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -111,8 +131,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "yaml_file"
         value = "savu/plugins/loaders/templates/nexus_templates/mm.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -126,8 +148,10 @@ class ParameterTypeTest(unittest.TestCase):
             os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
 
         value = savu_base_path + "system_files/dls/test_dev_script.txt"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -136,8 +160,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "file_path_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -146,8 +172,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "file_path_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -156,8 +184,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "file_path_param"
         value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -166,8 +196,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "file_path_param"
         value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -176,8 +208,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = "doc/update_api.sh"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -186,8 +220,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -196,8 +232,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -206,8 +244,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -216,8 +256,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -226,8 +268,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "savu_file_path_param"
         value = "savu/plugins/loaders/templates/malcolm_templates/malcolm.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -242,8 +286,10 @@ class ParameterTypeTest(unittest.TestCase):
 
         value = savu_base_path + \
                 "savu/plugins/loaders/templates/malcolm_templates/malcolm.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -252,8 +298,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pattern"
         value = "An example"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -262,8 +310,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pattern"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -272,8 +322,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pattern"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -282,8 +334,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pattern"
         value = 'None'
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -292,8 +346,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "vocentering_search_area"
         value = (1, 2)
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -302,8 +358,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "vocentering_search_area"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -312,8 +370,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "vocentering_search_area"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -322,8 +382,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "vocentering_search_area"
         value = "[2, 3, 4, 5]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -332,8 +394,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "vocentering_search_area"
         value = "(1, 2)"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -342,8 +406,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -352,8 +418,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -362,8 +430,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = "Testing str"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -372,8 +442,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = "[2, 3, 4, 5]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -382,8 +454,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = "[one,two,three]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -392,8 +466,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = ['one', 'two', 'three']
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -402,8 +478,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = ['A longer sentence', 'two', 'three']
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -412,8 +490,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "ica_w_init"
         value = []
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -422,8 +502,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -432,8 +514,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -442,8 +526,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = "Testing str"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -452,8 +538,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = ["value", "second6"]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -462,8 +550,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = []
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -472,8 +562,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "empty_list_param"
         value = "[]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -482,8 +574,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -492,8 +586,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -502,8 +598,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = "Testing str"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -512,8 +610,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = ["value", "second6"]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -522,8 +622,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = "[3,7,8]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -532,8 +634,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = "[value, second6]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -542,8 +646,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "integer_list_param"
         value = "6 8 9"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -552,8 +658,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = ["value", "second6"]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -562,8 +670,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -572,8 +682,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "Testing str with multiple words"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -582,8 +694,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -592,8 +706,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "[another, example]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -602,8 +718,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "[another, 5, 8.0]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -612,8 +730,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "example"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -622,8 +742,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "4 6 7 86"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -632,8 +754,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "['one','two']"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -642,18 +766,58 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "string_list_param"
         value = "[]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
+
+    def test_string_list_10(self):
+        # Check that string list is accepted
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = ['5:600']
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_11(self):
+        # Check that string list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[5:600]"
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_12(self):
+        # Check that string list is accepted (string format)
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[5:600,5:7]"
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
 
     def test_num_list(self):
         # Check that int list is accepted
         plugin = self.initial_setup()
         key = "num_list_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -662,8 +826,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -672,8 +838,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "Testing str"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -682,8 +850,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = ["value", "second6"]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -692,8 +862,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = [10.4, 30.6, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -702,8 +874,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = [10.4, 30.6, 5.9]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -712,8 +886,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "[value, second6]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -722,8 +898,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "[10.4, 30.6, 5]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -732,8 +910,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "[10.4, 30.6, 5.9]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -742,8 +922,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "10.4, 30.6, 5.9"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -752,8 +934,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = "[]"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -762,8 +946,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "num_list_param"
         value = []
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -772,8 +958,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "positive_test"
         value = 2
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -782,8 +970,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "positive_test"
         value = -2
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -792,8 +982,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "algorithm"
         value = "SIRT"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -802,8 +994,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "algorithm"
         value = "SARTT"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -812,8 +1006,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "algorithm"
         value = 4
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -828,8 +1024,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [2, 4, 64]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -844,8 +1042,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [-2, 5, 4]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -860,8 +1060,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = ["SIRT", "SART", "SLING"]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -876,8 +1078,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = ["FP", "BP", "SIRT"]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -892,8 +1096,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = ["FP"]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -908,8 +1114,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = ["FP", "SART"]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -924,8 +1132,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = ["FP"]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -934,8 +1144,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "algorithm"
         value = ":FP"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -953,8 +1165,10 @@ class ParameterTypeTest(unittest.TestCase):
                   21, 22, 23, 24, 25, 26, 27, 28, 29]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -963,8 +1177,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "other"
         value = "1:3a;"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -979,8 +1195,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [(2, 4), (5, 65), (86, 87)]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -994,8 +1212,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [[8, 8, 9], [78, 89], [78, 0, 0], [9]]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1010,8 +1230,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [(2, 7), (3, 8), (0, 4, 6)]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1024,8 +1246,10 @@ class ParameterTypeTest(unittest.TestCase):
         # Check the multi parameter value is changed to a list correctly
         val_list, error_str = pu.convert_multi_params(key, value)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1040,8 +1264,10 @@ class ParameterTypeTest(unittest.TestCase):
         result = [(4, 5), (7,0)]
         self.assertEqual(val_list, result)
 
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1050,8 +1276,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = {1: 2}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1060,8 +1288,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1070,8 +1300,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1080,8 +1312,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = {"example_key": "method"}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1090,8 +1324,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = {"example_key": {"second_dict":"method"}}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1100,8 +1336,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = "{'example_key': {'second_dict':'method'}}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1110,8 +1348,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = "{'example_key': [4,5,6,7]}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1120,8 +1360,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "dict_param"
         value = {'example_key': [4,5,6,7]}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1130,8 +1372,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = {1: 2.0}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1140,8 +1384,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1150,8 +1396,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1160,8 +1408,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = {3: "true"}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1170,8 +1420,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = {3: 5}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1180,8 +1432,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = {3.8: 5.0}
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1190,8 +1444,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = "{3.8: 5.0}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1201,8 +1457,10 @@ class ParameterTypeTest(unittest.TestCase):
         key = "cor_dict_param"
         # True is recognised as an integer value of 1
         value = "{3: true}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         # Fails and returns true with {3:1}
         self.assertFalse(valid_modification)
@@ -1212,8 +1470,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = "{3: 9.0}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1222,8 +1482,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "cor_dict_param"
         value = "{3: Another entry}"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1232,8 +1494,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pymca_config"
         value = "Savu/test_data/data/test_config.cfg"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertTrue(valid_modification)
 
@@ -1242,8 +1506,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pymca_config"
         value = 8
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1252,8 +1518,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pymca_config"
         value = [2, 3, 4, 5]
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 
@@ -1262,8 +1530,10 @@ class ParameterTypeTest(unittest.TestCase):
         plugin = self.initial_setup()
         key = "pymca_config"
         value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
-        valid_modification = plugin.tools.modify(
-            plugin.parameters, value, key
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
 

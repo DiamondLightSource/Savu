@@ -25,6 +25,8 @@
 import unittest
 
 import savu.plugins.utils as pu
+from scripts.config_generator.content import Content
+
 
 class ParameterDependencyDisplayTest(unittest.TestCase):
     """Test the display 'on' settings for dependent parameters.
@@ -32,14 +34,15 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
     """
 
     def initial_setup(self):
-        ppath = 'savu.plugins.reconstructions.tomobar.tomobar_recon'
+        content = Content()
+        ppath = "savu.plugins.reconstructions.tomobar.tomobar_recon"
         plugin = pu.load_class(ppath)()
         plugin._populate_default_parameters()
-        return plugin
+        return plugin, content
 
     def test_dependent_param_not_present(self):
         # Do not display the regularisation_methodTV
-        '''
+        """
         regularisation_methodTV:
              visibility: advanced
              dtype: str
@@ -47,22 +50,23 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              default: 0
              dependency:
                regularisation_method: [ROF_TV, FGP_TV, PD_TV, SB_TV, NLTV]
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'LLT_ROF'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "LLT_ROF"
 
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_methodTV']['display']
-        self.assertTrue(display_value == 'off')
-
+        display_value = plugin.p_dict["regularisation_methodTV"]["display"]
+        self.assertTrue(display_value == "off")
 
     def test_dependent_param_present(self):
         # Do display regularisation_methodTV
-        '''
+        """
         regularisation_methodTV:
              visibility: advanced
              dtype: str
@@ -70,23 +74,25 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              default: 0
              dependency:
                regularisation_method: [ROF_TV, FGP_TV, PD_TV, SB_TV, NLTV]
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'ROF_TV'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "ROF_TV"
 
-        display_value_before = plugin.p_dict['regularisation_methodTV']['display']
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        display_value_before = \
+            plugin.p_dict["regularisation_methodTV"]["display"]
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_methodTV']['display']
-        self.assertTrue(display_value=='on')
-
+        display_value = plugin.p_dict["regularisation_methodTV"]["display"]
+        self.assertTrue(display_value == "on")
 
     def test_dependent_param_none(self):
         # Do NOT display regularisation_device
-        '''
+        """
         regularisation_device:
              visibility: advanced
              dtype: str
@@ -94,22 +100,23 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              default: gpu
              dependency:
                 regularisation_method: not None
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'None'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "None"
 
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_device']['display']
-        self.assertTrue(display_value == 'off')
-
+        display_value = plugin.p_dict["regularisation_device"]["display"]
+        self.assertTrue(display_value == "off")
 
     def test_dependent_param_not_none(self):
         # DO display regularisation_device
-        '''
+        """
         regularisation_device:
              visibility: advanced
              dtype: str
@@ -117,22 +124,23 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              default: gpu
              dependency:
                 regularisation_method: not None
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'FGP_TV'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "FGP_TV"
 
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_device']['display']
-        self.assertTrue(display_value == 'on')
-
+        display_value = plugin.p_dict["regularisation_device"]["display"]
+        self.assertTrue(display_value == "on")
 
     def test_default_choices(self):
         # DO change reg iterations to 100
-        '''
+        """
         regularisation_iterations:
                  visibility: basic
                  dtype: int
@@ -155,23 +163,24 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        NLTV: 80
                  dependency:
                     regularisation_method: not None
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'PD_TV'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "PD_TV"
 
-        # TODO try on load in comparison to modify as modify does not change default..
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        # TODO try on load in comparison to modify_main as modify_main does not change default..
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_iterations']['display']
-        self.assertTrue(display_value=='on')
-
+        display_value = plugin.p_dict["regularisation_iterations"]["display"]
+        self.assertTrue(display_value == "on")
 
     def test_default_choices2(self):
         # Do not display regularisation_iterations
-        '''
+        """
         regularisation_iterations:
                  visibility: basic
                  dtype: int
@@ -194,17 +203,19 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        NLTV: 80
                  dependency:
                     regularisation_method: not None
-        '''
-        plugin = self.initial_setup()
-        key = 'regularisation_method'
-        value = 'None'
+        """
+        plugin, content = self.initial_setup()
+        key = "regularisation_method"
+        value = "None"
 
-        valid_modification = plugin.tools.modify(plugin.parameters, value, key)
+        valid_modification = content.modify_main(
+            key, value, plugin.tools, plugin.parameters
+        )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict['regularisation_iterations']['display']
-        self.assertTrue(display_value == 'off')
+        display_value = plugin.p_dict["regularisation_iterations"]["display"]
+        self.assertTrue(display_value == "off")
 
 
 if __name__ == "__main__":
