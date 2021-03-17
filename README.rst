@@ -1,6 +1,9 @@
 .. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
     :target: https://github.com/DiamondLightSource/Savu/actions
 
+.. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_install/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
 .. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
     :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
 

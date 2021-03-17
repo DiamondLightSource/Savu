@@ -1,4 +1,4 @@
-name: savu-install
+name: savu_install
 
 on:
   push:
