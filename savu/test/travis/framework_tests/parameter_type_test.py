@@ -57,11 +57,38 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertFalse(valid_modification)
 
     def test_int_2(self):
-        # Should float be changed to an integer?
+        # Float value is declined
         plugin = self.initial_setup()
         key = "other"
         value = 7.0
         value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_int_3(self):
+        # Octal value not converted
+        '''If your YAML contains integer values that start with a 0 and do not
+        contain digits greater than 7, they will be parsed as octal values.'''
+        plugin = self.initial_setup()
+        key = "other"
+        value = "0123"
+        value_check = pu._dumps(value)
+        self.assertEqual("0123", value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_int_4(self):
+        # Sexagesimal value not converted to integer
+        # sexagesimal and the 9:00 is considered to be similar to 9 minutes and 0 seconds, equalling a total of 540 seconds.
+        plugin = self.initial_setup()
+        key = "other"
+        value = "9:00"
+        value_check = pu._dumps(value)
+        self.assertEqual(value_check, '9:00')
         valid_modification, error_str = param_u.is_valid(
             key, value_check, plugin.p_dict[key]
         )
@@ -653,6 +680,32 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_int_list_7(self):
+        # Check that str list is not accepted (string format)
+        plugin = self.initial_setup()
+        key = "integer_list_param"
+        value = "[6:0, 9:8]"
+
+        value_check = pu._dumps(value)
+        self.assertEqual(['6:0', '9:8'], value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_int_list_8(self):
+        # Check that str list is not accepted
+        plugin = self.initial_setup()
+        key = "integer_list_param"
+        value = ['6:0', '9:8']
+
+        value_check = pu._dumps(value)
+        self.assertEqual(['6:0', '9:8'], value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
     def test_string_list(self):
         # Check that string list is accepted
         plugin = self.initial_setup()
@@ -804,6 +857,19 @@ class ParameterTypeTest(unittest.TestCase):
         value = "[5:600,5:7]"
 
         value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_string_list_13(self):
+        # Check that string list is accepted (string format)
+        # Previously sexigesimal values could be changed to int if yaml.load is used
+        plugin = self.initial_setup()
+        key = "string_list_param"
+        value = "[5:600,5:7]"
+        value_check = pu._dumps(value)
+        self.assertEqual(value_check, ['5:600','5:7'])
         valid_modification, error_str = param_u.is_valid(
             key, value_check, plugin.p_dict[key]
         )
@@ -1457,7 +1523,7 @@ class ParameterTypeTest(unittest.TestCase):
         key = "cor_dict_param"
         # True is recognised as an integer value of 1
         value = "{3: true}"
-
+        # MAYBE run yaml config or error message run on the input values?
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, plugin.p_dict[key]
@@ -1488,6 +1554,19 @@ class ParameterTypeTest(unittest.TestCase):
             key, value_check, plugin.p_dict[key]
         )
         self.assertFalse(valid_modification)
+
+    def test_int_float_dict_10(self):
+        # Check that int and int(accepted as float) dict is accepted
+        plugin = self.initial_setup()
+        key = "cor_dict_param"
+        value = {3:5}
+
+        value_check = pu._dumps(value)
+        self.assertEqual({3:5}, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
 
     def test_config(self):
         # Check that config is accepted (same as default value)
