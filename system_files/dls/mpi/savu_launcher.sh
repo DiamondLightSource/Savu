@@ -214,7 +214,7 @@ case $cluster in
 		if [ -z $gpu_arch ] ; then
 			case $project in
 				"k11") gpu_arch='Volta' ;;
-				*) gpu_arch = 'Pascal' ;;
+				*) gpu_arch='Pascal' ;;
 			esac
 		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
