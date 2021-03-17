@@ -351,9 +351,17 @@ def _dumps(val):
         except Exception:
             pass
         try:
+            # To avoid sexagesimal values being evaluated, replace colon values temporarily
+            isdict = re.findall(r"[\{\}]+", val)
+            if isinstance(val, str) and not isdict:
+                val = val.replace(':', ':?')
             value = yaml.load(val, Loader=yaml.SafeLoader)
+            if isinstance(value, str):
+                value = value.replace(':?', ':')
             return value
         except Exception:
+            if isinstance(val, str):
+                val = val.replace(':?', ':')
             pass
         try:
             isdict = re.findall(r"[\{\}]+", val)
