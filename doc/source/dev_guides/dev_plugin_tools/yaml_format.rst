@@ -1,6 +1,6 @@
 .. _yaml_format:
 
-YAML
+YAML format
 ###################
 
 .. code-block:: yaml
