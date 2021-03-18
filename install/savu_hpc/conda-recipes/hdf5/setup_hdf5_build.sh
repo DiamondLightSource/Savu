@@ -1,5 +1,5 @@
 #!/bin/bash
-#set things up for versions, releases etc.
+#set things up for versions, patches, releases etc.
 export PATCH_HDF="hdf5-"$VERSION_HDF
 export RELEASE_HDF=${PATCH_HDF%.*}
 # get openmpi version
@@ -8,4 +8,9 @@ openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,
 VERSION_TMP=$VERSION_HDF"_openmpi"$openmpi_version
 export VERSION_HDF=$VERSION_TMP
 
-conda build . --numpy 1.15 --python 3.7
+numpy_full=$(python -c "import numpy; print(numpy.__version__)")
+export NUMPY_VER="${numpy_full:0:4}"
+python_full=$(python --version)
+export PYTHON_VER="${python_full:7:3}"
+
+conda build . --numpy $NUMPY_VER --python $PYTHON_VER
