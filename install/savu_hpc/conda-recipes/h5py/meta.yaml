@@ -1,8 +1,6 @@
-{% set version = "2.10.0" %}
-
 package:
   name: h5py
-  version: {{ version }}
+  version: {{ environ['VERSION_H5PY'] }}
 
 source:
   fn: h5py-{{ version }}.tar.gz
@@ -23,4 +21,3 @@ build:
 about:
   home: http://www.h5py.org/
   license: New BSD (http://opensource.org/licenses/bsd-license.php)
-
