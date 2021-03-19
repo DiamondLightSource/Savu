@@ -5,7 +5,6 @@ package:
 source:
   fn: {{ environ['PATCH_HDF'] }}.tar.bz2
   url: https://www.hdfgroup.org/ftp/HDF5/releases/{{ environ['RELEASE_HDF'] }}/{{ environ['PATCH_HDF'] }}/src/{{ environ['PATCH_HDF'] }}.tar.bz2
-  md5: 7c19d6b81ee2a3ba7d36f6922b2f90d3
 
 build:
   number: 1
