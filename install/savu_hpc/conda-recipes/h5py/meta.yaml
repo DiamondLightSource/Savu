@@ -3,8 +3,8 @@ package:
   version: {{ environ['VERSION_H5PY'] }}
 
 source:
-  fn: h5py-{{ version }}.tar.gz
-  url: https://github.com/h5py/h5py/archive/{{ version }}.tar.gz
+  fn: h5py-{{ environ['VERSION_H5PY'] }}.tar.gz
+  url: https://github.com/h5py/h5py/archive/{{ environ['VERSION_H5PY'] }}.tar.gz
 
 requirements:
   build:
