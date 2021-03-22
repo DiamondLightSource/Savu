@@ -10,7 +10,7 @@ requirements:
   build:
     - python
     - numpy
-    - hdf5
+    - hdf5 1.10.5_openmpi3.1.4
     - cython
     - pkgconfig
     - six
