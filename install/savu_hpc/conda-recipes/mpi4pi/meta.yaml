@@ -8,7 +8,7 @@ source:
 
 build:
   number: 0
-  script: python -m pip install --no-deps --ignore-installed --no-cache-dir -vvv .
+  script: env MPICC=$MPICC $PYTHON -m pip install --no-deps --ignore-installed --no-cache-dir -vvv .
 
 requirements:
   build:
@@ -16,11 +16,11 @@ requirements:
   host:
     - python
     - pip
-    - openmpi
+    - openmpi 3.1.4
     - setuptools
   run:
     - python
-    - openmpi
+    - openmpi 3.1.4
 
 test:
   files:
