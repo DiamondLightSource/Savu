@@ -241,14 +241,19 @@ if [ ! $test_flag ]; then
   fi
 
   echo "Installing mpi4py..."
-  string=$(awk '/^mpi4py/' $versions_file)
-  mpi4py_version=$(echo $string | cut -d " " -f 2)
-  pip install mpi4py==$mpi4py_version
+  #string=$(awk '/^mpi4py/' $versions_file)
+  #mpi4py_version=$(echo $string | cut -d " " -f 2)
+  #pip install mpi4py==$mpi4py_version
+  echo "Installing mpi4pi from savu-dep channel..."
+  conda install --yes -c savu-dep mpi4pi --no-deps
+
+  echo "Installing h5py from savu-dep channel..."
+  conda install --yes -c savu-dep h5py --no-deps
 
   echo "Installing hdf5 from savu-dep channel..."
-  conda install -c savu-dep hdf5
-  #. $recipes/installer.sh "hdf5"
-  . $recipes/installer.sh "h5py"
+  conda install --yes -c savu-dep hdf5=1.10.5_openmpi3.1.4 --no-deps
+
+  conda list
 
   echo "Checking that mpi4py/hdf5/h5py are installed into conda environment"
 
