@@ -204,8 +204,8 @@ class Content(object):
             if skip:
                 print(f"Skipping plugin {pos}: {name}")
             else:
-                message = f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu."
-                print(message)
+                message = f"PLUGIN ERROR: The plugin {name} is " \
+                          f"unavailable in this version of Savu."
                 raise Exception(f'Incompatible process list. {message}')
 
     def _mutate_plugins(self, name, pos, search=False):
