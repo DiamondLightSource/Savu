@@ -16,11 +16,11 @@ requirements:
   host:
     - python
     - pip
-    - openmpi 3.1.4 hc99cbb1_0
+    - openmpi
     - setuptools
   run:
     - python
-    - openmpi 3.1.4 hc99cbb1_0
+    - openmpi
 
 test:
   files:
