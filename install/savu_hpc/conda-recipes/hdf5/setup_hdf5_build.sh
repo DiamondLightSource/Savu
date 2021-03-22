@@ -13,4 +13,4 @@ export NUMPY_VER="${numpy_full:0:4}"
 python_full=$(python --version)
 export PYTHON_VER="${python_full:7:3}"
 
-conda build . --numpy $NUMPY_VER --python $PYTHON_VER
+conda build .

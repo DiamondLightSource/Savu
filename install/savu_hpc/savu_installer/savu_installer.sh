@@ -245,7 +245,7 @@ if [ ! $test_flag ]; then
   #mpi4py_version=$(echo $string | cut -d " " -f 2)
   #pip install mpi4py==$mpi4py_version
   echo "Installing mpi4pi from savu-dep channel..."
-  conda install --yes -c savu-dep mpi4pi --no-deps
+  conda install --yes -c savu-dep mpi4py --no-deps
 
   echo "Installing h5py from savu-dep channel..."
   conda install --yes -c savu-dep h5py --no-deps
