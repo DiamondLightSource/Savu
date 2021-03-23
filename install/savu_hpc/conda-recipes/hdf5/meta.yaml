@@ -1,6 +1,6 @@
 package:
   name: hdf5
-  version: {{ environ['VERSION_HDF'] }}
+  version: {{ environ['VERSION_BUILD_HDF5'] }}
 
 source:
   fn: {{ environ['PATCH_HDF'] }}.tar.bz2

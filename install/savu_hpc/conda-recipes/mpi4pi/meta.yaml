@@ -3,7 +3,7 @@ package:
   version: {{ environ['VERSION_MPI4PI'] }}
 
 source:
-  fn: mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
+  fn: mpi4py-{{ environ['VERSION_BUILD_MPI4PI'] }}.tar.gz
   url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
 
 build:
