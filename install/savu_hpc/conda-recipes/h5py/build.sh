@@ -21,6 +21,7 @@ export PYTHONPATH=$PYTHONPATH:$(python -c 'import site; print(site.getsitepackag
 echo Running with Python: $(which python)
 echo "********************************************************************"
 echo $ana_path
+echo $hdf5_XYZ_version
 echo "********************************************************************"
 $PYTHON setup.py configure --hdf5=$ana_path
 $PYTHON setup.py configure --hdf5-version=$hdf5_XYZ_version
