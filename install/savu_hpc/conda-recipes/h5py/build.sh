@@ -7,7 +7,6 @@ mpi=${mpicc%/bin/mpicc}
 # set anaconda distribution
 ana_path=$(command -v savu)
 ana_path=${ana_path%/bin/savu}
-#hdf5_version=1.10.5
 hdf5_build_no=1
 
 export LD_LIBRARY_PATH=$mpi/lib:$mpi/include:$ana_path/lib:$LD_LIBRARY_PATH
@@ -30,8 +29,6 @@ version_explicit_HDF5=${version_explicit:0:6}
 rm -rf temppack.txt
 echo $version_explicit_HDF5
 echo "********************************************************************"
-$PYTHON setup.py configure --hdf5=$ana_path
-$PYTHON setup.py configure --hdf5-version=$version_explicit_HDF5
-$PYTHON setup.py configure --mpi
+$PYTHON setup.py configure --mpi --hdf5=$ana_path --hdf5-version=$version_explicit_HDF5
 $PYTHON setup.py build
 $PYTHON setup.py install
