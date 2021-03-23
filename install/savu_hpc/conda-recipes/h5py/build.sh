@@ -25,7 +25,8 @@ conda list --explicit > temppack.txt
 checkpack_var=$(grep "hdf5" temppack.txt)
 shortened_string=${checkpack_var##*/}
 version_explicit_t=${shortened_string%-*}
-version_explicit_HDF5=${version_explicit_t##*-}
+version_explicit=${version_explicit_t##*-}
+version_explicit_HDF5=${version_explicit:0:6}
 rm -rf temppack.txt
 echo $version_explicit_HDF5
 echo "********************************************************************"
