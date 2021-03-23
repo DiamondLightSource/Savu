@@ -21,10 +21,16 @@ export PYTHONPATH=$PYTHONPATH:$(python -c 'import site; print(site.getsitepackag
 echo Running with Python: $(which python)
 echo "********************************************************************"
 echo $ana_path
-echo $hdf5_XYZ_version
+conda list --explicit > temppack.txt
+checkpack_var=$(grep "hdf5" temppack.txt)
+shortened_string=${checkpack_var##*/}
+version_explicit_t=${shortened_string%-*}
+version_explicit_HDF5=${version_explicit_t##*-}
+rm -rf temppack.txt
+echo $version_explicit_HDF5
 echo "********************************************************************"
 $PYTHON setup.py configure --hdf5=$ana_path
-$PYTHON setup.py configure --hdf5-version=$hdf5_XYZ_version
+$PYTHON setup.py configure --hdf5-version=$version_explicit_HDF5
 $PYTHON setup.py configure --mpi
 $PYTHON setup.py build
 $PYTHON setup.py install
