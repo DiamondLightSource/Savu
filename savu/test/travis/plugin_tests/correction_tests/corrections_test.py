@@ -13,11 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: time_based_correction_test
+.. module:: corrections_test
    :platform: Unix
-   :synopsis: Test for the time_based_correction
-
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+   :synopsis: Tests for correction plugins
 
 """
 import unittest
@@ -25,23 +23,40 @@ from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
-
-class TimeBasedCorrectionTest(unittest.TestCase):
+class CorrectionsTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
     experiment = None
 
-    def test_correction(self):
+    def test_camera_rot_correction(self):
+        process_list = 'corrections/camera_rot_corr_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_subpixel_shift(self):
+        process_list = 'corrections/subpixel_shift_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_time_based_correction(self):
         process_list = 'corrections/time_based_correction_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
-    def test_correction2(self):
+    def test_time_based_correction2(self):
         process_list = 'corrections/time_based_correction_test2.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-        
+
+    def test_mtf_deconvolution(self):
+        process_list = 'corrections/mtf_deconvolution_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
 if __name__ == "__main__":
     unittest.main()
