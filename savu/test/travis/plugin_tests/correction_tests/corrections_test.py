@@ -24,37 +24,43 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 class CorrectionsTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = None
+    
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = None
 
     def test_camera_rot_correction(self):
         process_list = 'corrections/camera_rot_corr_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_subpixel_shift(self):
         process_list = 'corrections/subpixel_shift_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_time_based_correction(self):
         process_list = 'corrections/time_based_correction_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_time_based_correction2(self):
         process_list = 'corrections/time_based_correction_test2.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_mtf_deconvolution(self):
         process_list = 'corrections/mtf_deconvolution_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
