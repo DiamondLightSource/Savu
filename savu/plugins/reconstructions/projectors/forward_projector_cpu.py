@@ -31,27 +31,42 @@ import numpy as np
 class ForwardProjectorCpu(Plugin, CpuPlugin):
     """
     This plugin uses ToMoBAR software and CPU Astra projector underneath to generate projection data.
-    The plugin will project the given object using user provided parallel-beam geometry.
+    The plugin will project the given object using the metadata OR user-provided parallel-beam geometry.
 
     :param angles_deg: Projection angles in degrees in a format [start, stop, step]. Default: [0.0, 180.0, 0.5].
     :param det_horiz: The size of the _horizontal_ detector. Default: 300.
+    :param centre_of_rotation: The centre of rotation. Default: 0.0.
     :param out_datasets: Default out dataset names. Default: ['forw_proj']
     """
 
     def __init__(self):
         super(ForwardProjectorCpu, self).__init__('ForwardProjectorCpu')
 
-    def pre_process(self):
-        # set parameters
-        angles_list = self.parameters['angles_deg']
-        self.angles_rad = np.deg2rad(np.arange(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-        self.angles_total = len(self.angles_rad)
-        self.detectors_horiz = self.parameters['det_horiz']
+    #def pre_process(self):
+        # getting metadata
+        #in_meta_data = self.get_in_meta_data()[0]
+        #self.angles_meta_deg = in_meta_data.get('rotation_angle')
+        #self.angles_rad = np.deg2rad(self.angles_meta_deg)
+        #self.cor = in_meta_data.get('centre_of_rotation')
+        #self.cor=self.cor[0]
+        #print(self.cor)
+        #self.detectors_horiz = in_meta_data.get('detector_x')
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+
+        #print(in_dataset[0].meta_data.get("rotation_angle"))
+        in_meta_data2=self.get_in_meta_data()[0]
+        angles_meta_deg = in_meta_data2.get('rotation_angle')
+
+        # user-set parameters
+        angles_list=self.parameters['angles_deg']
+        self.cor=self.parameters['centre_of_rotation']
+        self.angles_rad = np.deg2rad(np.arange(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
+        self.detectors_horiz = self.parameters['det_horiz']
+        self.angles_total = len(self.angles_rad)
 
         out_shape_sino = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
         label = ['x.pixels', 'proj.angles', 'y.pixels']
@@ -70,7 +85,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
         objsize_image = np.shape(image)[0]
         RectoolsDIR = RecToolsDIR(DetectorsDimH = self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
                             DetectorsDimV = None,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                            CenterRotOffset = None, # Center of Rotation (CoR) scalar (for 3D case only)
+                            CenterRotOffset = self.cor, # Center of Rotation (CoR) scalar
                             AnglesVec = self.angles_rad, # array of angles in radians
                             ObjSize = objsize_image, # a scalar to define reconstructed object dimensions
                             device_projector='cpu')
@@ -79,11 +94,6 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
 
     def new_shape(self, full_shape, data):
         # calculate a new output data shape based on the input data shape
-        core_dirs = data.get_core_dimensions()
-        angles_list = self.parameters['angles_deg']
-        self.angles_rad = np.deg2rad(np.arange(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-        self.angles_total = len(self.angles_rad)
-        self.detectors_horiz = self.parameters['det_horiz']
         new_shape_sino_orig = list(full_shape)
         new_shape_sino= (self.angles_total, new_shape_sino_orig[1], self.detectors_horiz)
         return tuple(new_shape_sino)

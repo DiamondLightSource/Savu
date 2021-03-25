@@ -21,6 +21,7 @@
 
 """
 import math
+import copy
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -99,13 +100,16 @@ class BaseRecon(Plugin):
 
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
+        self.set_centre_of_rotation(in_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
         if len(self.angles.shape) != 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
         self.slice_dirs = out_data[0].get_slice_dimensions()
+
+        # metadata output populator
+        self.populate_metadata_to_output(in_data[0], out_data[0], in_meta_data)
 
         shape = in_pData[0].get_shape()
         factor = self.__get_outer_pad()
@@ -147,7 +151,7 @@ class BaseRecon(Plugin):
     def get_vol_shape(self):
         return self.br_vol_shape
 
-    def set_centre_of_rotation(self, inData, mData, pData):
+    def set_centre_of_rotation(self, inData, mData):
         # if cor has been passed as a dataset then do nothing
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
@@ -168,6 +172,17 @@ class BaseRecon(Plugin):
                 # mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
         self.centre = self.cor[0]
+
+    def populate_metadata_to_output(self, inData, outData, mData):
+        # writing  rotation angles into the metadata associated with the output (reconstruction)
+        outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
+        if 'detector_x' in list(mData.get_dictionary().keys()):
+            detector_x_dim = mData.get('detector_x')
+        else:
+            xDim = inData.get_data_dimension_by_axis_label('detector_x')
+            detector_x_dim = inData.get_shape()[xDim]
+        outData.meta_data.set("detector_x", copy.deepcopy(detector_x_dim))
+        outData.meta_data.set("centre_of_rotation", copy.deepcopy(self.cor))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')
