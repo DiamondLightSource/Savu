@@ -172,8 +172,7 @@ class PluginRunner(object):
         plugin._revert_preview(plugin.get_in_datasets())
         plugin_dict['cite'] = plugin.get_citation_information()
         plugin._clean_up()
-        self.exp._update(plugin_dict)
-        self.exp._merge_out_data_to_in()
+        self.exp._merge_out_data_to_in(plugin_dict)
 
     def __check_gpu(self):
         """ Check if the process list contains GPU processes and determine if
