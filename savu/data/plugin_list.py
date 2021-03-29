@@ -97,6 +97,8 @@ class PluginList(object):
                 plugin['active'] = plugin_group[group]['active'][0]
 
             if plugin['active'] or active_pass:
+                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
+                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
                 plugin_class = None
                 try:
                     # Load the related class
@@ -107,8 +109,6 @@ class PluginList(object):
                     # No plugin class found
                     logging.error(f"No class found for {plugin['name']}")
 
-                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
-                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
                 plugin['doc'] = plugin_class.docstring_info if plugin_class else ""
                 plugin['tools'] = plugin_class.tools if plugin_class else {}
                 plugin['param'] = plugin_class.p_dict if plugin_class else {}
