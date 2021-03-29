@@ -161,9 +161,9 @@ class Experiment(object):
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
         # clear out dataset dictionaries
-        for data_dict in self.collection['datasets']:
-            for data in data_dict.values():
-                data.meta_data._set_dictionary({})
+        # for data_dict in self.collection['datasets']:
+        #     for data in data_dict.values():
+        #         data.meta_data._set_dictionary({})
 
     def _get_collection(self):
         return self.collection
@@ -229,10 +229,10 @@ class Experiment(object):
         self.index["in_data"] = {}
 
     def _merge_out_data_to_in(self, plugin_dict):
-        out_data = self.index['out_data']
+        out_data = self.index['out_data'].copy()
         for key, data in out_data.items():
             if data.remove is False:
-                out_data[key] = data
+                self.index['in_data'][key] = data
         self.collection['datasets'].append(out_data)
         self.collection['plugin_dict'].append(plugin_dict)
         self.index["out_data"] = {}
