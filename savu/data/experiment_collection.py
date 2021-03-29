@@ -110,14 +110,6 @@ class Experiment(object):
     def _set_initial_datasets(self):
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
 
-    def _update(self, plugin_dict):
-        data = self.index['out_data'].copy()
-        # clear output metadata after first setup
-        for d in list(data.values()):
-            d.meta_data._set_dictionary({})
-        self.collection['datasets'].append(data)
-        self.collection['plugin_dict'].append(plugin_dict)
-
     def _set_transport(self, transport):
         self._transport = transport
 
@@ -168,6 +160,10 @@ class Experiment(object):
 
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
+        # clear out dataset dictionaries
+        for data_dict in self.collection['datasets']:
+            for data in data_dict.values():
+                data.meta_data._set_dictionary({})
 
     def _get_collection(self):
         return self.collection
@@ -222,7 +218,8 @@ class Experiment(object):
     def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
         import h5py
-        if self.meta_data.get('process') == len(self.meta_data.get('processes')) - 1 and not self.checkpoint:
+        if self.meta_data.get('process') == len(
+                self.meta_data.get('processes')) - 1 and not self.checkpoint:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
                 entry_group = nxs_file.create_group('entry')
                 entry_group.attrs['NX_class'] = 'NXentry'
@@ -231,10 +228,13 @@ class Experiment(object):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
-    def _merge_out_data_to_in(self):
-        for key, data in self.index["out_data"].items():
+    def _merge_out_data_to_in(self, plugin_dict):
+        out_data = self.index['out_data']
+        for key, data in out_data.items():
             if data.remove is False:
-                self.index['in_data'][key] = data
+                out_data[key] = data
+        self.collection['datasets'].append(out_data)
+        self.collection['plugin_dict'].append(plugin_dict)
         self.index["out_data"] = {}
 
     def _finalise_experiment_for_current_plugin(self):
