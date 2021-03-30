@@ -64,5 +64,12 @@ class CorrectionsTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
+    def test_convert_360_180_sinogram(self):
+        process_list = 'corrections/convert_360_180_sinogram_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
 if __name__ == "__main__":
     unittest.main()
