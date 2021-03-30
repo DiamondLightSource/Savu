@@ -591,16 +591,12 @@ def _check_options(current_parameter_details, value, pvalid):
 def _error_message(dtype, param_name):
     """Create an error message"""
     if isinstance(dtype, list):
-        type_options = " or ".join([str(type_error_dict[t]) for t in dtype])
-        error_str = (
-            "Your input for the parameter '{}' must match"
-            " the type {}.".format(param_name, type_options)
-        )
+        type_options = "' or '".join([str(type_error_dict[t]) for t in dtype])
+        error_str = f"Your input for the parameter '{param_name}' must match" \
+                    f" the type '{type_options}'."
     else:
-        error_str = (
-            "Your input for the parameter '{}' must match"
-            " the type '{}'.".format(param_name, type_error_dict[dtype])
-        )
+        error_str = f"Your input for the parameter '{param_name}' must " \
+                    f"match the type '{type_error_dict[dtype]}'."
     return error_str
 
 
@@ -610,7 +606,7 @@ def _gui_error_message(dtype, param_name):
     each paramter input box"""
     if isinstance(dtype, list):
         type_options = "' or '".join([str(t) for t in dtype])
-        error_str = "Type must match '{}'.".format(type_options)
+        error_str = f"Type must match '{type_options}'."
     else:
-        error_str = "Type must match '{}'.".format(type_error_dict[dtype])
+        error_str = f"Type must match '{type_error_dict[dtype]}'."
     return error_str
