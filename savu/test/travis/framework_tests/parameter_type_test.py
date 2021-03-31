@@ -37,7 +37,7 @@ class ParameterTypeTest(unittest.TestCase):
     def test_int(self):
         # Check that integer is accepted
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = 7
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -48,7 +48,7 @@ class ParameterTypeTest(unittest.TestCase):
     def test_int_1(self):
         # Check that string is declined
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = "hello"
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -59,7 +59,7 @@ class ParameterTypeTest(unittest.TestCase):
     def test_int_2(self):
         # Float value is declined
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = 7.0
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -72,7 +72,7 @@ class ParameterTypeTest(unittest.TestCase):
         '''If your YAML contains integer values that start with a 0 and do not
         contain digits greater than 7, they will be parsed as octal values.'''
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = "0123"
         value_check = pu._dumps(value)
         self.assertEqual("0123", value_check)
@@ -85,10 +85,80 @@ class ParameterTypeTest(unittest.TestCase):
         # Sexagesimal value not converted to integer
         # sexagesimal and the 9:00 is considered to be similar to 9 minutes and 0 seconds, equalling a total of 540 seconds.
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = "9:00"
         value_check = pu._dumps(value)
         self.assertEqual(value_check, '9:00')
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_int_5(self):
+        # Boolean value not converted to integer
+        plugin = self.initial_setup()
+        key = "int_param"
+        value = "True"
+        value_check = pu._dumps(value)
+        self.assertEqual(value_check, True)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_float(self):
+        # Check that string is declined
+        plugin = self.initial_setup()
+        key = "float_param"
+        value = "hello"
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_float_1(self):
+        # Int value is accepted
+        plugin = self.initial_setup()
+        key = "float_param"
+        value = 7
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_float_2(self):
+        # Float value is accepted
+        plugin = self.initial_setup()
+        key = "float_param"
+        value = 7.99
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_float_3(self):
+        # Sexagesimal value not converted to integer
+        # sexagesimal and the 9:00 is considered to be similar to 9 minutes and 0 seconds, equalling a total of 540 seconds.
+        plugin = self.initial_setup()
+        key = "float_param"
+        value = "9:00"
+        value_check = pu._dumps(value)
+        self.assertEqual(value_check, '9:00')
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_float_4(self):
+        # Boolean value not converted to integer
+        plugin = self.initial_setup()
+        key = "float_param"
+        value = "True"
+        value_check = pu._dumps(value)
+        self.assertEqual(value_check, True)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, plugin.p_dict[key]
         )
@@ -1221,7 +1291,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that syntax works. If colon included in the first item
         # then this overwrites items after ;
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = "1:30:1;"
 
         # Check the multi parameter value is changed to a list correctly
@@ -1241,7 +1311,7 @@ class ParameterTypeTest(unittest.TestCase):
     def test_multi_param_9(self):
         # Check that syntax fails
         plugin = self.initial_setup()
-        key = "other"
+        key = "int_param"
         value = "1:3a;"
 
         value_check = pu._dumps(value)

@@ -291,9 +291,10 @@ def _nptype(value):
 
 def _integer(value):
     parameter_valid = False
-    if isinstance(value, int):
-        parameter_valid = True
-    if isinstance(value, np.integer):
+    if _boolean(value):
+        # Prevent boolean from being accepted as an integer value of 1 or 0
+        parameter_valid = False
+    elif isinstance(value, (int, np.integer)):
         parameter_valid = True
     return parameter_valid
 
@@ -324,9 +325,7 @@ def _string(value):
 
 def _float(value):
     parameter_valid = False
-    if isinstance(value, float):
-        parameter_valid = True
-    if isinstance(value, np.float):
+    if isinstance(value, (float, np.float)):
         parameter_valid = True
     elif _integer(value):
         # Allow integer values as well

@@ -15,11 +15,16 @@ class NoProcessTools(PluginTools):
             dtype: str
             description: Explicitly state the slicing pattern.
             default: None
-        other:
+        int_param:
             visibility: advanced
             dtype: int
             description: Temporary parameter for testing.
             default: 10
+        float_param:
+            visibility: advanced
+            dtype: float
+            description: Temporary parameter for testing.
+            default: 10.0
         yaml_file:
             visibility: advanced
             dtype: yaml_file
