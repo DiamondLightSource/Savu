@@ -29,6 +29,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.plugin_list import CitationInformation
+import savu.test.test_utils as tu
 import savu.core.utils as cu
 
 
@@ -99,7 +100,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
         flat = inData.data.flat()
         self.data_size = inData.get_shape()
         (self.depth, self.height, self.width) = flat.shape
-        file_path = self.parameters["file_path"]
+        file_path = self.get_conf_path()
         file_ext = self.check_file_path(file_path)
         if file_ext==".npy":
             try:
@@ -146,6 +147,12 @@ class MtfDeconvolution(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         return self.psf_correction(data[0], self.mtf_array, self.pad_width)
+
+    def get_conf_path(self):
+        path = self.parameters["file_path"]
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
 
     def get_citation_information(self):
         cite_info = CitationInformation()
