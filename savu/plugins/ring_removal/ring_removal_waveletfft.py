@@ -108,7 +108,7 @@ class RingRemovalWaveletfft(BaseFilter, CpuPlugin):
                 sino = sino[0:-1,:]
             if self.width1%2!=0:
                 sino = sino[:,0:-1]
-            output[self.sslice] = sino
+            output[tuple(self.sslice)] = sino
         return output
 
     def get_plugin_pattern(self):
