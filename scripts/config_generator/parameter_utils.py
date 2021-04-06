@@ -30,15 +30,76 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
-import savu.plugins.utils as pu 
+import savu.plugins.utils as pu
 
 
 def _preview(value):
     """ preview value """
     parameter_valid = False
     if _list(value):
+        if all(_preview_dimension(dimension_value) for dimension_value in value):
+            parameter_valid = True
+    elif _emptylist(value):
         parameter_valid = True
     return parameter_valid
+
+
+def _preview_dimension(value):
+    """ Check the full preview parameter value """
+    import savu.plugins.utils as pu
+    parameter_valid = False
+    if _string(value):
+        slice_range = [*range(1,5)]
+        slice_str = [":"*n for n in slice_range]
+        if value in slice_str:
+            # If : notation is used, accept this
+            parameter_valid = True
+        elif ":" in value:
+            count_colon = value.count(":")
+            if count_colon < 4:
+                # Only allow 4 colons, start stop step block
+                start_stop_split = value.split(":")
+                type_list = [pu._dumps(v) for v in start_stop_split if v]
+                if all(_preview_dimension_singular(item) for item in type_list):
+                    parameter_valid = True
+        elif _preview_dimension_singular(value):
+                parameter_valid = True
+    elif _integer(value) or _float(value):
+        parameter_valid = True
+    return parameter_valid
+
+
+def _preview_dimension_singular(value):
+    """ Check the singular value within the preview dimension"""
+    parameter_valid = False
+    if _string(value):
+        word_string = ["mid", "end"]
+        word_present = any(item in value for item in word_string)
+        # Check for letters from mid and end incase both are used
+        letter_str = "miden"
+        letters = ''.join(l for l in value if l.isalpha())
+        unaccepted_letters = ''.join(l for l in letters if l not in letter_str)
+        if not unaccepted_letters:
+            try:
+                # Attempt to evaluate the provided equation
+                temp_value = _preview_eval(value)
+                if _integer(temp_value) or _float(temp_value):
+                    parameter_valid = True
+            except Exception:
+                print("There was an error with your dimension value input.")
+        else:
+            print('If you are trying to use an expression, '
+                  'please only use mid and end command words.')
+    elif _integer(value) or _float(value):
+        parameter_valid = True
+    return parameter_valid
+
+
+def _preview_eval(value):
+    """ Evaluate with mid and end"""
+    mid = 0
+    end = 0
+    return eval(value,{"__builtins__":None},{"mid":mid,"end":end})
 
 
 def _intlist(value):
@@ -69,7 +130,7 @@ def _numlist(value):
     if isinstance(value, list):
         if value:
             # If the list is not empty
-            if all( _float(item) for item in value):
+            if all(_float(item) for item in value):
                 parameter_valid = True
     return parameter_valid
 
