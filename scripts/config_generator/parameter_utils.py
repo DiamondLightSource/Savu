@@ -106,13 +106,14 @@ def _yamlfile(value):
     """ yaml_file """
     parameter_valid = False
     file_path_str = ''
-    if _filepath(value):
-        file_path_str = value
-    elif _savufilepath(value):
-        # If the file path is not valid, try preprending the savu base path
-        savu_base_path = \
-            os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
-        file_path_str = savu_base_path+value
+    if _string(value):
+        if os.path.isfile(value):
+            file_path_str = value
+        elif _savufilepath(value):
+            # If the file path is not valid, try preprending the savu base path
+            savu_base_path = \
+                os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+            file_path_str = savu_base_path+value
 
     if file_path_str:
         with open(file_path_str, 'r') as f:
@@ -218,6 +219,8 @@ def _filepath(value):
     parameter_valid = False
     if _string(value):
         if os.path.isfile(value):
+            parameter_valid = True
+        elif _savufilepath(value):
             parameter_valid = True
     return parameter_valid
 
