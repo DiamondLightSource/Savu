@@ -242,7 +242,6 @@ if [ ! $test_flag ]; then
   conda install -y -q conda-build
 
   if [ $facility = dls ]; then
-
     echo "Building Savu..."
     conda build $DIR/$savu_recipe
     savubuild=`conda build $DIR/$savu_recipe --output`
@@ -300,6 +299,7 @@ if [ ! $test_flag ]; then
       echo "Installing all required packages from the explicit file $EXPLICIT_FILE" | xargs
       conda create -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
     fi
+  fi
 
   # cleanup build artifacts
   rm $PREFIX/miniconda.sh
