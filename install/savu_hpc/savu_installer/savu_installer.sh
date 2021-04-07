@@ -297,7 +297,7 @@ if [ ! $test_flag ]; then
       conda env update -n root -f $DIR/environment.yml
     else
       echo "Installing all required packages from the explicit file $EXPLICIT_FILE" | xargs
-      conda create -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
+      conda env create -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
     fi
   fi
 
