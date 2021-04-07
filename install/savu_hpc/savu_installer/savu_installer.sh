@@ -103,17 +103,25 @@ else
   echo -e "\n============================================================="
 fi
 
-# set compiler wrapper
-MPICC=$(command -v mpicc)
-MPI_HOME=${MPICC%/mpicc}
-if ! [ "$MPICC" ]; then
-  echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-  exit 1
+if [ $facility = dls ]; then
+  echo "Proceed with $facility installation" | xargs
+  # set compiler wrapper
+  MPICC=$(command -v mpicc)
+  MPI_HOME=${MPICC%/mpicc}
+  if ! [ "$MPICC" ]; then
+    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+    exit 1
+  else
+    echo "Using mpicc:   " $MPICC
+    export PATH=$MPI_HOME:$PATH
+    openmpi_ver_string=$(mpicxx --showme:version)
+    export openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+    echo "Proceed with $openmpi_version version" | xargs
+  fi
 else
-  echo "Using mpicc:   " $MPICC
-  export PATH=$MPI_HOME:$PATH
+  echo "Proceed with a PC installation, going to use the openmpi installation from conda"
+  echo "Consider of installing Savu-lite from savu-dep conda channel instead"
 fi
-
 
 # # check for cuda
 # nvcc=`command -v nvcc`
@@ -225,79 +233,48 @@ if [ ! $test_flag ]; then
 
   conda install -y -q conda-build
 
-  echo "Building Savu..."
-  conda build $DIR/$savu_recipe
-  savubuild=`conda build $DIR/$savu_recipe --output`
-  echo "Installing Savu..."
-  conda install -y -q --use-local $savubuild
+  if [ $facility = dls ]; then
 
-  path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
-  savu_path=${path%/savu/__init__.py*}
+    echo "Building Savu..."
+    conda build $DIR/$savu_recipe
+    savubuild=`conda build $DIR/$savu_recipe --output`
+    echo "Installing Savu..."
+    conda install -y -q --use-local $savubuild
 
-  # get the savu version
-  if [ -z $recipes ]; then
-    install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-    recipes=$savu_path/$install_path/../conda-recipes
+    path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
+    savu_path=${path%/savu/__init__.py*}
+
+    # get the savu version
+    if [ -z $recipes ]; then
+      install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
+      recipes=$savu_path/$install_path/../conda-recipes
+    fi
+
+    echo "Installing mpi4py from savu-dep conda channel"
+    mpi4py_vesion="3.0.2"
+    export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
+    conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
+    #string=$(awk '/^mpi4py/' $versions_file)
+    #mpi4py_version=$(echo $string | cut -d " " -f 2)
+    #pip install mpi4py==$mpi4py_version
+    echo "Installing hdf5 from savu-dep conda channel"
+    hdf5_vesion="1.10.5"
+    export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
+    conda install --yes -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
+
+    echo "Installing h5py from savu-dep conda channel"
+    VERSION_H5PY="2.10.0"
+    export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_vesion"_hdf5_"$VERSION_BUILD_HDF5
+    conda install --yes -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
+    #. $recipes/installer.sh "hdf5"
+    #. $recipes/installer.sh "h5py"
+  else
+    echo "Installing mpi4py/hdf5/h5py from conda for CI run"
+    recipes=$DIR/../conda-recipes
+    conda env update -n root -f $DIR/environment_ci.yml
   fi
-
-  echo "Installing mpi4py..."
-  #string=$(awk '/^mpi4py/' $versions_file)
-  #mpi4py_version=$(echo $string | cut -d " " -f 2)
-  #pip install mpi4py==$mpi4py_version
-  echo "Installing mpi4pi from savu-dep channel..."
-  conda install --yes -c savu-dep mpi4py --no-deps
-
-  echo "Installing h5py from savu-dep channel..."
-  conda install --yes -c savu-dep h5py --no-deps
-
-  echo "Installing hdf5 from savu-dep channel..."
-  conda install --yes -c savu-dep hdf5=1.10.5_openmpi3.1.4 --no-deps
 
   conda list
-
-  echo "Checking that mpi4py/hdf5/h5py are installed into conda environment"
-
-  string=$(awk '/^hdf5/' $versions_file)
-  hdf5_version=$(echo $string | cut -d " " -f 2)
-  export PACKAGE=hdf5
-  export VER_PACKAGE=$hdf5_version
-  conda list $PACKAGE > check_conda_package.txt
-  if grep -q $VER_PACKAGE check_conda_package.txt; then
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
-      rm -f check_conda_package.txt
-  else
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      rm -f check_conda_package.txt
-      exit 0
-  fi
-
-  string=$(awk '/^h5py/' $versions_file)
-  h5py_version=$(echo $string | cut -d " " -f 2)
-  export PACKAGE=h5py
-  export VER_PACKAGE=$h5py_version
-  conda list $PACKAGE > check_conda_package.txt
-  if grep -q $VER_PACKAGE check_conda_package.txt; then
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
-      rm -f check_conda_package.txt
-  else
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      rm -f check_conda_package.txt
-      exit 0
-  fi
-
-  export PACKAGE=mpi4py
-  string=$(awk '/^mpi4py/' $versions_file)
-  mpi4py_version=$(echo $string | cut -d " " -f 2)
-  export VER_PACKAGE=$mpi4py_version
-  conda list $PACKAGE > check_conda_package.txt
-  if grep -q $VER_PACKAGE check_conda_package.txt; then
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
-      rm -f check_conda_package.txt
-  else
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      rm -f check_conda_package.txt
-      exit 0
-  fi
 
   echo "Installing pytorch..."
   string=$(awk '/^cudatoolkit/' $versions_file)
