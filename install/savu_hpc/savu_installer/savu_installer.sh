@@ -54,6 +54,7 @@ if [ $test_flag ]; then
   test_flag=true
 fi
 
+
 # Set the prompts flag to false if no prompts are required
 flag_parse "--no_prompts" prompts "$@"
 if [ $prompts ]; then
@@ -69,6 +70,13 @@ if [ ! $facility ]; then
 fi
 
 export FACILITY=$facility
+
+# set the explicit file
+arg_parse "-f" explicit_file "$@"
+if [ ! $explicit_file ]; then
+  explicit_file=false
+fi
+export EXPLICIT_FILE=$explicit_file
 
 # set the conda folder
 arg_parse "-c" conda_folder "$@"
@@ -250,52 +258,48 @@ if [ ! $test_flag ]; then
       recipes=$savu_path/$install_path/../conda-recipes
     fi
 
-    echo "Installing mpi4py from savu-dep conda channel"
-    mpi4py_vesion="3.0.2"
-    export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
-    conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
-    #string=$(awk '/^mpi4py/' $versions_file)
-    #mpi4py_version=$(echo $string | cut -d " " -f 2)
-    #pip install mpi4py==$mpi4py_version
-    echo "Installing hdf5 from savu-dep conda channel"
-    hdf5_vesion="1.10.5"
-    export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
-    conda install --yes -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
+    if [ $EXPLICIT_FILE = false ]; then
+      echo "Installing mpi4py from savu-dep conda channel"
+      mpi4py_vesion="3.0.2"
+      export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
+      conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
+      #string=$(awk '/^mpi4py/' $versions_file)
+      #mpi4py_version=$(echo $string | cut -d " " -f 2)
+      #pip install mpi4py==$mpi4py_version
 
-    echo "Installing h5py from savu-dep conda channel"
-    VERSION_H5PY="2.10.0"
-    export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_vesion"_hdf5_"$VERSION_BUILD_HDF5
-    conda install --yes -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
-    #. $recipes/installer.sh "hdf5"
-    #. $recipes/installer.sh "h5py"
-  else
-    echo "Installing mpi4py/hdf5/h5py from conda for CI run"
-    recipes=$DIR/../conda-recipes
-    conda env update -n root -f $DIR/environment_ci.yml
-  fi
+      echo "Installing hdf5 from savu-dep conda channel"
+      hdf5_vesion="1.10.5"
+      export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
+      conda install --yes -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
-  conda list
+      echo "Installing h5py from savu-dep conda channel"
+      VERSION_H5PY="2.10.0"
+      export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_vesion"_hdf5_"$VERSION_BUILD_HDF5
+      conda install --yes -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
-  echo "Installing pytorch..."
-  string=$(awk '/^cudatoolkit/' $versions_file)
-  cudatoolkit_version=$(echo $string | cut -d " " -f 2)
-  conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
+      echo "Installing pytorch..."
+      string=$(awk '/^cudatoolkit/' $versions_file)
+      cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+      conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
 
-  export PACKAGE=cudatoolkit
-  string=$(awk '/^cudatoolkit/' $versions_file)
-  cudatoolkit_version=$(echo $string | cut -d " " -f 2)
-  export VER_PACKAGE=$cudatoolkit_version
-  conda list $PACKAGE > check_conda_package.txt
-  if grep -q $VER_PACKAGE check_conda_package.txt; then
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
-      rm -f check_conda_package.txt
-  else
-      echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
-      rm -f check_conda_package.txt
-      exit 0
-  fi
-
-  conda env update -n root -f $DIR/environment.yml
+      export PACKAGE=cudatoolkit
+      string=$(awk '/^cudatoolkit/' $versions_file)
+      cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+      export VER_PACKAGE=$cudatoolkit_version
+      conda list $PACKAGE > check_conda_package.txt
+      if grep -q $VER_PACKAGE check_conda_package.txt; then
+          echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
+          rm -f check_conda_package.txt
+      else
+          echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is NOT found in Savu's environment! \nInstallation process terminated!"
+          rm -f check_conda_package.txt
+          exit 0
+      fi
+      conda env update -n root -f $DIR/environment.yml
+    else
+      echo "Installing all required packages from the explicit file $EXPLICIT_FILE" | xargs
+      conda create -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
+    fi
 
   # cleanup build artifacts
   rm $PREFIX/miniconda.sh
