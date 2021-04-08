@@ -195,14 +195,14 @@ def _yamlfilepath(value):
 def _yaml_file_is_valid(file_path_str):
     """Try to read the yaml file at the provided file path (file_path_str)
     """
-    parameter_valid = False
+    yaml_file_valid = False
     with open(file_path_str, 'r') as f:
         errors = yu.check_yaml_errors(f)
         try:
             yu.read_yaml(file_path_str)
             # If the yaml file is read in without errors, then the
             # file path is a valid entry
-            parameter_valid = True
+            yaml_file_valid = True
         except:
             # Print relevant errors if there is an exception.
             # Some errors may not be serious enough to prevent the yaml
@@ -211,7 +211,7 @@ def _yaml_file_is_valid(file_path_str):
                 print("There were some errors with your yaml file structure.")
                 for e in errors:
                     print(e)
-    return parameter_valid
+    return yaml_file_valid
 
 
 def _intgroup(value):
@@ -256,7 +256,7 @@ def _check_internal_path(hf, int_path):
         print("Attribute error.")
     except:
         print(
-            Fore.BLUE + "Please choose another interior" " path."
+            Fore.BLUE + "Please choose another interior path."
             + Fore.RESET
         )
         print("Example interior paths: ")
