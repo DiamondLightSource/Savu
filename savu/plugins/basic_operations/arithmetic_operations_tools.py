@@ -10,7 +10,7 @@ scalars from METADATA (min, max, mean) OR providing a scalar value.
         """
         scalar_value:
               visibility: basic
-              dtype: int
+              dtype: float
               description: A scalar value value for arithmetic operation
                (it not in metadata).
               default: None
