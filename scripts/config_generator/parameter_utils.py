@@ -56,13 +56,8 @@ def _preview_dimension(value):
             # If : notation is used, accept this
             parameter_valid = True
         elif ":" in value:
-            count_colon = value.count(":")
-            if count_colon < 4:
-                # Only allow 4 colons, start stop step block
-                start_stop_split = value.split(":")
-                type_list = [pu._dumps(v) for v in start_stop_split if v]
-                if all(_preview_dimension_singular(item) for item in type_list):
-                    parameter_valid = True
+            if _split_notation_is_valid(value):
+                parameter_valid = True
         elif _preview_dimension_singular(value):
                 parameter_valid = True
     elif _integer(value) or _float(value):
@@ -70,12 +65,29 @@ def _preview_dimension(value):
     return parameter_valid
 
 
+def _split_notation_is_valid(value):
+    """Check if the start step stock chunk entries are valid
+
+    :param value: The value to check
+    :return: parameter_valid True if the split notation is valid
+    """
+    split_notation_valid = False
+    count_colon = value.count(":")
+    if count_colon < 4:
+        # Only allow 4 colons, start stop step block
+        start_stop_split = value.split(":")
+        type_list = [pu._dumps(v) for v in start_stop_split if v]
+        if all(_preview_dimension_singular(item) for item in type_list):
+            split_notation_valid = True
+    return split_notation_valid
+
+
 def _preview_dimension_singular(value):
     """ Check the singular value within the preview dimension"""
     parameter_valid = False
     if _string(value):
         string_valid = re.fullmatch("(mid|end|[^a-zA-z])+", value)
-        # Check that the string does not contain any letters
+        # Check that the string does not contain any letters [^a-zA-Z]
         # If it does contain letters, mid and end are the only keywords allowed
         if string_valid:
             try:
