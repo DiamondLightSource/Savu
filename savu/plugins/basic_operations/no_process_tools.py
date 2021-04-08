@@ -27,7 +27,7 @@ class NoProcessTools(PluginTools):
             default: 10.0
         yaml_file:
             visibility: advanced
-            dtype: yaml_file
+            dtype: yaml_file_path
             description: Yaml file path.
             default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
         vocentering_search_area:
@@ -61,7 +61,7 @@ class NoProcessTools(PluginTools):
             default: "(1, 3, 3)"
         yamlconverter_yaml_file:
             visibility: basic
-            dtype: yaml_file
+            dtype: yaml_file_path
             description: Path to file containing data descriptions
             default: None
         savunexusloader_datasets:
