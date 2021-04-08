@@ -304,7 +304,7 @@ def _intpathway(value):
     return parameter_valid
 
 
-def _configfile(value):
+def _configfilepath(value):
     """ Check if the value is a config file """
     parameter_valid = False
     if _filepath(value):
@@ -456,7 +456,7 @@ type_dict = {
     "savufilepath": _savufilepath,
     "directory": _directory,
     "int_path": _intpathway,
-    "config_file": _configfile,
+    "config_file_path": _configfilepath,
     "filename": _filename,
     "nptype": _nptype,
     "int": _integer,
@@ -484,7 +484,7 @@ type_error_dict = {
     "savufilepath": "filepath within the savu directory",
     "directory": "directory",
     "int_path": "string",
-    "config_file": "configuration file",
+    "config_file_path": "configuration file path",
     "filename": "file name",
     "nptype": "numpy data type",
     "int": "integer",

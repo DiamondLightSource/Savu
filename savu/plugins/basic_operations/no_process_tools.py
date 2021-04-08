@@ -48,7 +48,7 @@ class NoProcessTools(PluginTools):
             default: '(1.0, 0.0e-1, 0.0e-2, 0.0e-3, 0.0e-4)'
         pymca_config:
             visibility: basic
-            dtype: config_file
+            dtype: config_file_path
             description: Path to config file
             default: 'Savu/test_data/data/test_config.cfg'
             visibility: intermediate

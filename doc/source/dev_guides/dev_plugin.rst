@@ -324,8 +324,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - A file directory
     * - int_path
       - An interior path
-    * - config_file
-      - A configuration file
+    * - config_file_path
+      - A configuration file path
     * - filename
       - A file name
     * - nptype

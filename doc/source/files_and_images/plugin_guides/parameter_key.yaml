@@ -29,7 +29,7 @@ dtype:
         savufilepath: File path within the Savu directory
         directory: File directory
         int_path: Interior path
-        config_file: Configuration file
+        config_file_path: Configuration file path
         filename: File name
         nptype: Numpy type
         dict: Dictionary
