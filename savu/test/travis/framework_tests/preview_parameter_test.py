@@ -254,5 +254,38 @@ class PreviewParameterTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_21(self):
+        # Check that key words and incorrect letters are not accepted
+        plugin = self.initial_setup()
+        key = "preview"
+        value = ['another - 1:mid + 1', ':', '12']
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_22(self):
+        # Check that key words and incorrect letters are not accepted
+        plugin = self.initial_setup()
+        key = "preview"
+        value = ['another - 1: 1', ':', '12']
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_23(self):
+        # Check that key word letters in incorrect order are not accepted
+        plugin = self.initial_setup()
+        key = "preview"
+        value = ['dim - 1: 1', ':', '12']
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, plugin.p_dict[key]
+        )
+        self.assertFalse(valid_modification)
+
 if __name__ == "__main__":
     unittest.main()

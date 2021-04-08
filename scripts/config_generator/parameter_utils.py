@@ -22,6 +22,7 @@
 """
 
 import os
+import re
 import h5py
 import posixpath
 import numpy as np
@@ -73,13 +74,10 @@ def _preview_dimension_singular(value):
     """ Check the singular value within the preview dimension"""
     parameter_valid = False
     if _string(value):
-        word_string = ["mid", "end"]
-        word_present = any(item in value for item in word_string)
-        # Check for letters from mid and end incase both are used
-        letter_str = "miden"
-        letters = ''.join(l for l in value if l.isalpha())
-        unaccepted_letters = ''.join(l for l in letters if l not in letter_str)
-        if not unaccepted_letters:
+        string_valid = re.fullmatch("(mid|end|[^a-zA-z])+", value)
+        # Check that the string does not contain any letters
+        # If it does contain letters, mid and end are the only keywords allowed
+        if string_valid:
             try:
                 # Attempt to evaluate the provided equation
                 temp_value = _preview_eval(value)
