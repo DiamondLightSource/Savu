@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: data_rescale
+.. module:: rescale_intensity
    :platform: Unix
    :synopsis: performs stretching or shrinking the data intensity levels based on skimage rescale_intensity module
 
@@ -30,24 +30,17 @@ import skimage.io
 import numpy as np
 
 @register_plugin
-class DataRescale(Plugin, CpuPlugin):
-    """
-    The plugin performs stretching or shrinking the data intensity levels based on skimage rescale_intensity module. \
-    Min-max scalars for rescaling can be passed from METADATA OR by providing as an input.
-    
-    :param min_value: the global minimum data value. Default: None.
-    :param max_value: the global maximum data value. Default: None.
-    """
-
+class RescaleIntensity(Plugin, CpuPlugin):
     def __init__(self):
-        super(DataRescale, self).__init__("DataRescale")
+        super(RescaleIntensity, self).__init__("RescaleIntensity")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        pattern_type=self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
 
     def pre_process(self):
         data = self.get_in_datasets()[0]
@@ -59,7 +52,7 @@ class DataRescale(Plugin, CpuPlugin):
             the_min = data.meta_data.get(['stats', 'min', 'pattern'])
         except KeyError:
             the_min = self.parameters['min_value']
-        
+
         self._data_range = (the_min, the_max)
 
     def process_frames(self, data):
@@ -69,10 +62,10 @@ class DataRescale(Plugin, CpuPlugin):
         else:
             resampled_image = data[0]
         return resampled_image
-    
+
     def nInput_datasets(self):
         return 1
-    
+
     def nOutput_datasets(self):
         return 1
 

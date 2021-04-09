@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
-.. module:: basic_operations_test
+.. module:: plugins_test
    :platform: Unix
-   :synopsis: testing the histogram plugin
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+   :synopsis: value_substitution_test
+
+.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
+
 import unittest
-from savu.test import test_utils as tu
-from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
+import savu.test.test_utils as tu
+from savu.test.travis.framework_tests.plugin_runner_test \
+    import run_protected_plugin_runner
 
+class ValueSubstitutionTest(unittest.TestCase):
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
-class BasicOperations(unittest.TestCase):
-
-    def test_basic_operations(self):
-        process_file = tu.get_test_process_path('basic_operations_test.nxs')
-        options = tu.set_experiment('tomo')
-        options['process_file'] = process_file
+    def test_value_substitution(self):
+        process_list = 'basic_operations/value_substitution_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
