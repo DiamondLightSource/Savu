@@ -259,9 +259,17 @@ if [ ! $test_flag ]; then
 
     if [ $EXPLICIT_FILE = false ]; then
       echo "Installing mpi4py from savu-dep conda channel"
-      mpi4py_vesion="3.0.2"
+      mpi4py_version="3.0.2"
       export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
-      conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
+
+      wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-$mpi4py_version.tar.gz
+      tar -zxf mpi4py-$mpi4py_version.tar.gz
+      cd mpi4py-$mpi4py_version
+      python setup.py build --mpicc=$MPICC
+      python setup.py install
+      rm -rf ../mpi4py-$mpi4py_version
+
+      #conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
       #string=$(awk '/^mpi4py/' $versions_file)
       #mpi4py_version=$(echo $string | cut -d " " -f 2)
       #pip install mpi4py==$mpi4py_version
@@ -273,7 +281,7 @@ if [ ! $test_flag ]; then
 
       echo "Installing h5py from savu-dep conda channel"
       VERSION_H5PY="2.10.0"
-      export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_vesion"_hdf5_"$VERSION_BUILD_HDF5
+      export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
       conda install --yes -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
       echo "Installing pytorch..."
