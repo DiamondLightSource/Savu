@@ -174,7 +174,7 @@ def _range(value):
 
 
 def _yamlfilepath(value):
-    """ yaml_file_path """
+    """ yamlfilepath """
     parameter_valid = False
     if _string(value):
         if os.path.isfile(value):
@@ -475,14 +475,14 @@ type_dict = {
     "num_list": _numlist,
     "empty_list": _emptylist,
     "range": _range,
-    "yaml_file_path": _yamlfilepath,
+    "yamlfilepath": _yamlfilepath,
     "file_int_path_int": _intgroup,
     "int_path_int": _intgroup1,
     "filepath": _filepath,
     "savufilepath": _savufilepath,
     "directory": _directory,
     "int_path": _intpathway,
-    "config_file_path": _configfilepath,
+    "configfilpath": _configfilepath,
     "filename": _filename,
     "nptype": _nptype,
     "int": _integer,
@@ -503,14 +503,14 @@ type_error_dict = {
     "num_list": "list of numbers",
     "empty_list": "empty list",
     "range": "range'. For example '<value 1>, <value 2>",
-    "yaml_file_path": "yaml file path",
+    "yamlfilepath": "yaml file path",
     "file_int_path_int": "[filepath, interior file path, int]",
     "int_path_int": "[interior file path, int]",
     "filepath": "filepath",
     "savufilepath": "filepath within the savu directory",
     "directory": "directory",
     "int_path": "string",
-    "config_file_path": "configuration file path",
+    "configfilepath": "configuration file path",
     "filename": "file name",
     "nptype": "numpy data type",
     "int": "integer",
