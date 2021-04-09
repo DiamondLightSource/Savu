@@ -290,13 +290,8 @@ def _intgroup1(value):
 
 def _directory(value):
     """ directory """
-    parameter_valid = False
-    # take the directory from the path
-    # path = os.path.dirname(value)
     path = value if value else "."
-    if os.path.isdir(path):
-        parameter_valid = True
-    return parameter_valid
+    return os.path.isdir(path)
 
 
 def _filepath(value):
@@ -311,7 +306,7 @@ def _filepath(value):
 
 
 def _savufilepath(value):
-    """ A file path inside the Savu directory"""
+    """A file path inside the Savu directory"""
     parameter_valid = False
     savu_base_path = \
         os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
@@ -322,24 +317,9 @@ def _savufilepath(value):
 
 
 def _intpathway(value):
-    # Interior file path
-    parameter_valid = False
+    """Interior file path"""
     # Could check if valid, but only if file_path known for another parameter
-    if _string(value):
-        parameter_valid = True
-    return parameter_valid
-
-
-def _configfilepath(value):
-    """ Check if the value is a config file """
-    parameter_valid = False
-    if _filepath(value):
-        filetovalidate = configparser.ConfigParser()
-        filetovalidate.read(value)
-        content = filetovalidate.sections()
-        if content:
-            parameter_valid = True
-    return parameter_valid
+    return _string(value)
 
 
 def _filename(value):
@@ -481,7 +461,6 @@ type_dict = {
     "filepath": _filepath,
     "directory": _directory,
     "int_path": _intpathway,
-    "configfilpath": _configfilepath,
     "filename": _filename,
     "nptype": _nptype,
     "int": _integer,
@@ -508,7 +487,6 @@ type_error_dict = {
     "filepath": "filepath",
     "directory": "directory",
     "int_path": "string",
-    "configfilepath": "configuration file path",
     "filename": "file name",
     "nptype": "numpy data type",
     "int": "integer",
