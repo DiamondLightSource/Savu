@@ -33,7 +33,6 @@ class MinAndMax(Plugin, CpuPlugin):
     A plugin to calculate the min and max values of each slice (as determined \
     by the pattern parameter)
 
-    :u*param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     :param smoothing: Apply a smoothing filter or not. Default: True.
     :u*param masking: Apply a circular mask or not. Default: True.
     :u*param ratio: Used to calculate the circular mask. If not provided, \

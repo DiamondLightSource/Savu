@@ -29,9 +29,9 @@ from savu.test.travis.framework_tests.plugin_runner_test \
     import run_protected_plugin_runner
 
 class TomobarRecon2dCpuTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_tomobar_recon2d_cpu(self):
         process_list = 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs'
