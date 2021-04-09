@@ -21,6 +21,7 @@
 
 """
 
+import logging
 import skimage.exposure
 import skimage.io
 import numpy as np
@@ -53,11 +54,27 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     def __init__(self, name='ImageSaver'):
         super(ImageSaver, self).__init__(name)
 
+    def setup(self):
+        data_pattern = self.parameters['pattern']
+        in_pData, _ = self.get_plugin_datasets()
+        try:
+            in_pData[0].plugin_data_setup(data_pattern, 'single')
+        except:
+            msg = "\n***************************************************"\
+            "**********\n"\
+            "Can't find the data pattern: {}.\nThe pattern parameter of " \
+            "this plugin must be relevant to its \nprevious plugin" \
+            "\n*************************************************************"\
+            "\n".format(data_pattern)
+            logging.warning(msg)
+            cu.user_message(msg)
+            raise ValueError(msg)
+
     def pre_process(self):
         super(ImageSaver, self).pre_process()
+        self.pData = self.get_plugin_in_datasets()[0]
         self.file_format = self.parameters['format']
         num_bit = self.parameters['num_bit']
-        self.pData = self.get_plugin_in_datasets()[0]
         if not (num_bit == 8 or num_bit == 16 or num_bit == 32):
             self.num_bit = 32
             msg = "\n***********************************************\n"\

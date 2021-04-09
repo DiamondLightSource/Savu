@@ -125,7 +125,9 @@ class ImageLoader(BaseLoader):
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                exec("angles = " + angles)
+                ldict = {}
+                exec("angles = " + angles,globals(),ldict)
+                angles = ldict['angles']
             except Exception as e:
                 warnings.warn("Could not execute statement: {}".format(e))
                 try:
