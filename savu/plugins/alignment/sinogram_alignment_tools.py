@@ -1,10 +1,12 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class SinogramAlignmentTools(PluginTools):
-    """The centre of mass of each row is determined and then a sine function fit
-through these to determine the centre of rotation.  The residual between
-each centre of mass and the sine function is then used to align each row.
+    """The centre of mass of each row is determined and then a sine function
+    fit through these to determine the centre of rotation.  The residual
+    between each centre of mass and the sine function is then used to align
+    each row.
     """
+
     def define_parameters(self):
         """
         threshold:
@@ -21,8 +23,8 @@ each centre of mass and the sine function is then used to align each row.
         type:
               visibility: intermediate
               dtype: str
-              description: Either centre_of_mass or shift, with the latter requiring
-                ProjectionVerticalAlignment prior to this plugin.
+              description: Either centre_of_mass or shift, with the latter
+                  requiring ProjectionVerticalAlignment prior to this plugin.
               default: centre_of_mass
               options: [centre_of_mass, shift]
 

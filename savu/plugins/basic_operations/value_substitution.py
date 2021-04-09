@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: value_mask_replacement
+.. module:: value_substitution
    :platform: Unix
-   :synopsis: looks for a specific value in the provided second array (e.g. a mask) and substitutes the value in the first array with a given value
+   :synopsis: looks for a specific value in the provided second dataset (e.g. a mask image)\
+    and substitutes it with a given value
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -28,25 +29,20 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 
 @register_plugin
-class ValueMaskReplacement(Plugin, CpuPlugin):
-    """
-    The function looks for a specific value in the provided second array (e.g. a mask) and substitutes the value in the first array with a given value. 
-
-    :param seek_value: The value to be located in the provided second array. Default: 0.
-    :param new_value: The value to be replaced with in the first array. Default: 1.   
-    """
+class ValueSubstitution(Plugin, CpuPlugin):
 
     def __init__(self):
-        super(ValueMaskReplacement, self).__init__("ValueMaskReplacement")
+        super(ValueSubstitution, self).__init__("ValueSubstitution")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
+        pattern_type=self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
+        in_pData[1].plugin_data_setup(pattern_type, 'single')
 
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
 
     def process_frames(self, data):
         indeces = np.where(data[1] == self.parameters['seek_value'])

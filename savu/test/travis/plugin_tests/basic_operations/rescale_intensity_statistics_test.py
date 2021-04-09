@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: tomobar 2d cpu test
+   :synopsis: rescale_intensity_statistics_test
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -28,14 +28,20 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test \
     import run_protected_plugin_runner
 
-class TomobarRecon2dCpuTest(unittest.TestCase):
+class RescaleIntensityStatisticsTest(unittest.TestCase):
     def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
 
-    def test_tomobar_recon2d_cpu(self):
-        process_list = 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+    def test_rescale_intensity(self):
+        process_list = 'basic_operations/rescale_intensity_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_get_statistics(self):
+        process_list = 'basic_operations/get_data_statistics_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

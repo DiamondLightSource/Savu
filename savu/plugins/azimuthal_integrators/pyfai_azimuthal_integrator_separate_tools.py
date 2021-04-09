@@ -5,26 +5,17 @@ class PyfaiAzimuthalIntegratorSeparateTools(PluginTools):
     """
     def define_parameters(self):
         """
-        use_mask:
-              visibility: basic
-              dtype: bool
-              description: Should we mask.
-              default: False
         out_datasets:
               visibility: datasets
               dtype: list
-              description: A
+              description: Names assigned to datasets created as output to the
+                  plugin.
               default: ['powder','spots']
         percentile:
               visibility: intermediate
               dtype: int
               description: Percentile to threshold
               default: 50
-        num_bins:
-              visibility: basic
-              dtype: int
-              description: Number of bins.
-              default: 1005
         num_bins_azim:
               visibility: basic
               dtype: int

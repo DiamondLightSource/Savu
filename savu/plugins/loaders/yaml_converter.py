@@ -26,6 +26,7 @@ import os
 import h5py
 import yaml
 import copy
+import logging
 import collections.abc as collections
 import numpy as np  # used in exec so do not delete
 from ast import literal_eval
@@ -67,14 +68,24 @@ class YamlConverter(BaseLoader):
     def _get_yaml_file(self, yaml_file):
         if yaml_file is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
+            
+        # try the absolute path
+        yaml_abs = os.path.abspath(yaml_file)
+        if os.path.exists(yaml_abs):
+            return yaml_abs
+        
+        # try adding the path to savu
+        yaml_savu = os.path.join(os.path.dirname(
+            __file__.split(os.path.join('savu', 'plugins'))[0]), yaml_file)
+        if os.path.exists(yaml_savu):
+            return yaml_savu
 
-        if not os.path.exists(yaml_file):
-            path = os.path.dirname(
-                __file__.split(os.path.join('savu', 'plugins'))[0])
-            yaml_file = os.path.join(path, yaml_file)
-            if not os.path.exists(yaml_file):
-                raise Exception('The yaml file does not exist %s' % yaml_file)
-        return yaml_file
+        # try adding the path to the templates folder
+        yaml_templ = os.path.join(os.path.dirname(__file__), yaml_file)
+        if os.path.exists(yaml_templ):
+            return yaml_templ
+
+        raise Exception('The yaml file does not exist %s' % yaml_file)
 
     def _add_template_updates(self, ddict):
         all_entries = ddict.pop('all', {})

@@ -21,6 +21,7 @@
 
 """
 import os
+import copy
 import logging
 
 from colorama import Fore
@@ -44,17 +45,64 @@ class PluginParameters(object):
     def __init__(self):
         super(PluginParameters, self).__init__()
         self.param = MetaData(ordered=True)
+        self.docstring_info = {}
+        self.parameters = {}
 
     def populate_parameters(self, tools_list):
-        """Set the plugin parameters for each of the tools classes"""
-        list(
-            map(
-                lambda tool_class: self._set_plugin_parameters(tool_class),
-                tools_list
-            )
-        )
+        """ Set parameter definitions and default parameter values """
+        # set the parameter definitions
+        # populates the dictionary returned by self.get_param_definitions()
+        list(map(lambda tool_class: 
+                 self._set_parameter_definitions(tool_class), tools_list))
+        # set the default parameter values
+        # populates the dictionary returned by self.get_param_values()
+        self._populate_default_parameters()
 
-    def _set_plugin_parameters(self, tool_class):
+    def initialise(self, params):
+        # Override default parameter values with plugin list entries
+        self.set_plugin_list_parameters(copy.deepcopy(params))
+        self.multi_params_dict = {}
+        self.extra_dims = []
+        self._get_plugin().set_parameters(self.parameters)
+        
+    def _populate_default_parameters(self):
+        """
+        This method should populate all the required parameters with
+        default values. It is used for checking to see if parameter
+        values are appropriate
+        """
+        p_defs = self.get_param_definitions()
+        self.set_docstring(self.get_doc())
+        self.parameters = \
+            OrderedDict([(k, v['default']) for k, v in p_defs.items()])
+        # parameters holds current values, this is edited outside of the
+        # tools class so default and dependency display values are updated here
+        self.update_dependent_defaults()
+        self.check_dependencies(self.parameters)
+        self._get_plugin().set_parameters(self.parameters)
+
+    def set_docstring(self, doc_str):
+        self.docstring_info['info'] = doc_str.get('verbose')
+        self.docstring_info['warn'] = doc_str.get('warn')
+        self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
+        self.docstring_info['synopsis'] = doc.find_synopsis(self)
+
+    def _set_parameters_this_instance(self, indices):
+        """ Determines the parameters for this instance of the plugin, in the
+        case of parameter tuning.
+
+        param np.ndarray indices: the index of the current value in the
+            parameter tuning list.
+        """
+        dims = set(self.multi_params_dict.keys())
+        count = 0
+        for dim in dims:
+            info = self.multi_params_dict[dim]
+            name = info['label'].split('_param')[0]
+            self.parameters[name] = info['values'][indices[count]]
+            count += 1
+
+    def _set_parameter_definitions(self, tool_class):
         """Load the parameters for each base class, c, check the
         dataset visibility, check data types, set dictionary values.
         """
@@ -105,43 +153,6 @@ class PluginParameters(object):
         if str(value) == "default":
             default = param_info_dict[param_name]["default"]
             value = self._set_default(default, parameters, param_name)
-        return value
-
-    def _set_default(self, default, parameters, param_name):
-        """Check if the default value is a dictionary which depends on
-        another parameter value. If it is, then find the
-        dependent value. If there is no option, set the default to None.
-        An example would be:
-
-        default:
-            regularisation_method:
-                FGP_TV: 100
-                NLTV: 500
-        """
-        param_info_dict = self.param.get_dictionary()
-        if isinstance(default, OrderedDict):
-            desc = param_info_dict[param_name]["description"]
-            parent_param = list(default.keys())[0] if default.keys() else ""
-            if parent_param:
-                dep_param_choices = {
-                    k: v for k, v in default[parent_param].items()
-                }
-                # If the parameter name exists in the current plugin
-                if parent_param in parameters:
-                    # Find current parent value
-                    parent_value = parameters[parent_param]
-                    if parent_value in dep_param_choices.keys():
-                        desc["range"] = (
-                            f"The recommended value with the "
-                            f"'chosen' {parent_param} would be "
-                            f"{dep_param_choices[parent_value]}"
-                        )
-                        value = dep_param_choices[parent_value]
-                    else:
-                        # The default value was not found in the dictionary
-                        value = None
-        else:
-            value = default
         return value
 
     def _check_required_keys(self, param_info_dict, tool_class):
@@ -273,66 +284,86 @@ class PluginParameters(object):
         for k, v in param_info_dict.items():
             v["display"] = "on"
 
-    def update_defaults(self, parameters, mod=False):
-        """Check if the default field of each parameter holds a dictionary.
-        If it does, then check the default parameter keys to find the default
-        value of the given parameter
+    def update_dependent_defaults(self):
         """
-        param_info_dict = self.param.get_dictionary()
-        # Default values which are of the type dictionary are also currently
-        # selected here
-        default_list = {
-            k: v["default"]
-            for k, v in param_info_dict.items()
-            if isinstance(v["default"], OrderedDict)
-        }
-        for p_name, default in default_list.items():
-            desc = param_info_dict[p_name]["description"]
-            parent_param = list(default.keys())[0] if default.keys() else ""
+        Fix default values for parameters that have a dependency on the value 
+        of another parameter, and are in dictionary form.
+        """
+        for name, pdict in self.get_param_definitions().items():
+            if isinstance(pdict["default"], OrderedDict):
+                self.parameters[name] = self.get_dependent_default(pdict)
 
-            # Check that the dictionary key is a valid parameter name
-            if parent_param in param_info_dict.keys():
-                # Check that each parameter choice key has a matching
-                # dictionary value
-                if isinstance(default[parent_param], dict):
-                    dep_param_choices = {
-                        k: v for k, v in default[parent_param].items()
-                    }
-                    if mod:
-                        # If there was a modification, find current parent value
-                        parent_value = parameters[parent_param]
-                    else:
-                        # If there was no modification, on load, find the
-                        # parent default
-                        temp_default = \
-                            param_info_dict[parent_param]["default"]
-                        parent_value = self._set_default(
-                            temp_default, parameters, parent_param
-                        )
+    def does_exist(self, key, ddict):
+        if not key in ddict:
+            raise Exception("The dependency %s does not exist" % key)
+        return ddict[key]
 
-                if parent_value in dep_param_choices.keys():
-                    desc["range"] = (
-                        f"The recommended value with the chosen "
-                        f"{str(parent_param)} would be "
-                        f"{str(dep_param_choices[parent_value])}"
-                    )
-                    recommendation = (
-                        f"It's recommended that you update {str(p_name)}"
-                        f" to {str(dep_param_choices[parent_value])}"
-                    )
-                    if mod:
-                        # If a modification is being made don't automatically
-                        # change other parameters, print a warning
-                        if mod == p_name:
-                            print(Fore.RED + recommendation + Fore.RESET)
-                    else:
-                        # If there was no modification, on loading the
-                        # plugin set the correct default value
-                        parameters[p_name] = dep_param_choices[parent_value]
-                else:
-                    # If there is no match
-                    parameters[p_name] = None
+    def get_dependent_default(self, child):
+        """
+        Recursive function to replace a dictionary of default parameters with
+        a single value.
 
+        Parameters
+        ----------
+        child : dict
+            The parameter definition dictionary of the dependent parameter.
+
+        Returns1
+        -------
+        value
+            The correct default value based on the current value of the
+            dependency, or parent, parameter.
+
+        """
+        pdefs = self.get_parameter_definitions()
+        parent_name = list(child['default'].keys())[0]
+        parent = self.does_exist(parent_name, pdefs)
+        
+        # if the parent default is a dictionary then apply the function
+        # recursively
+        if isinstance(parent['default'], dict):
+            self.parameters[parent_name] = \
+                self.get_dependent_default(parent['default'])
+
+        return self.parameters[parent_name]['default']
+
+    def warn_dependents(self, mod_param, mod_value): # all defaults have already been set at this point - move this somewhere else?
+        """
+        Find dependents of a modified parameter # complete the docstring
+        """
+        # find dependents
+        for name, pdict in self.get_param_definitions().items():
+            default = pdict['default']
+            if isinstance(default, OrderedDict):
+                parent_name = list(default.keys()[0])
+                if parent_name == mod_param:
+                    if mod_value in default[parent_name]:
+                        value = default[parent_name][mod_value]
+                        desc = pdict['description']
+                        self.make_recommendation(
+                            name, desc, parent_name, value)
+
+    def make_recommendation(self, child_name, desc, parent_name, value): # move this somewhere else - configurator?
+        desc["range"] = (
+            f"The recommended value with the chosen "
+            f"{str(parent_name)} would be {str(value)}"
+        )
+        recommendation = (
+            f"It's recommended that you update {str(child_name)}"
+            f" to {str(value)}"
+        )
+        print(Fore.RED + recommendation + Fore.RESET)
+
+    # def check_dependencies(self, parameters):
+    #     """
+    #     Determine which parameter values are dependent on a parent value and
+    #     whether they should be hidden or shown
+    #     """
+    #     param_info_dict = self.get_param_definitions()
+    #     for name, pdict in param_info_dict.items():
+    #         if "dependency" in pdict:
+    #             if isinstance(pdict, )
+        
     def check_dependencies(self, parameters):
         """Determine which parameter values are dependent on a parent
         value and whether they should be hidden or shown
@@ -367,10 +398,10 @@ class PluginParameters(object):
                     else:
                         param_info_dict[p_name]["display"] = "off"
 
-    def set_parameters(self, input_parameters):
+    def set_plugin_list_parameters(self, input_parameters):
         """
         This method is called after the plugin has been created by the
-        pipeline framework.  It replaces ``self.plugin_class.parameters``
+        pipeline framework.  It replaces ``self.parameters``
         default values with those given in the input process list. It
         checks for multi parameter strings, eg. 57;68;56;
 
@@ -378,10 +409,10 @@ class PluginParameters(object):
         for this plugin, or None if no customisation is required.
         """
         for key in input_parameters.keys():
-            if key in self.plugin_class.parameters.keys():
+            if key in self.parameters.keys():
                 new_value = input_parameters[key]
                 self.__check_multi_params(
-                    self.plugin_class.parameters, new_value, key
+                    self.parameters, new_value, key
                 )
             else:
                 error = (
@@ -621,6 +652,9 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
         self.tools_list = self._find_tools()
         self._set_tools_data()
 
+    def _get_plugin(self):
+        return self.plugin_class
+
     def _find_tools(self):
         """Using the method resolution order, find base class tools"""
         tool_list = []
@@ -639,8 +673,24 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
         self.set_cite(self.tools_list)
         self.set_doc(self.tools_list)
 
-    def get_param(self):
+    def get_param_definitions(self):
+        """
+        Returns
+        -------
+        dict
+            Original parameter definitions read from tools file.
+        """
         return self.param.get_dictionary()
+
+    def get_param_values(self):
+        """
+        Returns
+        -------
+        dict
+            Plugin parameter values for this instance.
+
+        """
+        return self.parameters
 
     def get_citations(self):
         return self.cite.get_dictionary()

@@ -15,7 +15,8 @@
 """
 .. module:: arithmetic_operations
    :platform: Unix
-   :synopsis: perform elemetary arithmetic operations on data: addition, subtraction, multiplication and division
+   :synopsis: Perform elementary arithmetic operations on data: addition,\
+       subtraction, multiplication and division
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -29,6 +30,8 @@ import numpy as np
 
 @register_plugin
 class ArithmeticOperations(Plugin, CpuPlugin):
+
+
     def __init__(self):
         super(ArithmeticOperations, self).__init__("ArithmeticOperations")
 

@@ -26,11 +26,8 @@ from savu.plugins.analysis.base_analysis import BaseAnalysis
 import numpy as np
 
 
-@register_plugin
+#@register_plugin
 class Histogram(BaseAnalysis, CpuPlugin):
-    """
-    This plugin uses peakutils to find peaks in spectra. This is then metadata.
-    """
 
     def __init__(self):
         super(Histogram, self).__init__("Histogram")

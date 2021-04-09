@@ -21,40 +21,35 @@
 
 """
 
-import ast
 import copy
 import logging
 import numpy as np
-from collections import OrderedDict
 
 import savu.plugins.utils as pu
-import savu.plugins.docstring_parser as doc
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
 class Plugin(PluginDatasets):
-    """
-    """
+
     def __init__(self, name="Plugin"):
         super(Plugin, self).__init__(name)
         self.name = name
         self.chunk = False
-        self.docstring_info = {}
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
         self.exp = None
         self.check = False
-        self.parameters = OrderedDict()
-        self.tools = None
-        self.p_dict = OrderedDict()
+        self.tools = self._set_plugin_tools()
+        self.parameters = {}
+
+    def set_parameters(self, params):
+        self.parameters = params
 
     def initialise(self, params, exp, check=False):
         self.check = check
         self.exp = exp
-        self._populate_default_parameters()
-        self.initialise_parameters()
-        self.tools.set_parameters(copy.deepcopy(params))
+        self.get_plugin_tools().initialise(params)
         self._main_setup()
 
     def _main_setup(self):
@@ -77,21 +72,6 @@ class Plugin(PluginDatasets):
     def get_process_frames_counter(self):
         return self.pcount
 
-    def _set_parameters_this_instance(self, indices):
-        """ Determines the parameters for this instance of the plugin, in the
-        case of parameter tuning.
-
-        param np.ndarray indices: the index of the current value in the
-            parameter tuning list.
-        """
-        dims = set(self.multi_params_dict.keys())
-        count = 0
-        for dim in dims:
-            info = self.multi_params_dict[dim]
-            name = info['label'].split('_param')[0]
-            self.parameters[name] = info['values'][indices[count]]
-            count += 1
-
     def set_filter_padding(self, in_data, out_data):
         """
         Should be overridden to define how wide the frame should be for each
@@ -108,46 +88,17 @@ class Plugin(PluginDatasets):
         logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
 
-    def _get_plugin_tools(self):
+    def get_plugin_tools(self):
+        return self.tools
+
+    def _set_plugin_tools(self):
         plugin_tools_id = self.__class__.__module__ + '_tools'
         tool_class = pu.get_tools_class(plugin_tools_id, self)
         return tool_class
 
-    def _populate_default_parameters(self):
-        """
-        This method should populate all the required parameters with
-        default values. It is used for checking to see if parameter
-        values are appropriate
-        """
-        p_tools = self._get_plugin_tools()
-        if p_tools:
-            self.tools = p_tools
-            self.p_dict = p_tools.get_param()
-            self.set_docstring(p_tools.get_doc())
-            self.parameters = \
-                OrderedDict([(k, v['default'])
-                             for k, v in self.p_dict.items()])
-            # parameters holds current values, this is edited outside of the
-            # tools class so default and dependency display values are updated here
-            self.tools.update_defaults(self.parameters)
-            self.tools.check_dependencies(self.parameters)
-
-    def set_docstring(self, doc_str):
-        self.docstring_info['info'] = doc_str.get('verbose')
-        self.docstring_info['warn'] = doc_str.get('warn')
-        self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
-        self.docstring_info['synopsis'] = doc.find_synopsis(self)
-
     def delete_parameter_entry(self, param):
         if param in list(self.parameters.keys()):
             del self.parameters[param]
-
-    def initialise_parameters(self):
-        self.parameters = OrderedDict()
-        self.p_dict = OrderedDict()
-        self._populate_default_parameters()
-        self.multi_params_dict = {}
-        self.extra_dims = []
 
     def get_parameters(self, name):
         """ Return a plugin parameter

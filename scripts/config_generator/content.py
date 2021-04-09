@@ -128,7 +128,7 @@ class Content(object):
             else:
                 raise Exception("INPUT ERROR: Unknown plugin %s" % name)
         plugin = pu.plugins[name]()
-        plugin._populate_default_parameters()
+        plugin.get_plugin_tools()._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
 
@@ -204,9 +204,9 @@ class Content(object):
             if skip:
                 print(f"Skipping plugin {pos}: {name}")
             else:
-                message = f"PLUGIN ERROR: The plugin {name} is " \
-                          f"unavailable in this version of Savu. To skip " \
-                          f"the broken plugin use: open -s <process_list>"
+                message = f"\nPLUGIN ERROR: The plugin {name} is " \
+                          f"unavailable in this version of Savu. \n Type open"\
+                          f" -s <process_list> to skip the broken plugin."
                 raise Exception(f'Incompatible process list. {message}')
 
     def _mutate_plugins(self, name, pos, search=False):
@@ -317,7 +317,7 @@ class Content(object):
             if parameter_valid:
                 value = tools.check_for_default(value, param_name, parameters)
                 parameters[param_name] = value
-                tools.update_defaults(parameters, mod=param_name)
+                tools.warn_dependents(parameters, param_name)
                 # Update the list of parameters to hide those dependent on others
                 tools.check_dependencies(parameters)
             else:
@@ -507,14 +507,15 @@ class Content(object):
             self.plugin_list.plugin_list.insert(pos, plugin_dict)
 
     def create_plugin_dict(self, plugin):
+        tools = plugin.get_plugin_tools()
         plugin_dict = {}
         plugin_dict['name'] = plugin.name
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['tools'] = plugin.tools
-        plugin_dict['param'] = plugin.p_dict
-        plugin_dict['doc'] = plugin.docstring_info
+        plugin_dict['tools'] = tools
+        plugin_dict['param'] = tools.get_param_definitions()
+        plugin_dict['doc'] = tools.docstring_info
         return plugin_dict
 
     def get(self, pos):

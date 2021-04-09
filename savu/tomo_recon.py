@@ -29,6 +29,7 @@ import os
 from mpi4py import MPI
 from savu.version import __version__
 
+import savu.core.utils as cu
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
 
@@ -213,16 +214,17 @@ def main(input_args=None):
     options = _set_options(args)
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
-    if options['nProcesses'] == 1:
+    try:
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
-    else:
-        try:
-            plugin_runner = pRunner(options)
-            plugin_runner._run_plugin_list()
-        except Exception as error:
-            print(error)
-            traceback.print_exc(file=sys.stdout)
+    except Exception:
+        # raise the error in the user log
+        trace = traceback.format_exc()
+        cu.user_message(trace)
+        if options['nProcesses'] == 1:
+            sys.exit(1)
+        else:
+            # Kill all MPI processes
             MPI.COMM_WORLD.Abort(1)
 
 

@@ -20,21 +20,16 @@
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
+
 import logging
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import numpy as np
 from scipy.ndimage import center_of_mass
-@register_plugin
+
+#@register_plugin
 class StxmAnalysis(BaseFilter, CpuPlugin):
-    """
-    This plugin performs basic STXM analysis of diffraction patterns.
-    :param mask_file: takes in a mask currently in hdf format. Default: None.
-    :param mask_path: path to the mask inside the file. Default:'/mask'.
-    :param threshold: intensity threshold for the dark field. Default: 0.05.
-    :param out_datasets: A. Default: ["bf","df","dpc_x","dpc_y","combined_dpc"].
-    """
 
     def __init__(self):
         super(StxmAnalysis, self).__init__("StxmAnalysis")
@@ -48,7 +43,7 @@ class StxmAnalysis(BaseFilter, CpuPlugin):
 #         print self.mask.shape
 
 
-    def filter_frames(self, data):
+    def process_frames(self, data):
         d=data[0]
         d = d*self.mask #  set everything to zero that's in the mask
         bf = np.array([d.sum().sum()])

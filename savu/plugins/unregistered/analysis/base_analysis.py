@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A base class for analysis plugins.
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
 from savu.plugins.plugin import Plugin

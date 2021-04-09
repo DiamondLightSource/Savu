@@ -28,14 +28,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
+#@register_plugin
 class Stats(Plugin, CpuPlugin):
-    """
-    :param out_datasets: the output dataset. Default: ['stats'].
-    :param required_stats: create a list of required stats\
-        calcs. Default: ['max'].
-    :param direction: which direction to perform this. Default: 'PROJECTION'.
-    """
 
     def __init__(self):
         logging.debug("Starting the statistics")

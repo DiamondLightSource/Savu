@@ -30,11 +30,6 @@ import numpy as np
 
 @register_plugin
 class Ica(BaseComponentAnalysis):
-    """
-    This plugin performs independent component analysis on XRD/XRF spectra.
-    :param w_init: The initial mixing matrix. Default: None.
-    :param random_state: The state. Default: 1.
-    """
 
     def __init__(self):
         super(Ica, self).__init__("Ica")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
+.. module:: basic_operations_test
    :platform: Unix
-   :synopsis: tomobar 2d cpu test
-
-.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
+   :synopsis: testing the histogram plugin
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
-import savu.test.test_utils as tu
-from savu.test.travis.framework_tests.plugin_runner_test \
-    import run_protected_plugin_runner
+from savu.test import test_utils as tu
+from savu.test.travis.framework_tests.plugin_runner_test import \
+    run_protected_plugin_runner
 
-class TomobarRecon2dCpuTest(unittest.TestCase):
-    def setUp(self):
-        self.data_file = '24737.nxs'
-        self.experiment = 'tomo'
 
-    def test_tomobar_recon2d_cpu(self):
-        process_list = 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+class BasicOperations(unittest.TestCase):
+
+    def test_basic_operations(self):
+        process_file = tu.get_test_process_path('basic_operations/basic_operations_test.nxs')
+        options = tu.set_experiment('tomo')
+        options['process_file'] = process_file
         run_protected_plugin_runner(options)
-        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
