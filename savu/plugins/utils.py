@@ -134,22 +134,21 @@ def plugin_loader(exp, plugin_dict, check=False):
     return plugin
 
 
-def get_tools_class(plugin_tools_id, cls=False):
-    tool_class = None
+def get_tools_class(plugin_tools_id, cls=None):
+    #tool_class = None
     if plugin_tools_id == "savu.plugins.plugin_tools":
         plugin_tools_id = "savu.plugins.base_tools"
 
-    # determine Savu base path
+    #determine Savu base path
     path_name = plugin_tools_id.replace(".", "/")
     file_path = savu.__path__[0] + "/../" + path_name + ".py"
     if os.path.isfile(file_path):
         if cls:
-            tool_class = load_class(plugin_tools_id)(cls)
+            return load_class(plugin_tools_id)(cls)
         else:
-            tool_class = load_class(plugin_tools_id)
-
-    return tool_class
-
+            return load_class(plugin_tools_id)
+    else:
+        Exception("Tools file %s not found." % path_name)
 
 def get_plugins_paths(examples=True):
     """
