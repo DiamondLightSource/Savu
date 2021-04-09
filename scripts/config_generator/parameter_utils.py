@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: Parameter utilities
 
-.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Jessica Verschoyle,Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -35,53 +35,36 @@ import savu.plugins.utils as pu
 
 def _preview(value):
     """ preview value """
-    parameter_valid = False
-    if _list(value):
-        parameter_valid = True
-    return parameter_valid
+    return _list(value)
+
+
+def _typelist(func, value):
+    if isinstance(value, list):
+        if value:
+            return all(func(item) for item in value)
+    return False
 
 
 def _intlist(value):
     """ A list containing integer values """
-    parameter_valid = False
-    if isinstance(value, list):
-        if value:
-            # If the list is not empty
-            if all(_integer(item) for item in value):
-                parameter_valid = True
-    return parameter_valid
+    return _typelist(_integer)
 
 
 def _stringlist(value):
     """ A list containing string values """
-    parameter_valid = False
-    if isinstance(value, list):
-        if value:
-            # If the list is not empty
-            if all(_string(item) for item in value):
-                parameter_valid = True
-    return parameter_valid
+    return _typelist(_string)
 
 
 def _numlist(value):
     """ int or float list """
-    parameter_valid = False
-    if isinstance(value, list):
-        if value:
-            # If the list is not empty
-            if all( _float(item) for item in value):
-                parameter_valid = True
-    return parameter_valid
+    return _typelist(_float)
 
 
 def _emptylist(value):
     """ empty list """
-    parameter_valid = False
-    if isinstance(value, list):
-        if len(value) == 0:
-            # If the list is empty
-            parameter_valid = True
-    return parameter_valid
+    if isinstance(value, list) and not value:
+        return True
+    return False
 
 
 def _range(value):
@@ -128,7 +111,7 @@ def _yamlfile(value):
     return parameter_valid
 
 
-def _intgroup(value):
+def _intgroup(value):  # why is this called _intgroup? can we have something like list[filepath, hdffilepath, int]
     """ [path, int_path, int] """
     parameter_valid = False
     try:
@@ -288,23 +271,16 @@ def _nptype(value):
         parameter_valid = True
     return parameter_valid
 
-
 def _integer(value):
-    parameter_valid = False
-    if isinstance(value, int):
-        parameter_valid = True
-    if isinstance(value, np.integer):
-        parameter_valid = True
-    return parameter_valid
-
+    # do not use isinstance as this also picks up boolean values
+    if type(value) in (int, np.integer):
+        return True
+    return False
 
 def _positive_integer(value):
-    parameter_valid = False
     if _integer(value):
-        if value > 0:
-            parameter_valid = True
-    return parameter_valid
-
+        return value > 0
+    return False
 
 def _boolean(value):
     parameter_valid = False
@@ -323,16 +299,10 @@ def _string(value):
 
 
 def _float(value):
-    parameter_valid = False
-    if isinstance(value, float):
-        parameter_valid = True
-    if isinstance(value, np.float):
-        parameter_valid = True
-    elif _integer(value):
-        # Allow integer values as well
-        float(value)
-        parameter_valid = True
-    return parameter_valid
+    valid = isinstance(value, (float, np.float))
+    if not valid:
+        valid = _integer(value)
+    return valid
 
 
 def _tuple(value):
@@ -438,7 +408,7 @@ type_error_dict = {
 }
 
 
-def is_valid(param_name, value, current_parameter_details):
+def is_valid(param_name, value, param_def):
     """Check if the parameter value (value) is a valid data type
     for the parameter (param_name)
 
@@ -449,105 +419,57 @@ def is_valid(param_name, value, current_parameter_details):
 
     :param param_name: The name of the parameter
     :param value: The new value of the parameter
-    :param current_parameter_details: Dictionary of information about the
-      parameter, such as description, dtype, default
+    :param param_def: Parameter definition dictionary, containing e.g.,
+        description, dtype, default
     :return: boolean True if the value is a valid parameter value
 
     """
-    option_error_str = ""
-    type_error_str = ""
+    error_str = ""
+    dtype = param_def["dtype"]
+    default_value = param_def["default"]
 
-    dtype = current_parameter_details["dtype"]
-    default_value = current_parameter_details["default"]
     # If a default value is used, this is a valid option
-    pvalid = _check_default(value, default_value)
+    if _check_default(value, default_value):
+        return True, error_str
 
-    if pvalid is False:
-        if isinstance(dtype, list):
-            # If there are multiple possible types
-            for individual_type in dtype:
-                # Errors can be overwritten as later types may match the value type
-                pvalid, type_error_str = _check_type(
-                                            individual_type,
-                                            param_name,
-                                            value,
-                                            current_parameter_details)
-                if pvalid is True:
-                    # If the value type matches one of the possible types then exit
-                    break
-        else:
-            pvalid, type_error_str = _check_type(dtype,
-                                        param_name,
-                                        value,
-                                        current_parameter_details)
-        # Then check if the option is valid
-        if not is_multi_param(param_name, value):
-            # If it is a multi parameter, each item is checked individually
-            pvalid, option_error_str = _check_options(
-                                            current_parameter_details,
-                                            value,
-                                            pvalid)
+    dtype = dtype if isinstance(dtype, list) else [dtype]
+    for atype in dtype:
+        pvalid, error_str = _check_type(
+            atype, param_name, value, param_def)
+        if pvalid:
+            break
 
-    if pvalid is False:
-        # If an option error exists then use this error message
-        type_error_str = (
-            option_error_str
-            if option_error_str
-            else _error_message(dtype, param_name)
-        )
+    return pvalid, error_str
 
-    return pvalid, type_error_str
-
-
-def _check_type(dtype, param_name, value, current_parameter_details):
+def _check_type(dtype, param_name, value, param_def):
     """Check if the provided value matches the required date type
 
     :param dtype: The required data type
     :param param_name: The parameter name
     :param value: The new value
-    :param current_parameter_details: Paramter detail dictionary
+    :param param_def: Parameter definition dictionary
     :return: pvalid, True if the value type matches the required dtype
-             type_error_str, Error message
+              type_error_str, Error message
     """
-    type_error_str = ""
-    pvalid = False
-    if dtype not in type_dict.keys():
-        type_error_str = "That type definition is not configured properly."
-    elif is_multi_param(param_name, value):
-        # If there are multiple parameters, check each individually
-        pvalid, type_error_str = _check_multi_params(
-            param_name, value, current_parameter_details
-        )
+    # If this is paramter tuning, check each individually
+    if is_multi_param(param_name, value): 
+        val_list, error_str = pu.convert_multi_params(param_name, value)
+        # incorrect parameter tuning syntax
+        if error_str:
+            return False, error_str
+        
+        for val in val_list:
+            pvalid, error_str = _check_type(dtype, param_name, val, param_def)
+            
+            if not pvalid:
+                return pvalid, error_str
     else:
         pvalid = type_dict[dtype](value)
-    return pvalid, type_error_str
+    
+    if not pvalid:
+        return pvalid, _error_message(dtype, param_name)
 
-
-def _check_multi_params(param_name, value, current_parameter_details):
-    """Check if value is a multi parameter and check if each item is valid.
-    Change from the input multi parameter string to a list
-
-    :param param_name: Name of the parameter
-    :param value: Parameter value
-    :param current_parameter_details: Parameter dictionary
-    :return: boolean True if all parameters are valid
-             An error string
-    """
-    type_error_str = ""
-    parameter_valid = False
-    if is_multi_param(param_name, value):
-        val_list, type_error_str = pu.convert_multi_params(param_name, value)
-        if not type_error_str:
-            for item in val_list:
-                parameter_valid, type_error_str = is_valid(
-                    param_name, item, current_parameter_details
-                )
-                if parameter_valid is False:
-                    # If one value inside the list is not valid, then return false
-                    break
-
-    return parameter_valid, type_error_str
-
+    return _check_options(param_def, value, pvalid)
 
 def is_multi_param(param_name, value):
     """Return True if the value is made up of multiple parameters"""
@@ -571,10 +493,10 @@ def _check_default(value, default_value):
     return default_present
 
 
-def _check_options(current_parameter_details, value, pvalid):
+def _check_options(param_def, value, pvalid):
     """Check if the input value matches one of the valid parameter options"""
     option_error_str = ""
-    options = current_parameter_details.get("options") or {}
+    options = param_def.get("options") or {}
     if len(options) >= 1:
         if value in options or str(value) in options:
             pvalid = True
