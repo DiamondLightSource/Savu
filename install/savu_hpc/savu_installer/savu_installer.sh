@@ -266,8 +266,8 @@ if [ ! $test_flag ]; then
     cd mpi4py-$mpi4py_version
     python setup.py build --mpicc=$MPICC
     python setup.py install
-    rm -rf ../mpi4py-$mpi4py_version
-    rm -rf ../mpi4py-$mpi4py_version.tar.gz
+    #rm -rf ../mpi4py-$mpi4py_version
+    #rm -rf ../mpi4py-$mpi4py_version.tar.gz
 
     if [ $EXPLICIT_FILE = false ]; then
       #conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
@@ -278,12 +278,13 @@ if [ ! $test_flag ]; then
       echo "Installing hdf5 from savu-dep conda channel"
       hdf5_vesion="1.10.5"
       export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
-      conda install --yes -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
+      echo $VERSION_BUILD_HDF5
+      conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
       echo "Installing h5py from savu-dep conda channel"
       VERSION_H5PY="2.10.0"
       export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
-      conda install --yes -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
+      conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
       echo "Installing pytorch..."
       string=$(awk '/^cudatoolkit/' $versions_file)
