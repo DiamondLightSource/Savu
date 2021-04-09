@@ -100,18 +100,23 @@ class PluginList(object):
                 plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
                 plugin_class = None
-                try:
-                    # Load the related class
-                    plugin_class = pu.load_class(plugin['id'])()
-                    # Populate the parameters (including those from it's base classes)
-                    plugin_class._populate_default_parameters()
-                except ImportError:
-                    # No plugin class found
-                    logging.error(f"No class found for {plugin['name']}")
 
-                plugin['doc'] = plugin_class.docstring_info if plugin_class else ""
-                plugin['tools'] = plugin_class.tools if plugin_class else {}
-                plugin['param'] = plugin_class.p_dict if plugin_class else {}
+                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
+                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
+                #try:
+                    # Load the related class
+                plugin_class = pu.load_class(plugin['id'])()
+                    # Populate the parameters (including those from it's base classes)
+                plugin_tools = plugin_class.get_plugin_tools()
+                plugin_tools._populate_default_parameters()
+                #except ImportError:
+                    # No plugin class found
+                logging.error(f"No class found for {plugin['name']}")
+
+                plugin['doc'] = plugin_tools.docstring_info if plugin_class else ""
+                plugin['tools'] = plugin_tools if plugin_class else {}
+                plugin['param'] = plugin_tools.get_param_definitions() if \
+                    plugin_class else {}
                 plugin['pos'] = group.strip()
 
                 for param in parameters:
@@ -340,15 +345,16 @@ class PluginList(object):
             exp.meta_data.set('nPlugin', pos)
             process = {}
             plugin = pu.load_class('savu.plugins.savers.hdf5_saver')()
+            ptools = plugin.get_plugin_tools()
             plugin.parameters['in_datasets'] = [name]
             process['name'] = plugin.name
             process['id'] = plugin.__module__
             process['pos'] = str(pos+1)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['param'] = plugin.p_dict
-            process['doc'] = plugin.docstring_info
-            process['tools'] = plugin.tools
+            process['param'] = ptools.get_param_definitions()
+            process['doc'] = ptools.docstring_info
+            process['tools'] = ptools
             self._add(pos+1, process)
 
     def _update_datasets(self, plugin_no, data_dict):

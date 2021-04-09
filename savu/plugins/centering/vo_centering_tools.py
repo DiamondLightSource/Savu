@@ -42,10 +42,10 @@ class VoCenteringTools(PluginTools):
              description: Step of fine searching
              default: 0.5
         datasets_to_populate:
-             visibility: advanced
-             dtype: range
+             visibility: intermediate
+             dtype: string_list
              description: A list of datasets which require this information
-             default: '[]'
+             default: []
         out_datasets:
              visibility: datasets
              dtype: list

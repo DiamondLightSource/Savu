@@ -30,8 +30,6 @@ import pyfftw.interfaces.scipy_fftpack as fft
 
 @register_plugin
 class VoCentering(BaseFilter, CpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(VoCentering, self).__init__("VoCentering")
