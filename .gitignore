@@ -30,3 +30,6 @@ build/
 # VSCode settings
 .vscode
 .vscode/
+
+# experiment directory
+mics/
