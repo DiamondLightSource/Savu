@@ -257,18 +257,19 @@ if [ ! $test_flag ]; then
       recipes=$savu_path/$install_path/../conda-recipes
     fi
 
+    echo "Installing mpi4py"
+    mpi4py_version="3.0.2"
+    export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
+
+    wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-$mpi4py_version.tar.gz
+    tar -zxf mpi4py-$mpi4py_version.tar.gz
+    cd mpi4py-$mpi4py_version
+    python setup.py build --mpicc=$MPICC
+    python setup.py install
+    rm -rf ../mpi4py-$mpi4py_version
+    rm -rf ../mpi4py-$mpi4py_version.tar.gz
+
     if [ $EXPLICIT_FILE = false ]; then
-      echo "Installing mpi4py from savu-dep conda channel"
-      mpi4py_version="3.0.2"
-      export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
-
-      wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-$mpi4py_version.tar.gz
-      tar -zxf mpi4py-$mpi4py_version.tar.gz
-      cd mpi4py-$mpi4py_version
-      python setup.py build --mpicc=$MPICC
-      python setup.py install
-      rm -rf ../mpi4py-$mpi4py_version
-
       #conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
       #string=$(awk '/^mpi4py/' $versions_file)
       #mpi4py_version=$(echo $string | cut -d " " -f 2)
