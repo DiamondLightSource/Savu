@@ -2,13 +2,14 @@
 # $ conda create --name <env> --file <this file>
 # platform: linux-64
 @EXPLICIT
-https://repo.anaconda.com/pkgs/main/linux-64/_libgcc_mutex-0.1-main.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/mpi4py-3.0.2_openmpi_3.1.4-py37_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/hdf5-1.10.5_openmpi_3.1.4-1.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/h5py-2.10.0_mpi4pi_3.0.2_hdf5_1.10.5_openmpi_3.1.4-1.tar.bz2
+https://repo.anaconda.com/pkgs/main/linux-64/_libgcc_mutex-0.1-main.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/_pytorch_select-0.2-gpu_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/blas-1.0-mkl.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/ca-certificates-2020.12.5-ha878542_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/cudatoolkit-10.1.243-h6bb024c_0.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/h5py-2.10.0_mpi4pi_3.0.2_hdf5_1.10.5_openmpi_3.1.4-1.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/intel-openmp-2020.2-254.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/libgcc-ng-8.2.0-hdf63c60_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libgfortran4-7.5.0-h14aa051_18.tar.bz2
