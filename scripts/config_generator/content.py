@@ -317,7 +317,7 @@ class Content(object):
             if parameter_valid:
                 value = tools.check_for_default(value, param_name, parameters)
                 parameters[param_name] = value
-                tools.warn_dependents(parameters, param_name)
+                tools.warn_dependents(param_name, value)
                 # Update the list of parameters to hide those dependent on others
                 tools.check_dependencies(parameters)
             else:

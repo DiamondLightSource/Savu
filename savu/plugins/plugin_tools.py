@@ -315,7 +315,7 @@ class PluginParameters(object):
             dependency, or parent, parameter.
 
         """
-        pdefs = self.get_parameter_definitions()
+        pdefs = self.get_param_definitions()
         parent_name = list(child['default'].keys())[0]
         parent = self.does_exist(parent_name, pdefs)
         
@@ -335,9 +335,9 @@ class PluginParameters(object):
         for name, pdict in self.get_param_definitions().items():
             default = pdict['default']
             if isinstance(default, OrderedDict):
-                parent_name = list(default.keys()[0])
+                parent_name = list(default.keys())[0]
                 if parent_name == mod_param:
-                    if mod_value in default[parent_name]:
+                    if mod_value in default[parent_name].keys():
                         value = default[parent_name][mod_value]
                         desc = pdict['description']
                         self.make_recommendation(
