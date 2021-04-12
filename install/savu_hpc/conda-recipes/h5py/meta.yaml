@@ -21,3 +21,4 @@ build:
 about:
   home: http://www.h5py.org/
   license: New BSD (http://opensource.org/licenses/bsd-license.php)
+  summary: Pythonic interface to the HDF5 binary data format

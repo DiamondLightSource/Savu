@@ -6,27 +6,23 @@ source:
   fn: mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
   url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
 
-build:
-  number: 0
-  script: env MPICC=$MPICC $PYTHON -m pip install --no-deps --ignore-installed --no-cache-dir -vvv .
-
 requirements:
-  build:
-    - {{ compiler('c') }}
   host:
     - python
     - pip
-    - openmpi
     - setuptools
   run:
     - python
-    - openmpi
 
 test:
   files:
     - mpiexec.sh
     - helloworld.py
   script: run_test.sh
+
+build:
+  preserve_egg_dir: False
+  number: 0
 
 about:
   home: https://mpi4py.bitbucket.io/
