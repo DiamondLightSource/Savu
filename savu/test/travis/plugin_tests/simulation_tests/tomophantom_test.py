@@ -35,13 +35,13 @@ class TomophantomTest(unittest.TestCase):
 
     def test_tomophantom(self):
         process_list = 'simulation/tomophantom/tomophant_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_quantification_tomophantom(self):
         process_list = 'simulation/tomophantom/tomophant_quantif_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
