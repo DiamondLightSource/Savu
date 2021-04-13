@@ -145,7 +145,6 @@ class TomoPhantom(Plugin, CpuPlugin):
             _sinoshifts_ = {}
             if self.parameters['artifacts_misalignment_maxamplitude'] is not None:
                 _sinoshifts_ = {'sinoshifts_maxamplitude' : self.parameters['artifacts_misalignment_maxamplitude']}
-
             # adding zingers and stripes
             _zingers_ = {}
             if self.parameters['artifacts_zingers_percentage'] is not None:
@@ -183,7 +182,7 @@ class TomoPhantom(Plugin, CpuPlugin):
             # adding zingers and stripes
             _zingers_ = {}
             if self.parameters['artifacts_zingers_percentage'] is not None:
-                _zingers_ = {'zingers_percentage' : self.parameters['artifacts_zingers_percentage',
+                _zingers_ = {'zingers_percentage' : self.parameters['artifacts_zingers_percentage'],
                              'zingers_modulus' : 10}
             _stripes_ = {}
             if self.parameters['artifacts_stripes_percentage'] is not None:
