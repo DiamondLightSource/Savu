@@ -259,11 +259,11 @@ if [ ! $test_flag ]; then
 
       if [ $EXPLICIT_FILE = false ]; then
       echo "Installing mpi4py from savu-dep conda channel"
+      mpi4py_version="3.0.2"
+      export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
+      conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
       #string=$(awk '/^mpi4py/' $versions_file)
       #mpi4py_version=$(echo $string | cut -d " " -f 2)
-      mpi4py_version="3.0.2"
-      export VERSION_BUILD_MPI4PI=$mpi4py_vesion"_openmpi_"$openmpi_version
-      conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
 
       echo "Installing hdf5 from savu-dep conda channel"
       hdf5_vesion="1.10.5"
