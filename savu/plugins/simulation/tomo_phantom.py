@@ -137,36 +137,32 @@ class TomoPhantom(Plugin, CpuPlugin):
             model = TomoP2D.Model(self.model, self.dims, self.path_library2D)
             # create a 2D sinogram
             projdata_clean = TomoP2D.ModelSino(self.model, self.dims, self.detectors_num, self.angles, self.path_library2D)
-            # Adding artifacts and noise
-            # forming dictionaries with artifact types
-            _noise_ =  {'type' : self.parameters['artifacts_noise_type'],
-                        'sigma' : self.parameters['artifacts_noise_sigma'],
-                        'seed' : 0,
-                        'prelog' : False}
-
+            # forming dictionaries with different artifact types and noise
+            _noise_ =  {'noise_type' : self.parameters['artifacts_noise_type'],
+                        'noise_sigma' : self.parameters['artifacts_noise_sigma'],
+                        'noise_seed' : 0}
             # misalignment dictionary
             _sinoshifts_ = {}
             if self.parameters['artifacts_misalignment_maxamplitude'] is not None:
-                _sinoshifts_ = {'maxamplitude' : self.parameters['artifacts_misalignment_maxamplitude']}
+                _sinoshifts_ = {'sinoshifts_maxamplitude' : self.parameters['artifacts_misalignment_maxamplitude']}
 
             # adding zingers and stripes
             _zingers_ = {}
             if self.parameters['artifacts_zingers_percentage'] is not None:
-                _zingers_ = {'percentage' : self.parameters['artifacts_zingers_percentage'],
-                            'modulus' : 10}
-
+                _zingers_ = {'zingers_percentage' : self.parameters['artifacts_zingers_percentage',
+                             'zingers_modulus' : 10}
             _stripes_ = {}
             if self.parameters['artifacts_stripes_percentage'] is not None:
-                _stripes_ = {'percentage' : self.parameters['artifacts_stripes_percentage'],
-                             'maxthickness' : self.parameters['artifacts_stripes_maxthickness'],
-                             'intensity' : self.parameters['artifacts_stripes_intensity'],
-                             'type' : self.parameters['artifacts_stripes_type'],
-                             'variability' : self.parameters['artifacts_stripes_variability']}
+                _stripes_ = {'stripes_percentage' : self.parameters['artifacts_stripes_percentage'],
+                             'stripes_maxthickness' : self.parameters['artifacts_stripes_maxthickness'],
+                             'stripes_intensity' : self.parameters['artifacts_stripes_intensity'],
+                             'stripes_type' : self.parameters['artifacts_stripes_type'],
+                             'stripes_variability' : self.parameters['artifacts_stripes_variability']}
 
             if self.parameters['artifacts_misalignment_maxamplitude'] is not None:
-                [projdata, shifts] = _Artifacts_(projdata_clean, _noise_, _zingers_, _stripes_, _sinoshifts_)
+                [projdata, shifts] = _Artifacts_(projdata_clean, **_noise_, **_zingers_, **_stripes_, **_sinoshifts_)
             else:
-                projdata = _Artifacts_(projdata_clean, _noise_, _zingers_, _stripes_, _sinoshifts_)
+                projdata = _Artifacts_(projdata_clean, **_noise_, **_zingers_, **_stripes_, **_sinoshifts_)
         else:
             # create a 3D phantom
             frame_idx = self.out_pData[0].get_current_frame_idx()[0]
@@ -175,36 +171,32 @@ class TomoPhantom(Plugin, CpuPlugin):
             model = np.flipud(model[:,0,:])
             # create a 3D projection data
             projdata_clean = TomoP3D.ModelSinoSub(self.model, self.dims, self.detectors_num, self.dims, (frame_idx, frame_idx+1), self.angles, self.path_library3D)
-            # Adding artifacts and noise
-            # forming dictionaries with artifact types
-            _noise_ =  {'type' : self.parameters['artifacts_noise_type'],
-                        'sigma' : self.parameters['artifacts_noise_sigma'],
-                        'seed' : 0,
-                        'prelog' : False}
-
+            # forming dictionaries with different artifact types and noise
+            _noise_ =  {'noise_type' : self.parameters['artifacts_noise_type'],
+                        'noise_sigma' : self.parameters['artifacts_noise_sigma'],
+                        'noise_seed' : 0}
             # misalignment dictionary
             _sinoshifts_ = {}
             if self.parameters['artifacts_misalignment_maxamplitude'] is not None:
-                _sinoshifts_ = {'maxamplitude' : self.parameters['artifacts_misalignment_maxamplitude']}
+                _sinoshifts_ = {'sinoshifts_maxamplitude' : self.parameters['artifacts_misalignment_maxamplitude']}
 
             # adding zingers and stripes
             _zingers_ = {}
             if self.parameters['artifacts_zingers_percentage'] is not None:
-                _zingers_ = {'percentage' : self.parameters['artifacts_zingers_percentage'],
-                            'modulus' : 10}
-
+                _zingers_ = {'zingers_percentage' : self.parameters['artifacts_zingers_percentage',
+                             'zingers_modulus' : 10}
             _stripes_ = {}
             if self.parameters['artifacts_stripes_percentage'] is not None:
-                _stripes_ = {'percentage' : self.parameters['artifacts_stripes_percentage'],
-                             'maxthickness' : self.parameters['artifacts_stripes_maxthickness'],
-                             'intensity' : self.parameters['artifacts_stripes_intensity'],
-                             'type' : self.parameters['artifacts_stripes_type'],
-                             'variability' : self.parameters['artifacts_stripes_variability']}
+                _stripes_ = {'stripes_percentage' : self.parameters['artifacts_stripes_percentage'],
+                             'stripes_maxthickness' : self.parameters['artifacts_stripes_maxthickness'],
+                             'stripes_intensity' : self.parameters['artifacts_stripes_intensity'],
+                             'stripes_type' : self.parameters['artifacts_stripes_type'],
+                             'stripes_variability' : self.parameters['artifacts_stripes_variability']}
 
             if self.parameters['artifacts_misalignment_maxamplitude'] is not None:
-                [projdata, shifts] = _Artifacts_(projdata_clean, _noise_, _zingers_, _stripes_, _sinoshifts_)
+                [projdata, shifts] = _Artifacts_(projdata_clean, **_noise_, **_zingers_, **_stripes_, **_sinoshifts_)
             else:
-                projdata = _Artifacts_(projdata_clean, _noise_, _zingers_, _stripes_, _sinoshifts_)
+                projdata = _Artifacts_(projdata_clean, **_noise_, **_zingers_, **_stripes_, **_sinoshifts_)
             projdata = np.swapaxes(projdata,0,1)
         return [projdata, model]
 
