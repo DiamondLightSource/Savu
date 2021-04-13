@@ -288,8 +288,8 @@ def _savufilepath(value):
     savu_base_path = \
         os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
     if _string(value):
-        valid = os.path.isfile(savu_base_path+value)
-    return valid
+        return os.path.isfile(savu_base_path+value)
+    return False
 
 
 def _intpathway(value):
@@ -586,7 +586,8 @@ def _error_message(dtype, param_name):
 def _gui_error_message(dtype, param_name):
     """Create an error string for the GUI
     Remove the paramter name, as the GUI message will be displayed below
-    each paramter input box"""
+    each parameter input box
+    """
     if isinstance(dtype, list):
         type_options = "' or '".join([str(t) for t in dtype])
         error_str = f"Type must match '{type_options}'."
