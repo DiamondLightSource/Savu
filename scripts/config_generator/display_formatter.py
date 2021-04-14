@@ -199,7 +199,6 @@ class DisplayFormatter(object):
 
     def _append_description(self, desc, key, p_dict, str_margin, width,
                             params, breakdown):
-        opt_margin = str_margin + (2 * " ")
         c_off = Back.RESET + Fore.RESET
         description_verbose = False
         if isinstance(desc[key], str):
@@ -237,46 +236,67 @@ class DisplayFormatter(object):
             params += "\n" + option_text
             for opt in options:
                 current_opt = p_dict["data"][key]
-                if current_opt == opt:
-                    # Highlight the currently selected option by setting a
-                    # background colour and white text
-                    colour = Back.BLUE + Fore.LIGHTWHITE_EX
-                    verbose_color = Back.BLACK + Fore.LIGHTWHITE_EX
-                else:
-                    # Make the option bold using Style.BRIGHT
-                    colour = Fore.BLUE + Style.BRIGHT
-                    # Remove bold style for the description
-                    verbose_color = Style.RESET_ALL + Fore.BLACK
-                option_verbose = ""
-                unicode_bullet_point = "\u2022"
-                if (description_verbose is True) and (
-                    "options" in description_keys
-                ):
-                    # If there are option descriptions present
-                    options_desc = {k: v
-                                    for k, v in desc[key]["options"].items()
-                                    if v}
-                    if opt in options_desc.keys():
-                        # Append the description
-                        opt_d = unicode_bullet_point + str(opt) + ": " \
-                                + options_desc[opt]
-                    else:
-                        # No description if the field is blank
-                        opt_d = unicode_bullet_point + str(opt) + ": "
-                    option_verbose += "\n" + opt_d
-                    option_verbose = self._get_equal_lines(option_verbose,
-                                                           width, verbose_color, c_off,
-                                                           opt_margin, option_colour=colour)
-                else:
-                    option_verbose = unicode_bullet_point + str(opt)
-                    option_verbose = self._get_equal_lines(option_verbose,
-                                          width, colour, c_off, opt_margin,
-                                          option_colour=colour)
+                option_verbose = \
+                    self._get_verbose_option_string(opt, current_opt,
+                            description_keys, description_verbose,
+                            desc, key, c_off, width, str_margin)
 
                 temp = "\n" + "%s" + c_off + Style.RESET_ALL
                 params += temp % option_verbose
 
         return params
+
+    def _get_verbose_option_string(self, opt, current_opt, description_keys,
+                                   description_verbose, desc, key, c_off,
+                                   width, str_margin):
+        """ Get the option description string and correctly format it
+        """
+        colour, v_colour = self._get_verbose_option_colours(opt, current_opt)
+        unicode_bullet_point = "\u2022"
+        opt_margin = str_margin + (2 * " ")
+        if (description_verbose is True) and ("options" in description_keys):
+            # If there are option descriptions present
+            options_desc = {k: v
+                            for k, v in desc[key]["options"].items()
+                            if v}
+            if opt in options_desc.keys():
+                # Append the description
+                opt_d = unicode_bullet_point + str(opt) + ": " \
+                        + options_desc[opt]
+            else:
+                # No description if the field is blank
+                opt_d = unicode_bullet_point + str(opt) + ": "
+            option_verbose = "\n" + opt_d
+            option_verbose = \
+                self._get_equal_lines(option_verbose,
+                                       width, v_colour, c_off,
+                                       opt_margin, option_colour=colour)
+        else:
+            option_verbose = unicode_bullet_point + str(opt)
+            option_verbose = \
+                self._get_equal_lines(option_verbose,
+                                       width, colour, c_off, opt_margin,
+                                       option_colour=colour)
+        return option_verbose
+
+    def _get_verbose_option_colours(self, opt, current_opt):
+        """Set the colour of the option text
+
+        :param opt: Option string
+        :param current_opt: The curently selected option value
+        :return: colour, verbose_color
+        """
+        if current_opt == opt:
+            # Highlight the currently selected option by setting a
+            # background colour and white text
+            colour = Back.BLUE + Fore.LIGHTWHITE_EX
+            verbose_color = Back.BLACK + Fore.LIGHTWHITE_EX
+        else:
+            # Make the option bold using Style.BRIGHT
+            colour = Fore.BLUE + Style.BRIGHT
+            # Remove bold style for the description
+            verbose_color = Style.RESET_ALL + Fore.BLACK
+        return colour, verbose_color
 
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
