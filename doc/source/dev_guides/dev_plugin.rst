@@ -272,7 +272,12 @@ You should choose one of five options.
 Dtype
 ''''''
 
-Choose the data type. This is used to check the parameter input is valid.
+Choose the required data type. This is used to check if the parameter input is valid.
+
+Basic types
+::::::::::::
+
+The basic data types are included in the table below:
 
 .. list-table::
     :header-rows: 1
@@ -282,62 +287,233 @@ Choose the data type. This is used to check the parameter input is valid.
       - Description
     * - int
       - An integer
-    * - pos_int
-      - A positive integer
-    * - bool
-      - A boolean
     * - str
       - A string
     * - float
       - A float
-    * - tuple
-      - A tuple
-    * - list
-      - A list
-    * - int_list
-      - A list of integers
-    * - string_list
-      - A list of strings
-    * - num_list
-      - A list of numbers
-    * - empty_list
-      - An empty list
-    * - preview
-      - Preview slice list
-    * - range
-      - A range e.g. (0,1)
-    * - yaml_file_path
-      - A yaml file path
-    * - file_int_path_int
-      - A sequence of items. The first item in the list should be a
-        file path, the next should be an interior file path, the last
-        item should be an integer. [<file path>, <interior path>, <integer>]
-    * - int_path_int
-      - A sequence of items. The first item in the list should be an
-        interior file path, the last item should be an integer.
-        [<interior path> , <integer>]
+    * - bool
+      - A boolean
     * - filepath
       - A file path
-    * - savufilepath
-      - A file path within the Savu directory
-    * - directory
-      - A file directory
-    * - int_path
-      - An interior path
-    * - config_file_path
-      - A configuration file path
-    * - filename
-      - A file name
+    * - hdf5path
+      - An hdf5 path
+    * - yamlfilepath
+      - A yaml file path
     * - nptype
       - A numpy type
+    * - preview
+      - Preview slice list
+    * - list
+      - A list
     * - dict
       - A dictionary
-    * - int_float_dict
-      - A dictionary holding ineteger keys and float values. {int:float}
 
+List combinations
+:::::::::::::::::::
+
+You can create a custom list data type containing
+the basic types by using the following syntax.
+
+* list[]
+
+Inside the encasing brackets, you should state the required type.
+
+By including one required type inside the brackets (eg. list[int]) the list
+will be expected to contain any number of integer values. By including two or
+more items within the brackets, you can specify the number of entries inside
+the list (eg. list[int,int,int]) and the list will be expected to contain
+that number of entries.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - List syntax
+      - Description
+    * - list
+      - A list of any length containing and combination of basic types
+    * - list[btype]
+      - A list of any length containing only btype
+    * - list[btype, btype, ..., btype]
+      - A list of btype of fixed length = N = numnber of btype
+
+Where btype can be the same or different types.
+For example:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data type example
+      - Description
+    * - list[int]
+      - A list of integers of any length
+    * - list[string, string]
+      - A list containing two strings
+    * - list[list[string, float], int]
+      - A list containing a list of one string and one float and a separate integer value
+    * - list[filepath, h5path, int]
+      - a list containing a filepath, a hdf5path and an integer value
+    * - list[int,int,int]
+      - A list containing three integer values
+
+Lists containing multiple data types
+:::::::::::::::::::::::::::::::::::::
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - List syntax
+      - Description
+    * - list
+      - A list of any length containing and combination of basic types
+    * - list[ [btype(1), btype(2)] ]
+      - list of any length containing btype(1) or btype(2) entries
+
+Where btype can be the same or different types.
+
+The empty list [] and None can be used as options here
+
+For example:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data type example
+      - Description
+    * - list[[string, []]]
+      - A list of strings of any length or an empty list
+    * - list[[int, string, float], None, []]
+      - A list that either contains a trio of [int, string, float] values, the keyword None or is empty
+
+Dictionaries
+:::::::::::::::
+
+You can create a custom dictionary data type containing
+the data type options by using the following syntax.
+
+* dict{}
+
+Inside the encasing brackets, you should state the required type.
+Only a subset of basic types are available as dictionary ‘key’ types.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Dictionary syntax
+      - Description
+    * - dict
+      - A dictionary of any length containing and combination of basic types
+    * - dict{btype(1): btype(2)}
+      - A dictionary of keys of btype(1) with values of btype(2)
+
+For example:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data type example
+      - Description
+    * - dict[int: float]
+      - A dictionary of integer keys and float values
+
+Specify a range of values
+:::::::::::::::::::::::::::
+
+If you require an integer or float value within a range, you can use the
+greater than and smaller than symbols '>' and '<'. This can only be
+applied to int and float data types.
+
+The standard mathematical inequalities notation is:
+
+* < (less than)
+
+* <= (less than or equal to)
+
+* > (greater than)
+
+* >= (greater than or equal to)
+
+For example:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data type example
+      - Description
+    * - int > 0
+      - An integer value greater than 0
+    * - int > a
+      - An integer value greater than a, where a is an integer
+    * - float <= b
+      - A float less than or equal to b, where b is an integer or float
+    * - a < float < b
+      - A float greater than a and less than b, where a and b are integers or floats
+    * - a <= int <= b
+      - An integer greater than or equal to a and less than or equal to b, where a and b are integers
+
+Options list
+:::::::::::::
 
 If more than one data type is allowed, then include these in a list format.
-e.g. [int, float] would mean that integers or floats are valid data types.
+Each data type should be seperated by a comma.
+
+The empty list [] and None may be used as options here.
+
+Examples:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data type example
+      - Description
+    * - [int, float]
+      - integers or floats are valid
+    * - [[], list[int]]
+      - An empty list or a list containing integers
+    * - [None, list[str]]
+      - None or a list containing strings
+    * - [list[float], float]
+      - A list containing floats or one float
+    * - [int, None]
+      - An integer or None
+
+In the table below are some more specific data type examples:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 50 50
+
+    * - Data Type
+      - Description
+    * - empty_list
+      - An empty list
+    * - int>0
+      - A positive integer
+    * - list[int]
+      - A list of integers
+    * - list[str]
+      - A list of strings
+    * - list[float]
+      - A list of numbers
+    * - list[int, int]
+      - A range e.g. (0,1)
+    * - list[filepath, hdf5path, int]
+      - A sequence of items. The first item in the list should be a
+        file path, the next should be an interior file path, the last
+        item should be an integer. [<file path>, <hdf5 interior path>, <integer>]
+    * - list[hdf5path, int]
+      - A sequence of items. The first item in the list should be an
+        interior file path, the last item should be an integer.
+        [<hdf5 interior path> , <integer>]
+    * - dict{int: float}
+      - A dictionary holding ineteger keys and float values. {int:float}
 
 If you are a developer and would like to create your own data type then you
 should edit the file parameter_utils.py. This file is inside the directory
@@ -404,9 +580,6 @@ method is NDF.
     NDF_penalty:
         dependency:
             regularisation_method: NDF
-
-If you want this parameter to appear when the value is not a None value,
-you can type the string 'not None'.
 
 Options
 '''''''
