@@ -15,7 +15,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilterTools(PluginTools):
               default: 200
         thresh:
               visibility: intermediate
-              dtype: int_list
+              dtype: list[float,float]
               description: Threshold of the percentile filter
               default: [5, 95]
     

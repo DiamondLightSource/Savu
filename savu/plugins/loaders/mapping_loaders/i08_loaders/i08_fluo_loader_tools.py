@@ -7,7 +7,7 @@ class I08FluoLoaderTools(PluginTools):
         """
         mono_path:
             visibility: basic
-            dtype: int_path
+            dtype: hdf5path
             description: The mono energy.
             default: '/entry/instrument/PlaneGratingMonochromator/pgm_energy'
 

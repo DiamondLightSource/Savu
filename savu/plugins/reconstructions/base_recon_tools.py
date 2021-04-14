@@ -7,7 +7,7 @@ class BaseReconTools(PluginTools):
         """
         centre_of_rotation:
              visibility: basic
-             dtype: [float, str, num_list, int_float_dict]
+             dtype: [float, str, list[float], dict{int:float}]
              description: Centre of rotation to use for the
                reconstruction.
              default: 0.0

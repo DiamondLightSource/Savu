@@ -18,7 +18,7 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: None
         data_path:
             visibility: intermediate
-            dtype: int_path
+            dtype: hdf5path
             description: Path to the data inside the file.
             default: 'entry1/tomo_entry/data/data'
         stack_or_cat:

@@ -38,7 +38,7 @@ class NoProcessTools(PluginTools):
             default: '(-50, 50)'
         ica_w_init:
             visibility: intermediate
-            dtype: list
+            dtype: [[],list]
             description: The initial mixing matrix
             default: 'None'
         distcorr_polynomial_coeffs:
@@ -66,26 +66,26 @@ class NoProcessTools(PluginTools):
             default: None
         savunexusloader_datasets:
             visibility: basic
-            dtype: list
+            dtype: [[],list]
             description: Override the default by choosing specific
               dataset(s) to load, by stating the NXdata name
             default: []
         savunexusloader_names:
             visibility: basic
-            dtype: list
+            dtype: [[],list]
             description: Override the dataset names associated with
               the datasets parameter above
             default: []
         randomhdf5loader_axis_labels:
             visibility: basic
-            dtype: list
+            dtype: [[],list[str]]
             description: A list of the axis labels to be associated
               with each dimension, of the form ['name1.unit1', 'name2.
               unit2',...].
             default: []
         randomhdf5loader_patterns:
             visibility: basic
-            dtype: list
+            dtype: [[],list[str]]
             description: A list of data access patterns e.g.
               [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where 'c'
               and 's' represent core and slice dimensions respectively
@@ -98,7 +98,7 @@ class NoProcessTools(PluginTools):
             default: int16
         randomhdf5loader_angles:
             visibility: basic
-            dtype: list
+            dtype: [str,list,None]
             description: A python statement to be evaluated or a file
             default: None
         multisavuloader_filename:
@@ -126,12 +126,12 @@ class NoProcessTools(PluginTools):
             default: "[[0, 1], [2, 3]]"
         dxchangeloader_dark:
             visibility: basic
-            dtype: int_path_int
+            dtype: list[hdf5path, int]
             description: dark data path and scale value
             default: "['exchange/data_dark', 1]"
         dxchangeloader_flat:
             visibility: basic
-            dtype: int_path_int
+            dtype: list[hdf5path, int]
             description: flat data path and scale value
             default: "['exchange/data_white', 1]"
         positive_test:
@@ -152,22 +152,22 @@ class NoProcessTools(PluginTools):
             default: (0,1)
         integer_list_param:
             visibility: basic
-            dtype: int_list
+            dtype: list[int]
             description: int list required
             default: [0,1]
         string_list_param:
             visibility: basic
-            dtype: string_list
+            dtype: list[str]
             description: string list required
             default: ['item_one','item_two']
         num_list_param:
             visibility: basic
-            dtype: num_list
+            dtype: list[float]
             description: list of numbers required
             default: [0,1]
         empty_list_param:
             visibility: basic
-            dtype: empty_list
+            dtype: [[],None]
             description: empty list required
             default: None
         dict_param:
@@ -177,7 +177,7 @@ class NoProcessTools(PluginTools):
             default: "{'2':4}"
         cor_dict_param:
             visibility: basic
-            dtype: int_float_dict
+            dtype: dict{int:float}
             description: dictionary required
             default: "{'2':4.0}"
         file_path_param:

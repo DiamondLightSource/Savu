@@ -12,18 +12,18 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
             default: 'entry1/tomo_entry/data/data'
         image_key_path:
             visibility: intermediate
-            dtype: int_path
+            dtype: hdf5path
             description: Path to the image key entry inside the nxs file.
             default: 'entry1/tomo_entry/instrument/detector/image_key'
         dark:
             visibility: intermediate
-            dtype: file_int_path_int
+            dtype: list[filepath, hdf5path, int]
             description: Optional path to the dark field data file, nxs path and\
               scale value.
             default: '[None, None, 1]'
         flat:
             visibility: intermediate
-            dtype: file_int_path_int
+            dtype: list[filepath, hdf5path, int]
             description: Optional path to the flat field data file, nxs path and\
               scale value.
             default: '[None, None, 1]'
@@ -39,7 +39,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
             default: False
         ignore_flats:
             visibility: intermediate
-            dtype: int_list
+            dtype: [list[int],None]
             description: List of batch numbers of flats (start at 1) to\
               ignore.
             default: None

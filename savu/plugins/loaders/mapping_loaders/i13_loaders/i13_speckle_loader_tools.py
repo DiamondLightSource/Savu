@@ -12,12 +12,12 @@ class I13SpeckleLoaderTools(PluginTools):
             default: 9.1
         reference_key:
             visibility: intermediate
-            dtype: int_path
+            dtype: hdf5path
             description: Path to the reference
             default: '/entry/reference'
         angle_key:
             visibility: intermediate
-            dtype: int_path
+            dtype: hdf5path
             description: Path to the reference
             default: '/entry/theta'
         dataset_names:

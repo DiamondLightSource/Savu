@@ -10,18 +10,18 @@ will be ignored (use a dummy).
         """
         size:
               visibility: basic
-              dtype: [list, tuple]
+              dtype: [list, tuple, []]
               description: A list specifiying the required data size.
               default: []
         axis_labels:
               visibility: basic
-              dtype: list
+              dtype: [[],list[str]]
               description: "A list of the axis labels to be associated
                 with each dimension, of the form ['name1.unit1', 'name2.unit2',...]"
               default: []
         patterns:
               visibility: intermediate
-              dtype: list
+              dtype: [[],list[str]]
               description: "A list of data access patterns e.g.
                 [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where
                 'c' and 's' represent core and slice dimensions

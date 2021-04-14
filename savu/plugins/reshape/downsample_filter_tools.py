@@ -39,7 +39,7 @@ class DownsampleFilterTools(PluginTools):
             default: False
         rotate_angle:
             visibility: basic
-            dtype: [float, str, num_list, int_float_dict]
+            dtype: [float, str, list[float], dict{int:float}]
             description: Rotate images by a given angle (Degree).
             default: 0.0
         max:

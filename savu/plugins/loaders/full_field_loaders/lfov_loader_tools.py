@@ -13,17 +13,17 @@ class LfovLoaderTools(PluginTools):
             default: 'projection'
         data_path:
             visibility: basic
-            dtype: int_path
+            dtype: hdf5path
             description: Path to the data inside the file.
             default: 'entry/data/data'
         order:
             visibility: intermediate
-            dtype: int_list
+            dtype: list[int]
             description: Order of datasets used for stitching.
             default: [1,0]
         row_offset:
             visibility: intermediate
-            dtype: int_list
+            dtype: list[int]
             description: Offsets of row indices between datasets.
             default: [0,-1]
         stack_or_cat:

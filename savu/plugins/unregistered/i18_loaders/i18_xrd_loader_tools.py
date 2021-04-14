@@ -12,7 +12,7 @@ class I18XrdLoaderTools(PluginTools):
             default: None
         calibration_path:
             visibility: basic
-            dtype: int_path
+            dtype: hdf5path
             description: path to the calibration file.
             default: None
         name:
