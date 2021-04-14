@@ -318,14 +318,13 @@ class PluginParameters(object):
         pdefs = self.get_param_definitions()
         parent_name = list(child['default'].keys())[0]
         parent = self.does_exist(parent_name, pdefs)
-        
+
         # if the parent default is a dictionary then apply the function
         # recursively
         if isinstance(parent['default'], dict):
             self.parameters[parent_name] = \
                 self.get_dependent_default(parent['default'])
-
-        return self.parameters[parent_name]['default']
+        return child['default'][parent_name][self.parameters[parent_name]]
 
     def warn_dependents(self, mod_param, mod_value): # all defaults have already been set at this point - move this somewhere else?
         """
