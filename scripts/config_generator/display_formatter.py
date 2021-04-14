@@ -546,55 +546,80 @@ class CiteDisplay(DisplayFormatter):
         if they are required. For example, if certain methods are being
         used.
         """
+        title = self._get_quiet(p_dict, count, width)
+        citation = self._get_plugin_citation(p_dict, width)
+        return title + citation
+
+    def _get_plugin_citation(self, p_dict, width):
+        """Get the plugin citation information
+
+        :param p_dict: Dictionary containing plugin information
+        :param width: The terminal display width for output strings
+        :return: cite, A string containing plugin citations
+        """
         margin = 6
         str_margin = " " * margin
 
         cite = ""
         parameters = p_dict["data"]
         citation_dict = p_dict["tools"].get_citations()
-
-        title = self._get_quiet(p_dict, count, width)
         line_break = "\n" + str_margin + "-" * (width - margin) + "\n"
 
-        for citation in citation_dict.values():
-            if citation.dependency:
-                # If the citation is dependent upon a certain parameter value
-                # being chosen
-                for (
-                    citation_dependent_parameter,
-                    citation_dependent_value,
-                ) in citation.dependency.items():
-                    current_value = parameters[citation_dependent_parameter]
-                    if current_value == citation_dependent_value:
-                        str_dep = (
-                            "This citation is for the "
-                            + citation_dependent_value
-                            + " "
-                            + citation_dependent_parameter
-                        )
-                        str_dep = self._get_equal_lines(
-                            str_dep,
-                            width,
-                            Style.BRIGHT,
-                            Style.RESET_ALL,
-                            str_margin,
-                        )
-                        cite += (
-                            line_break
-                            + str_dep
-                            + "\n"
-                            + self._get_citation_lines(
-                                citation, width, str_margin
-                            )
-                        )
-            else:
-                cite += line_break + self._get_citation_lines(
-                    citation, width, str_margin
+        if citation_dict:
+            for citation in citation_dict.values():
+                if citation.dependency:
+                    # If the citation is dependent upon a certain parameter
+                    # value being chosen
+                    str_dep = self._get_citation_dependency_str(
+                        citation, parameters, width, str_margin
+                    )
+                    if str_dep:
+                        cite += line_break + str_dep + "\n" \
+                                + self._get_citation_lines(citation,
+                                                           width,
+                                                           str_margin)
+                else:
+                    cite += line_break \
+                            + self._get_citation_lines(citation,
+                                                       width, str_margin)
+        else:
+            cite = f"\n{' '}No citations"
+        return cite
+
+    def _get_citation_dependency_str(self, citation, parameters, width,
+                                     str_margin):
+        """Create a message for citations dependent on a
+        certain parameter
+
+        :param citation: Single citation dictionary
+        :param parameters: List of current parameter values
+        :param width: The terminal display width for output strings
+        :param str_margin: The terminal display margin
+        :return: str_dep, A string to identify citations dependent on
+        certain parameter values
+        """
+        str_dep = ""
+        for (citation_dependent_parameter, citation_dependent_value) \
+            in citation.dependency.items():
+            current_value = parameters[citation_dependent_parameter]
+            if current_value == citation_dependent_value:
+                str_dep = (
+                    f"This citation is for the {citation_dependent_value}"
+                    f" {citation_dependent_parameter}"
                 )
-        return title + cite
+                str_dep = self._get_equal_lines(
+                    str_dep, width, Style.BRIGHT, Style.RESET_ALL, str_margin
+                )
+        return str_dep
 
     def _get_citation_lines(self, citation, width, str_margin):
-        """Print certain information about the citation in order."""
+        """Print certain information about the citation in order.
+
+        :param citation: Single citation dictionary
+        :param width: The terminal display width for output strings
+        :param str_margin: The terminal display margin
+        :return: A string containing citation details
+        """
         cite_keys = ["name", "description", "doi", "bibtex", "endnote"]
         cite_dict = citation.__dict__
         cite_str = ""
