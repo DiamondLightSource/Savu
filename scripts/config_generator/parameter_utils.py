@@ -267,12 +267,6 @@ def _intgroup1(value):
         return parameter_valid
 
 
-def _directory(value):
-    """ directory """
-    path = value if value else "."
-    return os.path.isdir(path)
-
-
 def _filepath(value):
     """ file path """
     valid = False
@@ -426,7 +420,6 @@ type_dict = {
     "file_int_path_int": _intgroup,
     "int_path_int": _intgroup1,
     "filepath": _filepath,
-    "directory": _directory,
     "int_path": _intpathway,
     "filename": _filename,
     "nptype": _nptype,
@@ -452,7 +445,6 @@ type_error_dict = {
     "file_int_path_int": "[filepath, interior file path, int]",
     "int_path_int": "[interior file path, int]",
     "filepath": "filepath",
-    "directory": "directory",
     "int_path": "string",
     "filename": "file name",
     "nptype": "numpy data type",
