@@ -248,7 +248,7 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
-    def modify(self, pos_str, param_name, value, ref=False):
+    def modify(self, pos_str, param_name, value, ref=False, dim=False):
         """ Modify the plugin at pos_str and the parameter at param_name
         The new value will be set if it is valid.
 
@@ -256,6 +256,7 @@ class Content(object):
         :param param_name: The parameter position/name
         :param value: The new parameter value
         :param ref: boolean Refresh the plugin
+        :param dim: The dimension to be modified
 
         returns: A boolean True if the value is a valid input for the
           selected parameter
@@ -266,7 +267,8 @@ class Content(object):
         parameters = plugin_entry['data']
         params = plugin_entry['param']
         param_name, value = self.setup_modify(params, param_name, value, ref)
-        valid_modification = self.modify_main(param_name, value, tools, parameters)
+        valid_modification = self.modify_main(param_name, value,
+                                              tools, parameters, dim)
         return valid_modification
 
     def setup_modify(self, params, param_name, value, ref):
@@ -292,7 +294,7 @@ class Content(object):
         param_name = pu.param_to_str(param_name, keys)
         return param_name, value
 
-    def modify_main(self, param_name, value, tools, parameters):
+    def modify_main(self, param_name, value, tools, parameters, dim):
         """Check the parameter is within the current parameter list.
         Check the new parameter value is valid, modify the parameter
         value, update defaults, check if dependent parameters should
@@ -302,12 +304,22 @@ class Content(object):
         :param value: The new parameter value
         :param tools: The plugin tools
         :param parameters: The plugin parameters
+        :param dim: The dimensions
 
         returns: A boolean True if the value is a valid input for the
           selected parameter
         """
         parameter_valid = False
         current_parameter_details = tools.param.get(param_name)
+        
+
+        # If dimensions are provided then alter preview param
+        if dim and param_name=='preview':
+            # Filter the dimension, dim1 or dim1.start
+            dim, slice = self._separate_dimension_and_slice(dim)
+            value = self.modify_preview(parameters, param_name, value, dim,
+                                        slice)
+
         # If found, then the parameter is within the current parameter list
         # displayed to the user
         if current_parameter_details:
@@ -316,7 +328,9 @@ class Content(object):
                 param_name, value_check, current_parameter_details
             )
             if parameter_valid:
+                # If default choice is requested, then find the default value and set it
                 value = tools.check_for_default(value, param_name, parameters)
+                # Save the value
                 parameters[param_name] = value
                 tools.warn_dependents(param_name, value)
                 # Update the list of parameters to hide those dependent on others
@@ -591,6 +605,173 @@ class Content(object):
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
+
+    def _separate_dimension_and_slice(self, command_str):
+        """Check the start stop step command
+
+        param command_str: a string '1.1' containing the dimension
+            and slice number seperated by a full stop
+
+        :returns dim, slice
+        """
+        if isinstance(command_str, str) and '.' in command_str:
+            # If the slice value is included
+            slice_dict = {'start':0, 'stop':1, 'step':2, 'chunk':3}
+            slice = slice_dict[command_str.split('.')[1]]
+            dim = int(command_str.split('.')[0])
+            # dim = str(dim) +'.'+ str(slice)
+        else:
+           dim = int(command_str)
+           slice = ''
+        return dim, slice
+
+    def dim_str_to_int(self, dim_str):
+        """ Check the additional 1.1.dim keyword
+
+        :param dim: A string 'dim1' specifying the dimension
+
+        :return: dim - An integer dimension value
+        """
+        number = ''.join(l for l in dim_str if l.isdigit())
+        letters = ''.join(l for l in dim_str if l.isalpha())
+
+        if letters == "dim" and number.strip():
+            dim = int(number)
+        else:
+            raise ValueError("Following the second decimal place, please "
+                             "specify a dimension '1.1.dim1/1.preview.dim1'")
+        return dim
+
+    def modify_preview(self, parameters, param_name, value, dim, slice):
+        """ Check the entered value is valid and edit preview"""
+        slice_list = [0,1,2,3]
+        type_check_value = pu._dumps(value)
+        current_preview_value = pu._dumps(parameters[param_name])
+        pu.check_valid_dimension(dim, current_preview_value)
+        if slice in slice_list:
+            # Modify this dimension and slice only
+            if param_u._preview_dimension_singular(type_check_value):
+                value = self._modify_preview_dimension_slice(value,
+                                                            current_preview_value,
+                                                            dim, slice)
+            else:
+                raise Exception('Invalid preview dimension slice value. Please '
+                                'enter a float, an integer or a string including '
+                                'only mid and end keywords.')
+        else:
+            # If the entered value is a valid dimension value
+            if param_u._preview_dimension(type_check_value):
+                # Modify the whole dimension
+                value = \
+                    self._modify_preview_dimension(value,
+                                                  current_preview_value,
+                                                  dim)
+            else:
+                raise Exception('Invalid preview dimension value. Please '
+                                'enter a float, an integer or slice notation.')
+        return value
+
+    def _modify_preview_dimension_slice(self, value, current_val, dim, slice):
+        """Modify the preview dimension slice value at the dimension (dim)
+        provided
+
+        :param value: The new value
+        :param current_value: The current preview parameter value
+        :param dim: The dimension to modify
+        :param slice: The slice value to modify
+        :return: The modified value
+        """
+        if not current_val:
+            current_val = self._set_empty_list(dim,
+                          self._set_empty_dimension_slice(value, slice))
+        else:
+            current_val[dim - 1] = \
+                self._modified_slice_notation(current_val[dim - 1],
+                                                            value,
+                                                            slice)
+        return current_val
+
+    def _modified_slice_notation(self, old_value, value, slice):
+        """Change the current value at the provided slice
+
+        :param old_value: Previous slice notation
+        :param value: New value to set
+        :param slice: Slice to modify
+        :return: Changed value (str/int)
+        """
+        if pu.is_slice_notation(old_value):
+            start_stop_split = self._set_incomplete_slices(old_value.split(":"))
+            self._check_slice_valid(slice, start_stop_split)
+            return self._get_modified_slice(start_stop_split, value, slice)
+        elif slice == 0:
+            # If there is no slice notation, only allow first slice to
+            # be modified
+            return value
+        else:
+            raise Exception("There is no existing slice notation "
+                            "to modify.")
+
+    def _get_modified_slice(self, start_stop_split, value, slice):
+        if all(v == "" for v in start_stop_split):
+            return self._set_empty_dimension_slice(value, slice)
+        else:
+            start_stop_split[slice] = str(value)
+            start_stop_split = ":".join(start_stop_split)
+            return start_stop_split
+
+    def _check_slice_valid(self, slice, value):
+        """Check the slice is within the correct range"""
+        if value and (slice > (len(value) - 1)):
+            raise Exception(f"There are not currently enough slices "
+                            f"defined.")
+
+    def _modify_preview_dimension(self, value, current_preview, dim):
+        """ Modify the preview list value at the dimension provided (dim)
+
+        :param value: The new value
+        :param current_value: The current preview parameter list value
+        :param dim: The dimension to modify
+        :return: The modified value
+        """
+        if not current_preview:
+            return self._set_empty_list(dim, value)
+        else:
+            current_preview[dim - 1] = value
+            # Save the altered preview value
+            return current_preview
+
+    def _set_empty_dimension_slice(self, value, slice):
+        """Set the empty dimension and insert colons to indicate
+        the correct slice notation.
+
+        :param value: New value to set
+        :param slice: start/stop/step/chunk value
+        :return: String for the new value
+        """
+        return slice * ":" + str(value)
+
+    def _set_incomplete_slices(self, split_list):
+        """Set the empty slice values.
+
+        :param split_list: start/stop/step/chunk entries in a list
+        :return: Full list with default start/stop/step/chunk entries
+        """
+        while len(split_list)<4:
+            split_list.append("")
+        return split_list
+
+    def _set_empty_list(self, dim, value):
+        """ If the dimension is 1 then allow the whole empty list
+        to be set.
+
+        :param dim: Dimension to be altered
+        :param value: New value
+        :return: List containing new value
+        """
+        if dim == 1:
+            return [value]
+        else:
+            raise ValueError("You have not set earlier dimensions")
 
     def level(self, level):
         """ Set the visibility level of parameters """

@@ -384,6 +384,19 @@ def _dumps(val):
         value = val
     return value
 
+def check_valid_dimension(dim, prev_list):
+    """Check the dimension is within the correct range"""
+    if not 0 < dim < 21:
+        raise Exception('Please use a dimension between 0 and 20.')
+    if prev_list and (dim > len(prev_list)):
+        raise Exception('You have not specified enough dimensions '
+                        'inside the preview parameter.')
+    return True
+
+def is_slice_notation(value):
+    """Return True if the value is made up of multiple"""
+    return (isinstance(value, str) and (':' in value))
+
 def create_dir(file_path):
     """Check if directories provided exist at this file path. If they don't
     create the directories.
