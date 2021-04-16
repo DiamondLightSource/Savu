@@ -152,8 +152,8 @@ class DisplayFormatter(object):
         keycount = 0
 
         # Check if the parameters need to be filtered
-        subelem = display_args['subelem'] if display_args else None
-        datasets = display_args['datasets'] if display_args else None
+        subelem = display_args.get("subelem")
+        datasets = display_args.get("datasets")
 
         if not (subelem or datasets):
             # Return the list of parameters according to the visibility level
@@ -583,7 +583,7 @@ class CiteDisplay(DisplayFormatter):
                             + self._get_citation_lines(citation,
                                                        width, str_margin)
         else:
-            cite = f"\n{' '}No citations"
+            cite = f"\n\n{' '}No citations"
         return cite
 
     def _get_citation_dependency_str(self, citation, parameters, width,
@@ -641,3 +641,180 @@ class CiteDisplay(DisplayFormatter):
                 cite_str += "\n" + cite_key + "\n" + cite_value + "\n"
 
         return cite_str
+
+
+class ExpandDisplay(DisplayFormatter):
+    def __init__(self, plugin_list, dims: int, dim_view):
+        self.dims = dims
+        self.dim_view = dim_view
+        super(ExpandDisplay, self).__init__(plugin_list)
+
+    def _get_quiet(self, p_dict, count, width, quiet=True):
+        active = (
+            "***OFF***" if "active" in p_dict and not p_dict["active"] else ""
+        )
+        p_dict["data"] = self._remove_quotes(p_dict["data"])
+        pos = p_dict["pos"].strip() if "pos" in list(p_dict.keys()) else count
+        fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
+        back = Back.LIGHTBLACK_EX
+        return self._get_plugin_title(
+            p_dict, width, fore, back, active=active, quiet=quiet, pos=pos
+        )
+
+    def _get_default(self, level, p_dict, count, width, display_args=False):
+        """ Find the preview parameter and print """
+        title = self._get_quiet(p_dict, count, width)
+        preview_str = self._get_preview_str(p_dict, width)
+        return title + preview_str
+
+    def _get_preview_str(self, p_dict, width):
+        preview_str = ""
+        parameters = p_dict["data"]
+        p_name = "preview"
+
+        param_display_list = pu.set_order_by_visibility(p_dict["param"])
+        if p_name in param_display_list:
+            preview_value = parameters[p_name]
+            preview_list = pu._dumps(preview_value)
+            dims = self._get_display_dimensions(preview_list)
+            param_number = self._get_param_display_number(p_name,
+                                                          param_display_list)
+            preview_str += f"\n{param_number: >5})   {p_name: >29} : "
+            if self.dim_view:
+                # Display dimension slice notation
+                preview_str += self._dim_slice_output(preview_list,
+                                                     width,
+                                                     dims)
+            else:
+                # Display preview parameter
+                preview_str += self._preview_output(preview_list,
+                                                   width,
+                                                   dims)
+        else:
+            preview_str = f"\n\n{' '}No preview parameter"
+        return preview_str
+
+    def _get_display_dimensions(self, preview_list):
+        """Select the number of data dimensions to be displayed
+
+        :param preview_list: Preview parameter value
+        :return: Number of dimensions to display
+        """
+        if isinstance(self.dims, type(None)):
+            if not preview_list:
+                # If the preview list is empty, only display dimension 1
+                return 1
+            else:
+                # If a dimension is not provided, show all dimensions
+                return len(preview_list)
+        else:
+            pu.check_valid_dimension(self.dims, preview_list)
+            return self.dims
+
+    def _dim_slice_output(self, preview_list, width, dims):
+        """Compile the string lines for dimension and slice notation syntax"""
+        temp_str = ""
+        # If there are multiple values in list format
+        # Only show the values for the dimensions chosen
+        if not preview_list:
+            # If empty
+            preview_display_value = ":"
+        else:
+            preview_display_value = preview_list[dims - 1]
+
+        prev_val = self._set_syntax(preview_display_value)
+        temp_str += f"\n   {'dim' + str(dims): >37} : "
+        temp_str += self._get_slice_notation_info(prev_val,width)
+
+        return temp_str
+
+    def _preview_output(self, preview, width, dims):
+        """ Compile output string lines for preview syntax"""
+        temp_str = ""
+        for dim in range(1, dims + 1):
+                temp_str += self._dim_slice_output(preview, width, dim)
+        return temp_str
+
+    def _get_param_display_number(self, p_name, param_display_list):
+        """Find the position number of the parameter 'p_name' inside
+        the user display
+
+        :return param_number: Display number for parameter
+        """
+        param_number = 0
+        for key in param_display_list:
+            param_number += 1
+            if key == p_name:
+                break
+        return param_number
+
+    def _get_slice_notation_info(self, val, width):
+        """Create a string for certain slice notation information,
+        start:stop:step (and chunk if provided)
+
+        :param val: The value to be displayed
+        :param width: The console text width
+        :return: String containing split notation to display
+        """
+        import itertools
+        basic_split_keys = ["start", "stop", "step"]
+        all_split_keys = [*basic_split_keys, "chunk"]
+        split_str = ""
+
+        if pu.is_slice_notation(val):
+            val_list = val.split(":")
+            if len(val_list)< 3:
+                # Make sure the start stop step split keys are always shown,
+                # even when blank
+                val_list.append('')
+            for slice_name, v in zip(all_split_keys, val_list):
+                # Only print up to the shortest list.
+                # (Only show the chunk value if it is in val_list)
+                split_str += self._get_slice_str(slice_name, v, width)
+        else:
+            # Display the first value as 'start', keep stop and step blank
+            val_list = [val]
+            for slice_name, v in itertools.zip_longest(basic_split_keys,
+                                                       val_list, fillvalue=""):
+                split_str += self._get_slice_str(slice_name, v, width)
+
+        return split_str
+
+    def _get_slice_str(self, label, value, width):
+        """Create a string to display information
+
+        :param label: The label to describe the value
+        :param val: The value to be displayed
+        :param width: The console text width
+        :return: A string with a "label: value" format
+        """
+        margin = 6
+        str_margin = " " * margin
+
+        style_on = Style.BRIGHT
+        style_off = Style.RESET_ALL
+
+        split_line_str = f"{label: >39} : {value}"
+        split_text = self._get_equal_lines(
+            split_line_str, width, style_off, style_off, str_margin
+        )
+        return "\n" + split_text
+
+    def _set_syntax(self, val):
+        """ Remove additional spaces, replace colon for 'all' """
+        if isinstance(val, str):
+            if pu.is_slice_notation(val):
+                if val == ':':
+                    val = ''
+                else:
+                    val = val.strip()
+            else:
+                val = val.strip()
+        return val
+
+    def _remove_quotes(self, data_dict):
+        """Remove quotes around variables for display"""
+        for key, val in data_dict.items():
+            val = str(val).replace("'", "")
+            data_dict[key] = val
+        return data_dict
