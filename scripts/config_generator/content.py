@@ -229,7 +229,8 @@ class Content(object):
                     self.refresh(str_pos, change=mutate['replace'])
                     print(mutate['desc'])
                     return True
-                raise Exception(f"Replacement plugin {mutate['replace']} unavailable for {name}")
+                raise Exception(f"Replacement plugin {mutate['replace']} "
+                                f"unavailable for {name}")
             elif 'remove' in mutate.keys():
                 self.remove(pos)
                 print(mutate['desc'])
@@ -473,30 +474,100 @@ class Content(object):
             pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
-    def split_plugin_and_parameter(self, param):
-        """Separate the plugin number and parameter
-        """
-        if len(param.split('.')) is 2:
-            pos_str, param = param.split('.')
-            return pos_str, param
-        else:
-            raise Exception('Incorrect parameter number: Please enter the '
-                  'plugin number, followed by the parameter number. '
-                  'Use a decimal format.')
-
-    def get_start_stop(self, start, stop):
+    def get_start_stop(self, start, stop, subelem_arg=False, expand=False):
         """Find the start and stop number for the plugin range selected
         """
         range_dict = {}
         if start:
-            if '.' in start:
-                start, subelem = start.split('.')
-                range_dict['subelem'] = subelem
-            start = self.find_position(start)
-            stop = self.find_position(stop) + 1 if stop else start + 1
+            start, stop, range_dict = self._split_subelem(start, stop,
+                                                          subelem_arg,
+                                                          expand)
             range_dict['start'] = start
             range_dict['stop'] = stop
         return range_dict
+
+    def _split_subelem(self, start, stop, subelem_arg, expand):
+        """Separate plugin number, parameter(subelement), dimension
+        and command
+
+        :param start: The plugin to start at
+        :param stop: The plugin to stop at
+        :param subelem_arg: True if suelem/parameter argument is allowed
+        :param expand: True if the expand display command is being used
+        :return: start plugin, stop plugin, range_dict containing a subelem
+            if a parameter is specified
+        """
+        range_dict = {}
+        if isinstance(start, str) and '.' in start:
+            if not subelem_arg:
+                raise ValueError("Please enter the plugin number only.")
+            start, subelem, dim, command = \
+                self.separate_plugin_subelem(start)
+            self._check_command_valid(command, dim, expand)
+            start = self.find_position(start)
+            # Ignore a second 'stop' value if provided
+            stop = start + 1
+            range_dict['subelem'] = subelem
+        else:
+            start = self.find_position(start)
+            stop = self.find_position(stop) + 1 if stop else start + 1
+        return start, stop, range_dict
+
+    def _check_command_valid(self, command, dim, expand):
+        """If expand is False, do not allow command and dim arguments.
+
+        :param command: the supplied command, eg expand or a dimension
+          string
+        :param dim: The dimension to display/modify
+        :param expand: bool, True if the expand display command is being used.
+          False if command and dimension arguments are not permitted
+        """
+        if not expand:
+            if command or dim:
+                raise Exception("Use either 'plugin_pos.param_name' or"
+                                " ' plugin_pos.param_no'")
+
+    def separate_plugin_subelem(self, plugin_param):
+        """ Separate the plugin number,parameter (subelement) number
+        and additional command if present.
+
+        :param plugin_param: A string supplied by the user input which
+         contains the plugin element to edit/display. eg "1.1.dim.command"
+
+        :returns plugin: The number of the plugin element
+                 subelem: The number of the parameter
+                 dim: The dimension
+                 command: The supplied command, eg expand or a dimension
+                          string
+        """
+        plugin_param = plugin_param.split('.')
+        # Four arguments allowed
+        if not 1<len(plugin_param)<5:
+            raise ValueError("Invalid  entry. Use <command> -h to "
+                             "check arguments.")
+
+        plugin = plugin_param[0]
+        subelem = plugin_param[1]
+        if len(plugin_param) > 2:
+            dim = self.dim_str_to_int(plugin_param[2])
+            command = str(dim)
+            if len(plugin_param) == 4:
+                command += '.' + self.check_command_str(plugin_param[3])
+        else:
+            dim, command = '', ''
+        return plugin, subelem, dim, command
+
+    def check_command_str(self, command_str):
+        """ Check the additional 1.1.dim.command for slice or 'expand'
+        keywords
+        """
+        command_list = ['expand', 'start', 'stop', 'step', 'chunk']
+        if command_str not in command_list:
+            raise ValueError("Following the second decimal place, please "
+                            "specify a dimension '1.1.dim1/1.preview.dim1'"
+                            " and then the command '1.1.dim1.expand' or  "
+                            "'1.1.dim1.start' ")
+        return command_str
 
     def insert(self, plugin, pos, str_pos, replace=False):
         plugin_dict = self.create_plugin_dict(plugin)
