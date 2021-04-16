@@ -152,7 +152,7 @@ def _mod_arg_parser(args=None, doc=True):
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
     val_str = "The plugin parameter value."
-    parser.add_argument("value", nargs='+', help=val_str)
+    parser.add_argument("value", nargs='?', help=val_str)
     return __arg_parser(parser, args, 'mod', doc)
 
 
@@ -232,6 +232,21 @@ def _level_arg_parser(args=None, doc=True):
     parser.add_argument("level",  nargs='?', help="The visibility level."
                         , choices=['basic', 'intermediate', 'advanced'])
     return __arg_parser(parser, args, 'level', doc)
+
+
+def _expand_arg_parser(args=None, doc=True):
+    """ Argument parser for expand command. """
+    desc = sc.get_description()["expand"]
+    parser = ArgumentParser(prog="expand", description=desc)
+    plugin_pos_str = "Expand this plugin preview parameter."
+    parser.add_argument("plugin_pos", help=plugin_pos_str)
+    dim_str = "Number of dimensions the data has."
+    parser.add_argument("dim", nargs="?", type=int, help=dim_str)
+    # Hidden argument to use when argument can be string and one
+    # dimension is displayed
+    parser.add_argument('dim_view', nargs="?", default=False,
+                        help=argparse.SUPPRESS)
+    return __arg_parser(parser, args, "expand", doc)
 
 
 def _clear_arg_parser(args=None, doc=True):
