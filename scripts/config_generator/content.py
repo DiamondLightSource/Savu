@@ -577,9 +577,7 @@ class Content(object):
         """
         command_list = ['expand', 'start', 'stop', 'step', 'chunk']
         if command_str not in command_list:
-            raise ValueError("Following the second decimal place, please "
-                            "specify a dimension '1.1.dim1/1.preview.dim1'"
-                            " and then the command '1.1.dim1.expand' or  "
+            raise ValueError("Following the dimension, use start/stop/step eg.  "
                             "'1.1.dim1.start' ")
         return command_str
 
