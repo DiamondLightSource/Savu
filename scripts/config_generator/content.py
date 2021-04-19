@@ -342,6 +342,24 @@ class Content(object):
             print("Not in parameter keys.")
         return parameter_valid
 
+    def remove_dimensions(self, pos_str, dim):
+        """ Modify the plugin preview value. Remove all dimensions supplied
+        which are greater than the dimension value provided.
+
+        :param pos_str: The plugin position
+        :param dim: The dimension to be modified
+        """
+        pos = self.find_position(pos_str)
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        parameters = plugin_entry["data"]
+        current_prev_list = pu._dumps(parameters["preview"])
+
+        # If dimensions are provided, then alter preview param
+        if dim and current_prev_list:
+            while len(current_prev_list) > dim:
+                current_prev_list.pop()
+            parameters["preview"] = current_prev_list
+
     def value(self, value):
         if not value.count(';'):
             try:

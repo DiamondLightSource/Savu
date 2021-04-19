@@ -143,6 +143,9 @@ def _mod(content, args):
 def _expand(content, args):
     """ Expand the plugin preview parameter. """
     range_dict = content.split_plugin_string(args.plugin_pos, "")
+    if not args.dim_view:
+        # If one specific dimension is not being viewed
+        content.remove_dimensions(args.plugin_pos, args.dim)
     formatter = ExpandDisplay(content.plugin_list, args.dim,
                               args.dim_view)
     content.display(formatter, **range_dict)
