@@ -58,7 +58,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "LLT_ROF"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
@@ -84,7 +84,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         display_value_before = \
             pdefs["regularisation_methodTV"]["display"]
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
@@ -108,7 +108,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
@@ -132,7 +132,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "FGP_TV"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
@@ -172,7 +172,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
 
         # TODO try on load in comparison to modify_main as modify_main does not change default..
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, plugin.tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
@@ -211,7 +211,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
