@@ -68,7 +68,8 @@ def _open(content, args):
 @error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    range_dict = content.get_start_stop(args.start, args.stop, subelem_arg=True)
+    range_dict = content.split_plugin_string(args.start, args.stop,
+                                             subelem_view=True)
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     level = 'advanced' if args.all else content.disp_level
@@ -119,10 +120,10 @@ def _save(content, args):
 def _mod(content, args):
     """ Modify plugin parameters."""
     pos_str, subelem, dims, command = \
-        content.separate_plugin_subelem(args.param)
+        content.separate_plugin_subelem(args.param, True)
     if 'expand' in command:
-        # Run the start stop step view for that dimension
-        _expand(content, f"{args.param} {dims} {True}")
+        # Run the start stop step view for that dimension alone
+        _expand(content, f"{pos_str} {dims} {True}")
     else:
         if not args.value:
             raise Exception('Please enter a value')
@@ -141,10 +142,7 @@ def _mod(content, args):
 @error_catcher
 def _expand(content, args):
     """ Expand the plugin preview parameter. """
-    # Include an empty 'stop' value as only one plugin is selected
-    range_dict = content.get_start_stop(args.plugin_pos, '',
-                                        expand=args.dim_view,
-                                        subelem_arg=args.dim_view)
+    range_dict = content.split_plugin_string(args.plugin_pos, "")
     formatter = ExpandDisplay(content.plugin_list, args.dim,
                               args.dim_view)
     content.display(formatter, **range_dict)
@@ -188,7 +186,7 @@ def _ref(content, args):
 @error_catcher
 def _cite(content, args):
     """ Display plugin citations."""
-    range_dict = content.get_start_stop(args.start, args.stop)
+    range_dict = content.split_plugin_string(args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
     return content
