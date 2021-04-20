@@ -476,13 +476,12 @@ def is_valid(param_name, value, param_def):
     :return: boolean True if the value is a valid parameter value
 
     """
-    error_str = ""
     dtype = param_def["dtype"]
     default_value = param_def["default"]
 
     # If a default value is used, this is a valid option
     if _check_default(value, default_value):
-        return True, error_str
+        return True, ""
 
     dtype = dtype if isinstance(dtype, list) else [dtype]
     for atype in dtype:
@@ -490,8 +489,7 @@ def is_valid(param_name, value, param_def):
             atype, param_name, value, param_def)
         if pvalid:
             break
-
-    return pvalid, error_str
+    return pvalid, "" if pvalid else _error_message(dtype, param_name)
 
 def _check_type(dtype, param_name, value, param_def):
     """Check if the provided value matches the required date type
@@ -517,11 +515,12 @@ def _check_type(dtype, param_name, value, param_def):
                 return pvalid, error_str
     else:
         pvalid = type_dict[dtype](value)
+        pvalid, opt_err = _check_options(param_def, value, pvalid)
+        if not pvalid:
+            return pvalid, opt_err if opt_err \
+                else _error_message(dtype, param_name)
 
-    if not pvalid:
-        return pvalid, _error_message(dtype, param_name)
-
-    return _check_options(param_def, value, pvalid)
+    return True, ""
 
 
 def is_multi_param(param_name, value):
