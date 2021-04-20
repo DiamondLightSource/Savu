@@ -85,7 +85,7 @@ class PluginParameters(object):
         self.docstring_info['info'] = doc_str.get('verbose')
         self.docstring_info['warn'] = doc_str.get('warn')
         self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
-        self.docstring_info['synopsis'] = doc.find_synopsis(self)
+        self.docstring_info['synopsis'] = doc.find_synopsis(self._get_plugin())
 
     def _set_parameters_this_instance(self, indices):
         """ Determines the parameters for this instance of the plugin, in the
