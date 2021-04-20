@@ -43,7 +43,7 @@ class YamlParameterTest(unittest.TestCase):
         PluginToolTestingClass.define_parameters.__doc__ \
             = test_function.__doc__
         parameter_class._set_parameter_definitions(PluginToolTestingClass)
-        pdefs = parameter_class.get_param_definitions()
+        pdefs = parameter_class.param.get_dictionary()
         return pdefs
 
     def test_parameter_visibility(self):
@@ -189,11 +189,13 @@ class YamlParameterTest(unittest.TestCase):
               description: A parameter
              default: 8
         """
-        with self.assertRaises(Exception) as context:
-            pdefs = self.initial_setup(self.test_parameter_indent)
+        printOutput = StringIO()  # Create StringIO object
+        sys.stdout = printOutput
 
-        self.assertTrue('The parameters have not been read in correctly'
-                        in str(context.exception))
+        pdefs = self.initial_setup(self.test_parameter_indent)
+
+        self.assertTrue('Error reading the yaml structure'
+                        in str(printOutput.getvalue()))
 
 
     def test_parameter_options(self):
