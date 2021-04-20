@@ -63,8 +63,10 @@ class MinAndMax(Plugin, CpuPlugin):
         data = self.get_in_datasets()[0]
         data_shape = data.get_shape()
         width = data_shape[-1]
-        use_mask = self.parameters['masking']
-        if use_mask is True:
+        self.use_mask = self.parameters['masking']
+        self.data_pattern = self.parameters['pattern']
+        self.mask = np.ones((width, width), dtype=np.float32)
+        if self.use_mask is True:
             ratio = self.parameters['ratio']
             if ratio is None:
                 try:
@@ -73,8 +75,6 @@ class MinAndMax(Plugin, CpuPlugin):
                 except KeyError:
                     ratio = 1.0
             self.mask = self.circle_mask(width, ratio)
-        else:
-            self.mask = np.ones((width, width), dtype=np.float32)
         self.method = self.parameters['method']
         if not (self.method == 'percentile' or self.method == 'extrema'):
             msg = "\n***********************************************\n"\
@@ -91,8 +91,8 @@ class MinAndMax(Plugin, CpuPlugin):
         use_filter = self.parameters['smoothing']
         frame = np.nan_to_num(data[0])
         if use_filter is True:
-            frame = gaussian_filter(frame, (3, 3)) * self.mask
-        else:
+            frame = gaussian_filter(frame, (3, 3))
+        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ'):
             frame = frame * self.mask
         if self.method == 'percentile':
             list_out = [np.array(
@@ -119,10 +119,10 @@ class MinAndMax(Plugin, CpuPlugin):
         except:
             msg = "\n***************************************************"\
             "**********\n"\
-            "Can't find the data pattern: {}.\nYou may need to add " \
-            "this plugin after a reconstruction plugin\n" \
-            "*************************************************************\n"\
-            "".format(self._get_pattern())
+            "Can't find the data pattern: {}.\nThe pattern parameter of " \
+            "this plugin must be relevant to its \nprevious plugin" \
+            "\n*************************************************************"\
+            "\n".format(self._get_pattern())
             logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)

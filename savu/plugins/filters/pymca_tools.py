@@ -7,7 +7,7 @@ class PymcaTools(PluginTools):
         """
         config:
               visibility: intermediate
-              dtype: config_file
+              dtype: filepath
               description: Path to the config file
               default: 'Savu/test_data/data/test_config.cfg'
 

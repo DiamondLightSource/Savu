@@ -306,8 +306,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - Preview slice list
     * - range
       - A range e.g. (0,1)
-    * - yaml_file
-      - A yaml file
+    * - yaml_file_path
+      - A yaml file path
     * - file_int_path_int
       - A sequence of items. The first item in the list should be a
         file path, the next should be an interior file path, the last
@@ -324,8 +324,8 @@ Choose the data type. This is used to check the parameter input is valid.
       - A file directory
     * - int_path
       - An interior path
-    * - config_file
-      - A configuration file
+    * - config_file_path
+      - A configuration file path
     * - filename
       - A file name
     * - nptype

@@ -8,7 +8,7 @@ descriptions loaded from a yaml file.
         """
         yaml_file:
               visibility: basic
-              dtype: filepath
+              dtype: yamlfilepath
               description: Path to the file containing the data descriptions.
               default: None
         template_param:

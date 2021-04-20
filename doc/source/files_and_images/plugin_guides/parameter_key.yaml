@@ -22,14 +22,14 @@ dtype:
         empty_list: An empty list
         preview: Preview slice list for data
         range: A range (0,1)
-        yaml_file: Yaml file
+        yaml_file_path: Yaml file path
         file_int_path_int: [<file path>, <interior path>, <integer>]
         int_path_int : [<interior path> , <integer>]
         filepath: File path
         savufilepath: File path within the Savu directory
         directory: File directory
         int_path: Interior path
-        config_file: Configuration file
+        config_file_path: Configuration file path
         filename: File name
         nptype: Numpy type
         dict: Dictionary

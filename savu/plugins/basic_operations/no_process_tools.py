@@ -15,14 +15,19 @@ class NoProcessTools(PluginTools):
             dtype: str
             description: Explicitly state the slicing pattern.
             default: None
-        other:
+        int_param:
             visibility: advanced
             dtype: int
             description: Temporary parameter for testing.
             default: 10
+        float_param:
+            visibility: advanced
+            dtype: float
+            description: Temporary parameter for testing.
+            default: 10.0
         yaml_file:
             visibility: advanced
-            dtype: yaml_file
+            dtype: yamlfilepath
             description: Yaml file path.
             default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
         vocentering_search_area:
@@ -43,7 +48,7 @@ class NoProcessTools(PluginTools):
             default: '(1.0, 0.0e-1, 0.0e-2, 0.0e-3, 0.0e-4)'
         pymca_config:
             visibility: basic
-            dtype: config_file
+            dtype: filepath
             description: Path to config file
             default: 'Savu/test_data/data/test_config.cfg'
             visibility: intermediate
@@ -56,7 +61,7 @@ class NoProcessTools(PluginTools):
             default: "(1, 3, 3)"
         yamlconverter_yaml_file:
             visibility: basic
-            dtype: yaml_file
+            dtype: yamlfilepath
             description: Path to file containing data descriptions
             default: None
         savunexusloader_datasets:
@@ -182,7 +187,7 @@ class NoProcessTools(PluginTools):
             default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
         savu_file_path_param:
             visibility: basic
-            dtype: savufilepath
+            dtype: filepath
             description: Savu Filepath required
             default: "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
