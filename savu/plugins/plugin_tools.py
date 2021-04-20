@@ -290,7 +290,7 @@ class PluginParameters(object):
         of another parameter, and are in dictionary form.
         """
         for name, pdict in self.get_param_definitions().items():
-            if isinstance(pdict["default"], OrderedDict):
+            if pdict["default"] and isinstance(pdict["default"], dict):
                 self.parameters[name] = self.get_dependent_default(pdict)
 
     def does_exist(self, key, ddict):
