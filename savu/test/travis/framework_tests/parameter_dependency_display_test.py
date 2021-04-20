@@ -95,13 +95,20 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
     def test_dependent_param_none(self):
         # Do NOT display regularisation_device
         """
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: gpu
+        regularisation_parameter:
+             visibility: basic
+             dtype: float
+             description:
+               summary: Regularisation parameter could control the level
+                 of smoothing or denoising.
+               verbose: Higher regularisation values lead to stronger smoothing
+                 effect. If the value is too high, you will obtain a very blurry
+                 reconstructed image.
+               range: Recommended between 0.0001 and 0.1
+             example: 'A good value to start with is {default}, {range}'
+             default: 0.0001
              dependency:
-                regularisation_method: not None
+                regularisation_method
         """
         plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
@@ -113,19 +120,26 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = pdefs["regularisation_device"]["display"]
+        display_value = pdefs["regularisation_parameter"]["display"]
         self.assertTrue(display_value == "off")
 
     def test_dependent_param_not_none(self):
         # DO display regularisation_device
         """
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: gpu
+        regularisation_parameter:
+             visibility: basic
+             dtype: float
+             description:
+               summary: Regularisation parameter could control the level
+                 of smoothing or denoising.
+               verbose: Higher regularisation values lead to stronger smoothing
+                 effect. If the value is too high, you will obtain a very blurry
+                 reconstructed image.
+               range: Recommended between 0.0001 and 0.1
+             example: 'A good value to start with is {default}, {range}'
+             default: 0.0001
              dependency:
-                regularisation_method: not None
+                regularisation_method
         """
         plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
@@ -137,7 +151,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = pdefs["regularisation_device"]["display"]
+        display_value = pdefs["regularisation_parameter"]["display"]
         self.assertTrue(display_value == "on")
 
     def test_default_choices(self):
@@ -164,7 +178,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        TGV: 80
                        NLTV: 80
                  dependency:
-                    regularisation_method: not None
+                    regularisation_method
         """
         plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
@@ -204,7 +218,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        TGV: 80
                        NLTV: 80
                  dependency:
-                    regularisation_method: not None
+                    regularisation_method
         """
         plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"

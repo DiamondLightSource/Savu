@@ -145,7 +145,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
              example: 'A good value to start with is {default}, {range}'
              default: 0.0001
              dependency:
-                regularisation_method: not None
+                regularisation_method
 
         regularisation_iterations:
              visibility: basic
@@ -168,7 +168,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
                    TGV: 80
                    NLTV: 80
              dependency:
-                regularisation_method: not None
+                regularisation_method
 
         regularisation_PD_lip:
              visibility: advanced

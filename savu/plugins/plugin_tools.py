@@ -375,6 +375,7 @@ class PluginParameters(object):
         }
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
+                # There is a dictionary of dependency values
                 parent_param_name = list(dependency.keys())[0]
                 # The choices which must be in the parent value
                 parent_choice_list = dependency[parent_param_name]
@@ -386,16 +387,18 @@ class PluginParameters(object):
                     """
                     parent_value = parameters[parent_param_name]
 
-                    if parent_choice_list == "not None":
-                        if parent_value == "None" \
-                                or isinstance(parent_value, type(None)):
-                            param_info_dict[p_name]["display"] = "off"
-                        else:
-                            param_info_dict[p_name]["display"] = "on"
-                    elif str(parent_value) in parent_choice_list:
+                    if str(parent_value) in parent_choice_list:
                         param_info_dict[p_name]["display"] = "on"
                     else:
                         param_info_dict[p_name]["display"] = "off"
+            else:
+                if dependency in parameters:
+                    parent_value = parameters[dependency]
+                    if parent_value is None or str(parent_value) == "None":
+                        param_info_dict[p_name]["display"] = "off"
+                    else:
+                        param_info_dict[p_name]["display"] = "on"
+
 
     def set_plugin_list_parameters(self, input_parameters):
         """
