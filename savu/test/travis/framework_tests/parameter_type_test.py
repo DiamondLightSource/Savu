@@ -22,6 +22,7 @@
 """
 
 import unittest
+import numpy as np
 
 import savu.plugins.utils as pu
 import scripts.config_generator.parameter_utils as param_u
@@ -857,10 +858,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list(self):
+    def test_float_list(self):
         # Check that int list is accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = [2, 3, 4, 5]
 
         value_check = pu._dumps(value)
@@ -869,10 +870,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list_1(self):
+    def test_float_list_1(self):
         # Check that integer is not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = 8
 
         value_check = pu._dumps(value)
@@ -881,10 +882,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_2(self):
+    def test_float_list_2(self):
         # Check that str is not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "Testing str"
 
         value_check = pu._dumps(value)
@@ -893,10 +894,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_3(self):
+    def test_float_list_3(self):
         # Check that str list is not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = ["value", "second6"]
 
         value_check = pu._dumps(value)
@@ -905,10 +906,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_4(self):
+    def test_float_list_4(self):
         # Check that float and int list is accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = [10.4, 30.6, 5]
 
         value_check = pu._dumps(value)
@@ -917,10 +918,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list_5(self):
+    def test_float_list_5(self):
         # Check that float only list is accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = [10.4, 30.6, 5.9]
 
         value_check = pu._dumps(value)
@@ -929,10 +930,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list_6(self):
+    def test_float_list_6(self):
         # Check that str list is not accepted (string format)
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "[value, second6]"
 
         value_check = pu._dumps(value)
@@ -941,10 +942,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_7(self):
+    def test_float_list_7(self):
         # Check that float and int list is accepted (string format)
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "[10.4, 30.6, 5]"
 
         value_check = pu._dumps(value)
@@ -953,10 +954,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list_8(self):
+    def test_float_list_8(self):
         # Check that float only list is accepted (string format)
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "[10.4, 30.6, 5.9]"
 
         value_check = pu._dumps(value)
@@ -965,10 +966,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_num_list_9(self):
+    def test_float_list_9(self):
         # Check that multiple floats inside a string are not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "10.4, 30.6, 5.9"
 
         value_check = pu._dumps(value)
@@ -977,10 +978,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_10(self):
+    def test_float_list_10(self):
         # Check that empty lists are not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = "[]"
 
         value_check = pu._dumps(value)
@@ -989,10 +990,10 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_num_list_11(self):
+    def test_float_list_11(self):
         # Check that empty lists are not accepted
         pdefs = self.initial_setup()
-        key = "num_list_param"
+        key = "float_list_param"
         value = []
 
         value_check = pu._dumps(value)
@@ -1000,6 +1001,20 @@ class ParameterTypeTest(unittest.TestCase):
             key, value_check, pdefs[key]
         )
         self.assertFalse(valid_modification)
+
+    def test_float_list_11(self):
+        # Check that np float lists are accepted
+        pdefs = self.initial_setup()
+        key = "float_list_param"
+        value = []
+        for i in range(0, 10):
+            value.append(np.float64(i))
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
 
     def test_pos_int(self):
         # Check that positive integers are accepted
@@ -1212,7 +1227,6 @@ class ParameterTypeTest(unittest.TestCase):
                   11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                   21, 22, 23, 24, 25, 26, 27, 28, 29]
         self.assertEqual(val_list, result)
-
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(

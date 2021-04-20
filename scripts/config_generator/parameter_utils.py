@@ -329,7 +329,7 @@ def _nptype(value):
 
 def _integer(value):
     # do not use isinstance as this also picks up boolean values
-    if type(value) in (int, np.integer):
+    if type(value) in (int, np.int_):
         return True
     return False
 

@@ -160,7 +160,7 @@ class NoProcessTools(PluginTools):
             dtype: list[str]
             description: string list required
             default: ['item_one','item_two']
-        num_list_param:
+        float_list_param:
             visibility: basic
             dtype: list[float]
             description: list of numbers required
