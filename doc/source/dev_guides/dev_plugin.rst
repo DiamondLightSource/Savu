@@ -335,7 +335,7 @@ that number of entries.
     * - list[btype]
       - A list of any length containing only btype
     * - list[btype, btype, ..., btype]
-      - A list of btype of fixed length = N = numnber of btype
+      - A list of btype of fixed length = N = number of btype
 
 Where btype can be the same or different types.
 For example:
@@ -421,41 +421,6 @@ For example:
     * - dict[int: float]
       - A dictionary of integer keys and float values
 
-Specify a range of values
-:::::::::::::::::::::::::::
-
-If you require an integer or float value within a range, you can use the
-greater than and smaller than symbols '>' and '<'. This can only be
-applied to int and float data types.
-
-The standard mathematical inequalities notation is:
-
-* < (less than)
-
-* <= (less than or equal to)
-
-* > (greater than)
-
-* >= (greater than or equal to)
-
-For example:
-
-.. list-table::
-    :header-rows: 1
-    :widths: 50 50
-
-    * - Data type example
-      - Description
-    * - int > 0
-      - An integer value greater than 0
-    * - int > a
-      - An integer value greater than a, where a is an integer
-    * - float <= b
-      - A float less than or equal to b, where b is an integer or float
-    * - a < float < b
-      - A float greater than a and less than b, where a and b are integers or floats
-    * - a <= int <= b
-      - An integer greater than or equal to a and less than or equal to b, where a and b are integers
 
 Options list
 :::::::::::::
