@@ -156,7 +156,7 @@ def _dawn_setup():
 
 
 def _get_dawn_parameters(plugin):
-    plugin._populate_default_parameters()
+    plugin.get_plugin_tools()._populate_default_parameters()
     desc = plugin.p_dict['description']
     params = {}
     for key, value in plugin.parameters.items():

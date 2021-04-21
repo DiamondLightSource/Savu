@@ -144,7 +144,7 @@ def _savu_setup(path2plugin, inputs, parameters):
     parameters['out_datasets'] = [inputs['dataset_name']]
     plugin = get_plugin(path2plugin.split('.py')[0]+'.py')
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
-    plugin._set_parameters(parameters)
+    plugin.set_parameters(parameters)
     plugin._set_plugin_datasets()
     plugin.setup()
     return plugin

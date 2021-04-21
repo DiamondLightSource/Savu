@@ -138,7 +138,7 @@ class Content(object):
         name = change if change else plugin_entry['name']
         active = plugin_entry['active']
         plugin = pu.plugins[name]()
-        plugin._populate_default_parameters()
+        plugin.get_plugin_tools()._populate_default_parameters()
         keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]['active'] = active
