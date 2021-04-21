@@ -226,7 +226,8 @@ class PluginList(object):
 
     def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()
-        plugin_inst._populate_default_parameters()
+        tools = plugin_inst.get_plugin_tools()
+        tools._populate_default_parameters()
         return plugin_inst.docstring_info
 
     # def _byteify(self, input):

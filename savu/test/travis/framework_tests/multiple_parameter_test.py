@@ -34,7 +34,8 @@ class MultipleParameterTest(unittest.TestCase):
     def plugin_setup(self):
         ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         plugin = pu.load_class(ppath)()
-        plugin.tools._populate_default_parameters()
+        tools = plugin.get_plugin_tools()
+        tools._populate_default_parameters()
         return plugin
 
     def framework_options_setup(self):
