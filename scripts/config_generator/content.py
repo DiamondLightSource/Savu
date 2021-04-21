@@ -718,9 +718,9 @@ class Content(object):
         :param slice: Slice to modify
         :return: Changed value (str/int)
         """
+        old_value = self._set_incomplete_slices(str(old_value), slice)
         if pu.is_slice_notation(old_value):
-            start_stop_split = self._set_incomplete_slices(old_value.split(":"))
-            self._check_slice_valid(slice, start_stop_split)
+            start_stop_split = old_value.split(":")
             return self._get_modified_slice(start_stop_split, value, slice)
         elif slice == 0:
             # If there is no slice notation, only allow first slice to
@@ -737,12 +737,6 @@ class Content(object):
             start_stop_split[slice] = str(value)
             start_stop_split = ":".join(start_stop_split)
             return start_stop_split
-
-    def _check_slice_valid(self, slice, value):
-        """Check the slice is within the correct range"""
-        if value and (slice > (len(value) - 1)):
-            raise Exception(f"There are not currently enough slices "
-                            f"defined.")
 
     def _modify_preview_dimension(self, value, current_preview, dim):
         """ Modify the preview list value at the dimension provided (dim)
@@ -769,15 +763,17 @@ class Content(object):
         """
         return slice * ":" + str(value)
 
-    def _set_incomplete_slices(self, split_list):
-        """Set the empty slice values.
+    def _set_incomplete_slices(self, old_value, slice):
+        """Append default slice values.to the current string value, in order
+         to allow later slice values to be set
 
-        :param split_list: start/stop/step/chunk entries in a list
-        :return: Full list with default start/stop/step/chunk entries
+        :param old_value: Current string value with slice notation
+        :param slice: slice notation index to be edited
+        :return: String with default slice notation entries set
         """
-        while len(split_list)<4:
-            split_list.append("")
-        return split_list
+        while old_value.count(":")<slice:
+            old_value += ":"
+        return old_value
 
     def _set_empty_list(self, dim, value):
         """ If the dimension is 1 then allow the whole empty list
