@@ -290,8 +290,29 @@ class PluginParameters(object):
         of another parameter, and are in dictionary form.
         """
         for name, pdict in self.get_param_definitions().items():
-            if pdict["default"] and isinstance(pdict["default"], dict):
+            if self.default_dependency_dict_exists(pdict):
                 self.parameters[name] = self.get_dependent_default(pdict)
+
+    def default_dependency_dict_exists(self, pdict):
+        """ Check that the parameter default value is in a format with
+        the parent parameter string and the dependent value
+        e.g. default:
+                algorithm: FGP
+        and not an actual default value to be set
+        e.g. default: {'2':5}
+
+        :param pdict: The parameter definition dictionary
+        :return: True if the default dictionary contains the
+                correct format
+        """
+        if pdict["default"] and isinstance(pdict["default"], dict):
+            if "dict" not in pdict["dtype"]:
+                return True
+            else:
+                parent_name = list(pdict['default'].keys())[0]
+                if parent_name in self.get_param_definitions():
+                    return True
+        return False
 
     def does_exist(self, key, ddict):
         if not key in ddict:
