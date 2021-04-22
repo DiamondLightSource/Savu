@@ -126,12 +126,12 @@ class NoProcessTools(PluginTools):
             default: "[[0, 1], [2, 3]]"
         dxchangeloader_dark:
             visibility: basic
-            dtype: list[hdf5path, int]
+            dtype: list[[hdf5path, None], int]
             description: dark data path and scale value
             default: "['exchange/data_dark', 1]"
         dxchangeloader_flat:
             visibility: basic
-            dtype: list[hdf5path, int]
+            dtype: list[[hdf5path, None], int]
             description: flat data path and scale value
             default: "['exchange/data_white', 1]"
         positive_test:
