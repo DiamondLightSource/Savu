@@ -314,7 +314,7 @@ class Content(object):
         
 
         # If dimensions are provided then alter preview param
-        if dim and param_name=='preview':
+        if self.preview_dimension_to_modify(dim, param_name):
             # Filter the dimension, dim1 or dim1.start
             dim, slice = self._separate_dimension_and_slice(dim)
             value = self.modify_preview(parameters, param_name, value, dim,
@@ -342,6 +342,35 @@ class Content(object):
             print("Not in parameter keys.")
         return parameter_valid
 
+    def check_required_args(self, value, required):
+        """ Check required argument 'value' is present
+
+        :param value: Argument value
+        :param required: bool, True if the argument is required
+        """
+        if required and (not value):
+            raise Exception('Please enter a value')
+
+        if (not required) and value:
+            raise Exception(f"Unrecognised argument: {value}")
+
+    def preview_dimension_to_modify(self, dim, param_name):
+        """ Check that the dimension string is only present when the parameter
+        to modify is the preview parameter
+
+        :param dim: Dimension string
+        :param param_name: The parameter name (of the parameter to be modified)
+        :return: True if dimension string is provided and the parameter to modify
+        the preview parameter
+        """
+        if dim:
+            if param_name == "preview":
+                return True
+            else:
+                raise Exception("Please only use the dimension syntax when "
+                                "modifying the preview parameter.")
+        return False
+
     def remove_dimensions(self, pos_str, dim):
         """ Modify the plugin preview value. Remove all dimensions supplied
         which are greater than the dimension value provided.
@@ -352,6 +381,7 @@ class Content(object):
         pos = self.find_position(pos_str)
         plugin_entry = self.plugin_list.plugin_list[pos]
         parameters = plugin_entry["data"]
+        self.check_param_exists(parameters, "preview")
         current_prev_list = pu._dumps(parameters["preview"])
 
         # If dimensions are provided, then alter preview param
@@ -359,6 +389,17 @@ class Content(object):
             while len(current_prev_list) > dim:
                 current_prev_list.pop()
             parameters["preview"] = current_prev_list
+
+    def check_param_exists(self, parameters, pname):
+        """ Check the parameter is present in the current parameter list
+
+        :param parameters: Dictionary of parameters
+        :param pname: Parameter name
+        :return:
+        """
+        if not parameters.get(pname):
+            raise Exception(f"The {pname} parameter is not available"
+                            f" for this plugin.")
 
     def value(self, value):
         if not value.count(';'):

@@ -125,8 +125,7 @@ def _mod(content, args):
         # Run the start stop step view for that dimension alone
         _expand(content, f"{pos_str} {dims} {True}")
     else:
-        if not args.value:
-            raise Exception('Please enter a value')
+        content.check_required_args(args.value, True)
         # Get the parameter name for the display later
         args.param = content.get_param_arg_str(pos_str, subelem)
         content_modified = content.modify(pos_str, subelem,
