@@ -127,6 +127,8 @@ class PluginParameters(object):
         """Find the parameter information from the method docstring.
         This is provided in a yaml format.
         """
+        # *** TO DO turn the dtype entry into a string
+
         param_info_dict = None
         if hasattr(tool_class, "define_parameters"):
             yaml_text = tool_class.define_parameters.__doc__
@@ -187,31 +189,20 @@ class PluginParameters(object):
 
     def _check_dtype(self, param_info_dict, tool_class):
         """
-        Make sure that the dtype input is valid
+        Make sure that the dtype input is valid and that the default value is
+        compatible
         """
-        dtype_valid = True
-        for p_key, p in param_info_dict.items():
-            if isinstance(p["dtype"], list):
-                for item in p["dtype"]:
-                    if item not in param_u.type_dict:
-                        print(
-                            f"The {p_key} parameter has been assigned an "
-                            f"invalid type '{item}'."
-                        )
-            else:
-                if p["dtype"] not in param_u.type_dict:
-                    print(
-                        f"The {p_key} parameter has been assigned an invalid"
-                        f" type '{p['dtype']}'."
-                    )
-                    dtype_valid = False
-        if not dtype_valid:
-            print("The type options are: ")
-            type_list = [
-                "    {0}".format(key) for key in param_u.type_dict.keys()
-            ]
-            print(*type_list, sep="\n")
-            raise Exception(f"Please edit {tool_class.__name__}")
+        for p_key, p_dict in param_info_dict.items():
+            dtype = p_dict['dtype'].replace(" ", "") 
+            pvalid, error_str = param_u.is_valid_dtype(dtype)
+            if not pvalid:
+                raise Exception("Invalid parameter definition %s:\n %s"
+                                % (p_key, error_str))
+            pvalid, _ = param_u.is_valid(p_key, p_dict['default'], p_dict, check=True)
+            if not pvalid:
+                raise Exception("The default value %s for parameter '%s' does "\
+                                "not match the defined parameter dtype %s" 
+                                % (p_dict['default'], p_key, p_dict['dtype']))
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""
@@ -374,15 +365,6 @@ class PluginParameters(object):
         )
         print(Fore.RED + recommendation + Fore.RESET)
 
-    # def check_dependencies(self, parameters):
-    #     """
-    #     Determine which parameter values are dependent on a parent value and
-    #     whether they should be hidden or shown
-    #     """
-    #     param_info_dict = self.get_param_definitions()
-    #     for name, pdict in param_info_dict.items():
-    #         if "dependency" in pdict:
-    #             if isinstance(pdict, )
         
     def check_dependencies(self, parameters):
         """Determine which parameter values are dependent on a parent

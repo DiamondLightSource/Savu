@@ -23,6 +23,7 @@
 
 import os
 import re
+import copy
 import h5py
 import posixpath
 import numpy as np
@@ -34,11 +35,87 @@ import savu.plugins.loaders.utils.yaml_utils as yu
 import savu.plugins.utils as pu
 
 
+def _int(value):
+    # do not use isinstance as this also picks up boolean values
+    if type(value) in (int, np.int_):
+        return True
+    return False
+
+
+def _str(value):
+    parameter_valid = False
+    if isinstance(value, str):
+        parameter_valid = True
+    return parameter_valid
+
+
+def _float(value):
+    valid = isinstance(value, (float, np.float))
+    if not valid:
+        valid = _int(value)
+    return valid
+
+
+def _bool(value): # should eventually be a drop-down list
+    valid = isinstance(value, bool)
+    if not valid and isinstance(value, str):
+        return value.lower() == "true" or value.lower() == "false"
+    return valid
+
+
+def _filepath(value):
+    """ file path """
+    if _str(value):
+        return os.path.isfile(value)
+    return _savufilepath(value)
+
+
+def _h5path(value): # Extend this later as we need to know which file to apply the check to
+    """ internal path to a hdf5 dataset """
+    return _str(value)
+
+
+def _savufilepath(value, returnpath=False):
+    """ A file path inside the Savu directory"""
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+    value = os.path.join(savu_base_path, value)
+    if returnpath:
+        return os.path.isfile(savu_base_path+value), value
+    return os.path.isfile(savu_base_path+value)
+
+
+def _yamlfilepath(value):
+    """ yaml_file """
+    # does the filepath exist
+    if not _filepath(value):
+        # is it a file path in Savu folder
+        valid, value = _savufilepath(value, returnpath=True)
+        if not valid:
+            return False
+
+    with open(value, 'r') as f:
+        errors = yu.check_yaml_errors(f)
+        try:
+            yu.read_yaml(value)
+        except:
+            if errors:
+                print("There were some errors with your yaml file structure.")
+                for e in errors:
+                    print(e)
+    return True
+
+
+def _nptype(value):
+    """Check if the value is a numpy data type. Return true if it is."""
+    return (value in np.typecodes) or (value in np.sctypeDict.keys())
+
+
 def _preview(value):
     """ preview value """
     valid = _typelist(_preview_dimension, value)
-    if not valid:
-        valid = _emptylist(value)
+    if not valid and not value:
+        return True # empty list is allowed
     return valid
 
 
@@ -51,8 +128,7 @@ def _typelist(func, value):
 
 def _preview_dimension(value):
     """ Check the full preview parameter value """
-    import savu.plugins.utils as pu
-    if _string(value):
+    if _str(value):
         slice_range = [*range(1,5)]
         slice_str = [":"*n for n in slice_range]
         if value in slice_str:
@@ -86,7 +162,7 @@ def _split_notation_is_valid(value):
 def _preview_dimension_singular(value):
     """ Check the singular value within the preview dimension"""
     valid = False
-    if _string(value):
+    if _str(value):
         string_valid = re.fullmatch("(mid|end|[^a-zA-z])+", value)
         # Check that the string does not contain any letters [^a-zA-Z]
         # If it does contain letters, mid and end are the only keywords allowed
@@ -112,396 +188,240 @@ def _preview_eval(value):
     return eval(value,{"__builtins__":None},{"mid":mid,"end":end})
 
 
-def _intlist(value):
-    """ A list containing integer values """
-    return _typelist(_integer, value)
-
-
-def _stringlist(value):
-    """ A list containing string values """
-    return _typelist(_string, value)
-
-
-def _numlist(value):
-    """ int or float list """
-    return _typelist(_float, value)
-
-
-def _emptylist(value):
-    """ empty list """
-    if isinstance(value, list) and not value:
-        return True
-    return False
-
-
-def _range(value):
-    """range"""
-    parameter_valid = False
-    if isinstance(value, tuple):
-        if len(value) == 2:
-            if _float(value[0]) and _float(value[1]):
-                parameter_valid = True
-        else:
-            print(Fore.RED + "Please enter two values." + Fore.RESET)
-    elif _numlist(value):
-        if len(value) == 2:
-            if _float(value[0]) and _float(value[1]):
-                parameter_valid = True
-        else:
-            print(Fore.RED + "Please enter two values." + Fore.RESET)
-    return parameter_valid
-
-
-def _yamlfilepath(value):
-    """ yamlfilepath """
-    parameter_valid = False
-    if _string(value):
-        if os.path.isfile(value):
-            # Make sure that the file path exists
-            file_path_str = value
-            if _yaml_file_is_valid(file_path_str):
-                parameter_valid = True
-        elif _savufilepath(value):
-            # If the file path is not valid, try prepending the savu base path
-            savu_base_path = \
-                os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
-            file_path_str = savu_base_path + value
-            if _yaml_file_is_valid(file_path_str):
-                parameter_valid = True
-    return parameter_valid
-
-
-def _yaml_file_is_valid(file_path_str):
-    """Try to read the yaml file at the provided file path (file_path_str)
-    """
-    yaml_file_valid = False
-    with open(file_path_str, 'r') as f:
-        errors = yu.check_yaml_errors(f)
-        try:
-            yu.read_yaml(file_path_str)
-            # If the yaml file is read in without errors, then the
-            # file path is a valid entry
-            yaml_file_valid = True
-        except:
-            # Print relevant errors if there is an exception.
-            # Some errors may not be serious enough to prevent the yaml
-            # file from being read correctly.
-            if errors:
-                print("There were some errors with your yaml file structure.")
-                for e in errors:
-                    print(e)
-    return yaml_file_valid
-
-
-def _intgroup(value):  # why is this called _intgroup? can we have something like list[filepath, hdffilepath, int]
-    """ [path, int_path, int] """
-    parameter_valid = False
-    try:
-        if _list(value):
-            entries = value
-        if len(entries) == 3:
-            file_path = entries[0]
-
-            if _filepath(file_path):
-                int_path = entries[1]
-                with h5py.File(file_path, "r") as hf:
-                    int_path_valid = _check_internal_path(hf, int_path)
-                    if int_path_valid:
-                        try:
-                            compensation_fact = entries[2]
-                            parameter_valid = _integer(compensation_fact)
-                        except (Exception, ValueError):
-                            print("The compensation factor is not an integer.")
-        else:
-            print(Fore.RED + "Please enter three parameters." + Fore.RESET)
-    finally:
-        return parameter_valid
-
-
-def _check_internal_path(hf, int_path):
+#Replace this with if list combination contains filepath and h5path e.g. list[filepath, h5path, int] then perform this check
+def _check_h5path(filepath, h5path):
     """ Check if the internal path is valid"""
-    parameter_valid = False
-    try:
-        # Hdf5 dataset object
-        int_data = hf.get(int_path)
-        if int_data is None:
-            print("There is no data stored at that internal path.")
-        else:
-            # Internal path is valid, check data is present
-            int_data = np.array(int_data)
-            if int_data.size >= 1:
-                parameter_valid = True
-    except AttributeError:
-        print("Attribute error.")
-    except:
-        print(
-            Fore.BLUE + "Please choose another interior path."
-            + Fore.RESET
-        )
-        print("Example interior paths: ")
-        for group in hf:
-            for subgroup in hf[group]:
-                subgroup_str = "/" + group + "/" + subgroup
-                print(u"\t" + subgroup_str)
-        raise
-    return parameter_valid
-
-
-def _intgroup1(value):
-    """ [int_path, int] """
-    parameter_valid = False
-    try:
-        if _list(value):
-            entries = value
-        if len(entries) == 2:
-            int_path = entries[0]
-            if _intpathway(int_path):
-                try:
-                    scale_fact = int(entries[1])
-                    parameter_valid = _integer(scale_fact)
-                except (Exception, ValueError):
-                    print("The scale factor is not an integer.")
-        else:
-            print(Fore.RED + "Please enter two parameters." + Fore.RESET)
-    finally:
-        return parameter_valid
-
-
-def _filepath(value):
-    """ file path """
-    valid = False
-    if _string(value):
-        valid = os.path.isfile(value)
-        if not valid:
-            valid = _savufilepath(value)
-    return valid
-
-
-def _savufilepath(value):
-    """A file path inside the Savu directory"""
-    savu_base_path = \
-        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
-    if _string(value):
-        return os.path.isfile(savu_base_path+value)
-    return False
-
-
-def _intpathway(value):
-    """Interior file path"""
-    # Could check if valid, but only if file_path known for another parameter
-    return _string(value)
-
-
-def _filename(value):
-    """Check if the value is a valid filename string"""
-    parameter_valid = False
-    if _string(value):
-        filename = posixpath.normpath(value)
-        # Normalise the pathname by collapsing redundant separators and
-        # references so that //B, A/B/, A/./B and A/../B all become A/B.
-        _os_alt_seps = list(sep
-                            for sep in [os.path.sep, os.path.altsep]
-                            if sep not in (None, "/"))
-        # Find which separators the operating system provides, excluding slash
-        for sep in _os_alt_seps:
-            if sep in filename:
-                return False
-        # If path is an absolute pathname. On Unix, that means it begins with
-        # a slash, on Windows that it begins with a (back)slash after removing
-        # drive letter.
-        if os.path.isabs(filename) or filename.startswith("../"):
-            print(
-                "Please make sure the filename is absolute and doesn't"
-                " change directory."
-            )
-            return False
-        parameter_valid = True
-    return parameter_valid
-
-
-def _nptype(value):
-    """Check if the value is a numpy data type. Return true if it is."""
-    parameter_valid = False
-    if (value in np.typecodes) or (value in np.sctypeDict.keys()):
-        parameter_valid = True
-    return parameter_valid
-
-
-def _integer(value):
-    # do not use isinstance as this also picks up boolean values
-    if type(value) in (int, np.int_):
-        return True
-    return False
-
-
-def _positive_integer(value):
-    if _integer(value):
-        return value > 0
-    return False
-
-
-def _boolean(value):
-    parameter_valid = False
-    if isinstance(value, bool):
-        parameter_valid = True
-    elif value == "true" or value == "false":
-        parameter_valid = True
-    return parameter_valid
-
-
-def _string(value):
-    parameter_valid = False
-    if isinstance(value, str):
-        parameter_valid = True
-    return parameter_valid
-
-
-def _float(value):
-    valid = isinstance(value, (float, np.float))
-    if not valid:
-        valid = _integer(value)
-    return valid
-
-
-def _tuple(value):
-    parameter_valid = False
-    if isinstance(value, tuple):
-        parameter_valid = True
-    return parameter_valid
-
-
-def _dict(value):
-    parameter_valid = False
-    if isinstance(value, dict):
-        parameter_valid = True
-    return parameter_valid
-
-
-def _int_float_dict(value):
-    """Dictionary to hold integer keys and float values only
-    {integer:float}
-    """
-    parameter_valid = False
-    if isinstance(value, dict):
-        if all(_integer(k) for k in value.keys()):
-            if all(_float(v) for v in value.values()):
-                parameter_valid = True
+    with h5py.File(filepath, "r") as hf:
+        try:
+            # Hdf5 dataset object
+            h5path = hf.get(h5path)
+            if h5path is None:
+                print("There is no data stored at that internal path.")
             else:
-                print("Ensure dictionary values are floats.")
-        else:
-            print("Ensure dictionary keys are integers.")
-    return parameter_valid
+                # Internal path is valid, check data is present
+                int_data = np.array(h5path)
+                if int_data.size >= 1:
+                    return True, ""
+        except AttributeError:
+            print("Attribute error.")
+        except:
+            print(
+                Fore.BLUE + "Please choose another interior path."
+                + Fore.RESET
+            )
+            print("Example interior paths: ")
+            for group in hf:
+                for subgroup in hf[group]:
+                    subgroup_str = "/" + group + "/" + subgroup
+                    print(u"\t" + subgroup_str)
+            raise
+    return False, "Invalid path %s for file %s" % (h5path, filepath)
 
 
 def _list(value):
-    # List of digits or strings
-    parameter_valid = False
+    """ A non-empty list """
     if isinstance(value, list):
-        # This is a list of integer or float values
-        if value:
-            # If the list is not empty
-            parameter_valid = True
-    return parameter_valid
+        return True
+    return False
 
 
-# If you are editing the type dictionary, please update the documentation
-# file dev_guides/dev_plugin.rst and the files short_parameter_key.yaml
-# and parameter_key.yaml, inside doc/source/files_and_images/plugin_guides/
-# to provide guidance for plugin creators
-
-type_dict = {
-    "preview": _preview,
-    "int_list": _intlist,
-    "string_list": _stringlist,
-    "num_list": _numlist,
-    "empty_list": _emptylist,
-    "range": _range,
-    "yamlfilepath": _yamlfilepath,
-    "file_int_path_int": _intgroup,
-    "int_path_int": _intgroup1,
-    "filepath": _filepath,
-    "int_path": _intpathway,
-    "filename": _filename,
-    "nptype": _nptype,
-    "int": _integer,
-    "pos_int": _positive_integer,
-    "bool": _boolean,
-    "str": _string,
-    "float": _float,
-    "tuple": _tuple,
-    "list": _list,
-    "dict": _dict,
-    "int_float_dict": _int_float_dict,
-}
-
-type_error_dict = {
-    "preview": "preview slices",
-    "int_list": "list of integers",
-    "string_list": "list of strings",
-    "num_list": "list of numbers",
-    "empty_list": "empty list",
-    "range": "range'. For example '<value 1>, <value 2>",
-    "yamlfilepath": "yaml file path",
-    "file_int_path_int": "[filepath, interior file path, int]",
-    "int_path_int": "[interior file path, int]",
-    "filepath": "filepath",
-    "int_path": "string",
-    "filename": "file name",
-    "nptype": "numpy data type",
-    "int": "integer",
-    "pos_int": "positive integer",
-    "bool": "boolean",
-    "str": "string",
-    "float": "float/integer",
-    "tuple": "tuple",
-    "list": "list",
-    "dict": "dict",
-    "int_float_dict": "{int:float}",
-}
+def _dict(value):
+    """ A dictionary """
+    return isinstance(value, dict)
 
 
-def is_valid(param_name, value, param_def):
-    """Check if the parameter value (value) is a valid data type
-    for the parameter (param_name)
+def _None(value):
+    """ None """
+    return value == None  or value == "None"
 
-    Check if the value matches the default value.
-    Then type check, followed by a check on whether it is present in options
-    If the items in options have not been type checked, or have errors,
-    it may cause problems.
+
+def _dict_combination(param_name, value, param_def):
+    dtype = copy.copy(param_def['dtype'])
+
+    param_def['dtype'] = 'dict'
+    # check this is a dictionary
+    pvalid, error_str = _check_type(param_name, value, param_def)
+    if not pvalid:
+        return pvalid, error_str
+
+    dtype = dtype[len('dict'):]
+    dtype = _find_options(dtype, 'dict', '{', '}', ':')
+    # check there are only two options - for key and for value:
+    if len(dtype) != 2:
+        return False, "Incorrect number of dtypes supplied for dictionary"
+
+    # check the keys
+    n_vals = len(value.keys())
+    multi_vals = zip(list(list(dtype[0]*n_vals), value.keys()))
+    pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
+
+    # check the values:
+    multi_vals = zip(list(dtype[1]*n_vals), list(value.values()))
+    pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
+
+    return pvalid, error_str
+
+
+def _options_list(param_name, value, param_def):
+    """
+    There are multiple options of dtype defined in a list.
+    E.g. dtype: [string, int] # dtype can be a string or an integer
+    """
+    dtype = _find_options(param_def['dtype'])
+    for atype in dtype:
+        param_def['dtype'] = atype
+        pvalid, error_str = is_valid(param_name, value, param_def)
+        if pvalid:
+            return pvalid, error_str
+
+    return pvalid, "The parameter %s does not match the options %s" \
+            % (param_name, dtype)
+
+
+def _list_combination(param_name, value, param_def):
+    """
+    e.g.
+    (1) list
+    (1) list[btype] => any length
+    (2) list[btype, btype]  => fixed length (and btype can be same or different)
+        - list[int], list[string, string], list[list[string, float], int]
+    (3) list[filepath, h5path, int]
+    (4) list[[option1, option2]] = list[option1 AND/OR option2]
+    """
+    dtype = copy.copy(param_def['dtype'])
+
+    # is it a list?
+    param_def['dtype'] = 'list'
+    pvalid, error_str = _check_type(param_name, value, param_def)
+    if not pvalid:
+        return pvalid, error_str
+
+    # remove outer list from dtype and find separate list entries
+    dtype = _find_options(dtype[len('list'):])
+
+    #special case of empty list
+    if not value:
+        if dtype[0] == "":
+            error = "The empty list is not a valid option for %s" % param_name
+            return False, error
+        else:
+            return True, ""
+
+    # list can have any length if btype_list has length 1
+    if len(dtype) == 1:
+        dtype = dtype*len(value)
+
+    return _is_valid_multi(param_name, param_def, zip(dtype, value))
+
+
+def _matched_brackets(string, dtype, bstart, bend):
+    start_brackets = [m.start() for m in re.finditer('\%s' % bstart, string)]
+    end_brackets = [m.start() for m in re.finditer('\%s' % bend, string)]
+    matched = []
+    # Match start and end brackets
+    while(end_brackets):
+        end = end_brackets.pop(0)
+        idx = start_brackets.index([s for s in start_brackets if s < end][-1])
+        start =  start_brackets.pop(idx)
+        extra = len(dtype) if string[start-4:start] == dtype else 0
+        matched.append((start - extra, end))
+
+    return matched
+
+
+def _remove_nested_brackets(matched):
+    if len(matched) > 1:
+        for outer in matched[::-1]:
+            for i in range(len(matched[:-1]))[::-1]:
+                # Remove if is this bracket inside the outer bracket
+                if matched[i][0] > outer[0] and matched[i][1] < outer[1]:
+                    matched.pop(i)
+    return matched
+
+
+def _find_options(string, dtype='list', bstart="[", bend="]", split=","):
+    string = string[1:-1]
+    matched = _matched_brackets(string, dtype, bstart, bend)
+    # find and remove nested brackets
+    matched = _remove_nested_brackets(matched)
+    replace_strings = {}
+    # replace statements with place holders containing no commas
+    shift = 0
+    for i in range(len(matched)):
+        replace = string[matched[i][0]-shift:matched[i][1]-shift+1]
+        replacement = '$' + str(i)
+        replace_strings[replacement] = replace
+        string = string.replace(replace, replacement)
+        shift = matched[i][1] - matched[i][0] - 1
+
+    options = string.split(split)
+    # substitute original statements back in
+    for i in range(len(options)):
+        if options[i] in replace_strings.keys():
+            options[i] = replace_strings[options[i]]
+
+    return options
+
+def _convert_to_list(value):
+    return value if isinstance(value, list) else [value]
+
+
+def _is_valid_multi(param_name, param_def, multi_vals):
+    for atype, val in multi_vals:
+        param_def['dtype'] = atype
+        pvalid, error_str = is_valid(param_name, val, param_def)
+        if not pvalid:
+            error_str = "The value %s should be of type %s" % (val, atype)
+            break
+    return pvalid, error_str
+
+
+def is_valid(param_name, value, param_def, check=False):
+    """Check if the parameter value is a valid data type for the parameter
 
     :param param_name: The name of the parameter
     :param value: The new value of the parameter
     :param param_def: Parameter definition dictionary, containing e.g.,
         description, dtype, default
     :return: boolean True if the value is a valid parameter value
-
     """
-    dtype = param_def["dtype"]
-    default_value = param_def["default"]
+
+    original_dtype = copy.copy(param_def['dtype'])
+    # remove all whitespaces from dtype
+    param_def['dtype'] = param_def['dtype'].replace(" ", "")
 
     # If a default value is used, this is a valid option
-    if _check_default(value, default_value):
-        return True, ""
+    # Don't perform this check when checking the default value itself
+    if not check:
+        if _check_default(value, param_def['default']):
+            return True, ""
 
-    dtype = dtype if isinstance(dtype, list) else [dtype]
-    for atype in dtype:
-        pvalid, error_str = _check_type(
-            atype, param_name, value, param_def)
-        if pvalid:
-            break
+    dtype = param_def["dtype"]
+    if not dtype.split('list[')[0]:
+        pvalid, error_str = _list_combination(param_name, value, param_def)
+    elif not dtype.split('dict{')[0]:
+        pvalid, error_str = _dict_combination(param_name, value, param_def)
+    elif not dtype.split('[')[0] and not dtype.split(']')[-1]:
+        pvalid, error_str = _options_list(param_name, value, param_def)
+    else:
+        pvalid, error_str =_check_type(param_name, value, param_def)
+
+    # set dtype back to the original
+    param_def['dtype'] = original_dtype
     return pvalid, "" if pvalid else _error_message(dtype, param_name)
 
-def _check_type(dtype, param_name, value, param_def):
+
+def _check_type(param_name, value, param_def):
     """Check if the provided value matches the required date type
 
-    :param dtype: The required data type
     :param param_name: The parameter name
     :param value: The new value
     :param param_def: Parameter definition dictionary
     :return: pvalid, True if the value type matches the required dtype
               type_error_str, Error message
     """
-    # If this is paramter tuning, check each individually
+    dtype = param_def['dtype']
+    # If this is parameter tuning, check each individually
     if is_multi_param(param_name, value):
         val_list, error_str = pu.convert_multi_params(param_name, value)
         # incorrect parameter tuning syntax
@@ -509,12 +429,16 @@ def _check_type(dtype, param_name, value, param_def):
             return False, error_str
 
         for val in val_list:
-            pvalid, error_str = _check_type(dtype, param_name, val, param_def)
+            pvalid, error_str = _check_type(param_name, val, param_def)
 
             if not pvalid:
                 return pvalid, error_str
     else:
-        pvalid = type_dict[dtype](value)
+        try:
+            pvalid = globals()["_" + dtype](value)
+        except KeyError:
+            return False, "Unknown dtype '%s'" % dtype
+
         pvalid, opt_err = _check_options(param_def, value, pvalid)
         if not pvalid:
             return pvalid, opt_err if opt_err \
@@ -526,7 +450,7 @@ def _check_type(dtype, param_name, value, param_def):
 def is_multi_param(param_name, value):
     """Return True if the value is made up of multiple parameters"""
     return (
-        _string(value) and (";" in value) and param_name != "preview"
+        _str(value) and (";" in value) and param_name != "preview"
     )
 
 
@@ -585,3 +509,70 @@ def _gui_error_message(dtype, param_name):
     else:
         error_str = f"Type must match '{type_error_dict[dtype]}'."
     return error_str
+
+
+type_error_dict = {
+    "preview": "preview slices",
+    "yaml_file": "yaml format",
+    "filepath": "filepath",
+    "h5path" : "hdf5 path",
+    "filename": "file name",
+    "nptype": "numpy data type",
+    "int": "integer",
+    "bool": "boolean",
+    "str": "string",
+    "float": "float/integer",
+    "list": "list",
+    "dict": "dict",
+    "None": "None"
+}
+
+
+def is_valid_dtype(dtype):
+    """
+    Checks if the dtype is defined correctly
+    """
+    if not dtype.split('list[')[0]:
+        pvalid, error_str = _is_valid_list_combination_type(dtype)
+    elif not dtype.split('dict{')[0]:
+        pvalid, error_str = _is_valid_dict_combination_type(dtype)
+    elif not dtype.split('[')[0] and not dtype.split(']')[-1]:
+        pvalid, error_str = _is_valid_options_list_type(dtype)
+    else:
+        if '_' + dtype in globals().keys():
+            return True, ""
+        else:
+            return "False", "The basic dtype %s does not exist" % dtype
+    return pvalid, error_str
+
+
+def _is_valid_list_combination_type(dtype):
+    if not dtype:
+        return True, "" # the empty list
+    if not dtype[-1] == ']':
+        return False, "List combination is missing a closing bracket."
+    return is_valid_dtype(dtype[len('list['):-1])
+
+
+def _is_valid_dict_combination_type(dtype):
+    if not dtype[-1] == '}':
+        return False, "Dict combination is missing a closing bracket"
+    dtype = dtype[len('dict{'):-1]
+    dtype = _find_options(dtype, 'dict', '{', '}', ':')
+    for atype in dtype:
+        pvalid, error_str = is_valid_dtype(atype)
+        if not pvalid:
+            break
+    return pvalid, error_str
+
+
+def _is_valid_options_list_type(dtype):
+    if not dtype[-1] == ']':
+        return False, "Options list is missing a closing bracket."
+    dtype = _find_options(dtype)
+    for atype in dtype:
+        pvalid, error_str = is_valid_dtype(atype)
+        if not pvalid:
+            break
+    return pvalid, error_str
+

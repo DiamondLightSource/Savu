@@ -64,7 +64,7 @@ def remove_new_lines(in_string):
     return out_string
 
 
-def load_yaml_doc(lines):
+def load_yaml_doc(doc):
     """Load in the yaml format. Call yaml_utils.py
 
     Parameters
@@ -78,9 +78,20 @@ def load_yaml_doc(lines):
         Ordered dict of parameters
 
     """
+    # not all Savu dtypes are valid yaml syntax so convert them all to strings
+    lines = doc.split('\n')
+    doc = ""
+    for i, l in enumerate(lines):
+        split = (l.split('dtype:', 1))
+        if len(split) == 2:
+            dtype = split[1].lstrip().rstrip()
+            if not dtype[0] == "'" and not dtype[0] == '"':
+                l = l.replace(dtype, "'" + dtype + "'")
+        doc += l + "\n"
+                
     all_params = ""
     try:
-        all_params = yu.read_yaml_from_doc(lines)
+        all_params = yu.read_yaml_from_doc(doc)
     except:
         print("\nError reading the yaml structure from Yaml Utils.")
     return all_params
