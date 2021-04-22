@@ -63,7 +63,7 @@ preview:
 
 force_zero:
      visibility: intermediate
-     dtype: range
+     dtype: list[int,int]
      description: Set any values in the reconstructed image
        outside of this range to zero.
      default: '[None, None]'

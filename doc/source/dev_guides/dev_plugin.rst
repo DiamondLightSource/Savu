@@ -220,7 +220,7 @@ An example of a plugin tools class.
                 default: 10
             yaml_file:
                 visibility: advanced
-                dtype: yaml_file
+                dtype: yamlfilepath
                 description: Yaml file path.
                 default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
 
@@ -243,7 +243,7 @@ Yaml Text
         default: 10
     yaml_file:
         visibility: advanced
-        dtype: yaml_file
+        dtype: yamlfilepath
         description: Yaml file path.
         default: savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml
 
@@ -336,8 +336,12 @@ that number of entries.
       - A list of any length containing only btype
     * - list[btype, btype, ..., btype]
       - A list of btype of fixed length = N = number of btype
+    * - list[]
+      - An empty list
 
-Where btype can be the same or different types.
+Where btype stands for a type from the basic type table.
+The btype can be of the same or of different types.
+
 For example:
 
 .. list-table::
@@ -351,10 +355,10 @@ For example:
     * - list[string, string]
       - A list containing two strings
     * - list[list[string, float], int]
-      - A list containing a list of one string and one float and a separate integer value
+      - A list containing one list of one string and one float and one separate integer value
     * - list[filepath, h5path, int]
       - a list containing a filepath, a hdf5path and an integer value
-    * - list[int,int,int]
+    * - list[int, int, int]
       - A list containing three integer values
 
 Lists containing multiple data types
@@ -371,9 +375,12 @@ Lists containing multiple data types
     * - list[ [btype(1), btype(2)] ]
       - list of any length containing btype(1) or btype(2) entries
 
-Where btype can be the same or different types.
+Where btype stands for a type from the basic type table.
+The btype can be of the same or of different types.
 
-The empty list [] and None can be used as options here
+.. note::
+
+    None may be used as an additional data type in this case.
 
 For example:
 
@@ -383,10 +390,10 @@ For example:
 
     * - Data type example
       - Description
-    * - list[[string, []]]
-      - A list of strings of any length or an empty list
-    * - list[[int, string, float], None, []]
-      - A list that either contains a trio of [int, string, float] values, the keyword None or is empty
+    * - list[[str, int]]
+      - A list of any length, containing strings or integers
+    * - list[[[int, str, float], None]]
+      - A list that either contains a trio of [int, str, float] values or the keyword None
 
 Dictionaries
 :::::::::::::::
@@ -407,8 +414,17 @@ Only a subset of basic types are available as dictionary ‘key’ types.
       - Description
     * - dict
       - A dictionary of any length containing and combination of basic types
-    * - dict{btype(1): btype(2)}
+    * - dict[btype(1): btype(2)]
       - A dictionary of keys of btype(1) with values of btype(2)
+    * - dict[]
+      - An empty dictionary
+
+Where btype stands for a type from the basic type table.
+The btype can be of the same or of different types.
+
+.. note::
+
+    None may be used as an additional data type in this case.
 
 For example:
 
@@ -428,7 +444,9 @@ Options list
 If more than one data type is allowed, then include these in a list format.
 Each data type should be seperated by a comma.
 
-The empty list [] and None may be used as options here.
+.. note::
+
+    None may be used as an additional data type in this case.
 
 Examples:
 
@@ -440,7 +458,7 @@ Examples:
       - Description
     * - [int, float]
       - integers or floats are valid
-    * - [[], list[int]]
+    * - [list[], list[int]]
       - An empty list or a list containing integers
     * - [None, list[str]]
       - None or a list containing strings
@@ -448,6 +466,8 @@ Examples:
       - A list containing floats or one float
     * - [int, None]
       - An integer or None
+    * - [list[string], list[]]
+      - A list of strings of any length or an empty list
 
 In the table below are some more specific data type examples:
 
@@ -457,10 +477,6 @@ In the table below are some more specific data type examples:
 
     * - Data Type
       - Description
-    * - empty_list
-      - An empty list
-    * - int>0
-      - A positive integer
     * - list[int]
       - A list of integers
     * - list[str]
@@ -468,12 +484,12 @@ In the table below are some more specific data type examples:
     * - list[float]
       - A list of numbers
     * - list[int, int]
-      - A range e.g. (0,1)
-    * - list[filepath, hdf5path, int]
+      - A list containing two integer values
+    * - list[[filepath, None], [h5path, None], int]
       - A sequence of items. The first item in the list should be a
         file path, the next should be an interior file path, the last
         item should be an integer. [<file path>, <hdf5 interior path>, <integer>]
-    * - list[hdf5path, int]
+    * - list[[hdf5path, None], int]
       - A sequence of items. The first item in the list should be an
         interior file path, the last item should be an integer.
         [<hdf5 interior path> , <integer>]

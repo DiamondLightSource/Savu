@@ -10,30 +10,16 @@ dtype:
     description: The type of data
     values:
         int: Integer
-        pos_int: Positive integer
-        bool: Boolean
         str: String
         float: Float
-        tuple: Tuple
-        list: List
-        int_list: List of integers
-        string_list: List of strings
-        num_list: List of numbers including int and float
-        empty_list: An empty list
-        preview: Preview slice list for data
-        range: A range (0,1)
-        yaml_file_path: Yaml file path
-        file_int_path_int: [<file path>, <interior path>, <integer>]
-        int_path_int : [<interior path> , <integer>]
+        bool: Boolean
         filepath: File path
-        savufilepath: File path within the Savu directory
-        directory: File directory
-        int_path: Interior path
-        config_file_path: Configuration file path
-        filename: File name
+        hdf5path: Hdf5 path
+        yamlfilepath: Yaml file path
         nptype: Numpy type
+        preview: Preview slice list for data
+        list: List
         dict: Dictionary
-        int_float_dict: Dictionary with integer keys and float values. {int:float}
 
 description:
     description: A short explanation of the parameter
