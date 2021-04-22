@@ -7,7 +7,7 @@ class BaseTools(PluginTools):
         """
         in_datasets:
             visibility: datasets
-            dtype: string_list
+            dtype: [list[str], list[]]
             description: 
                 summary: A list of the dataset(s) to process.
                 verbose: >
@@ -21,7 +21,7 @@ class BaseTools(PluginTools):
 
         out_datasets:
             visibility: datasets
-            dtype: string_list
+            dtype: [list[str], list[]]
             description:
                 summary: A list of the dataset(s) to create.
                 verbose: >
