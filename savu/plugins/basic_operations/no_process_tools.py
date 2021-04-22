@@ -91,7 +91,7 @@ class NoProcessTools(PluginTools):
               and 's' represent core and slice dimensions respectively
               and every dimension must be specified.
             default: []
-        randomhdf5loader_dtype:
+        randomhdf5loader_nptype:
             visibility: basic
             dtype: nptype
             description: A numpy array data type
