@@ -7,7 +7,7 @@ class I14FluoLoaderTools(PluginTools):
         """
         mono_path:
             visibility: basic
-            dtype: hdf5path
+            dtype: h5path
             description: The mono energy.
             default: '/entry/instrument/beamline/DCM/dcm_energy'
 

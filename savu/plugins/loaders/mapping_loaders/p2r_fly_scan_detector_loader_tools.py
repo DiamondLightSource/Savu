@@ -12,7 +12,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
             default: 'entry1/tomo_entry/data/data'
         image_key_path:
             visibility: intermediate
-            dtype: hdf5path
+            dtype: h5path
             description: Path to the image key entry inside the nxs file.
             default: 'entry1/tomo_entry/instrument/detector/image_key'
         dark:

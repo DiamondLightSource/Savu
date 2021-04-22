@@ -13,7 +13,7 @@ class MultiSavuLoaderTools(PluginTools):
               default: None
         data_path:
               visibility: basic
-              dtype: hdf5path
+              dtype: h5path
               description: Path to the data inside the file.
               default:  'entry1/tomo_entry/data/data'
         stack_or_cat:

@@ -12,7 +12,7 @@ class StxmAnalysisTools(PluginTools):
               default: None
         mask_path:
               visibility: intermediate
-              dtype: hdf5path
+              dtype: h5path
               description: Path to the mask inside the file.
               default: '/mask'
         threshold:

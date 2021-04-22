@@ -17,22 +17,22 @@ class BaseI18MultiModalLoaderTools(PluginTools):
             default: ["rotation","x"]
         x:
             visibility: intermediate
-            dtype: hdf5path
+            dtype: h5path
             description: Where is x in the file.
             default: 'entry1/raster_counterTimer01/traj1ContiniousX'
         y:
             visibility: intermediate
-            dtype: hdf5path
+            dtype: h5path
             description: Where is y in the file
             default: None
         rotation:
             visibility: intermediate
-            dtype: hdf5path
+            dtype: h5path
             description: Where is rotation in the file
             default: 'entry1/raster_counterTimer01/sc_sample_thetafine'
         monochromator:
             visibility: intermediate
-            dtype: hdf5path
+            dtype: h5path
             description: Where is the monochromator
             default: 'entry1/instrument/DCM/energy'
 
