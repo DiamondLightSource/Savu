@@ -36,7 +36,7 @@ Importantly the Z coordinate is given following VOLUME_XY vertical pattern
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names
             default: ['INIT_MASK']
 

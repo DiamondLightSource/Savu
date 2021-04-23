@@ -76,7 +76,7 @@ Phantom3DLibrary.dat)
               default: 0.007
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: Default out dataset names.
               default: "['tomo', 'model']"
 

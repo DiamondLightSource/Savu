@@ -42,7 +42,7 @@ mask should be set in the central part of the object to be segmented.
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names
             default: ['MASK_RG_EVOLVED']
 

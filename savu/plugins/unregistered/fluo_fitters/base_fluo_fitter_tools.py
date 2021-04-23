@@ -7,13 +7,13 @@ class BaseFluoFitterTools(PluginTools):
         """
         in_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Create a list of the dataset(s)
             default: []
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: A
             default: ["FitWeights", "FitWidths", "FitAreas", "residuals"]
 

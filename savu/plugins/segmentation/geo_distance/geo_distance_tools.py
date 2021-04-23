@@ -19,7 +19,7 @@ class GeoDistanceTools(PluginTools):
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names.
             default: "['GeoDist, 'max_values']"
 

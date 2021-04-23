@@ -7,13 +7,13 @@ class StageMotionTools(PluginTools):
         """
         in_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Create a list of the dataset(s)
             default: ["pmean"]
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Create a list of the dataset(s)
             default: ["qmean"]
 

@@ -9,7 +9,7 @@ class TomoPhantomQuantificationTools(PluginTools):
         """
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: Default out dataset names.
               default: "['quantification_values']"
 

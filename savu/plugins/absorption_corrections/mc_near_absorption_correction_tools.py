@@ -8,7 +8,7 @@ and xrf sinogram stack.
         """
         in_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: "A list of the dataset(s) to process."
               default: ['xrf','stxm']
         """

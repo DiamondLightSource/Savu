@@ -7,12 +7,12 @@ class UmpaTools(PluginTools):
         """
         in_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: 'A list of the dataset(s) to process.'
               default: ['signal','reference']
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: 'A list of the dataset(s) output.'
               default: ['T','dx','dy','df','f']
         Nw:

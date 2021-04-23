@@ -22,7 +22,7 @@ class StxmAnalysisTools(PluginTools):
               default: 0.05
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description:
               default: ["bf","df","dpc_x","dpc_y","combined_dpc"]
         """

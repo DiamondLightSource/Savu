@@ -7,13 +7,13 @@ class BaseFitterTools(PluginTools):
         """
         in_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Create a list of the dataset(s)
             default: []
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Create a list of the dataset(s)
             default: ["FitWeights", "FitWidths", "FitAreas", "residuals"]
 
@@ -31,7 +31,7 @@ class BaseFitterTools(PluginTools):
 
         PeakIndex:
            visibility: intermediate
-           dtype: list
+           dtype: [list[],list[str]]
            description: The peak index.
            default: []
 
