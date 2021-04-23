@@ -65,9 +65,12 @@ def _bool(value): # should eventually be a drop-down list
 
 def _filepath(value):
     """ file path """
+    valid = False
     if _str(value):
-        return os.path.isfile(value)
-    return _savufilepath(value)
+        valid = os.path.isfile(value)
+        if not valid:
+            valid = _savufilepath(value)
+    return valid
 
 
 def _h5path(value): # Extend this later as we need to know which file to apply the check to
