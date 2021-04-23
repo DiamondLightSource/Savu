@@ -198,7 +198,8 @@ class PluginParameters(object):
             if not pvalid:
                 raise Exception("Invalid parameter definition %s:\n %s"
                                 % (p_key, error_str))
-            pvalid, _ = param_u.is_valid(p_key, p_dict['default'], p_dict, check=True)
+            default_value = pu._dumps(p_dict["default"])
+            pvalid, _ = param_u.is_valid(p_key, default_value, p_dict, check=True)
             if not pvalid:
                 raise Exception("The default value %s for parameter '%s' does "\
                                 "not match the defined parameter dtype %s" 
