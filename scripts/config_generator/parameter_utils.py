@@ -257,11 +257,12 @@ def _dict_combination(param_name, value, param_def):
 
     # check the keys
     n_vals = len(value.keys())
-    multi_vals = zip(list(list(dtype[0]*n_vals), value.keys()))
+
+    multi_vals = zip(list([dtype[0]]*n_vals), list(value.keys()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
     # check the values:
-    multi_vals = zip(list(dtype[1]*n_vals), list(value.values()))
+    multi_vals = zip(list([dtype[1]]*n_vals), list(value.values()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
     return pvalid, error_str
