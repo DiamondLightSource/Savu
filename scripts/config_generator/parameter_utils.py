@@ -88,23 +88,28 @@ def _savufilepath(value, returnpath=False):
 def _yamlfilepath(value):
     """ yaml_file """
     # does the filepath exist
-    if not _filepath(value):
-        # is it a file path in Savu folder
-        valid, value = _savufilepath(value, returnpath=True)
-        if not valid:
-            return False
+    if _str(value):
+        if not os.path.isfile(value):
+            # is it a file path in Savu folder
+            valid, value = _savufilepath(value, returnpath=True)
+            if not valid:
+                return False
+        return _yaml_is_valid(value)
+    return False
 
-    with open(value, 'r') as f:
+def _yaml_is_valid(filepath):
+    """Read the yaml file at the provided file path """
+    with open(filepath, 'r') as f:
         errors = yu.check_yaml_errors(f)
         try:
-            yu.read_yaml(value)
+            yu.read_yaml(filepath)
+            return True
         except:
             if errors:
                 print("There were some errors with your yaml file structure.")
                 for e in errors:
                     print(e)
-    return True
-
+    return False
 
 def _nptype(value):
     """Check if the value is a numpy data type. Return true if it is."""
