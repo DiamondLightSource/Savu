@@ -8,12 +8,12 @@ descriptions loaded from a yaml file.
         """
         yaml_file:
               visibility: basic
-              dtype: yamlfilepath
+              dtype: [None,yamlfilepath]
               description: Path to the file containing the data descriptions.
               default: None
         template_param:
               visibility: hidden
-              dtype: str
+              dtype: [str,dict, dict{}]
               description: A hidden parameter to hold parameters passed in
                 via a savu template file.
               default: {}

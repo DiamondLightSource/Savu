@@ -16,10 +16,10 @@ class BaseReconTools(PluginTools):
 
         init_vol:
              visibility: advanced
-             dtype: str
+             dtype: [None,str]
              description: Dataset to use as volume initialiser
                (does not currently work with preview)
-             default: 'None'
+             default: None
              example: "Type the name of the initialised dataset
                e.g. ['tomo']"
 
@@ -48,7 +48,7 @@ class BaseReconTools(PluginTools):
              warning: This will increase the size of the data and
                the time to compute the reconstruction. Only available
                for selected algorithms and will be ignored otherwise.
-             default: false
+             default: False
              dependency:
                algorithm: [FP_CUDA, FBP_CUDA, BP_CUDA, FP, FBP, BP]
         log:
@@ -57,7 +57,7 @@ class BaseReconTools(PluginTools):
              description:
                 summary: 'Take the log of the data before reconstruction (true or false).'
                 verbose: 'Should be set to false if PaganinFilter is set beforehand'
-             default: true
+             default: True
              example: Set to True to take the log of the data before reconstruction
 
         preview:
@@ -73,7 +73,7 @@ class BaseReconTools(PluginTools):
              dtype: range
              description: Set any values in the reconstructed image
                outside of this range to zero.
-             default: '[None, None]'
+             default: [None, None]
              example: '[0,1]'
 
         ratio:

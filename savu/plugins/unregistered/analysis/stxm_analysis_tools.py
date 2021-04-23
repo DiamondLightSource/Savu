@@ -7,7 +7,7 @@ class StxmAnalysisTools(PluginTools):
         """
         mask_file:
               visibility: basic
-              dtype: list
+              dtype: [None,list]
               description: Takes in a mask currently in hdf format.
               default: None
         mask_path:

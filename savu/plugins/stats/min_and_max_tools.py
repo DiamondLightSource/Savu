@@ -26,7 +26,7 @@ by the pattern parameter)
 
         ratio:
             visibility: intermediate
-            dtype: float
+            dtype: [None,float]
             description: Used to calculate the circular mask. If not provided,
               it is calculated using the center of rotation.
             default: None
@@ -46,7 +46,7 @@ by the pattern parameter)
 
         out_datasets:
              visibility: datasets
-             dtype: str
+             dtype: [list[],list[str]]
              description: The default names.
              default: ['the_min','the_max']
         """

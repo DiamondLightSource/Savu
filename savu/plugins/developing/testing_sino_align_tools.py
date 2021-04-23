@@ -9,7 +9,7 @@ each centre of mass and the sine function is then used to align each row.
         """
         threshold:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description:  e.g. [a, b] will set all values above a to
                 b.
               default: None

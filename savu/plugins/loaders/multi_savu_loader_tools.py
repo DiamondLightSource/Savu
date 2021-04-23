@@ -7,7 +7,7 @@ class MultiSavuLoaderTools(PluginTools):
         """
         file_name:
               visibility: basic
-              dtype: str
+              dtype: [None,str]
               description: The shared part of the name of each file
                 (not including .nxs).
               default: None

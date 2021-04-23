@@ -55,7 +55,7 @@ inverse radon transform from scikit-image.
 
         projection_shifts:
             visibility: advanced
-            dtype: list
+            dtype: [list, None]
             description: "1D array dtype = float Shift the projections
               contained in radon_image (the sinogram) by this many pixels
               before reconstructing the image. The ith value defines the
@@ -64,7 +64,7 @@ inverse radon transform from scikit-image.
 
         clip:
             visibility: advanced
-            dtype: list
+            dtype: [list,None]
             description: "length-2 sequence of floats. Force all values in
               the reconstructed tomogram to lie in the range [clip[0],
               clip[1]]."
@@ -72,7 +72,7 @@ inverse radon transform from scikit-image.
 
         relaxation:
             visibility: advanced
-            dtype: float
+            dtype: [float,None]
             description: Float. Relaxation parameter for the update step. A
               higher value can improve the convergence rate, but one runs the risk
               of instabilities. Values close to or higher than 1 are not recommended.

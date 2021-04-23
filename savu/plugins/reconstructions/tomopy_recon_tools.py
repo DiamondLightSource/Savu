@@ -43,13 +43,13 @@ required for the chosen algorithm will be ignored.
 
         init_vol:
             visibility: hidden
-            dtype: int
+            dtype: [None,int]
             description: Not an option.
             default: None
 
         centre_pad:
             visibility: hidden
-            dtype: int
+            dtype: [None,int]
             description: Not an option.
             default: None
 

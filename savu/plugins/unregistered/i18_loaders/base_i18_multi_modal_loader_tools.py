@@ -22,7 +22,7 @@ class BaseI18MultiModalLoaderTools(PluginTools):
             default: 'entry1/raster_counterTimer01/traj1ContiniousX'
         y:
             visibility: intermediate
-            dtype: h5path
+            dtype: [None,h5path]
             description: Where is y in the file
             default: None
         rotation:

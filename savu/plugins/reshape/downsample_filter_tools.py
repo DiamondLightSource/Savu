@@ -23,7 +23,7 @@ class DownsampleFilterTools(PluginTools):
             options: ['PROJECTION', 'SINOGRAM', 'VOLUME_XZ']
         num_bit:
             visibility: basic
-            dtype: str
+            dtype: int
             description: Bit depth of the rescaled data (8, 16 or 32).
             default: 32
             options: [8,16,32]
@@ -44,12 +44,12 @@ class DownsampleFilterTools(PluginTools):
             default: 0.0
         max:
             visibility: basic
-            dtype: float
+            dtype: [None,float]
             description: Global max for scaling.
             default: None
         min:
             visibility: basic
-            dtype: float
+            dtype: [None,float]
             description: Global min for scaling.
             default: None
 

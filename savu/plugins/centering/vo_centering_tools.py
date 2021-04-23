@@ -43,12 +43,12 @@ class VoCenteringTools(PluginTools):
              default: 0.5
         datasets_to_populate:
              visibility: intermediate
-             dtype: [[],list[str]]
+             dtype: [list[],list[str]]
              description: A list of datasets which require this information
              default: []
         out_datasets:
              visibility: datasets
-             dtype: [[],list[str]]
+             dtype: [list[],list[str]]
              description: The default names
              default: "['cor_preview', 'cor_broadcast']"
         broadcast_method:

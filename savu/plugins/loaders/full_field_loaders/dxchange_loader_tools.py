@@ -22,7 +22,7 @@ class DxchangeLoaderTools(PluginTools):
             default: "['exchange/data_white', 1]"
         logfile:
             visibility: intermediate
-            dtype: filepath
+            dtype: [None,filepath]
             description: Path to the log file.
             default: None
         angles:
@@ -32,7 +32,7 @@ class DxchangeLoaderTools(PluginTools):
             default: '[1,2,3]'
         image_key_path:
             visibility: advanced
-            dtype: h5path
+            dtype: [None,h5path]
             description: Not required.
             default: None
 

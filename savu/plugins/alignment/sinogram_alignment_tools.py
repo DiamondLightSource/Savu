@@ -11,7 +11,7 @@ class SinogramAlignmentTools(PluginTools):
         """
         threshold:
               visibility: basic
-              dtype: str
+              dtype: [None,str]
               description: e.g. a.b will set all values above a to b.
               default: None
         p0:

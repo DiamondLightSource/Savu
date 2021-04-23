@@ -12,7 +12,7 @@ class TiffSaverTools(PluginTools):
             default: 'VOLUME_XZ'
         prefix:
             visibility: basic
-            dtype: str
+            dtype: [None,str]
             description: Override the default output tiff file prefix.
             default: None
         """

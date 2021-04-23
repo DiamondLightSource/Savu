@@ -7,7 +7,7 @@ class AstraReconGpuTools(PluginTools):
         """
         res_norm:
             visibility: basic
-            dtype: int
+            dtype: [int,bool]
             description: Output the residual norm at each iteration
               (Error in the solution - iterative solvers only)
             default: False

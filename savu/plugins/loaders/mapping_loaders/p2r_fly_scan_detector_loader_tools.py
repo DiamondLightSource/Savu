@@ -29,7 +29,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
             default: '[None, None, 1]'
         angles:
             visibility: intermediate
-            dtype: str
+            dtype: [None,str]
             description: A python statement to be evaluated or a file.
             default: None
         3d_to_4d:

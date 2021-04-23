@@ -8,7 +8,7 @@ class BasicOperationsTools(PluginTools):
         """
         operations:
               visibility: basic
-              dtype: [[],list[str]
+              dtype: [list[],list[str]]
               description: Operations to perform.
               default: []
         pattern:

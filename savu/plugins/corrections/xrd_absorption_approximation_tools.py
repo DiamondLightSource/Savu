@@ -25,7 +25,7 @@ class XrdAbsorptionApproximationTools(PluginTools):
               default: 'Co0.2(Al2O3)0.8'
         log_me:
               visibility: intermediate
-              dtype: boolean
+              dtype: bool
               description: should we log the transmission.
               default: True
 

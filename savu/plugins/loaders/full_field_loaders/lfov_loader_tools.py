@@ -45,7 +45,7 @@ class LfovLoaderTools(PluginTools):
             default: 'scan.number'
         range:
             visibility: hidden
-            dtype: str
+            dtype: [None,str]
             description: No need
             default: None
         """

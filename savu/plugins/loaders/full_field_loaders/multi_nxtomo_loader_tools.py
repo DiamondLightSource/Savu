@@ -12,7 +12,7 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: 'tomo'
         file_name:
             visibility: intermediate
-            dtype: filename
+            dtype: [str,None]
             description: The shared part of the name of each file
               (not including .nxs).
             default: None

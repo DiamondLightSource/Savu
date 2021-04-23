@@ -11,7 +11,7 @@ class ArithmeticOperationsTools(PluginTools):
         """
         scalar_value:
               visibility: basic
-              dtype: float
+              dtype: [None,float]
               description: A scalar value value for arithmetic operation
                (if not in metadata).
               default: None

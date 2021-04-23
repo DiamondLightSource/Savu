@@ -7,7 +7,7 @@ class NoProcessPluginTools(PluginTools):
         """
         pattern:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description: Explicitly state the slicing pattern.
               default: None
         dummy:

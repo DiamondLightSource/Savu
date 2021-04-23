@@ -25,7 +25,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
 
         data_Huber_thresh:
             visibility: advanced
-            dtype: int
+            dtype: [None,int]
             description:
                 summary: Threshold parameter for Huber data fidelity.
                 verbose: Parameter which controls the level of suppression
@@ -40,7 +40,7 @@ toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisatio
 
         data_full_ring_GH:
              visibility: advanced
-             dtype: float
+             dtype: [None,float]
              description:
                 summary: Regularisation variable of Group-Huber method to
                   suppress constant intensity stripes in the data to minimise

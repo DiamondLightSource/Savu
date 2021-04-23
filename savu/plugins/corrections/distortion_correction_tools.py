@@ -24,7 +24,7 @@ class DistortionCorrectionTools(PluginTools):
               default: 1283.25
         file_path:
               visibility: intermediate
-              dtype: filepath
+              dtype: [None,filepath]
               description: Path to the text file having distortion coefficients
                 . Set to None for manually inputing.
               default: None
