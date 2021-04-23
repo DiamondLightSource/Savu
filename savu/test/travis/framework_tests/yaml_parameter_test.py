@@ -109,14 +109,8 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        printOutput = StringIO()  # Create StringIO object
-        sys.stdout = printOutput
-
         with self.assertRaises(Exception):
             pdefs = self.initial_setup(self.test_parameter_dtype)
-
-        self.assertTrue('has been assigned an invalid type'
-                        in str(printOutput.getvalue()))
 
     def  test_parameter_description(self):
         """
