@@ -351,66 +351,6 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_tuple(self):
-        # Check that tuple is accepted
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = (1, 2)
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
-    def test_tuple_1(self):
-        # Check that integer is not accepted
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = 8
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertFalse(valid_modification)
-
-    def test_tuple_2(self):
-        # Check that list is not accepted
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = [2, 3, 4, 5]
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertFalse(valid_modification)
-
-    def test_tuple_3(self):
-        # Check that list is not accepted (string format)
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = "[2, 3, 4, 5]"
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertFalse(valid_modification)
-
-    def test_tuple_4(self):
-        # Check that tuple is accepted (string format)
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = "(1, 2)"
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
     def test_list(self):
         # Check that list is accepted
         pdefs = self.initial_setup()
