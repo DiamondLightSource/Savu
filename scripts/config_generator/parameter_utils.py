@@ -81,8 +81,8 @@ def _savufilepath(value, returnpath=False):
         os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
     value = os.path.join(savu_base_path, value)
     if returnpath:
-        return os.path.isfile(savu_base_path+value), value
-    return os.path.isfile(savu_base_path+value)
+        return os.path.isfile(value), value
+    return os.path.isfile(value)
 
 
 def _yamlfilepath(value):
