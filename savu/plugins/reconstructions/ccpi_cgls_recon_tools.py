@@ -10,7 +10,7 @@ algorithm.
 
         n_iterations:
             visibility: basic
-            dtype: tuple
+            dtype: int
             description: Number of rows and columns in the reconstruction.
             default: 5
 

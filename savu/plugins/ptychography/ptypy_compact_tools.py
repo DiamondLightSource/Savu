@@ -12,7 +12,7 @@ class PtypyCompactTools(PluginTools):
               default: None
         data_orientation:
               visibility: intermediate
-              dtype: tuple
+              dtype: [list,None]
               description: See online documentation
               default: None
         data_auto_center:

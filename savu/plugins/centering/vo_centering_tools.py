@@ -23,9 +23,9 @@ class VoCenteringTools(PluginTools):
              default: 'None'
         search_area:
              visibility: intermediate
-             dtype: [tuple, list[float,float]]
+             dtype: list[float,float]
              description: Search area around the estimated centre of rotation
-             default: '(-50, 50)'
+             default: [-50, 50]
         ratio:
              visibility: intermediate
              dtype: float

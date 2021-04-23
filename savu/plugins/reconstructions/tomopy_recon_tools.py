@@ -10,7 +10,7 @@ required for the chosen algorithm will be ignored.
         """
         algorithm:
             visibility: intermediate
-            dtype: tuple
+            dtype: str
             description: "The reconstruction algorithm (art|bart|fbp|gridrec|
               mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad|sirt)."
             default: gridrec

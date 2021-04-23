@@ -8,7 +8,7 @@ before this to rescale the data.
         """
         pattern:
             visibility: intermediate
-            dtype: tuple
+            dtype: str
             description: How to slice the data.
             default: VOLUME_XZ
 
