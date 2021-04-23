@@ -264,6 +264,10 @@ def _dict_combination(param_name, value, param_def):
     multi_vals = zip(list([dtype[0]]*n_vals), list(value.keys()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
+    if not pvalid:
+        # If the keys are not the correct type, break and return False
+        return pvalid, error_str
+
     # check the values:
     multi_vals = zip(list([dtype[1]]*n_vals), list(value.values()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
