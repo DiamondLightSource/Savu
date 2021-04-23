@@ -168,10 +168,10 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertFalse(valid_modification)
 
     def test_yaml(self):
-        # Check that yaml file is accepted (this value is also the default)
+        # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "savu/plugins/loaders/full_field_loaders/nxtomo_loader.yaml"
+        value = "doc/source/files_and_images/plugin_guides/parameter_key.yaml"
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
@@ -1190,11 +1190,11 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that tuple list is accepted
         pdefs = self.initial_setup()
         key = "vocentering_search_area"
-        value = "(2,4);(5,65);(86,87);"
+        value = "[2,4];[5,65];[86,87];"
 
         # Check the multi parameter value is changed to a list correctly
         val_list, error_str = pu.convert_multi_params(key, value)
-        result = [(2, 4), (5, 65), (86, 87)]
+        result = [[2, 4], [5, 65], [86, 87]]
         self.assertEqual(val_list, result)
 
 
@@ -1225,11 +1225,11 @@ class ParameterTypeTest(unittest.TestCase):
         # Range should fail as length should be 2
         pdefs = self.initial_setup()
         key = "range_param"
-        value = "(2,7);(3,8);(0,4,6)"
+        value = "[2,7];[3,8];[0,4,6]"
 
         # Check the multi parameter value is changed to a list correctly
         val_list, error_str = pu.convert_multi_params(key, value)
-        result = [(2, 7), (3, 8), (0, 4, 6)]
+        result = [[2, 7], [3, 8], [0, 4, 6]]
         self.assertEqual(val_list, result)
 
 
@@ -1239,46 +1239,11 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_multi_param_13(self):
-        # One tuple, one list, the range type check should allow a list as well
-        pdefs = self.initial_setup()
-        key = "range_param"
-        value = "(2,7);[3,8];(0,4)"
-
-        # Check the multi parameter value is changed to a list correctly
-        val_list, error_str = pu.convert_multi_params(key, value)
-
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
-    def test_multi_param_14(self):
-        # Check that tuples are accepted
-        pdefs = self.initial_setup()
-        key = "vocentering_search_area"
-        value = "(4,5);(7,0);"
-
-        # Check the multi parameter value is changed to a list correctly
-        val_list, error_str = pu.convert_multi_params(key, value)
-        result = [(4, 5), (7,0)]
-        self.assertEqual(val_list, result)
-
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
     def test_dict(self):
         # Check that dict is accepted
         pdefs = self.initial_setup()
         key = "dict_param"
         value = {1: 2}
-
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
