@@ -21,8 +21,13 @@ done
 PREFIX="${PREFIX:-$HOME}"
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # get version from the version file in base of savu
-savu_version=$(cat $DIR/version.txt)
+export savu_version=$(cat $DIR/version.txt)
+# dealing with a case when "master" passed as savu_version
+if [ "$savu_version" != "master" ]; then
+  export savu_version="v$savu_version"
+fi
 
 # function for parsing optional arguments
 function arg_parse() {
@@ -47,6 +52,7 @@ function flag_parse() {
     shift
   done
 }
+
 
 # Set the test flag to true if test only
 flag_parse "--tests_only" test_flag "$@"
