@@ -8,7 +8,7 @@ class StatsTools(PluginTools):
         """
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: the output dataset.
               default: ['stats']
         required_stats:

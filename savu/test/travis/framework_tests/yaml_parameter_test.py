@@ -42,9 +42,9 @@ class YamlParameterTest(unittest.TestCase):
         parameter_class = PluginParameters()
         PluginToolTestingClass.define_parameters.__doc__ \
             = test_function.__doc__
-        parameter_class._set_plugin_parameters(PluginToolTestingClass)
-        param_dict = parameter_class.param.get_dictionary()
-        return param_dict
+        parameter_class._set_parameter_definitions(PluginToolTestingClass)
+        pdefs = parameter_class.param.get_dictionary()
+        return pdefs
 
     def test_parameter_visibility(self):
         """
@@ -56,7 +56,7 @@ class YamlParameterTest(unittest.TestCase):
             default: 8
         """
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_visibility)
+            pdefs = self.initial_setup(self.test_parameter_visibility)
 
     def test_in_dataset_visibility(self):
         """
@@ -67,10 +67,10 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        param_dict = self.initial_setup(self.test_in_dataset_visibility)
+        pdefs = self.initial_setup(self.test_in_dataset_visibility)
 
         # All dataset visibility levels are reset to 'datasets'
-        self.assertEqual(param_dict['in_datasets']['visibility'], 'datasets')
+        self.assertEqual(pdefs['in_datasets']['visibility'], 'datasets')
 
     def test_out_dataset_visibility(self):
         """
@@ -81,10 +81,10 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        param_dict = self.initial_setup(self.test_out_dataset_visibility)
+        pdefs = self.initial_setup(self.test_out_dataset_visibility)
 
         # All dataset visibility levels are reset to 'datasets'
-        self.assertEqual(param_dict['out_datasets']['visibility'], 'datasets')
+        self.assertEqual(pdefs['out_datasets']['visibility'], 'datasets')
 
     def test_dataset_visibility(self):
         """
@@ -95,10 +95,10 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        param_dict = self.initial_setup(self.test_dataset_visibility)
+        pdefs = self.initial_setup(self.test_dataset_visibility)
 
         # All dataset visibility levels are reset to 'datasets'
-        self.assertEqual(param_dict['in_datasets']['visibility'], 'datasets')
+        self.assertEqual(pdefs['in_datasets']['visibility'], 'datasets')
 
     def test_parameter_dtype(self):
         """
@@ -109,14 +109,8 @@ class YamlParameterTest(unittest.TestCase):
             description: None
             default: 8
         """
-        printOutput = StringIO()  # Create StringIO object
-        sys.stdout = printOutput
-
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_dtype)
-
-        self.assertTrue('has been assigned an invalid type'
-                        in str(printOutput.getvalue()))
+            pdefs = self.initial_setup(self.test_parameter_dtype)
 
     def  test_parameter_description(self):
         """
@@ -128,7 +122,7 @@ class YamlParameterTest(unittest.TestCase):
             default: 8
         """
         # Currently no problem with empty description
-        param_dict = self.initial_setup(self.test_parameter_description)
+        pdefs = self.initial_setup(self.test_parameter_description)
 
     def test_parameter_missing(self):
         """
@@ -142,7 +136,7 @@ class YamlParameterTest(unittest.TestCase):
         sys.stdout = printOutput
 
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_missing)
+            pdefs = self.initial_setup(self.test_parameter_missing)
 
         self.assertTrue('doesn\'t contain all of the required keys'
                         in str(printOutput.getvalue()))
@@ -159,7 +153,7 @@ class YamlParameterTest(unittest.TestCase):
         """
         # Error message
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_blank)
+            pdefs = self.initial_setup(self.test_parameter_blank)
 
     def test_parameter_mispelt(self):
         """
@@ -175,7 +169,7 @@ class YamlParameterTest(unittest.TestCase):
         sys.stdout = printOutput
 
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_mispelt)
+            pdefs = self.initial_setup(self.test_parameter_mispelt)
 
         self.assertTrue('doesn\'t contain all of the required keys'
                         in str(printOutput.getvalue()))
@@ -189,11 +183,13 @@ class YamlParameterTest(unittest.TestCase):
               description: A parameter
              default: 8
         """
-        with self.assertRaises(Exception) as context:
-            param_dict = self.initial_setup(self.test_parameter_indent)
+        printOutput = StringIO()  # Create StringIO object
+        sys.stdout = printOutput
 
-        self.assertTrue('The parameters have not been read in correctly'
-                        in str(context.exception))
+        pdefs = self.initial_setup(self.test_parameter_indent)
+
+        self.assertTrue('Error reading the yaml structure'
+                        in str(printOutput.getvalue()))
 
 
     def test_parameter_options(self):
@@ -208,7 +204,7 @@ class YamlParameterTest(unittest.TestCase):
 
         """
         # No error message
-        param_dict = self.initial_setup(self.test_parameter_options)
+        pdefs = self.initial_setup(self.test_parameter_options)
 
 
     def test_parameter_options_1(self):
@@ -224,7 +220,7 @@ class YamlParameterTest(unittest.TestCase):
         """
         # No error message at the moment, but to be read in correctly
         # options must be surrounded by square brackets
-        param_dict = self.initial_setup(self.test_parameter_options_1)
+        pdefs = self.initial_setup(self.test_parameter_options_1)
 
     def test_parameter_options_2(self):
         """
@@ -244,7 +240,7 @@ class YamlParameterTest(unittest.TestCase):
         """
         # Error message
         with self.assertRaises(Exception):
-            param_dict = self.initial_setup(self.test_parameter_options_2)
+            pdefs = self.initial_setup(self.test_parameter_options_2)
 
 
 class PluginToolTestingClass(PluginTools):

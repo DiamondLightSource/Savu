@@ -19,7 +19,7 @@ class GeoDistance3dTools(PluginTools):
 
         out_datasets:
             visibility: intermediate
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names.
             default: "['GeoDist']"
 

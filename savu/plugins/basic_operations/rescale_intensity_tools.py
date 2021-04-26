@@ -9,12 +9,12 @@ be passed with METADATA OR by providing as an input.
         """
         min_value:
               visibility: basic
-              dtype: float
+              dtype: [None,float]
               description: the global minimum data value.
               default: None
         max_value:
               visibility: basic
-              dtype: float
+              dtype: [None,float]
               description: the global maximum data value.
               default: None
         pattern:

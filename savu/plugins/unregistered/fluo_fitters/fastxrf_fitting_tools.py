@@ -49,7 +49,7 @@ class FastxrfFittingTools(PluginTools):
 
         average_spectrum:
             visibility: intermediate
-            dtype: int
+            dtype: [None,int]
             description: pass an average to do the strip.
             default: None
 

@@ -8,7 +8,7 @@ by the pattern parameter)
         """
         pattern:
             visibility: intermediate
-            dtype: tuple
+            dtype: str
             description: How to slice the data.
             default: VOLUME_XZ
 
@@ -26,7 +26,7 @@ by the pattern parameter)
 
         ratio:
             visibility: intermediate
-            dtype: float
+            dtype: [None,float]
             description: Used to calculate the circular mask. If not provided,
               it is calculated using the center of rotation.
             default: None
@@ -40,13 +40,13 @@ by the pattern parameter)
 
         p_range:
             visibility: intermediate
-            dtype: range
+            dtype: list[float,float]
             description: Percentage range if use the 'percentile' method.
             default: [0.0, 100.0]
 
         out_datasets:
              visibility: datasets
-             dtype: str
+             dtype: [list[],list[str]]
              description: The default names.
              default: ['the_min','the_max']
         """

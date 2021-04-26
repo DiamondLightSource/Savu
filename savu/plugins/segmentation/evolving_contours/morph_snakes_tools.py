@@ -47,7 +47,7 @@ minimum of energy (a possible edge countour).
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names
             default: ['MASK_MORPH_EVOLVED']
 

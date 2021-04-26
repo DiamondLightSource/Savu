@@ -8,9 +8,9 @@ class BandPassTools(PluginTools):
         """
         blur_width:
               visibility: basic
-              dtype: tuple
+              dtype: list
               description: Kernel size
-              default: (0, 3, 3)
+              default: [0, 3, 3]
         type:
               visibility: basic
               dtype: str

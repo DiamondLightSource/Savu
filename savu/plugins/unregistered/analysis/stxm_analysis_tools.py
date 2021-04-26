@@ -7,12 +7,12 @@ class StxmAnalysisTools(PluginTools):
         """
         mask_file:
               visibility: basic
-              dtype: list
+              dtype: [None,list]
               description: Takes in a mask currently in hdf format.
               default: None
         mask_path:
               visibility: intermediate
-              dtype: int_path
+              dtype: h5path
               description: Path to the mask inside the file.
               default: '/mask'
         threshold:
@@ -22,7 +22,7 @@ class StxmAnalysisTools(PluginTools):
               default: 0.05
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description:
               default: ["bf","df","dpc_x","dpc_y","combined_dpc"]
         """

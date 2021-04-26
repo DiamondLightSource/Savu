@@ -11,6 +11,6 @@ class TimeBasedPlusDriftCorrectionTools(PluginTools):
         template:
             visibility: basic
             description: Region on the detector used to track the drift
-            dtype: string_list
+            dtype: list[str]
             default: [100:200, 100:200]
         """

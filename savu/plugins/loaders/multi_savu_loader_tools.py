@@ -7,13 +7,13 @@ class MultiSavuLoaderTools(PluginTools):
         """
         file_name:
               visibility: basic
-              dtype: str
+              dtype: [None,str]
               description: The shared part of the name of each file
                 (not including .nxs).
               default: None
         data_path:
               visibility: basic
-              dtype: int_path
+              dtype: h5path
               description: Path to the data inside the file.
               default:  'entry1/tomo_entry/data/data'
         stack_or_cat:
@@ -34,7 +34,7 @@ class MultiSavuLoaderTools(PluginTools):
               default: 'scan.number'
         range:
               visibility: intermediate
-              dtype: range
+              dtype: list[ine,int]
               description: The start and end of file numbers.
               default: '[0,10]'
         name:

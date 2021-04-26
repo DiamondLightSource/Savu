@@ -41,17 +41,17 @@ Phantom3DLibrary.dat)
               default: 5000
         artifacts_misalignment_maxamplitude:
               visibility: intermediate
-              dtype: int
+              dtype: [None,int]
               description: Incorporate misalignment into projections (in pixels).
               default: None
         artifacts_zingers_percentage:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: Add broken pixels to projections, e.g. 0.25.
               default: None
         artifacts_stripes_percentage:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: The amount of stripes in the data, e.g. 1.0.
               default: None
         artifacts_stripes_maxthickness:
@@ -76,7 +76,7 @@ Phantom3DLibrary.dat)
               default: 0.007
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: Default out dataset names.
               default: "['tomo', 'model']"
 

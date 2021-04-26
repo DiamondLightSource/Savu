@@ -33,7 +33,7 @@ class StripBackgroundTools(PluginTools):
               default: 5
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: 'A list of the dataset(s) to process.'
               default: ['in_datasets[0]','background']
 

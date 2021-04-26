@@ -36,7 +36,8 @@ class AstraMultipleParameterTest(unittest.TestCase):
     def plugin_setup(self):
         ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         plugin = pu.load_class(ppath)()
-        plugin._populate_default_parameters()
+        tools = plugin.get_plugin_tools()
+        tools._populate_default_parameters()
         return plugin
 
     def framework_options_setup(self):
@@ -55,7 +56,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'n_iterations'
         params = {key: '1;2;3'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
@@ -64,7 +65,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'algorithm'
         params = {key: 'FBP;CGLS'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['FBP', 'CGLS'])
         self.assertEqual(plugin.extra_dims[0], 2)
@@ -74,7 +75,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         key1 = 'algorithm'
         key2 = 'n_iterations'
         params = {key1: 'FBP;CGLS', key2: '1;2;3'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
             self.assertEqual(data.extra_dims, plugin.extra_dims)

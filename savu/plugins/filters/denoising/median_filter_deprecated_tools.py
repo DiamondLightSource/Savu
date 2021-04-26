@@ -8,9 +8,9 @@ class MedianFilterDeprecatedTools(PluginTools):
         """
         kernel_size:
              visibility: basic
-             dtype: tuple
+             dtype: list[int]
              description: Kernel size of the median filter.
-             default: (1, 3, 3)
+             default: [1, 3, 3]
         pattern:
              visibility: intermediate
              dtype: str

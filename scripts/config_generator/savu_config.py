@@ -33,7 +33,8 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from .content import Content
     from .completer import Completer
-    from .display_formatter import ListDisplay, DispDisplay, CiteDisplay
+    from .display_formatter import ListDisplay, DispDisplay, \
+        CiteDisplay, ExpandDisplay
     from . import arg_parsers as parsers
     from savu.plugins import utils as pu
     from . import config_utils as utils
@@ -67,7 +68,8 @@ def _open(content, args):
 @error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    range_dict = content.get_start_stop(args.start, args.stop)
+    range_dict = content.split_plugin_string(args.start, args.stop,
+                                             subelem_view=True)
     formatter = DispDisplay(content.plugin_list)
     verbosity = parsers._get_verbosity(args)
     level = 'advanced' if args.all else content.disp_level
@@ -116,14 +118,36 @@ def _save(content, args):
 @parse_args
 @error_catcher
 def _mod(content, args):
-    """ Modify plugin parameters. """
-    pos_str, subelem = content.split_plugin_and_parameter(args.param)
-    # Use the parameter name location
-    args.param = content.get_param_arg_str(pos_str, subelem)
-    content_modified = content.modify(pos_str, subelem, ' '.join(args.value))
-    if content_modified:
-        # Display the selected parameter only
-        _disp(content, str(args.param))
+    """ Modify plugin parameters."""
+    pos_str, subelem, dims, command = \
+        content.separate_plugin_subelem(args.param, True)
+    if 'expand' in command:
+        # Run the start stop step view for that dimension alone
+        _expand(content, f"{pos_str} {dims} {True}")
+    else:
+        content.check_required_args(args.value, True)
+        # Get the parameter name for the display later
+        args.param = content.get_param_arg_str(pos_str, subelem)
+        content_modified = content.modify(pos_str, subelem,
+                                          ''.join(args.value),
+                                          dim=command)
+        if content_modified:
+            # Display the selected parameter only
+            _disp(content, str(args.param))
+    return content
+
+
+@parse_args
+@error_catcher
+def _expand(content, args):
+    """ Expand the plugin preview parameter. """
+    range_dict = content.split_plugin_string(args.plugin_pos, "")
+    if not args.dim_view:
+        # If one specific dimension is not being viewed
+        content.remove_dimensions(args.plugin_pos, args.dim)
+    formatter = ExpandDisplay(content.plugin_list, args.dim,
+                              args.dim_view)
+    content.display(formatter, **range_dict)
     return content
 
 
@@ -164,7 +188,7 @@ def _ref(content, args):
 @error_catcher
 def _cite(content, args):
     """ Display plugin citations."""
-    range_dict = content.get_start_stop(args.start, args.stop)
+    range_dict = content.split_plugin_string(args.start, args.stop)
     formatter = CiteDisplay(content.plugin_list)
     content.display(formatter, **range_dict)
     return content
@@ -242,11 +266,12 @@ commands = {'open': _open,
             'rem': _rem,
             'move': _move,
             'ref': _ref,
+            'level': _level,
+            'expand': _expand,
             'cite': _cite,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
-            'level': _level,
             'history': _history}
 
 def get_description():
@@ -344,7 +369,7 @@ def _write_command_to_log(in_text):
 
 
 def _write_output_to_log(accumulative_output):
-    """ Seperate the current command output, format it correctly
+    """ Separate the current command output, format it correctly
     and write this to the restructured text log file.
 
     :param accumulative_output:

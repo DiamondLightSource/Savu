@@ -8,7 +8,7 @@ Working on raw projections and flats.
         """
         file_path:
               visibility: intermediate
-              dtype: filepath
+              dtype: [None,filepath]
               description: Path to file containing a 2D array of a MTF function.
                 File formats are 'npy', or 'tif'.
               default: None

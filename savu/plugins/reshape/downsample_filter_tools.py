@@ -23,7 +23,7 @@ class DownsampleFilterTools(PluginTools):
             options: ['PROJECTION', 'SINOGRAM', 'VOLUME_XZ']
         num_bit:
             visibility: basic
-            dtype: str
+            dtype: int
             description: Bit depth of the rescaled data (8, 16 or 32).
             default: 32
             options: [8,16,32]
@@ -39,17 +39,17 @@ class DownsampleFilterTools(PluginTools):
             default: False
         rotate_angle:
             visibility: basic
-            dtype: [float, str, num_list, int_float_dict]
+            dtype: [float, str, list[float], dict{int:float}]
             description: Rotate images by a given angle (Degree).
             default: 0.0
         max:
             visibility: basic
-            dtype: float
+            dtype: [None,float]
             description: Global max for scaling.
             default: None
         min:
             visibility: basic
-            dtype: float
+            dtype: [None,float]
             description: Global min for scaling.
             default: None
 

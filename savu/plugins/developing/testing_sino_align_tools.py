@@ -9,16 +9,16 @@ each centre of mass and the sine function is then used to align each row.
         """
         threshold:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description:  e.g. [a, b] will set all values above a to
                 b.
               default: None
         p0:
               visibility: basic
-              dtype: tuple
+              dtype: list[int,int,int]
               description: Initial guess for the parameters of
                 scipy.optimize.curve_fit.
-              default: (1,1,1)
+              default: [1,1,1]
 
 
         """

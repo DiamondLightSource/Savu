@@ -23,13 +23,13 @@ class ProjectionShiftTools(PluginTools):
               options: [template_matching,orb_ransac]        
         template:
               visibility: basic
-              dtype: list
+              dtype: [list[str],None]]
               description: 'Position of the template to match (required)
                 e.g. [300:500, 300:500].'
               default: None
         threshold:
               visibility: intermediate
-              dtype: list
+              dtype: [list[float,float],None]
               description: 'e.g. [a, b] will set all values above a to b.'
               default: None
         n_keypoints:
@@ -41,7 +41,7 @@ class ProjectionShiftTools(PluginTools):
               default: 20
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: Set the output dataset name
               default: ['proj_shift']        
         """

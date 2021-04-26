@@ -37,8 +37,10 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         content = Content()
         ppath = "savu.plugins.reconstructions.tomobar.tomobar_recon"
         plugin = pu.load_class(ppath)()
-        plugin._populate_default_parameters()
-        return plugin, content
+        tools = plugin.get_plugin_tools()
+        tools._populate_default_parameters()
+        pdefs = tools.get_param_definitions()
+        return plugin, tools, pdefs, content
 
     def test_dependent_param_not_present(self):
         # Do not display the regularisation_methodTV
@@ -51,17 +53,17 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              dependency:
                regularisation_method: [ROF_TV, FGP_TV, PD_TV, SB_TV, NLTV]
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "LLT_ROF"
 
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_methodTV"]["display"]
+        display_value = pdefs["regularisation_methodTV"]["display"]
         self.assertTrue(display_value == "off")
 
     def test_dependent_param_present(self):
@@ -75,67 +77,81 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
              dependency:
                regularisation_method: [ROF_TV, FGP_TV, PD_TV, SB_TV, NLTV]
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "ROF_TV"
 
         display_value_before = \
-            plugin.p_dict["regularisation_methodTV"]["display"]
+            pdefs["regularisation_methodTV"]["display"]
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_methodTV"]["display"]
+        display_value = pdefs["regularisation_methodTV"]["display"]
         self.assertTrue(display_value == "on")
 
     def test_dependent_param_none(self):
         # Do NOT display regularisation_device
         """
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: gpu
+        regularisation_parameter:
+             visibility: basic
+             dtype: float
+             description:
+               summary: Regularisation parameter could control the level
+                 of smoothing or denoising.
+               verbose: Higher regularisation values lead to stronger smoothing
+                 effect. If the value is too high, you will obtain a very blurry
+                 reconstructed image.
+               range: Recommended between 0.0001 and 0.1
+             example: 'A good value to start with is {default}, {range}'
+             default: 0.0001
              dependency:
-                regularisation_method: not None
+                regularisation_method
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_device"]["display"]
+        display_value = pdefs["regularisation_parameter"]["display"]
         self.assertTrue(display_value == "off")
 
     def test_dependent_param_not_none(self):
         # DO display regularisation_device
         """
-        regularisation_device:
-             visibility: advanced
-             dtype: str
-             description: The device for regularisation
-             default: gpu
+        regularisation_parameter:
+             visibility: basic
+             dtype: float
+             description:
+               summary: Regularisation parameter could control the level
+                 of smoothing or denoising.
+               verbose: Higher regularisation values lead to stronger smoothing
+                 effect. If the value is too high, you will obtain a very blurry
+                 reconstructed image.
+               range: Recommended between 0.0001 and 0.1
+             example: 'A good value to start with is {default}, {range}'
+             default: 0.0001
              dependency:
-                regularisation_method: not None
+                regularisation_method
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "FGP_TV"
 
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_device"]["display"]
+        display_value = pdefs["regularisation_parameter"]["display"]
         self.assertTrue(display_value == "on")
 
     def test_default_choices(self):
@@ -162,20 +178,20 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        TGV: 80
                        NLTV: 80
                  dependency:
-                    regularisation_method: not None
+                    regularisation_method
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "PD_TV"
 
         # TODO try on load in comparison to modify_main as modify_main does not change default..
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, plugin.tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_iterations"]["display"]
+        display_value = pdefs["regularisation_iterations"]["display"]
         self.assertTrue(display_value == "on")
 
     def test_default_choices2(self):
@@ -202,19 +218,19 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                        TGV: 80
                        NLTV: 80
                  dependency:
-                    regularisation_method: not None
+                    regularisation_method
         """
-        plugin, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup()
         key = "regularisation_method"
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters
+            key, value, tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = plugin.p_dict["regularisation_iterations"]["display"]
+        display_value = pdefs["regularisation_iterations"]["display"]
         self.assertTrue(display_value == "off")
 
 

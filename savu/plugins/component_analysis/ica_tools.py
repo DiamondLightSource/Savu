@@ -9,7 +9,7 @@ class IcaTools(PluginTools):
         """
         w_init:
              visibility: basic
-             dtype: list
+             dtype: [None,list]
              description: The initial mixing matrix.
              default: None
 

@@ -10,13 +10,13 @@ algorithm.
 
         n_iterations:
             visibility: basic
-            dtype: tuple
+            dtype: int
             description: Number of rows and columns in the reconstruction.
             default: 5
 
         resolution:
             visibility: basic
-            dtype: str
+            dtype: float
             description: Number of output voxels (res = n_pixels/n_voxels),
               set res > 1 for reduced resolution.
             default: 1
@@ -44,13 +44,13 @@ algorithm.
 
         init_vol:
             visibility: advanced
-            dtype: str
+            dtype: [None,str]
             description: Not an option.
             default: None
 
         enforce_position:
             visibility: advanced
-            dtype: int
+            dtype: [bool,int]
             description: Not an option.
             default: False
 

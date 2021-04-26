@@ -32,7 +32,7 @@ import configparser
 from colorama import Fore
 
 import savu.plugins.loaders.utils.yaml_utils as yu
-import savu.plugins.utils as pu 
+import savu.plugins.utils as pu
 
 
 def _int(value):
@@ -65,9 +65,12 @@ def _bool(value): # should eventually be a drop-down list
 
 def _filepath(value):
     """ file path """
+    valid = False
     if _str(value):
-        return os.path.isfile(value)
-    return _savufilepath(value)
+        valid = os.path.isfile(value)
+        if not valid:
+            valid = _savufilepath(value)
+    return valid
 
 
 def _h5path(value): # Extend this later as we need to know which file to apply the check to
@@ -81,30 +84,35 @@ def _savufilepath(value, returnpath=False):
         os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
     value = os.path.join(savu_base_path, value)
     if returnpath:
-        return os.path.isfile(savu_base_path+value), value
-    return os.path.isfile(savu_base_path+value)
+        return os.path.isfile(value), value
+    return os.path.isfile(value)
 
 
 def _yamlfilepath(value):
     """ yaml_file """
     # does the filepath exist
-    if not _filepath(value):
-        # is it a file path in Savu folder
-        valid, value = _savufilepath(value, returnpath=True)
-        if not valid:
-            return False
+    if _str(value):
+        if not os.path.isfile(value):
+            # is it a file path in Savu folder
+            valid, value = _savufilepath(value, returnpath=True)
+            if not valid:
+                return False
+        return _yaml_is_valid(value)
+    return False
 
-    with open(value, 'r') as f:
+def _yaml_is_valid(filepath):
+    """Read the yaml file at the provided file path """
+    with open(filepath, 'r') as f:
         errors = yu.check_yaml_errors(f)
         try:
-            yu.read_yaml(value)
+            yu.read_yaml(filepath)
+            return True
         except:
             if errors:
                 print("There were some errors with your yaml file structure.")
                 for e in errors:
                     print(e)
-    return True
-
+    return False
 
 def _nptype(value):
     """Check if the value is a numpy data type. Return true if it is."""
@@ -129,8 +137,7 @@ def _typelist(func, value):
 def _preview_dimension(value):
     """ Check the full preview parameter value """
     if _str(value):
-        slice_range = [*range(1,5)]
-        slice_str = [":"*n for n in slice_range]
+        slice_str = [":"*n for n in range(1,5)]
         if value in slice_str:
             # If : notation is used, accept this
             valid = True
@@ -191,7 +198,7 @@ def _preview_eval(value):
 #Replace this with if list combination contains filepath and h5path e.g. list[filepath, h5path, int] then perform this check
 def _check_h5path(filepath, h5path):
     """ Check if the internal path is valid"""
-    with h5py.File(filepath, "r") as hf:    
+    with h5py.File(filepath, "r") as hf:
         try:
             # Hdf5 dataset object
             h5path = hf.get(h5path)
@@ -237,7 +244,7 @@ def _None(value):
 
 def _dict_combination(param_name, value, param_def):
     dtype = copy.copy(param_def['dtype'])
-    
+
     param_def['dtype'] = 'dict'
     # check this is a dictionary
     pvalid, error_str = _check_type(param_name, value, param_def)
@@ -249,14 +256,19 @@ def _dict_combination(param_name, value, param_def):
     # check there are only two options - for key and for value:
     if len(dtype) != 2:
         return False, "Incorrect number of dtypes supplied for dictionary"
-    
+
     # check the keys
     n_vals = len(value.keys())
-    multi_vals = zip(list(list(dtype[0]*n_vals), value.keys()))
+
+    multi_vals = zip(list([dtype[0]]*n_vals), list(value.keys()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
+    if not pvalid:
+        # If the keys are not the correct type, break and return False
+        return pvalid, error_str
+
     # check the values:
-    multi_vals = zip(list(dtype[1]*n_vals), list(value.values()))
+    multi_vals = zip(list([dtype[1]]*n_vals), list(value.values()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
     return pvalid, error_str
@@ -280,33 +292,33 @@ def _options_list(param_name, value, param_def):
 
 def _list_combination(param_name, value, param_def):
     """
-    e.g. 
+    e.g.
     (1) list
     (1) list[btype] => any length
     (2) list[btype, btype]  => fixed length (and btype can be same or different)
         - list[int], list[string, string], list[list[string, float], int]
-    (3) list[filepath, hdf5path, int]
+    (3) list[filepath, h5path, int]
     (4) list[[option1, option2]] = list[option1 AND/OR option2]
     """
     dtype = copy.copy(param_def['dtype'])
-    
+
     # is it a list?
     param_def['dtype'] = 'list'
     pvalid, error_str = _check_type(param_name, value, param_def)
     if not pvalid:
         return pvalid, error_str
-    
+
     # remove outer list from dtype and find separate list entries
     dtype = _find_options(dtype[len('list'):])
-    
+
     #special case of empty list
     if not value:
         if dtype[0] == "":
             error = "The empty list is not a valid option for %s" % param_name
-            return False, error  
+            return False, error
         else:
             return True, ""
-    
+
     # list can have any length if btype_list has length 1
     if len(dtype) == 1:
         dtype = dtype*len(value)
@@ -314,7 +326,7 @@ def _list_combination(param_name, value, param_def):
     return _is_valid_multi(param_name, param_def, zip(dtype, value))
 
 
-def _matched_brackets(string, dtype, bstart, bend):    
+def _matched_brackets(string, dtype, bstart, bend):
     start_brackets = [m.start() for m in re.finditer('\%s' % bstart, string)]
     end_brackets = [m.start() for m in re.finditer('\%s' % bend, string)]
     matched = []
@@ -368,8 +380,9 @@ def _convert_to_list(value):
 
 def _is_valid_multi(param_name, param_def, multi_vals):
     for atype, val in multi_vals:
-        param_def['dtype'] = atype                
-        pvalid, error_str = is_valid(param_name, val, param_def)
+        param_def['dtype'] = atype
+        _check_val = pu._dumps(val)
+        pvalid, error_str = is_valid(param_name, _check_val, param_def)
         if not pvalid:
             error_str = "The value %s should be of type %s" % (val, atype)
             break
@@ -422,15 +435,15 @@ def _check_type(param_name, value, param_def):
     """
     dtype = param_def['dtype']
     # If this is parameter tuning, check each individually
-    if is_multi_param(param_name, value): 
+    if is_multi_param(param_name, value):
         val_list, error_str = pu.convert_multi_params(param_name, value)
         # incorrect parameter tuning syntax
         if error_str:
             return False, error_str
-        
+
         for val in val_list:
             pvalid, error_str = _check_type(param_name, val, param_def)
-          
+
             if not pvalid:
                 return pvalid, error_str
     else:
@@ -439,10 +452,12 @@ def _check_type(param_name, value, param_def):
         except KeyError:
             return False, "Unknown dtype '%s'" % dtype
 
-    if not pvalid:
-        return pvalid, _error_message(dtype, param_name)
+        pvalid, opt_err = _check_options(param_def, value, pvalid)
+        if not pvalid:
+            return pvalid, opt_err if opt_err \
+                else _error_message(dtype, param_name)
 
-    return _check_options(param_def, value, pvalid)
+    return True, ""
 
 
 def is_multi_param(param_name, value):
@@ -487,23 +502,20 @@ def _check_options(param_def, value, pvalid):
 def _error_message(dtype, param_name):
     """Create an error message"""
     if isinstance(dtype, list):
-        type_options = " or ".join([str(type_error_dict[t]) for t in dtype])
-        error_str = (
-            "Your input for the parameter '{}' must match"
-            " the type {}.".format(param_name, type_options)
-        )
+        type_options = "' or '".join([str(type_error_dict[t]) for t in dtype])
+        error_str = f"Your input for the parameter '{param_name}' must match" \
+                    f" the type '{type_options}'."
     else:
-        error_str = (
-            "Your input for the parameter '{}' must match"
-            " the type '{}'.".format(param_name, type_error_dict[dtype])
-        )
+        error_str = f"Your input for the parameter '{param_name}' must " \
+                    f"match the type '{type_error_dict[dtype]}'."
     return error_str
 
 
 def _gui_error_message(dtype, param_name):
     """Create an error string for the GUI
     Remove the paramter name, as the GUI message will be displayed below
-    each paramter input box"""
+    each parameter input box
+    """
     if isinstance(dtype, list):
         type_options = "' or '".join([str(t) for t in dtype])
         error_str = f"Type must match '{type_options}'."
@@ -514,7 +526,7 @@ def _gui_error_message(dtype, param_name):
 
 type_error_dict = {
     "preview": "preview slices",
-    "yaml_file": "yaml format",
+    "yamlfilepath": "yaml format",
     "filepath": "filepath",
     "h5path" : "hdf5 path",
     "filename": "file name",

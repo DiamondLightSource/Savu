@@ -10,7 +10,7 @@ class BaseComponentAnalysisTools(PluginTools):
         """
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: "A list of the dataset(s) to process."
             default: "['scores', 'eigenvectors']"
 

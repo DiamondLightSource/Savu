@@ -7,22 +7,22 @@ class DxchangeLoaderTools(PluginTools):
         """
         data_path:
             visibility: basic
-            dtype: int_path
+            dtype: h5path
             description: Path to the data.
             default: 'exchange/data'
         dark:
             visibility: intermediate
-            dtype: int_path_int
+            dtype: list[[h5path, None], int]
             description: Dark data path and scale
             default: "['exchange/data_dark', 1]"
         flat:
             visibility: intermediate
-            dtype: int_path_int
+            dtype: list[[h5path, None], int]
             description: Flat data path and scale value.
             default: "['exchange/data_white', 1]"
         logfile:
             visibility: intermediate
-            dtype: filepath
+            dtype: [None,filepath]
             description: Path to the log file.
             default: None
         angles:
@@ -32,7 +32,7 @@ class DxchangeLoaderTools(PluginTools):
             default: '[1,2,3]'
         image_key_path:
             visibility: advanced
-            dtype: int_path
+            dtype: [None,h5path]
             description: Not required.
             default: None
 

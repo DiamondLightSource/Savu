@@ -11,15 +11,15 @@ class SinogramAlignmentTools(PluginTools):
         """
         threshold:
               visibility: basic
-              dtype: str
+              dtype: [None,str]
               description: e.g. a.b will set all values above a to b.
               default: None
         p0:
               visibility: basic
-              dtype: tuple
+              dtype: list[float,float,float]
               description: Initial guess for the parameters of
                 scipy.optimize.curve_fit.
-              default: (1, 1, 1)
+              default: [1, 1, 1]
         type:
               visibility: intermediate
               dtype: str

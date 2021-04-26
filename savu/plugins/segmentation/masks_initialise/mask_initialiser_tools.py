@@ -24,19 +24,19 @@ Importantly the Z coordinate is given following VOLUME_XY vertical pattern
 
         mask2_coordinates:
             visibility: basic
-            dtype: list
+            dtype: [None,list]
             description: The second mask coordinates.
             default: None
 
         mask2_radius:
             visibility: basic
-            dtype: int
+            dtype: [None,int]
             description: Mask2 will be initialised with an ellipse of radius.
             default: None
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: The default names
             default: ['INIT_MASK']
 

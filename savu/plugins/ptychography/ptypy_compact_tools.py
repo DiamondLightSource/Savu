@@ -7,12 +7,12 @@ class PtypyCompactTools(PluginTools):
         """
         data_center:
               visibility: intermediate
-              dtype: [tuple, list, str]
+              dtype: [tuple, list, str,None]
               description: 'Center (pixel) of the optical axes in raw data'
               default: None
         data_orientation:
               visibility: intermediate
-              dtype: tuple
+              dtype: [list,None]
               description: See online documentation
               default: None
         data_auto_center:
@@ -27,12 +27,12 @@ class PtypyCompactTools(PluginTools):
               default: 128
         illumination_photons:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description: See online documentation
               default: None
         illumination_diversity_noise:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         illumination_diversity_power:
@@ -42,12 +42,12 @@ class PtypyCompactTools(PluginTools):
               default: 0.1
         illumination_diversity_shift:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         sample_model:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description: See online documentation
               default: None
         sample_fill:
@@ -57,7 +57,7 @@ class PtypyCompactTools(PluginTools):
               default: 1
         sample_diversity_noise:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         sample_diversity_power:
@@ -67,7 +67,7 @@ class PtypyCompactTools(PluginTools):
               default: 0.1
         sample_diversity_shift:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         coherence_num_probe_modes:
@@ -82,17 +82,17 @@ class PtypyCompactTools(PluginTools):
               default: 1
         coherence_spectrum:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description: See online documentation
               default: None
         coherence_object_dispersion:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         coherence_probe_dispersion:
               visibility: intermediate
-              dtype: float
+              dtype: [None,float]
               description: See online documentation
               default: None
         common_numiter_contiguous:
@@ -107,7 +107,7 @@ class PtypyCompactTools(PluginTools):
               default: 0.7
         common_clip_object:
               visibility: intermediate
-              dtype: list
+              dtype: [None,list]
               description: See online documentation
               default: None
         DM_num_iter:

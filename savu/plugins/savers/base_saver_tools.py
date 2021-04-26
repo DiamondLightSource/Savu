@@ -7,12 +7,12 @@ class BaseSaverTools(PluginTools):
         """
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: none
             default: []
         in_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: none
             default: []
         """

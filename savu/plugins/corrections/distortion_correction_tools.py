@@ -7,9 +7,9 @@ class DistortionCorrectionTools(PluginTools):
         """
         polynomial_coeffs:
               visibility: basic
-              dtype: tuple
+              dtype: list
               description: Parameters of the radial distortion
-              default: '(1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15)'
+              default: [1.00015076, 1.9289e-6, -2.4325e-8, 1.00439e-11, -3.99352e-15]
         center_from_top:
               visibility: intermediate
               dtype: float
@@ -24,7 +24,7 @@ class DistortionCorrectionTools(PluginTools):
               default: 1283.25
         file_path:
               visibility: intermediate
-              dtype: filepath
+              dtype: [None,filepath]
               description: Path to the text file having distortion coefficients
                 . Set to None for manually inputing.
               default: None

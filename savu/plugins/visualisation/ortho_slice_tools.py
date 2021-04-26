@@ -38,7 +38,7 @@ class OrthoSliceTools(PluginTools):
 
         out_datasets:
             visibility: datasets
-            dtype: list
+            dtype: [list[],list[str]]
             description: Default out dataset names.
             default: "['XY','YZ','XZ']"
 

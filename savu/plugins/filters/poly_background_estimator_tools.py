@@ -7,7 +7,7 @@ class PolyBackgroundEstimatorTools(PluginTools):
         """
         out_datasets:
               visibility: datasets
-              dtype: list
+              dtype: [list[],list[str]]
               description: 'Create a list of the dataset(s). '
               default: ['Peaks']
         n:

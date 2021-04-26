@@ -12,13 +12,13 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: 'tomo'
         file_name:
             visibility: intermediate
-            dtype: filename
+            dtype: [str,None]
             description: The shared part of the name of each file
               (not including .nxs).
             default: None
         data_path:
             visibility: intermediate
-            dtype: int_path
+            dtype: h5path
             description: Path to the data inside the file.
             default: 'entry1/tomo_entry/data/data'
         stack_or_cat:
@@ -38,7 +38,7 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: 'scan.number'
         range:
             visibility: intermediate
-            dtype: range
+            dtype: list[int,int]
             description: The start and end of file numbers
             default: [0,10]
 

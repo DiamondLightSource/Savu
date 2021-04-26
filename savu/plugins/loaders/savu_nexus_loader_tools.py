@@ -20,13 +20,13 @@ populating the parameters.
               default: {}
         datasets:
               visibility: basic
-              dtype: list
-              description: Override the default by choosing specific
+              dtype: [list[],list[str]]
+              description: Overuuride the default by choosing specific
                 dataset(s) to load, by stating the NXdata name.
               default: []
         names:
               visibility: basic
-              dtype: list
+              dtype: [list[],list[str]]
               description: Override the dataset names associated with the
                 datasets parameter above.
               default: []

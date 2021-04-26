@@ -89,7 +89,8 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
         try:
             # Load the associated class
             plugin_class = pu.load_class(py_module_name)()
-            plugin_class._populate_default_parameters()
+            tools = plugin_class.get_plugin_tools()
+            tools._populate_default_parameters()
             try:
                 plugin_tools = plugin_class.tools.tools_list
                 if plugin_tools:

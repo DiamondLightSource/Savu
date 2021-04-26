@@ -13,12 +13,12 @@ class DarkFlatFieldCorrectionTools(PluginTools):
             default: PROJECTION
         lower_bound:
             visibility: intermediate
-            dtype: float
+            dtype: [None,float]
             description: Set all values below the lower_bound to this value.
             default: None
         upper_bound:
             visibility: intermediate
-            dtype: float
+            dtype: [None,float]
             description: Set all values above the upper bound to this value.
             default: None
         warn_proportion:

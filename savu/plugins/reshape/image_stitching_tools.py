@@ -19,7 +19,7 @@ flat-field correction.
             default: -1
         crop:
             visibility: basic
-            dtype: list
+            dtype: list[int,int,int,int]
             description: "Parameters used to crop stitched image with respect
               to the edges of an image. Format: [crop_top, crop_bottom,
               crop_left, crop_right]."

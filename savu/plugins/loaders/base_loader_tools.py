@@ -16,13 +16,13 @@ class BaseLoaderTools(PluginTools):
         in_datasets:
               # not inherited and not needed
               visibility: not
-              dtype: list[str]
+              dtype: [list[],list[str]]
               description: Create a list of the dataset(s) to process
               default: []
         out_datasets:
               # not inherited and not needed
               visibility: not
-              dtype: list[str]
+              dtype: [list[],list[str]]
               description: Create a list of the dataset(s) to create
               default: []
 

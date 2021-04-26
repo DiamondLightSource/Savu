@@ -85,7 +85,7 @@ class PluginParameters(object):
         self.docstring_info['info'] = doc_str.get('verbose')
         self.docstring_info['warn'] = doc_str.get('warn')
         self.docstring_info['documentation_link'] = doc_str.get('documentation_link')
-        self.docstring_info['synopsis'] = doc.find_synopsis(self)
+        self.docstring_info['synopsis'] = doc.find_synopsis(self._get_plugin())
 
     def _set_parameters_this_instance(self, indices):
         """ Determines the parameters for this instance of the plugin, in the
@@ -198,11 +198,13 @@ class PluginParameters(object):
             if not pvalid:
                 raise Exception("Invalid parameter definition %s:\n %s"
                                 % (p_key, error_str))
-            pvalid, _ = param_u.is_valid(p_key, p_dict['default'], p_dict, check=True)
-            if not pvalid:
-                raise Exception("The default value %s for parameter '%s' does "\
-                                "not match the defined parameter dtype %s" 
-                                % (p_dict['default'], p_key, p_dict['dtype']))
+            if not self.default_dependency_dict_exists(p_dict):
+                default_value = pu._dumps(p_dict["default"])
+                pvalid, _ = param_u.is_valid(p_key, default_value, p_dict, check=True)
+                if not pvalid:
+                    raise Exception("The default value %s for parameter '%s' does "\
+                                    "not match the defined parameter dtype %s"
+                                    % (p_dict['default'], p_key, p_dict['dtype']))
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""
@@ -281,8 +283,29 @@ class PluginParameters(object):
         of another parameter, and are in dictionary form.
         """
         for name, pdict in self.get_param_definitions().items():
-            if isinstance(pdict["default"], OrderedDict):
+            if self.default_dependency_dict_exists(pdict):
                 self.parameters[name] = self.get_dependent_default(pdict)
+
+    def default_dependency_dict_exists(self, pdict):
+        """ Check that the parameter default value is in a format with
+        the parent parameter string and the dependent value
+        e.g. default:
+                algorithm: FGP
+        and not an actual default value to be set
+        e.g. default: {'2':5}
+
+        :param pdict: The parameter definition dictionary
+        :return: True if the default dictionary contains the
+                correct format
+        """
+        if pdict["default"] and isinstance(pdict["default"], dict):
+            if "dict" not in pdict["dtype"]:
+                return True
+            else:
+                parent_name = list(pdict['default'].keys())[0]
+                if parent_name in self.get_param_definitions():
+                    return True
+        return False
 
     def does_exist(self, key, ddict):
         if not key in ddict:
@@ -306,17 +329,16 @@ class PluginParameters(object):
             dependency, or parent, parameter.
 
         """
-        pdefs = self.get_parameter_definitions()
+        pdefs = self.get_param_definitions()
         parent_name = list(child['default'].keys())[0]
         parent = self.does_exist(parent_name, pdefs)
-        
+
         # if the parent default is a dictionary then apply the function
         # recursively
         if isinstance(parent['default'], dict):
             self.parameters[parent_name] = \
                 self.get_dependent_default(parent['default'])
-
-        return self.parameters[parent_name]['default']
+        return child['default'][parent_name][self.parameters[parent_name]]
 
     def warn_dependents(self, mod_param, mod_value): # all defaults have already been set at this point - move this somewhere else?
         """
@@ -326,9 +348,9 @@ class PluginParameters(object):
         for name, pdict in self.get_param_definitions().items():
             default = pdict['default']
             if isinstance(default, OrderedDict):
-                parent_name = list(default.keys()[0])
+                parent_name = list(default.keys())[0]
                 if parent_name == mod_param:
-                    if mod_value in default[parent_name]:
+                    if mod_value in default[parent_name].keys():
                         value = default[parent_name][mod_value]
                         desc = pdict['description']
                         self.make_recommendation(
@@ -358,6 +380,7 @@ class PluginParameters(object):
         }
         for p_name, dependency in dep_list.items():
             if isinstance(dependency, OrderedDict):
+                # There is a dictionary of dependency values
                 parent_param_name = list(dependency.keys())[0]
                 # The choices which must be in the parent value
                 parent_choice_list = dependency[parent_param_name]
@@ -369,16 +392,18 @@ class PluginParameters(object):
                     """
                     parent_value = parameters[parent_param_name]
 
-                    if parent_choice_list == "not None":
-                        if parent_value == "None" \
-                                or isinstance(parent_value, type(None)):
-                            param_info_dict[p_name]["display"] = "off"
-                        else:
-                            param_info_dict[p_name]["display"] = "on"
-                    elif str(parent_value) in parent_choice_list:
+                    if str(parent_value) in parent_choice_list:
                         param_info_dict[p_name]["display"] = "on"
                     else:
                         param_info_dict[p_name]["display"] = "off"
+            else:
+                if dependency in parameters:
+                    parent_value = parameters[dependency]
+                    if parent_value is None or str(parent_value) == "None":
+                        param_info_dict[p_name]["display"] = "off"
+                    else:
+                        param_info_dict[p_name]["display"] = "on"
+
 
     def set_plugin_list_parameters(self, input_parameters):
         """

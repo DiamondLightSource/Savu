@@ -7,12 +7,12 @@ class I18XrdLoaderTools(PluginTools):
         """
         monitor_detector:
             visibility: basic
-            dtype: str
+            dtype: [None,str]
             description: Path to the folder containing the data.
             default: None
         calibration_path:
             visibility: basic
-            dtype: int_path
+            dtype: [None,h5path]
             description: path to the calibration file.
             default: None
         name:

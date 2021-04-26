@@ -12,7 +12,7 @@ class NxxrdLoaderTools(PluginTools):
             default: xrd
         calibration_path:
             visibility: basic
-            dtype: str
+            dtype: [None,str]
             description: Path to the calibration file
             default: None
         """

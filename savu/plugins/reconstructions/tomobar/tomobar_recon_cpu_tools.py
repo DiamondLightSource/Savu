@@ -12,7 +12,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         """
         output_size:
             visibility: advanced
-            dtype: tuple
+            dtype: [list,int,str]
             description:  The dimension of the reconstructed volume
               (only X-Y dimension).
             default: auto
@@ -25,7 +25,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
         data_Huber_thresh:
             visibility: advanced
-            dtype: int
+            dtype: [None,int]
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
 
@@ -37,7 +37,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
         data_full_ring_GH:
              visibility: advanced
-             dtype: str
+             dtype: [None,str]
              description: Regularisation variable for full constant
                ring removal (GH model).
              default: None

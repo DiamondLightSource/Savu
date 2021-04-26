@@ -34,7 +34,8 @@ class MultipleParameterTest(unittest.TestCase):
     def plugin_setup(self):
         ppath = 'savu.plugins.reconstructions.astra_recons.astra_recon_cpu'
         plugin = pu.load_class(ppath)()
-        plugin._populate_default_parameters()
+        tools = plugin.get_plugin_tools()
+        tools._populate_default_parameters()
         return plugin
 
     def framework_options_setup(self):
@@ -58,7 +59,7 @@ class MultipleParameterTest(unittest.TestCase):
         key = 'n_iterations'
         params = {'algorithm': 'CGLS', 'preview': '[:,0,:]',
                   key: '1;2;3'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
         self.assertEqual(plugin.extra_dims[0], 3)
@@ -67,7 +68,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'centre_of_rotation'
         params = {'preview': '[:,0,:]', key: '0.2;0.4;0.6'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [0.2, 0.4, 0.6])
         self.assertEqual(plugin.extra_dims[0], 3)
@@ -76,7 +77,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'projector'
         params = {'preview': '[:,0,:]', key: 'line;strip'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['line', 'strip'])
         self.assertEqual(plugin.extra_dims[0], 2)
@@ -85,7 +86,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin = self.plugin_setup()
         key = 'force_zero'
         params = {'preview': '[:,0,:]', key: '[0, 1];[1, 2]'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [[0, 1], [1, 2]])
         self.assertEqual(plugin.extra_dims[0], 2)
@@ -95,7 +96,7 @@ class MultipleParameterTest(unittest.TestCase):
         key1 = 'projector'
         key2 = 'centre_of_rotation'
         params = {key1: 'line;strip', key2: '85.0;85.5;86.0'}
-        plugin.tools.set_parameters(params)
+        plugin.tools.set_plugin_list_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
             self.assertEqual(data.extra_dims, plugin.extra_dims)

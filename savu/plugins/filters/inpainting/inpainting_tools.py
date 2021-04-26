@@ -8,7 +8,7 @@ is a chunk of data missing or one needs to inpaint some data features.
         """
         mask_range:
               visibility: basic
-              dtype: range
+              dtype: list[float,float]
               description: mask for inpainting is set as a threshold in a range.
               default: [1.0,100]
         iterations:
