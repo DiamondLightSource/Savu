@@ -40,7 +40,7 @@ by the pattern parameter)
 
         p_range:
             visibility: intermediate
-            dtype: range
+            dtype: list[float,float]
             description: Percentage range if use the 'percentile' method.
             default: [0.0, 100.0]
 

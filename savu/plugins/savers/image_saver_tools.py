@@ -39,7 +39,7 @@ before this to rescale the data.
 
         jpeg_quality:
             visibility: intermediate
-            dtype: range
+            dtype: int
             description: JPEG encoding quality (1 is worst, 100 is best).
             default: 75
 

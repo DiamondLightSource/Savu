@@ -70,7 +70,7 @@ class BaseReconTools(PluginTools):
 
         force_zero:
              visibility: intermediate
-             dtype: range
+             dtype: [list[float,float],list[None,None]]
              description: Set any values in the reconstructed image
                outside of this range to zero.
              default: [None, None]

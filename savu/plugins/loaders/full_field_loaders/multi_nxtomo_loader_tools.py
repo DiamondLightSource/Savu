@@ -38,7 +38,7 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: 'scan.number'
         range:
             visibility: intermediate
-            dtype: range
+            dtype: list[int,int]
             description: The start and end of file numbers
             default: [0,10]
 
