@@ -137,8 +137,7 @@ def _typelist(func, value):
 def _preview_dimension(value):
     """ Check the full preview parameter value """
     if _str(value):
-        slice_range = [*range(1,5)]
-        slice_str = [":"*n for n in slice_range]
+        slice_str = [":"*n for n in range(1,5)]
         if value in slice_str:
             # If : notation is used, accept this
             valid = True
@@ -382,7 +381,8 @@ def _convert_to_list(value):
 def _is_valid_multi(param_name, param_def, multi_vals):
     for atype, val in multi_vals:
         param_def['dtype'] = atype
-        pvalid, error_str = is_valid(param_name, val, param_def)
+        _check_val = pu._dumps(val)
+        pvalid, error_str = is_valid(param_name, _check_val, param_def)
         if not pvalid:
             error_str = "The value %s should be of type %s" % (val, atype)
             break
@@ -421,7 +421,7 @@ def is_valid(param_name, value, param_def, check=False):
 
     # set dtype back to the original
     param_def['dtype'] = original_dtype
-    return pvalid, "" if pvalid else _error_message(dtype, param_name)
+    return pvalid, error_str
 
 
 def _check_type(param_name, value, param_def):
