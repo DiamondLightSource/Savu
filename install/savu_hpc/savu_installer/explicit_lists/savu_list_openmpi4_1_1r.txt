@@ -5,6 +5,7 @@
 https://conda.anaconda.org/savu-dep/linux-64/mpi4py-3.0.2_openmpi_4.1.1r-py37_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/hdf5-1.10.5_openmpi_4.1.1r-1.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/h5py-2.10.0_mpi4pi_3.0.2_hdf5_1.10.5_openmpi_4.1.1r-1.tar.bz2
+https://conda.anaconda.org/dkazanc/linux-64/pmacparser-4-py37hdeaff10_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/_libgcc_mutex-0.1-main.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/_pytorch_select-0.2-gpu_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/blas-1.0-mkl.tar.bz2
