@@ -198,12 +198,13 @@ class PluginParameters(object):
             if not pvalid:
                 raise Exception("Invalid parameter definition %s:\n %s"
                                 % (p_key, error_str))
-            default_value = pu._dumps(p_dict["default"])
-            pvalid, _ = param_u.is_valid(p_key, default_value, p_dict, check=True)
-            if not pvalid:
-                raise Exception("The default value %s for parameter '%s' does "\
-                                "not match the defined parameter dtype %s" 
-                                % (p_dict['default'], p_key, p_dict['dtype']))
+            if not self.default_dependency_dict_exists(p_dict):
+                default_value = pu._dumps(p_dict["default"])
+                pvalid, _ = param_u.is_valid(p_key, default_value, p_dict, check=True)
+                if not pvalid:
+                    raise Exception("The default value %s for parameter '%s' does "\
+                                    "not match the defined parameter dtype %s"
+                                    % (p_dict['default'], p_key, p_dict['dtype']))
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""
