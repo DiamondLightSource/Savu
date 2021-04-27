@@ -40,6 +40,7 @@ class DisplayFormatter(object):
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("level", "basic")
         datasets = kwargs.get("datasets", False)
+        expand_preview = kwargs.get("expand_preview", False)
 
         start = kwargs.get("start", 0)
         stop = kwargs.get("stop", len(self.plugin_list))
@@ -53,7 +54,8 @@ class DisplayFormatter(object):
         line_break = "%s" % ("-" * WIDTH)
         out_string.append(line_break)
 
-        display_args = {"subelem": subelem, "datasets": datasets}
+        display_args = {"subelem": subelem, "datasets": datasets,
+                        "expand_preview": expand_preview}
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
@@ -154,6 +156,7 @@ class DisplayFormatter(object):
         # Check if the parameters need to be filtered
         subelem = display_args.get("subelem")
         datasets = display_args.get("datasets")
+        expand_preview = display_args.get("expand_preview")
 
         if not (subelem or datasets):
             # Return the list of parameters according to the visibility level
@@ -171,7 +174,8 @@ class DisplayFormatter(object):
                     # If there is a sub parameter specified, only show this
                     if key == subelem:
                         params = self._create_display_string(desc, key,
-                                p_dict, params, keycount, width, breakdown)
+                                p_dict, params, keycount, width, breakdown,
+                                expand_preview)
                 elif datasets:
                     # If datasets parameter specified, only show these
                     dataset_list = ["in_datasets", "out_datasets"]
@@ -180,18 +184,23 @@ class DisplayFormatter(object):
                                          params, keycount, width, breakdown)
                 else:
                     params = self._create_display_string(desc, key, p_dict,
-                                        params, keycount, width, breakdown)
+                                        params, keycount, width, breakdown,
+                                        expand_preview)
             return params
         except Exception as e:
             print("ERROR: " + str(e))
             raise
 
     def _create_display_string(self, desc, key, p_dict, params, keycount,
-                               width, breakdown):
+                               width, breakdown, expand_preview=False):
         margin = 6
         str_margin = " " * margin
         temp = "\n   %2i)   %29s : %s"
-        params += temp % (keycount, key, p_dict["data"][key])
+        val = p_dict["data"][key]
+        if key == "preview" and expand_preview:
+            val = pu._dumps(val)
+            val = self._preview_output(val, width, self._get_dimensions(val))
+        params += temp % (keycount, key, val)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
                                         width, params, breakdown)
@@ -350,13 +359,13 @@ class DisplayFormatter(object):
             lwidth = width - len(line) - len(offset)
             count += 1
             if count == 1:
-                """At the first line, split the key so that it's colour is
+                '''At the first line, split the key so that it's colour is
                 different. This is done here so that I keep the key and
                 value on the same line.
                 I have not passed in the unicode colour before this
                 point as the textwrap does not take unicode into
                 account when calculating the final string width.
-                """
+                '''
                 if ":" in line:
                     option_text = line.split(":")[0]
                     opt_descr_text = line.split(":")[1]
@@ -386,6 +395,108 @@ class DisplayFormatter(object):
                 )
         return new_str_list
 
+    def _get_dimensions(self, preview_list):
+        """ Check how many dimensions to display
+
+        :param preview_list: The preview parameter
+        :return: Dimensions to display
+        """
+        return 1 if not preview_list else len(preview_list)
+
+    def _preview_output(self, preview, width, dims):
+        """ Compile output string lines for preview syntax"""
+        temp_str = ""
+        for dim in range(1, dims + 1):
+            temp_str += self._dim_slice_output(preview, width, dim)
+        return temp_str
+
+    def _dim_slice_output(self, preview_list, width, dims):
+        """Compile the string lines for dimension and slice notation syntax"""
+        temp_str = ""
+        # If there are multiple values in list format
+        # Only show the values for the dimensions chosen
+        if not preview_list:
+            # If empty
+            preview_display_value = ":"
+        else:
+            preview_display_value = preview_list[dims - 1]
+
+        prev_val = self._set_syntax(preview_display_value)
+        temp_str += f"\n   {'dim' + str(dims): >37} : "
+        temp_str += self._get_slice_notation_info(prev_val,width)
+
+        return temp_str
+
+    def _get_slice_notation_info(self, val, width):
+        """Create a string for certain slice notation information,
+        start:stop:step (and chunk if provided)
+
+        :param val: The value to be displayed
+        :param width: The console text width
+        :return: String containing split notation to display
+        """
+        import itertools
+        basic_split_keys = ["start", "stop", "step"]
+        all_split_keys = [*basic_split_keys, "chunk"]
+        split_str = ""
+
+        if pu.is_slice_notation(val):
+            val_list = val.split(":")
+            if len(val_list)< 3:
+                # Make sure the start stop step split keys are always shown,
+                # even when blank
+                val_list.append('')
+            for slice_name, v in zip(all_split_keys, val_list):
+                # Only print up to the shortest list.
+                # (Only show the chunk value if it is in val_list)
+                split_str += self._get_slice_str(slice_name, v, width)
+        else:
+            # Display the first value as 'start', keep stop and step blank
+            val_list = [val]
+            for slice_name, v in itertools.zip_longest(basic_split_keys,
+                                                       val_list, fillvalue=""):
+                split_str += self._get_slice_str(slice_name, v, width)
+
+        return split_str
+
+    def _get_slice_str(self, label, value, width):
+        """Create a string to display information
+
+        :param label: The label to describe the value
+        :param val: The value to be displayed
+        :param width: The console text width
+        :return: A string with a "label: value" format
+        """
+        margin = 6
+        str_margin = " " * margin
+
+        style_on = Style.BRIGHT
+        style_off = Style.RESET_ALL
+
+        split_line_str = f"{label: >39} : {value}"
+        split_text = self._get_equal_lines(
+            split_line_str, width, style_off, style_off, str_margin
+        )
+        return "\n" + split_text
+
+    def _set_syntax(self, val):
+        """ Remove additional spaces, replace colon for 'all' """
+        if isinstance(val, str):
+            if pu.is_slice_notation(val):
+                if val == ':':
+                    val = ''
+                else:
+                    val = val.strip()
+            else:
+                val = val.strip()
+        return val
+
+    def _remove_quotes(self, data_dict):
+        """Remove quotes around variables for display"""
+        for key, val in data_dict.items():
+            val = str(val).replace("'", "")
+            data_dict[key] = val
+        return data_dict
 
 class DispDisplay(DisplayFormatter):
     def __init__(self, plugin_list):
@@ -700,40 +811,11 @@ class ExpandDisplay(DisplayFormatter):
         :param preview_list: Preview parameter value
         :return: Number of dimensions to display
         """
-        if isinstance(self.dims, type(None)):
-            if not preview_list:
-                # If the preview list is empty, only display dimension 1
-                return 1
-            else:
-                # If a dimension is not provided, show all dimensions
-                return len(preview_list)
+        if self.dims is None:
+            return self._get_dimensions(preview_list)
         else:
             pu.check_valid_dimension(self.dims, preview_list)
             return self.dims
-
-    def _dim_slice_output(self, preview_list, width, dims):
-        """Compile the string lines for dimension and slice notation syntax"""
-        temp_str = ""
-        # If there are multiple values in list format
-        # Only show the values for the dimensions chosen
-        if not preview_list:
-            # If empty
-            preview_display_value = ":"
-        else:
-            preview_display_value = preview_list[dims - 1]
-
-        prev_val = self._set_syntax(preview_display_value)
-        temp_str += f"\n   {'dim' + str(dims): >37} : "
-        temp_str += self._get_slice_notation_info(prev_val,width)
-
-        return temp_str
-
-    def _preview_output(self, preview, width, dims):
-        """ Compile output string lines for preview syntax"""
-        temp_str = ""
-        for dim in range(1, dims + 1):
-                temp_str += self._dim_slice_output(preview, width, dim)
-        return temp_str
 
     def _get_param_display_number(self, p_name, param_display_list):
         """Find the position number of the parameter 'p_name' inside
@@ -747,74 +829,3 @@ class ExpandDisplay(DisplayFormatter):
             if key == p_name:
                 break
         return param_number
-
-    def _get_slice_notation_info(self, val, width):
-        """Create a string for certain slice notation information,
-        start:stop:step (and chunk if provided)
-
-        :param val: The value to be displayed
-        :param width: The console text width
-        :return: String containing split notation to display
-        """
-        import itertools
-        basic_split_keys = ["start", "stop", "step"]
-        all_split_keys = [*basic_split_keys, "chunk"]
-        split_str = ""
-
-        if pu.is_slice_notation(val):
-            val_list = val.split(":")
-            if len(val_list)< 3:
-                # Make sure the start stop step split keys are always shown,
-                # even when blank
-                val_list.append('')
-            for slice_name, v in zip(all_split_keys, val_list):
-                # Only print up to the shortest list.
-                # (Only show the chunk value if it is in val_list)
-                split_str += self._get_slice_str(slice_name, v, width)
-        else:
-            # Display the first value as 'start', keep stop and step blank
-            val_list = [val]
-            for slice_name, v in itertools.zip_longest(basic_split_keys,
-                                                       val_list, fillvalue=""):
-                split_str += self._get_slice_str(slice_name, v, width)
-
-        return split_str
-
-    def _get_slice_str(self, label, value, width):
-        """Create a string to display information
-
-        :param label: The label to describe the value
-        :param val: The value to be displayed
-        :param width: The console text width
-        :return: A string with a "label: value" format
-        """
-        margin = 6
-        str_margin = " " * margin
-
-        style_on = Style.BRIGHT
-        style_off = Style.RESET_ALL
-
-        split_line_str = f"{label: >39} : {value}"
-        split_text = self._get_equal_lines(
-            split_line_str, width, style_off, style_off, str_margin
-        )
-        return "\n" + split_text
-
-    def _set_syntax(self, val):
-        """ Remove additional spaces, replace colon for 'all' """
-        if isinstance(val, str):
-            if pu.is_slice_notation(val):
-                if val == ':':
-                    val = ''
-                else:
-                    val = val.strip()
-            else:
-                val = val.strip()
-        return val
-
-    def _remove_quotes(self, data_dict):
-        """Remove quotes around variables for display"""
-        for key, val in data_dict.items():
-            val = str(val).replace("'", "")
-            data_dict[key] = val
-        return data_dict

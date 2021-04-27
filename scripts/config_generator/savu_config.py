@@ -141,13 +141,18 @@ def _mod(content, args):
 @error_catcher
 def _expand(content, args):
     """ Expand the plugin preview parameter. """
-    range_dict = content.split_plugin_string(args.plugin_pos, "")
-    if not args.dim_view:
-        # If one specific dimension is not being viewed
-        content.remove_dimensions(args.plugin_pos, args.dim)
-    formatter = ExpandDisplay(content.plugin_list, args.dim,
-                              args.dim_view)
-    content.display(formatter, **range_dict)
+    content.set_preview_display(args.plugin_pos)
+    if content.expand_preview:
+        range_dict = content.split_plugin_string(args.plugin_pos, "")
+        if not args.dim_view and args.dim is not None:
+            # If one specific dimension is not being viewed
+            check_str = f"Are you sure you want to alter the number of " \
+                        f"dimensions to {args.dim}?' [y/N]"
+            content.modify_dimensions(args.plugin_pos, args.dim,
+                                      check=input(check_str))
+        formatter = ExpandDisplay(content.plugin_list, args.dim,
+                                  args.dim_view)
+        content.display(formatter, **range_dict)
     return content
 
 
