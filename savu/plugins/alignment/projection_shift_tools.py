@@ -23,7 +23,7 @@ class ProjectionShiftTools(PluginTools):
               options: [template_matching,orb_ransac]        
         template:
               visibility: basic
-              dtype: [list[str],None]]
+              dtype: [list[str],None]
               description: 'Position of the template to match (required)
                 e.g. [300:500, 300:500].'
               default: None
