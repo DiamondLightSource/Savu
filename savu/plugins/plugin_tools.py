@@ -608,7 +608,10 @@ class PluginDocumentation(object):
 
     def set_doc(self, tools_list):
         # Use the tools class at the 'top'
-        self.doc.set("verbose", tools_list[-1].__doc__)
+        doc_lines = tools_list[-1].__doc__.splitlines()
+        doc_lines = [line.strip() for line in doc_lines if line]
+        docstring = " ".join(doc_lines)
+        self.doc.set("verbose", docstring)
         self.doc.set("warn", self.set_warn(tools_list))
         self.set_doc_link()
 
