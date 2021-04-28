@@ -120,7 +120,7 @@ def _save(content, args):
 def _mod(content, args):
     """ Modify plugin parameters."""
     pos_str, subelem, dims, command = \
-        content.separate_plugin_subelem(args.param, True)
+        content.separate_plugin_subelem(args.param, False)
     if 'expand' in command:
         # Run the start stop step view for that dimension alone
         _expand(content, f"{pos_str} {dims} {True}")

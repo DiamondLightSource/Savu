@@ -584,44 +584,51 @@ class Content(object):
         stop = self.find_position(stop) + 1 if stop else start + 1
         return start, stop
 
-    def _split_subelem(self, start, expand=False):
+    def _split_subelem(self, start, config_disp=True):
         """Separate the start string containing the plugin number,
         parameter(subelement), dimension and command
 
         :param start: The plugin to start at
-        :param expand: False if command and dimension arguments
+        :param config_disp: True if command and dimension arguments
           are not permitted
         :return: start plugin, range_dict containing a subelem
             if a parameter is specified
         """
         start, subelem, dim, command = \
-            self.separate_plugin_subelem(start, expand)
+            self.separate_plugin_subelem(start, config_disp)
         start, stop = self._get_start_stop(start, "")
         return start, stop, subelem
 
-    def _check_command_valid(self, plugin_param, expand):
+    def _check_command_valid(self, plugin_param, config_disp):
         """ Check the plugin_param string length
 
         :param plugin_param: The string containing plugin number, parameter,
          and command
-        :param expand: bool, False if command and dimension arguments are
+        :param config_disp: bool, True if command and dimension arguments are
           not permitted
         """
-        if not 1<len(plugin_param)<5:
-            raise ValueError("Invalid  entry. Use <command> -h to "
-                             "check arguments.")
-        if not expand:
+        if config_disp:
             if not 1 < len(plugin_param) < 3:
                 raise ValueError("Use either 'plugin_pos.param_name' or"
-                                " 'plugin_pos.param_no'")
+                                 " 'plugin_pos.param_no'")
+        else:
+            # The modify command is being used
+            if len(plugin_param) <= 1:
+                raise ValueError("Please enter the plugin parameter to modify"
+                                 ". Either 'plugin_pos.param_name' or"
+                                 " 'plugin_pos.param_no'")
+            if not 1<len(plugin_param)<5:
+                raise ValueError("Enter 'plugin_pos.param_no.dimension'. "
+                                 "Following the dimension, use start/stop/step"
+                                 " eg. '1.1.dim1.start' ")
 
-    def separate_plugin_subelem(self, plugin_param, expand):
+    def separate_plugin_subelem(self, plugin_param, config_disp):
         """ Separate the plugin number,parameter (subelement) number
         and additional command if present.
 
         :param plugin_param: A string supplied by the user input which
          contains the plugin element to edit/display. eg "1.1.dim.command"
-        :param expand: bool, False if command and dimension arguments are
+        :param config_disp: bool, True if command and dimension arguments are
           not permitted
 
         :returns plugin: The number of the plugin element
@@ -631,8 +638,9 @@ class Content(object):
                           string
         """
         plugin_param = plugin_param.split('.')
-        self._check_command_valid(plugin_param, expand)
         plugin = plugin_param[0]
+        start = self.find_position(plugin)
+        self._check_command_valid(plugin_param, config_disp)
         subelem = plugin_param[1]
         if len(plugin_param) > 2:
             dim = self.dim_str_to_int(plugin_param[2])
