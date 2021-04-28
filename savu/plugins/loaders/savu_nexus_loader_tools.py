@@ -13,7 +13,7 @@ populating the parameters.
         """
         preview:
               visibility: basic
-              dtype: preview
+              dtype: [preview, dict{str:preview}]
               description: A slice list of required frames to apply to ALL
                 datasets, else a dictionary of slice lists where the key is
                 the dataset name.
