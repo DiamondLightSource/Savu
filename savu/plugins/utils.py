@@ -397,7 +397,7 @@ def _sexagesimal_check(val, isdict, remove=True):
 def check_valid_dimension(dim, prev_list):
     """Check the dimension is within the correct range"""
     if not 0 < dim < 21:
-        raise Exception('Please use a dimension between 0 and 20.')
+        raise Exception('Please use a dimension between 1 and 20.')
     if prev_list and (dim > len(prev_list)):
         raise Exception('You have not specified enough dimensions '
                         'inside the preview parameter.')

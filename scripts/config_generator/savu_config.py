@@ -110,7 +110,7 @@ def _save(content, args):
     print()
     DispDisplay(content.plugin_list)._notices()
     content.save(out_file, check=input("Are you sure you want to save the "
-                 "current data to %s' [y/N]" % (out_file)),
+                 "current data to %s [y/N]" % (out_file)),
                  template=args.template)
     return content
 
@@ -147,7 +147,7 @@ def _expand(content, args):
         if not args.dim_view and args.dim is not None:
             # If one specific dimension is not being viewed
             check_str = f"Are you sure you want to alter the number of " \
-                        f"dimensions to {args.dim}?' [y/N]"
+                        f"dimensions to {args.dim}? [y/N]"
             content.modify_dimensions(args.plugin_pos, args.dim,
                                       check=input(check_str))
         formatter = ExpandDisplay(content.plugin_list, args.dim,
