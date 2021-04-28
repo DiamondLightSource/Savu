@@ -12,7 +12,7 @@ class ImageLoaderTools(PluginTools):
             default: tomo
         angles:
             visibility: intermediate
-            dtype: [None,str]
+            dtype: [None, str, int]
             description: 'A python statement to be evaluated
               (e.g np.linspace(0, 180, nAngles)) or a file.'
             default: None

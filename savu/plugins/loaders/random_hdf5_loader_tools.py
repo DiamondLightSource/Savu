@@ -45,7 +45,7 @@ will be ignored (use a dummy).
               default: 'tomo'
         angles:
               visibility: intermediate
-              dtype: [None,str]
+              dtype: [None,str,int]
               description: "A python statement to be evaluated or a
                 file - if the value is None, values will be in the
                 interval [0, 180]"

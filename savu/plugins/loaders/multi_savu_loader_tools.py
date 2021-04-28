@@ -23,8 +23,8 @@ class MultiSavuLoaderTools(PluginTools):
               default: stack
         stack_or_cat_dim:
               visibility: intermediate
-              dtype: list
-              description: Create a list of the dataset(s) to create
+              dtype: int
+              description: Dimension to stack or concatenate.
               default: 3
         axis_label:
               visibility: intermediate
@@ -34,7 +34,7 @@ class MultiSavuLoaderTools(PluginTools):
               default: 'scan.number'
         range:
               visibility: intermediate
-              dtype: list[ine,int]
+              dtype: list[int,int]
               description: The start and end of file numbers.
               default: '[0,10]'
         name:
