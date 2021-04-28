@@ -34,7 +34,7 @@ with warnings.catch_warnings():
     from .content import Content
     from .completer import Completer
     from .display_formatter import ListDisplay, DispDisplay, \
-        CiteDisplay, ExpandDisplay
+        CiteDisplay
     from . import arg_parsers as parsers
     from savu.plugins import utils as pu
     from . import config_utils as utils
@@ -141,18 +141,17 @@ def _mod(content, args):
 @error_catcher
 def _expand(content, args):
     """ Expand the plugin preview parameter. """
-    content.set_preview_display(args.plugin_pos)
-    if content.expand_preview:
-        range_dict = content.split_plugin_string(args.plugin_pos, "")
-        if not args.dim_view and args.dim is not None:
-            # If one specific dimension is not being viewed
-            check_str = f"Are you sure you want to alter the number of " \
-                        f"dimensions to {args.dim}? [y/N]"
-            content.modify_dimensions(args.plugin_pos, args.dim,
-                                      check=input(check_str))
-        formatter = ExpandDisplay(content.plugin_list, args.dim,
-                                  args.dim_view)
-        content.display(formatter, **range_dict)
+    dims_to_display = args.dim if args.dim_view else "all"
+    content.set_preview_display(args.plugin_pos, dims_to_display)
+    if content.expand_dim is not None:
+        content.find_position(args.plugin_pos)
+        if dims_to_display == "all" and args.dim is not None:
+            is_modified = content.modify_dimensions(args.plugin_pos, args.dim)
+            if is_modified:
+                _disp(content, f"{args.plugin_pos}.preview")
+        else:
+            _disp(content, f"{args.plugin_pos}.preview")
+            content.set_preview_display(args.plugin_pos, "all")
     return content
 
 

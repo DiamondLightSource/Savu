@@ -40,7 +40,7 @@ class DisplayFormatter(object):
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("level", "basic")
         datasets = kwargs.get("datasets", False)
-        expand_preview = kwargs.get("expand_preview", False)
+        expand_dim = kwargs.get("expand_dim", None)
 
         start = kwargs.get("start", 0)
         stop = kwargs.get("stop", len(self.plugin_list))
@@ -55,7 +55,7 @@ class DisplayFormatter(object):
         out_string.append(line_break)
 
         display_args = {"subelem": subelem, "datasets": datasets,
-                        "expand_preview": expand_preview}
+                        "expand_dim": expand_dim}
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
@@ -197,14 +197,18 @@ class ParameterFormatter(DisplayFormatter):
             raise
 
     def _create_display_string(self, desc, key, p_dict, params, keycount,
-                               width, breakdown, expand_preview=False):
+                               width, breakdown, expand_dim=None):
         margin = 6
         str_margin = " " * margin
         temp = "\n   %2i)   %29s : %s"
         val = p_dict["data"][key]
-        if key == "preview" and expand_preview:
+        if key == "preview" and expand_dim is not None:
             val = pu._dumps(val)
-            val = self._preview_output(val, width, self._get_dimensions(val))
+            if expand_dim == "all":
+                val = self._preview_output(val, width, self._get_dimensions(val))
+            else:
+                pu.check_valid_dimension(expand_dim, val)
+                val = self._dim_slice_output(val, width, expand_dim)
         params += temp % (keycount, key, val)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
@@ -340,7 +344,7 @@ class DispDisplay(ParameterFormatter):
         # Check if the parameters need to be filtered
         subelem = display_args.get("subelem")
         datasets = display_args.get("datasets")
-        expand_preview = display_args.get("expand_preview")
+        expand_dim = display_args.get("expand_dim")
 
         level = level if not (subelem or datasets) else False
         # Return the list of parameters according to the visibility level
@@ -360,11 +364,11 @@ class DispDisplay(ParameterFormatter):
                     if key in filter_items:
                         params = self._create_display_string(desc, key,
                                        p_dict, params, keycount, width,
-                                       breakdown, expand_preview)
+                                       breakdown, expand_dim)
                 else:
                     params = self._create_display_string(desc, key, p_dict,
                                         params, keycount, width, breakdown,
-                                        expand_preview)
+                                        expand_dim)
             return params
         except Exception as e:
             print("ERROR: " + str(e))
@@ -756,68 +760,3 @@ class CiteDisplay(DisplayFormatter):
                 cite_str += "\n" + cite_key + "\n" + cite_value + "\n"
 
         return cite_str
-
-
-class ExpandDisplay(ParameterFormatter):
-    def __init__(self, plugin_list, dims: int, dim_view):
-        self.dims = dims
-        self.dim_view = dim_view
-        super(ExpandDisplay, self).__init__(plugin_list)
-
-    def _get_default(self, level, p_dict, count, width, display_args=False):
-        """ Find the preview parameter and print """
-        title = self._get_quiet(p_dict, count, width)
-        preview_str = self._get_preview_str(p_dict, width)
-        return title + preview_str
-
-    def _get_preview_str(self, p_dict, width):
-        preview_str = ""
-        parameters = p_dict["data"]
-        p_name = "preview"
-
-        param_display_list = pu.set_order_by_visibility(p_dict["param"])
-        if p_name in param_display_list:
-            preview_value = parameters[p_name]
-            preview_list = pu._dumps(preview_value)
-            dims = self._get_display_dimensions(preview_list)
-            param_number = self._get_param_display_number(p_name,
-                                                          param_display_list)
-            preview_str += f"\n{param_number: >5})   {p_name: >29} : "
-            if self.dim_view:
-                # Display dimension slice notation
-                preview_str += self._dim_slice_output(preview_list,
-                                                     width,
-                                                     dims)
-            else:
-                # Display preview parameter
-                preview_str += self._preview_output(preview_list,
-                                                   width,
-                                                   dims)
-        else:
-            preview_str = f"\n\n{' '}No preview parameter"
-        return preview_str
-
-    def _get_display_dimensions(self, preview_list):
-        """Select the number of data dimensions to be displayed
-
-        :param preview_list: Preview parameter value
-        :return: Number of dimensions to display
-        """
-        if self.dims is None:
-            return self._get_dimensions(preview_list)
-        else:
-            pu.check_valid_dimension(self.dims, preview_list)
-            return self.dims
-
-    def _get_param_display_number(self, p_name, param_display_list):
-        """Find the position number of the parameter 'p_name' inside
-        the user display
-
-        :return param_number: Display number for parameter
-        """
-        param_number = 0
-        for key in param_display_list:
-            param_number += 1
-            if key == p_name:
-                break
-        return param_number

@@ -42,7 +42,7 @@ class Content(object):
         self.filename = filename
         self._finished = False
         self.failed = {}
-        self.expand_preview = False
+        self.expand_dim = None
 
     def set_finished(self, check='y'):
         self._finished = True if check.lower() == 'y' else False
@@ -85,7 +85,7 @@ class Content(object):
     def display(self, formatter, **kwargs):
         if 'level' not in list(kwargs.keys()):
             kwargs['level'] = self.disp_level
-        kwargs["expand_preview"] = self.expand_preview
+        kwargs["expand_dim"] = self.expand_dim
         print('\n' + formatter._get_string(**kwargs) + '\n')
 
     def check_file(self, filename):
@@ -147,11 +147,17 @@ class Content(object):
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 
-    def set_preview_display(self, input):
-        """ Set the expand_preview value to True to display the preview
-        parameter in it's expanded form showing dimension slices
+    def set_preview_display(self, input, expand_dim):
+        """ Set the dimensions_to_display value to "off" to prevent the
+        preview parameter being shown in it's expanded form.
+
+        If dimensions_to_display = "all", then all dimension slices are shown.
+        If a number is provided to dim_view, that dimension is shown.
+
+        :param input: The input string
+        :param expand_dim: The dimension number to display, or "all"
         """
-        self.expand_preview = False if input == "off" else True
+        self.expand_dim = None if input == "off" else expand_dim
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
@@ -379,27 +385,34 @@ class Content(object):
                                 "modifying the preview parameter.")
         return False
 
-    def modify_dimensions(self, pos_str, dim, check="y"):
+    def modify_dimensions(self, pos_str, dim):
         """ Modify the plugin preview value. Remove or add dimensions
         to the preview parameter until the provided dimension number
         is reached.
 
         :param pos_str: The plugin position
         :param dim: The new number of dimensions
+        :return True if preview is modified
         """
-        if check.lower() == "y":
-            pos = self.find_position(pos_str)
-            plugin_entry = self.plugin_list.plugin_list[pos]
-            parameters = plugin_entry["data"]
-            self.check_param_exists(parameters, "preview")
-            current_prev_list = pu._dumps(parameters["preview"])
+        pos = self.find_position(pos_str)
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        parameters = plugin_entry["data"]
+        self.check_param_exists(parameters, "preview")
+        current_prev_list = pu._dumps(parameters["preview"])
+        pu.check_valid_dimension(dim, [])
 
+        check_str = f"Are you sure you want to alter the number of " \
+            f"dimensions to {dim}? [y/N]"
+        check = input(check_str) if current_prev_list else "y"
+
+        if check.lower() == "y":
             while len(current_prev_list) > dim:
                 current_prev_list.pop()
             while len(current_prev_list) < dim:
                 current_prev_list.append(":")
-
             parameters["preview"] = current_prev_list
+            return True
+        return False
 
     def check_param_exists(self, parameters, pname):
         """ Check the parameter is present in the current parameter list
