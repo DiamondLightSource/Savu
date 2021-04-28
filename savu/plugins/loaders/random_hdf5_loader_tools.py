@@ -33,7 +33,7 @@ will be ignored (use a dummy).
               dtype: str
               description: Assign a name to the created h5 file.
               default: input_array
-        dtype:
+        dtype_:
               visibility: intermediate
               dtype: nptype
               description: A numpy array data type
