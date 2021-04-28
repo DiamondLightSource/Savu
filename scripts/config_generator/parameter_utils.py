@@ -313,7 +313,7 @@ def _list_combination(param_name, value, param_def):
 
     #special case of empty list
     if not value:
-        if dtype[0] == "":
+        if dtype[0] != "":
             error = "The empty list is not a valid option for %s" % param_name
             return False, error
         else:
@@ -401,7 +401,6 @@ def is_valid(param_name, value, param_def, check=False):
         description, dtype, default
     :return: boolean True if the value is a valid parameter value
     """
-
     original_dtype = copy.copy(param_def['dtype'])
     # remove all whitespaces from dtype
     param_def['dtype'] = param_def['dtype'].replace(" ", "")
