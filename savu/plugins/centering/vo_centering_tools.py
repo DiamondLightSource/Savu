@@ -17,7 +17,7 @@ class VoCenteringTools(PluginTools):
                include a time parameter.'
         start_pixel:
              visibility: intermediate
-             dtype: int
+             dtype: [int,None]
              description: The estimated centre of rotation. If value is None,
                use the horizontal centre of the image.
              default: 'None'

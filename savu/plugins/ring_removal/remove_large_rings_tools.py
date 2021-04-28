@@ -13,7 +13,7 @@ artefacts in a reconstructed image).
             default: 71
         snr:
             visibility: intermediate
-            dtype: int
+            dtype: float
             description: Ratio used to detect locations of large stripes.
               Greater is less sensitive.
             default: 3.0

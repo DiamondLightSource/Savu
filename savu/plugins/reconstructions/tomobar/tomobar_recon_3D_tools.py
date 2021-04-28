@@ -147,7 +147,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
 
         regularisation_methodTV:
              visibility: advanced
-             dtype: str
+             dtype: int
              description: "0/1 - TV specific isotropic/anisotropic choice."
              default: 0
              dependency:
