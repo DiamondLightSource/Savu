@@ -7,8 +7,8 @@ class ImageInterpolationTools(PluginTools):
         """
         size:
               visibility: basic
-              dtype: [float, tuple]
-              description: int, float or tuple.
+              dtype: [float, list[float]]
+              description: int, float or list.
               default: 2.0
         interp:
               visibility: basic

@@ -8,7 +8,7 @@ artefacts in a reconstructed image).
         """
         size:
             visibility: intermediate
-            dtype: [float, tuple]
+            dtype: [float, list[float]]
             description: Size of the median filter window. Greater is stronger.
             default: 71
         snr:
