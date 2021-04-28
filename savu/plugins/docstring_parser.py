@@ -85,10 +85,13 @@ def load_yaml_doc(doc):
         split = (l.split('dtype:', 1))
         if len(split) == 2:
             dtype = split[1].lstrip().rstrip()
-            if not dtype[0] == "'" and not dtype[0] == '"':
-                l = l.replace(dtype, "'" + dtype + "'")
+            if dtype:
+                if not dtype[0] == "'" and not dtype[0] == '"':
+                    l = l.replace(dtype, "'" + dtype + "'")
+            else:
+                print(f"Empty dtype entry for this plugin"
+                      f" tools file on line {i}")
         doc += l + "\n"
-                
     all_params = ""
     try:
         all_params = yu.read_yaml_from_doc(doc)

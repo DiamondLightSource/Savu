@@ -350,17 +350,12 @@ def _dumps(val):
         except Exception:
             pass
         try:
-            # To avoid sexagesimal values being evaluated, replace colon values temporarily
             isdict = re.findall(r"[\{\}]+", val)
-            if isinstance(val, str) and not isdict:
-                val = val.replace(':', ':?')
+            val = _sexagesimal_check(val, isdict, remove=False)
             value = yaml.load(val, Loader=yaml.SafeLoader)
-            if isinstance(value, str):
-                value = value.replace(':?', ':')
-            return value
+            return _sexagesimal_check(value, isdict)
         except Exception:
-            if isinstance(val, str):
-                val = val.replace(':?', ':')
+            val = _sexagesimal_check(val, isdict)
             pass
         try:
             isdict = re.findall(r"[\{\}]+", val)
@@ -384,10 +379,25 @@ def _dumps(val):
         value = val
     return value
 
+def _sexagesimal_check(val, isdict, remove=True):
+    """ To avoid sexagesimal values being evaluated, replace colon
+    values temporarily
+
+    :param val:
+    :param isdict: True if braces {} found
+    :return: value
+    """
+    if isinstance(val, str) and not isdict:
+        if remove:
+            val = val.replace(":?", ":")
+        else:
+            val = val.replace(":", ":?")
+    return val
+
 def check_valid_dimension(dim, prev_list):
     """Check the dimension is within the correct range"""
     if not 0 < dim < 21:
-        raise Exception('Please use a dimension between 0 and 20.')
+        raise Exception('Please use a dimension between 1 and 20.')
     if prev_list and (dim > len(prev_list)):
         raise Exception('You have not specified enough dimensions '
                         'inside the preview parameter.')

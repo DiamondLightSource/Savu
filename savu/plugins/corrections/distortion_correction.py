@@ -124,7 +124,7 @@ class DistortionCorrection(BaseFilter, CpuPlugin):
                                    dtype = np.float32) - x_offset
             y_center = np.asarray(self.parameters['center_from_top'],
                                    dtype = np.float32) - y_offset
-            list_fact = np.float32(self.parameters['polynomial_coeffs'])
+            list_fact = np.float32(tuple(self.parameters['polynomial_coeffs']))
         else:
             if not (os.path.isfile(file_path)):
                 self.msg = "!!! No such file: %s !!!"\

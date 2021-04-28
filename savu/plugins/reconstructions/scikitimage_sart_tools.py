@@ -46,7 +46,7 @@ inverse radon transform from scikit-image.
 
         image:
            visibility: advanced
-           dtype: list
+           dtype: [None,list]
            description:  "2D array, dtype=float, optional.  Image containing
              an initial reconstruction estimate. Shape of this array should
              be (radon_image.shape[0], radon_image.shape[0]). The default is

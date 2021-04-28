@@ -8,12 +8,12 @@ artefacts in a reconstructed image).
         """
         size:
             visibility: intermediate
-            dtype: [float, tuple]
+            dtype: [float, list[float]]
             description: Size of the median filter window. Greater is stronger.
             default: 71
         snr:
             visibility: intermediate
-            dtype: int
+            dtype: float
             description: Ratio used to detect locations of large stripes.
               Greater is less sensitive.
             default: 3.0

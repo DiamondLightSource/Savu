@@ -7,7 +7,7 @@ class PtypyCompactTools(PluginTools):
         """
         data_center:
               visibility: intermediate
-              dtype: [tuple, list, str,None]
+              dtype: [list[float], str, None]
               description: 'Center (pixel) of the optical axes in raw data'
               default: None
         data_orientation:

@@ -143,7 +143,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
 
         regularisation_methodTV:
              visibility: advanced
-             dtype: str
+             dtype: int
              description: 0/1 - TV specific isotropic/anisotropic choice.
              default: 0
              dependency:

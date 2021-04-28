@@ -332,10 +332,13 @@ def _matched_brackets(string, dtype, bstart, bend):
     matched = []
     # Match start and end brackets
     while(end_brackets):
-        end = end_brackets.pop(0)
-        idx = start_brackets.index([s for s in start_brackets if s < end][-1])
-        start =  start_brackets.pop(idx)
-        extra = len(dtype) if string[start-4:start] == dtype else 0
+        try:
+            end = end_brackets.pop(0)
+            idx = start_brackets.index([s for s in start_brackets if s < end][-1])
+            start = start_brackets.pop(idx)
+            extra = len(dtype) if string[start-4:start] == dtype else 0
+        except IndexError as ie:
+            raise IndexError(f"Incorrect number of brackets in {string}")
         matched.append((start - extra, end))
 
     return matched

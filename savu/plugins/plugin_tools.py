@@ -119,9 +119,10 @@ class PluginParameters(object):
             # Use a display option to apply to dependent parameters later.
             self._set_display(param_info_dict)
             for p_name, p_value in param_info_dict.items():
-                # Change the string to an integer, float, tuple, list, str, dict
-                p_value['default'] = pu._dumps(p_value['default'])
-                self.param.set(p_name, p_value)
+                # Change the string to an integer, float, list, str, dict
+                if not self.default_dependency_dict_exists(p_value):
+                    p_value['default'] = pu._dumps(p_value['default'])
+                    self.param.set(p_name, p_value)
 
     def _load_param_from_doc(self, tool_class):
         """Find the parameter information from the method docstring.
@@ -193,18 +194,24 @@ class PluginParameters(object):
         compatible
         """
         for p_key, p_dict in param_info_dict.items():
-            dtype = p_dict['dtype'].replace(" ", "") 
-            pvalid, error_str = param_u.is_valid_dtype(dtype)
-            if not pvalid:
-                raise Exception("Invalid parameter definition %s:\n %s"
-                                % (p_key, error_str))
+            dtype = p_dict['dtype'].replace(" ", "")
+            try:
+                pvalid, error_str = param_u.is_valid_dtype(dtype)
+                if not pvalid:
+                    raise Exception("Invalid parameter definition %s:\n %s"
+                                    % (p_key, error_str))
+            except IndexError:
+                print(f"There was an error with "
+                                f"{tool_class.__name__}")
             if not self.default_dependency_dict_exists(p_dict):
                 default_value = pu._dumps(p_dict["default"])
-                pvalid, _ = param_u.is_valid(p_key, default_value, p_dict, check=True)
+                pvalid, _ = param_u.is_valid(p_key, default_value,
+                                             p_dict, check=True)
                 if not pvalid:
-                    raise Exception("The default value %s for parameter '%s' does "\
-                                    "not match the defined parameter dtype %s"
-                                    % (p_dict['default'], p_key, p_dict['dtype']))
+                    error_str = f"The default value {p_dict['default']} " \
+                        f"for parameter '{p_key}' does not match the " \
+                        f"defined parameter dtype {p_dict['dtype']}"
+                    raise Exception(error_str)
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""
@@ -608,7 +615,10 @@ class PluginDocumentation(object):
 
     def set_doc(self, tools_list):
         # Use the tools class at the 'top'
-        self.doc.set("verbose", tools_list[-1].__doc__)
+        doc_lines = tools_list[-1].__doc__.splitlines()
+        doc_lines = [line.strip() for line in doc_lines if line]
+        docstring = " ".join(doc_lines)
+        self.doc.set("verbose", docstring)
         self.doc.set("warn", self.set_warn(tools_list))
         self.set_doc_link()
 

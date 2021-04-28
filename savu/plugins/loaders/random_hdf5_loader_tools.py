@@ -10,7 +10,7 @@ will be ignored (use a dummy).
         """
         size:
               visibility: basic
-              dtype: [list, tuple, list[]]
+              dtype: [list[float], list[]]
               description: A list specifiying the required data size.
               default: []
         axis_labels:
@@ -33,7 +33,7 @@ will be ignored (use a dummy).
               dtype: str
               description: Assign a name to the created h5 file.
               default: input_array
-        dtype:
+        dtype_:
               visibility: intermediate
               dtype: nptype
               description: A numpy array data type
@@ -45,7 +45,7 @@ will be ignored (use a dummy).
               default: 'tomo'
         angles:
               visibility: intermediate
-              dtype: [None,str]
+              dtype: [None,str,int]
               description: "A python statement to be evaluated or a
                 file - if the value is None, values will be in the
                 interval [0, 180]"

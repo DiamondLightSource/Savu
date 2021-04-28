@@ -42,6 +42,7 @@ class Content(object):
         self.filename = filename
         self._finished = False
         self.failed = {}
+        self.expand_preview = False
 
     def set_finished(self, check='y'):
         self._finished = True if check.lower() == 'y' else False
@@ -84,6 +85,7 @@ class Content(object):
     def display(self, formatter, **kwargs):
         if 'level' not in list(kwargs.keys()):
             kwargs['level'] = self.disp_level
+        kwargs["expand_preview"] = self.expand_preview
         print('\n' + formatter._get_string(**kwargs) + '\n')
 
     def check_file(self, filename):
@@ -144,6 +146,12 @@ class Content(object):
         self.plugin_list.plugin_list[pos]['active'] = active
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
+
+    def set_preview_display(self, input):
+        """ Set the expand_preview value to True to display the preview
+        parameter in it's expanded form showing dimension slices
+        """
+        self.expand_preview = False if input == "off" else True
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
@@ -371,23 +379,26 @@ class Content(object):
                                 "modifying the preview parameter.")
         return False
 
-    def remove_dimensions(self, pos_str, dim):
-        """ Modify the plugin preview value. Remove all dimensions supplied
-        which are greater than the dimension value provided.
+    def modify_dimensions(self, pos_str, dim, check="y"):
+        """ Modify the plugin preview value. Remove or add dimensions
+        to the preview parameter until the provided dimension number
+        is reached.
 
         :param pos_str: The plugin position
-        :param dim: The dimension to be modified
+        :param dim: The new number of dimensions
         """
-        pos = self.find_position(pos_str)
-        plugin_entry = self.plugin_list.plugin_list[pos]
-        parameters = plugin_entry["data"]
-        self.check_param_exists(parameters, "preview")
-        current_prev_list = pu._dumps(parameters["preview"])
+        if check.lower() == "y":
+            pos = self.find_position(pos_str)
+            plugin_entry = self.plugin_list.plugin_list[pos]
+            parameters = plugin_entry["data"]
+            self.check_param_exists(parameters, "preview")
+            current_prev_list = pu._dumps(parameters["preview"])
 
-        # If dimensions are provided, then alter preview param
-        if dim and current_prev_list:
             while len(current_prev_list) > dim:
                 current_prev_list.pop()
+            while len(current_prev_list) < dim:
+                current_prev_list.append(":")
+
             parameters["preview"] = current_prev_list
 
     def check_param_exists(self, parameters, pname):
@@ -679,7 +690,6 @@ class Content(object):
             slice_dict = {'start':0, 'stop':1, 'step':2, 'chunk':3}
             slice = slice_dict[command_str.split('.')[1]]
             dim = int(command_str.split('.')[0])
-            # dim = str(dim) +'.'+ str(slice)
         else:
            dim = int(command_str)
            slice = ''

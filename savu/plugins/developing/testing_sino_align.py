@@ -66,7 +66,7 @@ class TestingSinoAlign(Plugin, CpuPlugin):
             self.get_in_datasets()[0].meta_data.get('rotation_angle')
         com_y = self._com_y(1-sino)
         fitpars, covmat = \
-            curve_fit(self._sinfunc, com_x, com_y, p0=self.parameters['p0'])
+            curve_fit(self._sinfunc, com_x, com_y, p0=tuple(self.parameters['p0']))
         return com_y - self._sinfunc(com_x, *fitpars)
 
     def _com_y(self, sinogram):
@@ -82,7 +82,7 @@ class TestingSinoAlign(Plugin, CpuPlugin):
 
     def _shift(self, sinogram, com_x, com_y):
         fitpars, covmat = \
-            curve_fit(self._sinfunc, com_x, com_y, p0=self.parameters['p0'])
+            curve_fit(self._sinfunc, com_x, com_y, p0=tuple(self.parameters['p0']))
         variances = covmat.diagonal()
         std_devs = np.sqrt(variances)
         residual = com_y - self._sinfunc(com_x, *fitpars)
