@@ -152,7 +152,7 @@ def _mod_arg_parser(args=None, doc=True):
                  "'plugin_pos.param_name' or ' plugin_pos.param_no'")
     parser.add_argument("param", help=param_str)
     val_str = "The plugin parameter value."
-    parser.add_argument("value", nargs='?', help=val_str)
+    parser.add_argument("value", nargs='*', help=val_str)
     return __arg_parser(parser, args, 'mod', doc)
 
 

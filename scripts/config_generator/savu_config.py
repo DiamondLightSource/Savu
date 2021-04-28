@@ -129,7 +129,7 @@ def _mod(content, args):
         # Get the parameter name for the display later
         args.param = content.get_param_arg_str(pos_str, subelem)
         content_modified = content.modify(pos_str, subelem,
-                                          ''.join(args.value),
+                                          ' '.join(args.value),
                                           dim=command)
         if content_modified:
             # Display the selected parameter only
