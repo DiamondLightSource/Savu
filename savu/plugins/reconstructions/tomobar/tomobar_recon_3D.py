@@ -39,7 +39,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
     def _get_output_size(self, in_data):
-        sizeX = self.parameters['output_size']
+        sizeX = tuple(self.parameters['output_size'])
         shape = in_data.get_shape()
         if sizeX == 'auto':
             detX = in_data.get_data_dimension_by_axis_label('detector_x')
@@ -57,7 +57,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def setup(self):
         in_dataset = self.get_in_datasets()[0]
-        self.parameters['vol_shape'] = self.parameters['output_size']
+        self.parameters['vol_shape'] = tuple(self.parameters['output_size'])
         procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset.get_data_dimension_by_axis_label('detector_y')

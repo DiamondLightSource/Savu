@@ -66,8 +66,8 @@ class BandPass(BaseFilter, CpuPlugin):
         logging.debug("Data frame received for processing of shape %s",
                       str(data.shape))
         if self.parameters['type'] == 'Low':
-            result = gaussian_filter(data, self.parameters['blur_width'])
+            result = gaussian_filter(data, tuple(self.parameters['blur_width']))
         elif self.parameters['type'] == 'High':
-            lp = gaussian_filter(data, self.parameters['blur_width'])
+            lp = gaussian_filter(data, tuple(self.parameters['blur_width']))
             result = data - lp
         return result

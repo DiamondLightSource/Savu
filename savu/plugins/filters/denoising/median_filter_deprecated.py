@@ -40,11 +40,11 @@ class MedianFilterDeprecated(BaseFilter, CpuPlugin):
         super(MedianFilterDeprecated, self).__init__("MedianFilterDeprecated")
 
     def process_frames(self, data):
-        result = sig.medfilt(data[0], self.parameters['kernel_size'])
+        result = sig.medfilt(data[0], tuple(self.parameters['kernel_size']))
         return result
 
     def set_filter_padding(self, in_data, out_data):
-        padding = (self.parameters['kernel_size'][0]-1) // 2
+        padding = (tuple(self.parameters['kernel_size'])[0]-1) // 2
         in_data[0].padding = {'pad_multi_frames': padding}
         out_data[0].padding = {'pad_multi_frames': padding}
 
