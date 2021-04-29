@@ -45,7 +45,7 @@ class NoProcessTools(PluginTools):
             default: [-50, 50]
         ica_w_init:
             visibility: intermediate
-            dtype: [list[],list,None]
+            dtype: [list,None]
             description: The initial mixing matrix
             default: 'None'
         distcorr_polynomial_coeffs:
