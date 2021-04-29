@@ -1484,6 +1484,80 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_prev_dict_0(self):
+        # Check that str dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{xrd: [:,:,:, 0, 0]," \
+                 "stxm: [:,:, 0]," \
+                 "fluo: [:,:,:,0]}"
+        value_check = pu._dumps(value)
+
+        correct_value =  {'xrd': [':',':',':', 0, 0],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        self.assertEqual(correct_value, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict(self):
+        # Check that str dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{'xrd': [':',':',':', 0, 0]," \
+                 "'stxm': [':',':', 0]," \
+                 "'fluo': [':',':',':', 0]}"
+        value_check = pu._dumps(value)
+
+        correct_value =  {'xrd': [':',':',':', 0, 0],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        self.assertEqual(correct_value, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_1(self):
+        # Check that dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':',':',':', 0, 0],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        value_check = pu._dumps(value)
+        self.assertEqual(value, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_2(self):
+        # Check that dict with str preview and an incorrect preview value
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':',':',':', 0, 'incorrectentry'],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_prev_dict_3(self):
+        # Check that dict with str preview fails with colon and comma
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':,:,:', 0]}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
     def test_int_float_dict(self):
         # Check that dict with integer keys and float values is accepted
         pdefs = self.initial_setup()

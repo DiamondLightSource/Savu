@@ -159,9 +159,12 @@ def _split_notation_is_valid(value):
     if value.count(":") < 4:
         # Only allow 4 colons, start stop step block
         start_stop_split = value.split(":")
-        type_list = [pu._dumps(v) for v in start_stop_split if v]
-        return _typelist(_preview_dimension_singular,
-                                         type_list)
+        try:
+            type_list = [pu._dumps(v) for v in start_stop_split if v]
+            return _typelist(_preview_dimension_singular,
+                             type_list)
+        except Exception as e:
+            print(f"There was an error with your slice notation, '{value}'")
     return False
 
 
