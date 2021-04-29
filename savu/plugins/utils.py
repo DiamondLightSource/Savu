@@ -309,7 +309,8 @@ def convert_multi_params(param_name, value):
     )
     if multi_parameters:
         value = value.split(";")
-        if ":" in value[0]:
+        isdict = re.findall(r"[\{\}]+", value[0])
+        if ":" in value[0] and not isdict:
             seq = value[0].split(":")
             try:
                 seq = [ast.literal_eval(s) for s in seq]
