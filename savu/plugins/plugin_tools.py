@@ -193,6 +193,7 @@ class PluginParameters(object):
         Make sure that the dtype input is valid and that the default value is
         compatible
         """
+        plugin_error_str = f"There was an error with {tool_class.__name__}"
         for p_key, p_dict in param_info_dict.items():
             dtype = p_dict['dtype'].replace(" ", "")
             try:
@@ -201,17 +202,13 @@ class PluginParameters(object):
                     raise Exception("Invalid parameter definition %s:\n %s"
                                     % (p_key, error_str))
             except IndexError:
-                print(f"There was an error with "
-                                f"{tool_class.__name__}")
+                print(plugin_error_str)
             if not self.default_dependency_dict_exists(p_dict):
                 default_value = pu._dumps(p_dict["default"])
-                pvalid, _ = param_u.is_valid(p_key, default_value,
+                pvalid, error_str = param_u.is_valid(p_key, default_value,
                                              p_dict, check=True)
                 if not pvalid:
-                    error_str = f"The default value {p_dict['default']} " \
-                        f"for parameter '{p_key}' does not match the " \
-                        f"defined parameter dtype {p_dict['dtype']}"
-                    raise Exception(error_str)
+                    raise Exception(f"{plugin_error_str}: {error_str}")
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""

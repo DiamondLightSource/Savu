@@ -122,7 +122,7 @@ def _nptype(value):
 def _preview(value):
     """ preview value """
     valid = _typelist(_preview_dimension, value)
-    if not valid and not value:
+    if not valid and _list(value) and not value:
         return True # empty list is allowed
     return valid
 

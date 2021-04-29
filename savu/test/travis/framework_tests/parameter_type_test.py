@@ -447,6 +447,30 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_list_8(self):
+        # Check that boolean False is rejected
+        pdefs = self.initial_setup()
+        key = "ica_w_init"
+        value = False
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_list_9(self):
+        # Check that boolean True is rejected
+        pdefs = self.initial_setup()
+        key = "ica_w_init"
+        value = True
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
     def test_empty_list(self):
         # Check that int list is not accepted
         pdefs = self.initial_setup()
@@ -956,30 +980,6 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_pos_int(self):
-        # Check that positive integers are accepted
-        pdefs = self.initial_setup()
-        key = "positive_test"
-        value = 2
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
-    def test_pos_int_1(self):
-        # Check that negative integers are not accepted
-        pdefs = self.initial_setup()
-        key = "positive_test"
-        value = -2
-
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertFalse(valid_modification)
-
     def test_options(self):
         # Check that valid options are accepted
         pdefs = self.initial_setup()
@@ -1035,16 +1035,15 @@ class ParameterTypeTest(unittest.TestCase):
         self.assertTrue(valid_modification)
 
     def test_multi_param_1(self):
-        # Check that negative integers within the list are not accepted
+        # Check that boolean values within the list are not accepted
         pdefs = self.initial_setup()
         key = "positive_test"
-        value = "-2;5;4"
+        value = "False;5;4"
 
         # Check the multi parameter value is changed to a list correctly
         val_list, error_str = pu.convert_multi_params(key, value)
-        result = [-2, 5, 4]
+        result = [False, 5, 4]
         self.assertEqual(val_list, result)
-
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(

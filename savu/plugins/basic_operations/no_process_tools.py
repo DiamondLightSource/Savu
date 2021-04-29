@@ -10,6 +10,13 @@ class NoProcessTools(PluginTools):
             dtype: preview
             description:
             default: []
+        savu_nexus_preview:
+          visibility: basic
+          dtype: [preview, dict{str:preview}]
+          description: A slice list of required frames to apply to ALL
+            datasets, else a dictionary of slice lists where the key is
+            the dataset name.
+          default: {}
         pattern:
             visibility: advanced
             dtype: [str, None]
@@ -38,7 +45,7 @@ class NoProcessTools(PluginTools):
             default: [-50, 50]
         ica_w_init:
             visibility: intermediate
-            dtype: [list[],list,None]
+            dtype: [list,None]
             description: The initial mixing matrix
             default: 'None'
         distcorr_polynomial_coeffs:
