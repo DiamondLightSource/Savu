@@ -350,8 +350,8 @@ class PluginParameters(object):
         """
         # find dependents
         for name, pdict in self.get_param_definitions().items():
-            default = pdict['default']
-            if isinstance(default, OrderedDict):
+            if self.default_dependency_dict_exists(pdict):
+                default = pdict['default']
                 parent_name = list(default.keys())[0]
                 if parent_name == mod_param:
                     if mod_value in default[parent_name].keys():
