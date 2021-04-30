@@ -140,8 +140,8 @@ class SliceLists(object):
             b = self._split_list(s, max_frames)
             if pad:
                 diff = max_frames - len(b[-1])
-                #print("diff", diff, max_frames, len(b[-1]))
-                b[-1][-1] = self._fix_list_length(b[-1][-1], diff, split_dim) if diff \
+                b2 = b[-1][-2] if len(b[-1]) > 1 else None
+                b[-1][-1] = self._fix_list_length(b[-1][-1], b2, diff, split_dim) if diff \
                     else b[-1][-1]
             banked.extend(b)
         return banked
@@ -245,11 +245,12 @@ class SliceLists(object):
                 slice_list[i] = tuple(slice_list[i])
         return slice_list
 
-    def _fix_list_length(self, sl, length, dim):
+    def _fix_list_length(self, sl, sl2, length, dim):
         sdir = self.data.get_slice_dimensions()
         sl = list(sl)
         s = sl[sdir[dim]]
-        sl[sdir[dim]] = slice(s.start, s.stop + length*s.step, s.step)
+        step = s.start - sl2[sdir[dim]].stop + 1
+        sl[sdir[dim]] = slice(s.start, s.stop + length*step, s.step)
         return tuple(sl)
 
     def _get_local_single_slice_list(self, shape):
@@ -397,10 +398,9 @@ class GlobalData(object):
         sl_dict = {}
         sl, current = \
             self._get_slice_list(self.shape, current_sl=True, pad=True)
-
+        
         sl_dict['current'], _ = self.trans._get_frames_per_process(current)
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
-
         if self.trans.pad:
             sl = self.trans._pad_slice_list(
                 sl, "-value['before']", "value['after']")
@@ -422,6 +422,7 @@ class GlobalData(object):
                             "directions %s" % (self.get_current_pattern_name(),
                                                self.get_slice_directions()))
         slice_dims = self.data.get_slice_dimensions()
+
         transfer_gsl = self.trans._group_slice_list_in_multiple_dimensions(
                 transfer_ssl, mft, slice_dims, pad=pad)
 
