@@ -249,7 +249,7 @@ class SliceLists(object):
         sdir = self.data.get_slice_dimensions()
         sl = list(sl)
         s = sl[sdir[dim]]
-        step = s.start - sl2[sdir[dim]].stop + 1
+        step = s.start - sl2[sdir[dim]].stop + 1 if sl2 else s.step
         sl[sdir[dim]] = slice(s.start, s.stop + length*step, s.step)
         return tuple(sl)
 
