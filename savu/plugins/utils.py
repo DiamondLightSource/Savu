@@ -361,7 +361,7 @@ def _dumps(val):
         try:
             isdict = re.findall(r"[\{\}]+", val)
             # Matches { } between one and unlimited number of times
-            if isdict:
+            if isdict and isinstance(val, dict):
                 value_dict = {}
                 for k, v in val.items():
                     v = v.replace("[", "'[").replace("]", "]'")
@@ -371,11 +371,17 @@ def _dumps(val):
                 value = parse_config_string(val)
                 return value
         except Exception:
-            # for when parameter tuning with lists is added to the framework
             if len(val.split(';')) > 1:
                 value = val
-            else:
-                raise Exception("Invalid string %s" % val)
+                return value
+        try:
+            isdict = re.findall(r"[\{\}]+", val)
+            # Matches { } between one and unlimited number of times
+            if isdict:
+                value = val.replace("[", "'[").replace("]", "]'")
+                return _dumps(value)
+        except Exception:
+            raise Exception("Invalid string %s" % val)
     else:
         value = val
     return value
