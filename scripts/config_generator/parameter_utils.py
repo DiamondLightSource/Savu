@@ -258,10 +258,6 @@ def _dict_combination(param_name, value, param_def):
 
 
 def _check_dict_combination(param_name, value, param_def):
-    if is_multi_param(param_name, value):
-        return _check_multi_param(_check_dict_combination, param_name,
-                                                        value, param_def)
-
     dtype = copy.copy(param_def['dtype'])
     dtype = dtype[len('dict'):]
     dtype = _find_options(dtype, 'dict', '{', '}', ':')
@@ -327,10 +323,6 @@ def _list_combination(param_name, value, param_def):
 
 
 def _check_list_combination(param_name, value, param_def):
-    if is_multi_param(param_name, value):
-        return _check_multi_param(_check_list_combination, param_name,
-                                                        value, param_def)
-
     dtype = copy.copy(param_def['dtype'])
     # remove outer list from dtype and find separate list entries
     dtype = _find_options(dtype[len('list'):])
@@ -405,6 +397,7 @@ def _find_options(string, dtype='list', bstart="[", bend="]", split=","):
 
     return options
 
+
 def _convert_to_list(value):
     return value if isinstance(value, list) else [value]
 
@@ -442,6 +435,11 @@ def is_valid(param_name, value, param_def, check=False):
             return True, ""
 
     dtype = param_def["dtype"]
+
+    # If this is parameter tuning, check each individually
+    if is_multi_param(param_name, value):
+        return _check_multi_param(param_name, value, param_def)
+
     if not dtype.split('list[')[0]:
         pvalid, error_str = _list_combination(param_name, value, param_def)
     elif not dtype.split('dict{')[0]:
@@ -467,26 +465,22 @@ def _check_type(param_name, value, param_def):
     """
     dtype = param_def['dtype']
     # If this is parameter tuning, check each individually
-    if is_multi_param(param_name, value):
-        return _check_multi_param(_check_type, param_name, value, param_def)
-    else:
-        try:
-            pvalid = globals()["_" + dtype](value)
-        except KeyError:
-            return False, "Unknown dtype '%s'" % dtype
+    try:
+        pvalid = globals()["_" + dtype](value)
+    except KeyError:
+        return False, "Unknown dtype '%s'" % dtype
 
-        pvalid, opt_err = _check_options(param_def, value, pvalid)
-        if not pvalid:
-            return pvalid, opt_err if opt_err \
-                else _error_message(dtype, param_name)
+    pvalid, opt_err = _check_options(param_def, value, pvalid)
+    if not pvalid:
+        return pvalid, opt_err if opt_err \
+            else _error_message(dtype, param_name)
 
     return True, ""
 
 
-def _check_multi_param(func, param_name, value, param_def):
+def _check_multi_param(param_name, value, param_def):
     """ Check each multi parameter value individually
 
-    :param func: The function name
     :param param_name: The parameter name
     :param value: The multi parameter value to check
     :param param_def: The dictionary of parameter definitions
@@ -498,7 +492,7 @@ def _check_multi_param(func, param_name, value, param_def):
     if error_str:
         return False, error_str
     for val in val_list:
-        pvalid, error_str = func(param_name, val, param_def)
+        pvalid, error_str = is_valid(param_name, val, param_def)
         if not pvalid:
             break
     return pvalid, error_str
