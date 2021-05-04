@@ -249,7 +249,7 @@ class SliceLists(object):
         sdir = self.data.get_slice_dimensions()
         sl = list(sl)
         s = sl[sdir[dim]]
-        step = s.start - sl2[sdir[dim]].stop + 1
+        step = s.start - sl2[sdir[dim]].stop + 1 if sl2 else s.step
         sl[sdir[dim]] = slice(s.start, s.stop + length*step, s.step)
         return tuple(sl)
 
@@ -398,7 +398,7 @@ class GlobalData(object):
         sl_dict = {}
         sl, current = \
             self._get_slice_list(self.shape, current_sl=True, pad=True)
-        
+
         sl_dict['current'], _ = self.trans._get_frames_per_process(current)
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
         if self.trans.pad:
