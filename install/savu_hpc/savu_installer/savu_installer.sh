@@ -263,35 +263,36 @@ if [ ! $test_flag ]; then
       recipes=$savu_path/$install_path/../conda-recipes
     fi
 
-      if [ $EXPLICIT_FILE = false ]; then
-      echo "Installing mpi4py from savu-dep conda channel"
-      mpi4py_version="3.0.2"
-      export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
-      conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
-      #string=$(awk '/^mpi4py/' $versions_file)
-      #mpi4py_version=$(echo $string | cut -d " " -f 2)
+    if [ $EXPLICIT_FILE = false ]; then
+    echo "Installing mpi4py from savu-dep conda channel"
+    string=$(awk '/^mpi4py/' $versions_file)
+    mpi4py_version=$(echo $string | cut -d " " -f 2)
+    export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
+    conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
 
-      echo "Installing hdf5 from savu-dep conda channel"
-      hdf5_vesion="1.10.5"
-      export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
-      echo $VERSION_BUILD_HDF5
-      conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
+    echo "Installing hdf5 from savu-dep conda channel"
+    string=$(awk '/^hdf5/' $versions_file)
+    hdf5_vesion=$(echo $string | cut -d " " -f 2)
+    export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
+    echo $VERSION_BUILD_HDF5
+    conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
-      echo "Installing h5py from savu-dep conda channel"
-      VERSION_H5PY="2.10.0"
-      export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
-      conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
+    echo "Installing h5py from savu-dep conda channel"
+    string=$(awk '/^h5py/' $versions_file)
+    VERSION_H5PY=$(echo $string | cut -d " " -f 2)
+    export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
+    conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
-      echo "Installing pytorch..."
-      string=$(awk '/^cudatoolkit/' $versions_file)
-      cudatoolkit_version=$(echo $string | cut -d " " -f 2)
-      conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
+    echo "Installing pytorch..."
+    string=$(awk '/^cudatoolkit/' $versions_file)
+    cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+    conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
 
-      export PACKAGE=cudatoolkit
-      string=$(awk '/^cudatoolkit/' $versions_file)
-      cudatoolkit_version=$(echo $string | cut -d " " -f 2)
-      export VER_PACKAGE=$cudatoolkit_version
-      conda list $PACKAGE > check_conda_package.txt
+    export PACKAGE=cudatoolkit
+    string=$(awk '/^cudatoolkit/' $versions_file)
+    cudatoolkit_version=$(echo $string | cut -d " " -f 2)
+    export VER_PACKAGE=$cudatoolkit_version
+    conda list $PACKAGE > check_conda_package.txt
       if grep -q $VER_PACKAGE check_conda_package.txt; then
           echo -e "\nPackage $PACKAGE of v.$VER_PACKAGE is found in Savu's environment, continue with installation..."
           rm -f check_conda_package.txt
@@ -300,11 +301,13 @@ if [ ! $test_flag ]; then
           rm -f check_conda_package.txt
           exit 0
       fi
-      conda env update -n root -f $DIR/environment.yml
+    conda env update -n root -f $DIR/environment.yml
     else
       echo "Installing all required packages from the explicit file $EXPLICIT_FILE" | xargs
       conda update -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
     fi
+  else
+    echo "Installation for $facility has been chosen, make sure you install your custom-build mpi4py/hdf5/h5py packages" | xargs
   fi
 
   # cleanup build artifacts
