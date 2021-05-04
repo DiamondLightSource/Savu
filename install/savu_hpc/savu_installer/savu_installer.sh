@@ -272,15 +272,14 @@ if [ ! $test_flag ]; then
 
     echo "Installing hdf5 from savu-dep conda channel"
     string=$(awk '/^hdf5/' $versions_file)
-    hdf5_vesion=$(echo $string | cut -d " " -f 2)
-    export VERSION_BUILD_HDF5=$hdf5_vesion"_openmpi_"$openmpi_version
-    echo $VERSION_BUILD_HDF5
+    hdf5_version=$(echo $string | cut -d " " -f 2)
+    export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
     conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
     echo "Installing h5py from savu-dep conda channel"
     string=$(awk '/^h5py/' $versions_file)
-    VERSION_H5PY=$(echo $string | cut -d " " -f 2)
-    export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
+    h5py_version=$(echo $string | cut -d " " -f 2)
+    export VERSION_BUILD_H5PY=$h5py_version"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
     conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
     echo "Installing pytorch..."
