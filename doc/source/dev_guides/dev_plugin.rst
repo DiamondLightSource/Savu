@@ -88,8 +88,8 @@ Docstring example:
 
     """
 
-Next, Import any classes which you may need. Normally you will require the \
-Plugin class and the function decorator register_plugin.
+Next, import any classes which you may need. Most plugins would
+ require the Plugin class and the function decorator register_plugin.
 
 Import example:
 
@@ -210,7 +210,7 @@ An example of a plugin tools class.
             """
             pattern:
                 visibility: basic
-                dtype: str
+                dtype: [None, str]
                 description: Explicitly state the slicing pattern.
                 default: None
             other:
@@ -233,7 +233,7 @@ Yaml Text
 
     pattern:
         visibility: advanced
-        dtype: str
+        dtype: [None,str]
         description: Explicitly state the slicing pattern.
         default: None
     other:
@@ -295,7 +295,7 @@ The basic data types are included in the table below:
       - A boolean
     * - filepath
       - A file path
-    * - hdf5path
+    * - h5path
       - An hdf5 path
     * - yamlfilepath
       - A yaml file path
@@ -376,7 +376,6 @@ Lists containing multiple data types
       - A list of any length containing btype(1) or btype(2) entries
 
 Where btype stands for a type from the basic type table.
-The btype can be the same type, or of different types.
 
 .. note::
 
@@ -489,7 +488,7 @@ In the table below are some more specific data type examples:
       - A sequence of items. The first item in the list should be a
         file path, the next should be an interior file path, the last
         item should be an integer. [<file path>, <hdf5 interior path>, <integer>]
-    * - list[hdf5path, int]
+    * - list[h5path, int]
       - A sequence of items. The first item in the list should be an
         interior file path, the last item should be an integer.
         [<hdf5 interior path> , <integer>]
@@ -503,7 +502,8 @@ Any string of text
 
 Default
 '''''''
-The default value of the parameter. For example, False, 0, 0.01
+The default value of the parameter. For example, False, 0, 0.01.
+This default value must adhere to the correct data type, as specified by dtype.
 
 .. code-block:: yaml
 
