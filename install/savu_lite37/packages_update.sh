@@ -42,7 +42,7 @@ while IFS="|" read -r package_name channel_name stable_version failed_version in
       if [ $(version $new_version_package) > $(version $stable_version) ]; then
         if [ $(version $new_version_package) -ne $(version $failed_version) ]; then
           echo "--> Installing a NEW version of the package"
-          conda install --yes -c $channel_name $package_name --force-reinstall
+          conda install --yes -c $channel_name $package_name --force-reinstall --no-deps
           # Generate an explicit list file with installed conda packages
           conda list --explicit > spec-savu3_0_lite_"$label".txt
           sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_"$label".txt
@@ -71,7 +71,7 @@ while IFS="|" read -r package_name channel_name stable_version failed_version in
                 channel_name="${channel_name#"${channel_name%%[![:space:]]*}"}"
                 # remove trailing whitespace characters
                 channel_name="${channel_name%"${channel_name##*[![:space:]]}"}"
-                conda install --yes -c $channel_name $package_name=$stable_version --force-reinstall
+                conda install --yes -c $channel_name $package_name=$stable_version --force-reinstall --no-deps
               fi
           else
             echo "The package $package_name has NOT been updated to the NEW version $new_version_package succesfully, mark as INCOMPATIBLE" | xargs
