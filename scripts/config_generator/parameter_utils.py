@@ -511,10 +511,8 @@ def _check_default(value, default_value):
     """
     default_present = False
     if (
-        default_value == str(value)
-        or default_value == value
+        str(default_value) == str(value)
         or value == "default"
-        or str(default_value) == str(value)
     ):
         default_present = True
     return default_present
