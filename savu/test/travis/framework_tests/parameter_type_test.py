@@ -446,7 +446,7 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
         )
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_list_8(self):
         # Check that boolean False is rejected
@@ -965,7 +965,7 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
         )
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_float_list_11(self):
         # Check that np float lists are accepted
