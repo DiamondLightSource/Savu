@@ -63,6 +63,14 @@ def _bool(value): # should eventually be a drop-down list
     return valid
 
 
+def _dir(value):
+    """ A directory """
+    valid = False
+    if _str(value):
+        valid = os.path.isdir(value)
+    return valid
+
+
 def _filepath(value):
     """ file path """
     valid = False
@@ -424,6 +432,7 @@ def is_valid(param_name, value, param_def, check=False):
         description, dtype, default
     :return: boolean True if the value is a valid parameter value
     """
+    print("checking %s is of dtype %s" % (value, param_def['dtype']))
     original_dtype = copy.copy(param_def['dtype'])
     # remove all whitespaces from dtype
     param_def['dtype'] = param_def['dtype'].replace(" ", "")
