@@ -361,12 +361,16 @@ def _dumps(val):
         try:
             isdict = re.findall(r"[\{\}]+", val)
             # Matches { } between one and unlimited number of times
-            if isdict and isinstance(val, dict):
-                value_dict = {}
-                for k, v in val.items():
-                    v = v.replace("[", "'[").replace("]", "]'")
-                    value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
-                return value_dict
+            if isdict:
+                if isinstance(val, dict):
+                    value_dict = {}
+                    for k, v in val.items():
+                        v = v.replace("[", "'[").replace("]", "]'")
+                        value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
+                    return value_dict
+                else:
+                    value = val.replace("[", "'[").replace("]", "]'")
+                    return _dumps(yaml.load(value, Loader=yaml.SafeLoader))
             else:
                 value = parse_config_string(val)
                 return value
@@ -374,14 +378,8 @@ def _dumps(val):
             if len(val.split(';')) > 1:
                 value = val
                 return value
-        try:
-            isdict = re.findall(r"[\{\}]+", val)
-            # Matches { } between one and unlimited number of times
-            if isdict:
-                value = val.replace("[", "'[").replace("]", "]'")
-                return _dumps(value)
-        except Exception:
-            raise Exception("Invalid string %s" % val)
+            else:
+                raise Exception("Invalid string %s" % val)
     else:
         value = val
     return value
