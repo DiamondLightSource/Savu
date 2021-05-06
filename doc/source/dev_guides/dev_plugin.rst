@@ -299,6 +299,8 @@ The basic data types are included in the table below:
       - An hdf5 path
     * - yamlfilepath
       - A yaml file path
+    * - dir
+      - A directory
     * - nptype
       - A numpy type
     * - preview

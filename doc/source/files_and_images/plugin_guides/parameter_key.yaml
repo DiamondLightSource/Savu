@@ -14,8 +14,9 @@ dtype:
         float: Float
         bool: Boolean
         filepath: File path
-        hdf5path: Hdf5 path
+        h5path: Hdf5 path
         yamlfilepath: Yaml file path
+        dir: Directory
         nptype: Numpy type
         preview: Preview slice list for data
         list: List
