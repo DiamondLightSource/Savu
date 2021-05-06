@@ -89,7 +89,7 @@ Docstring example:
     """
 
 Next, import any classes which you may need. Most plugins would
- require the Plugin class and the function decorator register_plugin.
+require the Plugin class and the function decorator register_plugin.
 
 Import example:
 
