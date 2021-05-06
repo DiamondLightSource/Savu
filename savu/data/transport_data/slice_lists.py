@@ -398,7 +398,7 @@ class GlobalData(object):
         sl_dict = {}
         sl, current = \
             self._get_slice_list(self.shape, current_sl=True, pad=True)
-        
+
         sl_dict['current'], _ = self.trans._get_frames_per_process(current)
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
         if self.trans.pad:

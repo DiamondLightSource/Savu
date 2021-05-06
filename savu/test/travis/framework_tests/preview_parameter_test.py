@@ -242,6 +242,50 @@ class PreviewParameterTest(unittest.TestCase):
         value = {}
         self.assertFalse(self.check_modification(value, key, pdefs))
 
+    def test_29(self):
+        # Check that comma string is declined
+        pdefs = self.initial_setup()
+        key = "preview"
+        value = ":,:,:"
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_30(self):
+        # Check that comma string list is declined
+        pdefs = self.initial_setup()
+        key = "preview"
+        value = [":,:,:"]
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_31(self):
+        # Check that punctuation is declined
+        pdefs = self.initial_setup()
+
+        import string
+        for x in string.punctuation:
+            if x != ":":
+                key = "preview"
+                value = [x]
+                self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_32(self):
+        # Check that slice notation and punctuation is declined
+        pdefs = self.initial_setup()
+
+        import string
+        for x in string.punctuation:
+            if x != ":":
+                key = "preview"
+                value = [f"{x}:"]
+                self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_33(self):
+        # Check that default list : is allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = [":"]
+        self.assertTrue(self.check_modification(value, key, pdefs))
+
     def test_dict_1(self):
         # Check that key value dict is not accepted if preview is invalid
         pdefs = self.initial_setup()

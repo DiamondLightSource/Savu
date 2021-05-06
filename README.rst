@@ -71,11 +71,11 @@ Features
 - Easy integration of new functionality
 
 Documentation
-========
+==============
 The full documentation is available at https://savu.readthedocs.org/en/latest/
 
 Installation (Linux only)
-========
+=========================
 | Install Savu-lite package into an empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
 | ``conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev``
 

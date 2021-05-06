@@ -12,7 +12,7 @@ https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
         """
         output_size:
             visibility: advanced
-            dtype: [list,int,str]
+            dtype: [None, int, list[int,int],str]
             description:  The dimension of the reconstructed volume
               (only X-Y dimension).
             default: auto

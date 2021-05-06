@@ -309,7 +309,8 @@ def convert_multi_params(param_name, value):
     )
     if multi_parameters:
         value = value.split(";")
-        if ":" in value[0]:
+        isdict = re.findall(r"[\{\}]+", value[0])
+        if ":" in value[0] and not isdict:
             seq = value[0].split(":")
             try:
                 seq = [ast.literal_eval(s) for s in seq]
@@ -361,18 +362,22 @@ def _dumps(val):
             isdict = re.findall(r"[\{\}]+", val)
             # Matches { } between one and unlimited number of times
             if isdict:
-                value_dict = {}
-                for k, v in val.items():
-                    v = v.replace("[", "'[").replace("]", "]'")
-                    value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
-                return value_dict
+                if isinstance(val, dict):
+                    value_dict = {}
+                    for k, v in val.items():
+                        v = v.replace("[", "'[").replace("]", "]'")
+                        value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
+                    return value_dict
+                else:
+                    value = val.replace("[", "'[").replace("]", "]'")
+                    return _dumps(yaml.load(value, Loader=yaml.SafeLoader))
             else:
                 value = parse_config_string(val)
                 return value
         except Exception:
-            # for when parameter tuning with lists is added to the framework
             if len(val.split(';')) > 1:
                 value = val
+                return value
             else:
                 raise Exception("Invalid string %s" % val)
     else:

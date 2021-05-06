@@ -156,14 +156,16 @@ def _split_notation_is_valid(value):
     :param value: The value to check
     :return: parameter_valid True if the split notation is valid
     """
-    split_notation_valid = False
     if value.count(":") < 4:
         # Only allow 4 colons, start stop step block
         start_stop_split = value.split(":")
-        type_list = [pu._dumps(v) for v in start_stop_split if v]
-        split_notation_valid = _typelist(_preview_dimension_singular,
-                                         type_list)
-    return split_notation_valid
+        try:
+            type_list = [pu._dumps(v) for v in start_stop_split if v]
+            return _typelist(_preview_dimension_singular,
+                             type_list)
+        except Exception as e:
+            print(f"There was an error with your slice notation, '{value}'")
+    return False
 
 
 def _preview_dimension_singular(value):
@@ -250,17 +252,27 @@ def _dict_combination(param_name, value, param_def):
     pvalid, error_str = _check_type(param_name, value, param_def)
     if not pvalid:
         return pvalid, error_str
+    param_def['dtype'] = dtype
 
+    return _check_dict_combination(param_name, value, param_def)
+
+
+def _check_dict_combination(param_name, value, param_def):
+    dtype = copy.copy(param_def['dtype'])
     dtype = dtype[len('dict'):]
     dtype = _find_options(dtype, 'dict', '{', '}', ':')
     # check there are only two options - for key and for value:
     if len(dtype) != 2:
         return False, "Incorrect number of dtypes supplied for dictionary"
+    return _check_dict_entry_dtype(param_name, value, param_def, dtype)
 
+
+def _check_dict_entry_dtype(param_name, value, param_def, dtype):
+    """ Check that the dict keys and values are of the correct dtype """
     # check the keys
     n_vals = len(value.keys())
 
-    multi_vals = zip(list([dtype[0]]*n_vals), list(value.keys()))
+    multi_vals = zip(list([dtype[0]] * n_vals), list(value.keys()))
     pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
 
     if not pvalid:
@@ -268,10 +280,8 @@ def _dict_combination(param_name, value, param_def):
         return pvalid, error_str
 
     # check the values:
-    multi_vals = zip(list([dtype[1]]*n_vals), list(value.values()))
-    pvalid, error_str = _is_valid_multi(param_name, param_def, multi_vals)
-
-    return pvalid, error_str
+    multi_vals = zip(list([dtype[1]] * n_vals), list(value.values()))
+    return _is_valid_multi(param_name, param_def, multi_vals)
 
 
 def _options_list(param_name, value, param_def):
@@ -307,7 +317,13 @@ def _list_combination(param_name, value, param_def):
     pvalid, error_str = _check_type(param_name, value, param_def)
     if not pvalid:
         return pvalid, error_str
+    param_def['dtype'] = dtype
 
+    return _check_list_combination(param_name, value, param_def)
+
+
+def _check_list_combination(param_name, value, param_def):
+    dtype = copy.copy(param_def['dtype'])
     # remove outer list from dtype and find separate list entries
     dtype = _find_options(dtype[len('list'):])
 
@@ -322,6 +338,10 @@ def _list_combination(param_name, value, param_def):
     # list can have any length if btype_list has length 1
     if len(dtype) == 1:
         dtype = dtype*len(value)
+
+    if len(dtype) != len(value):
+        return False, f"Incorrect number of list entries for {value}. " \
+            f"The required format is {dtype}"
 
     return _is_valid_multi(param_name, param_def, zip(dtype, value))
 
@@ -377,19 +397,22 @@ def _find_options(string, dtype='list', bstart="[", bend="]", split=","):
 
     return options
 
+
 def _convert_to_list(value):
     return value if isinstance(value, list) else [value]
 
 
 def _is_valid_multi(param_name, param_def, multi_vals):
+    dtype = copy.copy(param_def['dtype'])
     for atype, val in multi_vals:
         param_def['dtype'] = atype
         _check_val = pu._dumps(val)
         pvalid, error_str = is_valid(param_name, _check_val, param_def)
         if not pvalid:
             error_str = "The value %s should be of type %s" % (val, atype)
-            break
-    return pvalid, error_str
+            return pvalid, error_str
+    param_def['dtype'] = dtype
+    return True, ""
 
 
 def is_valid(param_name, value, param_def, check=False):
@@ -412,6 +435,11 @@ def is_valid(param_name, value, param_def, check=False):
             return True, ""
 
     dtype = param_def["dtype"]
+
+    # If this is parameter tuning, check each individually
+    if is_multi_param(param_name, value):
+        return _check_multi_param(param_name, value, param_def)
+
     if not dtype.split('list[')[0]:
         pvalid, error_str = _list_combination(param_name, value, param_def)
     elif not dtype.split('dict{')[0]:
@@ -437,29 +465,37 @@ def _check_type(param_name, value, param_def):
     """
     dtype = param_def['dtype']
     # If this is parameter tuning, check each individually
-    if is_multi_param(param_name, value):
-        val_list, error_str = pu.convert_multi_params(param_name, value)
-        # incorrect parameter tuning syntax
-        if error_str:
-            return False, error_str
+    try:
+        pvalid = globals()["_" + dtype](value)
+    except KeyError:
+        return False, "Unknown dtype '%s'" % dtype
 
-        for val in val_list:
-            pvalid, error_str = _check_type(param_name, val, param_def)
-
-            if not pvalid:
-                return pvalid, error_str
-    else:
-        try:
-            pvalid = globals()["_" + dtype](value)
-        except KeyError:
-            return False, "Unknown dtype '%s'" % dtype
-
-        pvalid, opt_err = _check_options(param_def, value, pvalid)
-        if not pvalid:
-            return pvalid, opt_err if opt_err \
-                else _error_message(dtype, param_name)
+    pvalid, opt_err = _check_options(param_def, value, pvalid)
+    if not pvalid:
+        return pvalid, opt_err if opt_err \
+            else _error_message(dtype, param_name)
 
     return True, ""
+
+
+def _check_multi_param(param_name, value, param_def):
+    """ Check each multi parameter value individually
+
+    :param param_name: The parameter name
+    :param value: The multi parameter value to check
+    :param param_def: The dictionary of parameter definitions
+    :return: pvalid True if the value type matches the required dtype
+             type_error_str, Error message
+    """
+    val_list, error_str = pu.convert_multi_params(param_name, value)
+    # incorrect parameter tuning syntax
+    if error_str:
+        return False, error_str
+    for val in val_list:
+        pvalid, error_str = is_valid(param_name, val, param_def)
+        if not pvalid:
+            break
+    return pvalid, error_str
 
 
 def is_multi_param(param_name, value):
@@ -475,10 +511,8 @@ def _check_default(value, default_value):
     """
     default_present = False
     if (
-        default_value == str(value)
-        or default_value == value
+        str(default_value) == str(value)
         or value == "default"
-        or str(default_value) == str(value)
     ):
         default_present = True
     return default_present

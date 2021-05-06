@@ -55,13 +55,13 @@ class BaseFluoFitterTools(PluginTools):
 
         fitted_energy_range_keV:
            visibility: intermediate
-           dtype: list
+           dtype: list[float]
            description: The fitted energy range.
            default: [2.,18.]
 
         elements:
            visibility: intermediate
-           dtype: list
+           dtype: list[str]
            description: The fitted elements,
            default: ['Zn','Cu', 'Ar']
 

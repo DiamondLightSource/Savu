@@ -1,6 +1,6 @@
 centre_of_rotation:
      visibility: basic
-     dtype: [float, int, str]
+     dtype: [float, str]
      description: Centre of rotation to use for the
        reconstruction.
      default: 0.0
@@ -9,7 +9,7 @@ centre_of_rotation:
 
 init_vol:
      visibility: advanced
-     dtype: str
+     dtype: [str,None,list]
      description: Dataset to use as volume initialiser
        (does not currently work with preview)
      default: 'None'
@@ -18,7 +18,7 @@ init_vol:
 
 centre_pad:
      visibility: intermediate
-     dtype: float
+     dtype: [float,bool]
      description: Pad the sinogram to centre it in order
        to fill the reconstructed volume ROI for asthetic
        purposes.
@@ -33,7 +33,7 @@ centre_pad:
 
 outer_pad:
      visibility: intermediate
-     dtype: float
+     dtype: [bool,float]
      description: 'Pad the sinogram width to fill the
        reconstructed volume for asthetic purposes. Choose
        from True (defaults to sqrt(2)), False or
@@ -63,7 +63,7 @@ preview:
 
 force_zero:
      visibility: intermediate
-     dtype: list[int,int]
+     dtype: [list[None,None],list[int,int]]
      description: Set any values in the reconstructed image
        outside of this range to zero.
      default: '[None, None]'
