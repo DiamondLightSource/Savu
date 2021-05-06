@@ -72,8 +72,9 @@ class ParameterTypeTest(unittest.TestCase):
 
     def test_int_3(self):
         # Octal value not converted
-        '''If your YAML contains integer values that start with a 0 and do not
-        contain digits greater than 7, they will be parsed as octal values.'''
+        """If your YAML contains integer values that start with a 0 and do not
+        contain digits greater than 7, they will be parsed as octal values.
+        """
         pdefs = self.initial_setup()
         key = "int_param"
         value = "0123"
@@ -445,7 +446,7 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
         )
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_list_8(self):
         # Check that boolean False is rejected
@@ -964,7 +965,7 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
         )
-        self.assertFalse(valid_modification)
+        self.assertTrue(valid_modification)
 
     def test_float_list_11(self):
         # Check that np float lists are accepted
@@ -1238,6 +1239,156 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_multi_param_13(self):
+        pdefs = self.initial_setup()
+        key = "range_param"
+        value = "[8,8,9];[78,89];[78,0,test]"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [[8, 8, 9], [78, 89], [78, 0, 'test']]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_multi_param_14(self):
+        pdefs = self.initial_setup()
+        key = "range_param"
+        value = "[8,8,9];[78,89];[78, dhfdh]"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [[8, 8, 9], [78, 89], [78, 'dhfdh']]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_multi_param_dict_1(self):
+        pdefs = self.initial_setup()
+        key = "dict_param"
+        value = "{1: 2};{1: 2};{1: 2}"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 2},{1: 2},{1: 2}]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_multi_param_dict_2(self):
+        pdefs = self.initial_setup()
+        key = "dict_param"
+        value = "{1: 3};{1: 'another value'};{1: 2}"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 3},{1: 'another value'},{1: 2}]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_multi_param_dict_3(self):
+        # Check that if an integer is present in the multi value list,
+        # the dict is not valid
+        pdefs = self.initial_setup()
+        key = "dict_param"
+        value = "{1: 2};{1: 2};1"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 2},{1: 2},1]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_multi_param_dict_4(self):
+        # Check multiple dictionary values
+        pdefs = self.initial_setup()
+        key = "dict_param"
+        value = "{1: 2, 5:9, 3:99};{1: 2};"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 2, 3: 99, 5: 9}, {1: 2}]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_multi_param_dict_5(self):
+        # Check multiple dictionary values
+        pdefs = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{1: 2, 5:9, 3:99};{1: 2};"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 2, 3: 99, 5: 9}, {1: 2}]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_multi_param_dict_6(self):
+        # Check that if an integer is present in the multi value list,
+        # the dict is not valid
+        pdefs = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{1: 2};{1: 2};1"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 2},{1: 2},1]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_multi_param_dict_7(self):
+        pdefs = self.initial_setup()
+        key = "cor_dict_param"
+        value = "{1: 3};{1: 'another value'};{1: 2}"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+        result = [{1: 3},{1: 'another value'},{1: 2}]
+        self.assertEqual(val_list, result)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
     def test_dict(self):
         # Check that dict is accepted
         pdefs = self.initial_setup()
@@ -1327,6 +1478,97 @@ class ParameterTypeTest(unittest.TestCase):
         key = "dict_param"
         value = {'example_key': [4,5,6,7]}
 
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_0(self):
+        # Check that str dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{xrd: [:,:,:, 0, 0]," \
+                 "stxm: [:,:, 0]," \
+                 "fluo: [:,:,:,0]}"
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict(self):
+        # Check that str dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{'xrd': [':',':',':', 0, 0]," \
+                 "'stxm': [':',':', 0]," \
+                 "'fluo': [':',':',':', 0]}"
+        value_check = pu._dumps(value)
+
+        correct_value =  {'xrd': [':',':',':', 0, 0],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        self.assertEqual(correct_value, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_1(self):
+        # Check that dict with str preview is accepted
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':',':',':', 0, 0],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        value_check = pu._dumps(value)
+        self.assertEqual(value, value_check)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_2(self):
+        # Check that dict with str preview and an incorrect preview value
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':',':',':', 0, 'incorrectentry'],
+                  'stxm': [':',':', 0],
+                  'fluo': [':',':',':', 0]}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_prev_dict_3(self):
+        # Check that dict with str preview fails with colon and comma
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {'xrd': [':,:,:', 0]}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_prev_dict_multi(self):
+        # Check that dict with str preview fails with colon and comma
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{'xrd': [':,:,:', 0]};{'xrd': [':', 0]}"
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_prev_dict_multi_1(self):
+        # Check that dict with str preview passes
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  "{'xrd': [':', 0]};{'xrd': [':', 0]}"
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]

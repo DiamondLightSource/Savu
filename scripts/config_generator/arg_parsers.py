@@ -238,9 +238,14 @@ def _expand_arg_parser(args=None, doc=True):
     """ Argument parser for expand command. """
     desc = sc.get_description()["expand"]
     parser = ArgumentParser(prog="expand", description=desc)
-    plugin_pos_str = "Expand this plugin preview parameter."
+    plugin_pos_str = "Expand this plugin preview parameter. Turn off the " \
+                     "expand view with 'expand off'"
     parser.add_argument("plugin_pos", help=plugin_pos_str)
-    dim_str = "Number of dimensions the data has."
+    dim_str = "Data dimensions. If this value is the same as the " \
+              "current dimension value, then the dimension of the " \
+              "preview parameter will be unchanged. If it is greater " \
+              "or smaller than the current dimension value, then the " \
+              "dimension of the preview value will be altered."
     parser.add_argument("dim", nargs="?", type=int, help=dim_str)
     # Hidden argument to use when argument can be string and one
     # dimension is displayed

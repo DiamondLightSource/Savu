@@ -16,7 +16,7 @@ inverse radon transform from scikit-image.
 
         output_size:
             visibility: basic
-            dtype: [None, int, list]
+            dtype: [None, int, list[int,int]]
             description: Number of rows and columns in the reconstruction.
             default: None
 

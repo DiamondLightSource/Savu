@@ -187,6 +187,11 @@ class NoProcessTools(PluginTools):
             dtype: dict{int:float}
             description: dictionary required
             default: "{'2':4.0}"
+        savunexusloader_dict_param:
+            visibility: basic
+            dtype: dict{str:preview}
+            description: Dictionary of str and preview dtypes
+            default: {}
         file_path_param:
             visibility: basic
             dtype: filepath

@@ -53,5 +53,13 @@ class MultiNxtomoLoaderTools(PluginTools):
             dtype: list[int,int]
             description: The start and end of file numbers
             default: [0,10]
+        angles:
+            visibility: intermediate
+            dtype: [str, int, None]
+            description: If this is 4D data stored in 3D then pass an integer
+              value equivalent to the number of projections per 180 degree
+              scan. If the angles parameter is set to None, then values from
+              default dataset used.
+            default: None
 
         """
