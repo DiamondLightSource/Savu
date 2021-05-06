@@ -1,4 +1,4 @@
-{% set repo = "p39" %}
+{% set repo = "py39" %}
 
 package:
   name: savu-lite
