@@ -23,18 +23,15 @@ class MultiNxtomoLoaderTools(PluginTools):
             default: 'entry1/tomo_entry/data/data'
         dark:
             visibility: intermediate
-            dtype: [list[filepath, h5path, int],list[None,None,int]]
-            description: Specify the nexus file location where the dark field
-              images are stored. Then specify the path within this nexus file,
-              at which the dark images are located. The last value will be a
-              scale value.
+            dtype: [list[filepath, h5path, int], list[None, None, 1]]
+            description: Optional path to the dark field data file, nxs path 
+                and scale value.
             default: [None, None, 1]
         flat:
             visibility: intermediate
-            dtype: [list[filepath, h5path, int],list[None,None,int]]
-            description: This parameter needs to be specified only if flats
-              not stored in the same dataset as sample projections. Optional
-              Path to the flat field data file, nxs path and scale value.
+            dtype: [list[filepath, h5path, int], list[None, None, 1]]
+            description: Optional path to the flat field data file, nxs path 
+                and scale value.
             default: [None, None, 1]
         stack_or_cat:
             visibility: intermediate

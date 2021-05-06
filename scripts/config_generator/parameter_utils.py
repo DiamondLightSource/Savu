@@ -63,6 +63,14 @@ def _bool(value): # should eventually be a drop-down list
     return valid
 
 
+def _dir(value):
+    """ A directory """
+    valid = False
+    if _str(value):
+        valid = os.path.isdir(value)
+    return valid
+
+
 def _filepath(value):
     """ file path """
     valid = False

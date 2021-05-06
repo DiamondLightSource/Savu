@@ -344,7 +344,7 @@ class PluginParameters(object):
                 self.get_dependent_default(parent['default'])
         return child['default'][parent_name][self.parameters[parent_name]]
 
-    def warn_dependents(self, mod_param, mod_value): # all defaults have already been set at this point - move this somewhere else?
+    def warn_dependents(self, mod_param, mod_value): 
         """
         Find dependents of a modified parameter # complete the docstring
         """
@@ -360,7 +360,7 @@ class PluginParameters(object):
                         self.make_recommendation(
                             name, desc, parent_name, value)
 
-    def make_recommendation(self, child_name, desc, parent_name, value): # move this somewhere else - configurator?
+    def make_recommendation(self, child_name, desc, parent_name, value): 
         desc["range"] = (
             f"The recommended value with the chosen "
             f"{str(parent_name)} would be {str(value)}"
@@ -418,7 +418,7 @@ class PluginParameters(object):
 
         :param dict input_parameters: A dictionary of the input parameters
         for this plugin, or None if no customisation is required.
-        """
+        """        
         for key in input_parameters.keys():
             if key in self.parameters.keys():
                 new_value = input_parameters[key]
