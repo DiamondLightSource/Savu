@@ -261,6 +261,15 @@ def _check_dict_combination(param_name, value, param_def):
     dtype = copy.copy(param_def['dtype'])
     dtype = dtype[len('dict'):]
     dtype = _find_options(dtype, 'dict', '{', '}', ':')
+
+    #special case of empty dict
+    if not value:
+        if dtype[0] != "":
+            error = "The empty dict is not a valid option for %s" % param_name
+            return False, error
+        else:
+            return True, ""
+
     # check there are only two options - for key and for value:
     if len(dtype) != 2:
         return False, "Incorrect number of dtypes supplied for dictionary"

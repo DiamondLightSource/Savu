@@ -189,9 +189,14 @@ class NoProcessTools(PluginTools):
             default: "{'2':4.0}"
         savunexusloader_dict_param:
             visibility: basic
-            dtype: dict{str:preview}
+            dtype: [dict{str:preview}, dict{}]
             description: Dictionary of str and preview dtypes
             default: {}
+        dict_param_2:
+            visibility: basic
+            dtype: dict{str:preview}
+            description: Dictionary of str and preview dtypes
+            default: "{'str':['1:']}"
         file_path_param:
             visibility: basic
             dtype: filepath
