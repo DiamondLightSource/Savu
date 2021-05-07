@@ -12,7 +12,7 @@ class NoProcessTools(PluginTools):
             default: []
         savu_nexus_preview:
           visibility: basic
-          dtype: [preview, dict{str:preview}]
+          dtype: [preview, dict{str:preview}, dict{}]
           description: A slice list of required frames to apply to ALL
             datasets, else a dictionary of slice lists where the key is
             the dataset name.

@@ -13,7 +13,7 @@ descriptions loaded from a yaml file.
               default: None
         template_param:
               visibility: hidden
-              dtype: [str,dict, dict{}]
+              dtype: [str,dict]
               description: A hidden parameter to hold parameters passed in
                 via a savu template file.
               default: {}
