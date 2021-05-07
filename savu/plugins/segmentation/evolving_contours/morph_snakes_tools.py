@@ -11,7 +11,7 @@ minimum of energy (a possible edge countour).
         """
         lambda1:
             visibility: basic
-            dtype: int
+            dtype: float
             description: 'Weight parameter for the outer region, if lambda1
               is larger than lambda2, the outer region will contain a larger
               range of values than the inner region.'
@@ -19,7 +19,7 @@ minimum of energy (a possible edge countour).
 
         lambda2:
             visibility: basic
-            dtype: int
+            dtype: float
             description: 'Weight parameter for the inner region, if lambda2
               is larger than lambda1, the inner region will contain a larger
               range of values than the outer region.'

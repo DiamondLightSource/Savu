@@ -7,12 +7,12 @@ class ListToProjectionsTools(PluginTools):
         """
         step_size_x:
               visibility: basic
-              dtype: [None,int]
+              dtype: [None,float]
               description: step size in the interp, None if minimum chosen.
               default: None
         step_size_y:
               visibility: basic
-              dtype: [None,int]
+              dtype: [None,float]
               description: step size in the interp, None if minimum chosen.
               default: None
         fill_value:
