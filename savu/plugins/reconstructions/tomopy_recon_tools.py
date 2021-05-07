@@ -21,7 +21,7 @@ required for the chosen algorithm will be ignored.
             description: "Valid for fbp|gridrec, options - none|shepp|cosine|
               hann|hamming|ramlak|parzen|butterworth)."
             default: ramlak
-            options: [none,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
+            options: [None,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
             dependencies:
                 algorithm: [fbp, gridrec]
 
