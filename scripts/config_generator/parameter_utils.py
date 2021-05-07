@@ -89,7 +89,7 @@ def _h5path(value): # Extend this later as we need to know which file to apply t
 def _savufilepath(value, returnpath=False):
     """ A file path inside the Savu directory"""
     savu_base_path = \
-        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+        os.path.dirname(os.path.realpath(__file__)).split('Savu')[0]
     value = os.path.join(savu_base_path, value)
     if returnpath:
         return os.path.isfile(value), value

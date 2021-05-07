@@ -57,7 +57,7 @@ class NoProcessTools(PluginTools):
             visibility: basic
             dtype: filepath
             description: Path to config file
-            default: test_data/data/test_config.cfg
+            default: Savu/test_data/data/test_config.cfg
             visibility: intermediate
             description: Pattern used to create and store the hdf5 dataset
               default is the first pattern in the pattern dictionary.
@@ -201,6 +201,6 @@ class NoProcessTools(PluginTools):
             visibility: basic
             dtype: filepath
             description: Filepath required
-            default: savu/plugins/loaders/templates/nexus_templates/fluo.yml
+            default: Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml
 
 """
