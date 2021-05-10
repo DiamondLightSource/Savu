@@ -140,18 +140,19 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
     new_rst_file.write(convert_title(plugin_type) +
       '\n#################################################################\n')
 
-    plugin_data = plugin_class.p_dict
+    plugin_data = plugin_class.tools.get_param_definitions()
     plugin_citations = plugin_class.tools.get_citations()
+    plugin_docstring = plugin_class.tools.get_doc()
 
     tool_class = tool_class_list[-1]
-    if tool_class.__doc__:
-        # Remove white space
-        tool_doc=tool_class.__doc__.split()
-        if tool_doc:
-            new_rst_file.write('\nDescription'
-                                   '\n--------------------------\n')
-            new_rst_file.write('\n')
-            new_rst_file.write(tool_class.__doc__)
+    docstring_info = plugin_docstring.get("verbose")
+
+    if docstring_info:
+        new_rst_file.write('\nDescription'
+                               '\n--------------------------\n')
+        new_rst_file.write('\n')
+        new_rst_file.write(docstring_info )
+        new_rst_file.write('\n')
 
         # Locate documentation file
         doc_folder = savu_base_path + 'doc/source/'
@@ -212,16 +213,16 @@ def get_parameter_info(p_name, parameter):
         val_p = parameter[key]
         if isinstance(val_p, dict):
             str_dict = print_parameter_dict(val_p, '', 2)
-            parameter_info += pu.indent(key + ': \n' + str_dict )
+            parameter_info += pu.indent(f"{key}: \n{str_dict}")
         elif isinstance(val_p, str):
             if no_yaml_char(val_p):
-                parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
+                parameter_info += pu.indent(f"{key}: {val_p}\n")
             else:
-                parameter_info += pu.indent(key + ': "' + str(val_p) + '"\n')
+                parameter_info += pu.indent(f"{key}: \"{val_p}\"\n")
         elif isinstance(val_p, type(None)):
-            parameter_info += pu.indent(key + ':\n')
+            parameter_info += pu.indent(f"{key}:\n")
         else:
-            parameter_info += pu.indent(key + ': ' + str(val_p) + '\n')
+            parameter_info += pu.indent(f"{key}: {val_p}\n")
 
     return parameter_info
 
@@ -235,28 +236,26 @@ def print_parameter_dict(input_dict, parameter_info, indent_level):
             indent_level += 1
             dict_str = print_parameter_dict(v, '', indent_level)
             indent_level -= 1
-            parameter_info += pu.indent(k + ': \n' + dict_str , indent_level)
+            parameter_info += pu.indent(f"{k}: \n{dict_str}", indent_level)
         elif isinstance(v, str):
             # Check if the string contains characters which may need
             # to be surrounded by quotes
             if no_yaml_char(v):
-                parameter_info += pu.indent(k + ': ' + str(v)
-                                         + '\n', indent_level)
+                parameter_info += pu.indent(f"{k}: {v}\n", indent_level)
             else:
                 # Encase the string with quotation marks
-                parameter_info += pu.indent(k + ': "' + str(v)
-                                         + '"\n', indent_level)
+                parameter_info += pu.indent(f"{k}: \"{v}\"\n", indent_level)
         elif isinstance(v, type(None)):
-            parameter_info += pu.indent(k + ':\n', indent_level)
+            parameter_info += pu.indent(f"{k}:\n", indent_level)
         elif isinstance(v, list):
             indent_level += 1
             list_str = ''
             for item in v:
-                list_str += pu.indent( item + '\n', indent_level)
+                list_str += pu.indent( f"{item}\n", indent_level)
             indent_level -= 1
-            parameter_info += pu.indent(k + ': \n' + list_str, indent_level)
+            parameter_info += pu.indent(f"{k}: \n{list_str}", indent_level)
         else:
-            parameter_info += pu.indent(k + ': ' + str(v) + '\n', indent_level)
+            parameter_info += pu.indent(f"{k}: {v}\n", indent_level)
 
     return parameter_info
 
@@ -543,7 +542,7 @@ if __name__ == "__main__":
                     'plugin_datasets.py', 'plugin_datasets_notes.py',
                     'utils.py', 'plugin_tools.py', 'yaml_utils.py',
                     'hdf5_utils.py']
-    exclude_dir = ['driver']
+    exclude_dir = ['driver', 'unregistered']
 
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
