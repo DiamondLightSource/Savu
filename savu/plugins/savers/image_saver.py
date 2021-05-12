@@ -41,7 +41,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
 
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     :u*param format: Image format. Default: 'tif'.
-    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 16.
+    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 32.
     :param max: Global max for tiff scaling. Default: None.
     :param min: Global min for tiff scaling. Default: None.
     :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
@@ -150,7 +150,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
         return self._data_range
 
     def executive_summary(self):
-        if self._data_range == 'image':
+        if (self._data_range == 'image') and (self.num_bit != 32):
             return ["To rescale and normalise the data between global max and "
                     "min values, please run MaxAndMin plugin before "
                     "ImageSaver."]
