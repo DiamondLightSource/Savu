@@ -40,8 +40,9 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
-        self.tools = self._set_plugin_tools()
+        self.fixed_length = True
         self.parameters = {}
+        self.tools = self._set_plugin_tools()
 
     def set_parameters(self, params):
         self.parameters = params
