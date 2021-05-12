@@ -41,9 +41,9 @@ class ImageStitching(Plugin, CpuPlugin):
         self.space = self.parameters['pattern']
         
         if self.space == 'SINOGRAM':
-            in_pData[0].plugin_data_setup('SINOGRAM_STACK', 2)
+            in_pData[0].plugin_data_setup('SINOGRAM_STACK', 2, fixed_length=False)
         else:
-            in_pData[0].plugin_data_setup('PROJECTION_STACK', 2)
+            in_pData[0].plugin_data_setup('PROJECTION_STACK', 2, fixed_length=False)
         rm_dim = in_dataset[0].get_slice_dimensions()[0]
         patterns = ['SINOGRAM.' + str(rm_dim), 'PROJECTION.' + str(rm_dim)]
 
@@ -71,7 +71,7 @@ class ImageStitching(Plugin, CpuPlugin):
             axis_labels=axis_labels,
             shape=tuple(shape))
         if self.space == 'SINOGRAM':
-            out_pData[0].plugin_data_setup('SINOGRAM', 'single')
+            out_pData[0].plugin_data_setup('SINOGRAM', 'single', fixed_length=False)
         else:
             out_pData[0].plugin_data_setup('PROJECTION', 'single')
         
