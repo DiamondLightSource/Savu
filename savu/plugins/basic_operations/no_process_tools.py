@@ -12,7 +12,7 @@ class NoProcessTools(PluginTools):
             default: []
         savu_nexus_preview:
           visibility: basic
-          dtype: [preview, dict{str:preview}]
+          dtype: [preview, dict{str:preview}, dict{}]
           description: A slice list of required frames to apply to ALL
             datasets, else a dictionary of slice lists where the key is
             the dataset name.
@@ -57,7 +57,7 @@ class NoProcessTools(PluginTools):
             visibility: basic
             dtype: filepath
             description: Path to config file
-            default: test_data/data/test_config.cfg
+            default: Savu/test_data/data/test_config.cfg
             visibility: intermediate
             description: Pattern used to create and store the hdf5 dataset
               default is the first pattern in the pattern dictionary.
@@ -110,7 +110,7 @@ class NoProcessTools(PluginTools):
             default: None
         multisavuloader_filename:
             visibility: basic
-            dtype: [filename,None]
+            dtype: [str,None]
             description: The shared part of the name of each file
               (not including .nxs)
             default: None
@@ -189,13 +189,18 @@ class NoProcessTools(PluginTools):
             default: "{'2':4.0}"
         savunexusloader_dict_param:
             visibility: basic
-            dtype: dict{str:preview}
+            dtype: [dict{str:preview}, dict{}]
             description: Dictionary of str and preview dtypes
             default: {}
+        dict_param_2:
+            visibility: basic
+            dtype: dict{str:preview}
+            description: Dictionary of str and preview dtypes
+            default: "{'str':['1:']}"
         file_path_param:
             visibility: basic
             dtype: filepath
             description: Filepath required
-            default: savu/plugins/loaders/templates/nexus_templates/fluo.yml
+            default: Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml
 
 """

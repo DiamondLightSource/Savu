@@ -109,18 +109,20 @@ class CcpiDenoisingCpuTools(PluginTools):
         penalty_type:
             visibility: advanced
             dtype: str
-            options: [Huber, Perona, Tukey, Constr, Constrhuber]
+            options: [huber, perona, tukey, constr, constrhuber]
             description:
                 summary: Penalty type
                 verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty
                    type."
                 options:
-                    Huber: Huber
-                    Perona: Perona-Malik model
-                    Tukey: Tukey
+                    huber: Huber
+                    perona: Perona-Malik model
+                    tukey: Tukey
+                    constr:
+                    constrhuber:
             dependency:
                 method: NDF
-            default: Huber
+            default: huber
 
         edge_par:
             visibility: advanced

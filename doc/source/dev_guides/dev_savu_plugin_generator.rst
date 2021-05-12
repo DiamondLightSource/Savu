@@ -3,6 +3,11 @@
 How to generate a Savu Plugin
 ********************************
 
+If you do not want to create the plugin files from scratch, you can use templates. The
+Savu plugin generator can create a template plugin file for you, along with a documentation
+file for explaining how to use your plugin, and a tools file for defining your plugin parameters.
+
+
 Use the command: ``savu_plugin_generator`` to create a plugin and it's required files.
 
 .. toctree::
@@ -15,7 +20,7 @@ Use the command: ``savu_plugin_generator`` to create a plugin and it's required 
 
     usage: savu_plugin_generator [-h] [-q] [-d] plugin_name
 
-There are three steps:
+There are three tasks which will be completed:
 
 1. If a plugin exists with this name, then the file location will be found. If it does exist, then this file path will be
 displayed on the command line. If it doesn't exist, then a file will be created inside the savu/plugins directory.
@@ -36,7 +41,7 @@ You can download it
 An extended version is available
 :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
 
-For a list of templates visit the :ref:`plugin template<plugin_templates>` page.
+For a list of templates, visit the :ref:`plugin template<plugin_templates>` page.
 
 
 Plugin Documentation

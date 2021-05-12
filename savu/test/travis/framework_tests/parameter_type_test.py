@@ -654,6 +654,18 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_int_list_9(self):
+        # Check that empty list is not accepted
+        pdefs = self.initial_setup()
+        key = "integer_list_param"
+        value = []
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
     def test_string_list(self):
         # Check that string list is accepted
         pdefs = self.initial_setup()
@@ -965,9 +977,9 @@ class ParameterTypeTest(unittest.TestCase):
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
         )
-        self.assertTrue(valid_modification)
+        self.assertFalse(valid_modification)
 
-    def test_float_list_11(self):
+    def test_float_list_12(self):
         # Check that np float lists are accepted
         pdefs = self.initial_setup()
         key = "float_list_param"
@@ -980,6 +992,30 @@ class ParameterTypeTest(unittest.TestCase):
             key, value_check, pdefs[key]
         )
         self.assertTrue(valid_modification)
+
+    def test_list_range(self):
+        # Check that int list of length 2 is  accepted
+        pdefs = self.initial_setup()
+        key = "range_param"
+        value = ['6', '9']
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_list_range_1(self):
+        # Check that empty list is declined
+        pdefs = self.initial_setup()
+        key = "range_param"
+        value = []
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
 
     def test_options(self):
         # Check that valid options are accepted
@@ -1484,6 +1520,18 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_dict_8(self):
+        # Check that empty dict is accepted
+        pdefs = self.initial_setup()
+        key = "dict_param"
+        value = {}
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
     def test_prev_dict_0(self):
         # Check that str dict with str preview is accepted
         pdefs = self.initial_setup()
@@ -1547,6 +1595,28 @@ class ParameterTypeTest(unittest.TestCase):
         pdefs = self.initial_setup()
         key = "savunexusloader_dict_param"
         value =  {'xrd': [':,:,:', 0]}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_prev_dict_4(self):
+        # Check that empty dict passes
+        pdefs = self.initial_setup()
+        key = "savunexusloader_dict_param"
+        value =  {}
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_prev_dict_5(self):
+        # Check that empty dict fails
+        pdefs = self.initial_setup()
+        key = "dict_param_2"
+        value =  {}
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]

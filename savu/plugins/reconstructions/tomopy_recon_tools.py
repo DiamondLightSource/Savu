@@ -17,11 +17,11 @@ required for the chosen algorithm will be ignored.
 
         filter_name:
             visibility: intermediate
-            dtype: str
-            description: "Valid for fbp|gridrec, options - none|shepp|cosine|
+            dtype: [None, str]
+            description: "Valid for fbp|gridrec, options - None|shepp|cosine|
               hann|hamming|ramlak|parzen|butterworth)."
             default: ramlak
-            options: [none,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
+            options: [None,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
             dependencies:
                 algorithm: [fbp, gridrec]
 
