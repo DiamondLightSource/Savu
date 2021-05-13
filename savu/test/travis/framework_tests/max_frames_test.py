@@ -33,9 +33,9 @@ class MaxFramesTest(unittest.TestCase):
     def __get_slice_list_dict(self, data, pData, pattern, nFrames, dtype,
                               processes):
         data.exp.meta_data.set('processes', processes)
+        pData._plugin = NoProcessPlugin() # dummy plugin to set required params
         pData.plugin_data_setup(pattern, nFrames)
         pData._set_meta_data()
-        pData._plugin = NoProcessPlugin() # dummy plugin to set required params
         pData.plugin_data_transfer_setup()
         sl_dict = \
             data._get_transport_data()._get_slice_lists_per_process(dtype)
