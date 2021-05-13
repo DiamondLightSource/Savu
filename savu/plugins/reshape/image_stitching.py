@@ -73,7 +73,7 @@ class ImageStitching(Plugin, CpuPlugin):
         if self.space == 'SINOGRAM':
             out_pData[0].plugin_data_setup('SINOGRAM', 'single', fixed_length=False)
         else:
-            out_pData[0].plugin_data_setup('PROJECTION', 'single')
+            out_pData[0].plugin_data_setup('PROJECTION', 'single', fixed_length=False)
         
     def make_weight_matrix(self, height1, width1, height2, width2, overlap, side):
         """
