@@ -48,4 +48,16 @@ class LfovLoaderTools(PluginTools):
             dtype: [None,str]
             description: No need
             default: None
+        dark:
+            visibility: intermediate
+            dtype: [list[dir, h5path, float], list[None, None, float]]
+            description: Optional path to the dark field data file, nxs path 
+                and scale value.
+            default: [None, None, 1]
+        flat:
+            visibility: intermediate
+            dtype: [list[dir, h5path, float], list[None, None, float]]
+            description: Optional path to the flat field data file, nxs path 
+                and scale value.
+            default: [None, None, 1]            
         """
