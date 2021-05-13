@@ -41,21 +41,25 @@ class MmLoader(BaseLoader):
 
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
-        self.add_default_params(fluo(), 'fluo')
-        self.add_default_params(xrd(), 'xrd')
-        self.add_default_params(stxm(), 'stxm')
-        self.add_default_params(mon(), 'monitor')
+        self.fluo_keys = self.add_default_params(fluo(), 'fluo')
+        self.xrd_keys = self.add_default_params(xrd(), 'xrd')
+        self.stxm_keys = self.add_default_params(stxm(), 'stxm')
+        self.mon_keys = self.add_default_params(mon(), 'monitor')
 
     def add_default_params(self, inst, name):
         ptools = self.get_plugin_tools()
-        copy_keys = list(inst.parameters.keys() - self.parameters.keys())
+        inst_keys = inst.parameters.keys()
+        copy_keys = list(inst_keys - self.parameters.keys())
         if 'name' in copy_keys: copy_keys.remove('name')
         for key in copy_keys:
             ptools.param.set(key, inst.get_plugin_tools().param.get(key))
             ptools.parameters[key] = inst.get_plugin_tools().parameters[key]
+        return inst_keys
 
     def separate_params(self, name, keys):
-        all_keys = list(self.dict.keys()) + keys
+        mm_loader_keys = self.get_plugin_tools()._load_param_from_doc(
+            self.get_plugin_tools()).keys()
+        all_keys = keys - mm_loader_keys
         new_dict = {}
         for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
