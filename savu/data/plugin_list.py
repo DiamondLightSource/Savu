@@ -578,7 +578,9 @@ class CitationInformation(object):
     def write(self, citation_group):
         # classes don't have to be encoded to ASCII
         citation_group.attrs[NX_CLASS] = 'NXcite'
-        description_array = np.array([self.description.encode('ascii')])
+        # Valid ascii sequences will be encoded, invalid ones will be
+        # preserved as escape sequences
+        description_array = np.array([self.description.encode('ascii','backslashreplace')])
         citation_group.create_dataset('description'.encode('ascii'),
                                       description_array.shape,
                                       description_array.dtype,
@@ -588,12 +590,12 @@ class CitationInformation(object):
                                       doi_array.shape,
                                       doi_array.dtype,
                                       doi_array)
-        endnote_array = np.array([self.endnote.encode('ascii')])
+        endnote_array = np.array([self.endnote.encode('ascii','backslashreplace')])
         citation_group.create_dataset('endnote'.encode('ascii'),
                                       endnote_array.shape,
                                       endnote_array.dtype,
                                       endnote_array)
-        bibtex_array = np.array([self.bibtex.encode('ascii')])
+        bibtex_array = np.array([self.bibtex.encode('ascii','backslashreplace')])
         citation_group.create_dataset('bibtex'.encode('ascii'),
                                       bibtex_array.shape,
                                       bibtex_array.dtype,
