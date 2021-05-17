@@ -99,10 +99,17 @@ class PluginList(object):
             if plugin['active'] or active_pass:
                 plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
-                plugin_class = pu.load_class(plugin['id'])()
-                # Populate the parameters (including those from it's base classes)
-                plugin_tools = plugin_class.get_plugin_tools()
-                plugin_tools._populate_default_parameters()
+                plugin_class = None
+                try:
+                    plugin_class = pu.load_class(plugin['id'])()
+                    # Populate the parameters (including those from it's base classes)
+                    plugin_tools = plugin_class.get_plugin_tools()
+                    plugin_tools._populate_default_parameters()
+                except ImportError:
+                    # No plugin class found
+                    logging.error(f"No class found for {plugin['name']}")
+                except:
+                    print(f"There was a problem with {plugin['name']}")
 
                 plugin['doc'] = plugin_tools.docstring_info if plugin_class else ""
                 plugin['tools'] = plugin_tools if plugin_class else {}
