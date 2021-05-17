@@ -49,9 +49,9 @@ required for the chosen algorithm will be ignored.
 
         centre_pad:
             visibility: hidden
-            dtype: [None,int]
+            dtype: [int,bool]
             description: Not an option.
-            default: None
+            default: False
 
         """
 

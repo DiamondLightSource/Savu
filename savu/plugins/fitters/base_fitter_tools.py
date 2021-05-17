@@ -31,7 +31,7 @@ class BaseFitterTools(PluginTools):
 
         PeakIndex:
            visibility: intermediate
-           dtype: [list[],list[str]]
+           dtype: [list[],list]
            description: The peak index.
            default: []
 

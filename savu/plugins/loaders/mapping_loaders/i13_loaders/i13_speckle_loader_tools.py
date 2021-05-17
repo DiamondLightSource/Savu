@@ -7,9 +7,9 @@ class I13SpeckleLoaderTools(PluginTools):
         """
         signal_key:
             visibility: basic
-            dtype: float
+            dtype: h5path
             description: Path to the signals
-            default: 9.1
+            default: '/entry/sample'
         reference_key:
             visibility: intermediate
             dtype: h5path
