@@ -40,6 +40,7 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
+        self.fixed_length = True
         self.tools = self._set_plugin_tools()
         self.parameters = {}
 
