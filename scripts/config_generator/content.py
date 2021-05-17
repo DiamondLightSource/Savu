@@ -221,7 +221,7 @@ class Content(object):
                 message = f"\nPLUGIN ERROR: The plugin {name} is " \
                           f"unavailable in this version of Savu. \n Type open"\
                           f" -s <process_list> to skip the broken plugin."
-                raise Exception(f'Incompatible process list. {message}')
+                raise Exception(f"Incompatible process list. {message}")
 
     def _mutate_plugins(self, name, pos, search=False):
         """ Perform plugin mutations. """

@@ -580,7 +580,7 @@ def _gui_error_message(param_name, dtype):
 
 type_error_dict = {
     "preview": "preview slices",
-    "yamlfilepath": "yaml format",
+    "yamlfilepath": "yaml filepath",
     "filepath": "filepath",
     "h5path" : "hdf5 path",
     "filename": "file name",
