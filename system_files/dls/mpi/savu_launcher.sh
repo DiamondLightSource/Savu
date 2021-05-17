@@ -133,6 +133,8 @@ else
 		pathtodatafile=${pathtodatafile#/dls/staging}
 	fi
 	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
+	# in the case there is more than once instance of the pattern above
+	project=`echo $project | head -n1 | awk '{print $1;}'`
 	if [ -z "$project" ] ; then
 	  project=tomography
 	fi

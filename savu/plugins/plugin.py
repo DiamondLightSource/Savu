@@ -41,8 +41,8 @@ class Plugin(PluginDatasets):
         self.exp = None
         self.check = False
         self.fixed_length = True
-        self.tools = self._set_plugin_tools()
         self.parameters = {}
+        self.tools = self._set_plugin_tools()
 
     def set_parameters(self, params):
         self.parameters = params
