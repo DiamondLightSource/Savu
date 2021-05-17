@@ -22,6 +22,12 @@ requirements:
     - python
     - ipython
     - numpy
+    - tomopy
+    - astra-toolbox
+    - ccpi-regulariser
+    - tomophantom
+    - tomobar
+    - larix
     - hdf5
     - openmpi
     - h5py
