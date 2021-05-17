@@ -63,7 +63,7 @@ class MinAndMax(Plugin, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         data = self.get_in_datasets()[0]
         data_shape = data.get_shape()
-        width = data_shape[-1]
+        width = data_shape[0]
         self.use_mask = self.parameters['masking']
         self.data_pattern = self.parameters['pattern']
         self.mask = np.ones((width, width), dtype=np.float32)
@@ -93,7 +93,8 @@ class MinAndMax(Plugin, CpuPlugin):
         frame = np.nan_to_num(data[0])
         if use_filter is True:
             frame = gaussian_filter(frame, (3, 3))
-        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ'):
+        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ')\
+                and (self.mask.shape == frame.shape):
             frame = frame * self.mask
         if self.method == 'percentile':
             list_out = [np.array(

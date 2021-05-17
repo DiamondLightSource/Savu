@@ -55,6 +55,7 @@ class Plugin(PluginDatasets):
         self.pcount = 0
         self.exp = None
         self.check = False
+        self.fixed_length = True
 
     def initialise(self, params, exp, check=False):
         self.check = check
