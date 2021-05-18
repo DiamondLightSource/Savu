@@ -118,23 +118,25 @@ else
 fi
 
 if [ $facility = dls ]; then
-  echo "Proceed with $facility installation" | xargs
-  # set compiler wrapper
-  MPICC=$(command -v mpicc)
-  MPI_HOME=${MPICC%/mpicc}
-  if ! [ "$MPICC" ]; then
-    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-    exit 1
-  else
-    echo "Using mpicc:   " $MPICC
-    export PATH=$MPI_HOME:$PATH
-    openmpi_ver_string=$(mpicxx --showme:version)
-    export openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
-    echo "Proceed with $openmpi_version version" | xargs
-  fi
+  echo "Proceed with the DLS-specific installation and will use locally installed openmpi..." | xargs
 else
-  echo "Proceed with a PC installation, going to use the openmpi installation from conda"
-  echo "Consider of installing Savu-lite from savu-dep conda channel instead"
+  echo -e "Proceed with $facility installation and will attempt to use pre-installed openmpi."
+  echo -e "If a PC (non-MPI) installation is required, then install Savu-lite in a new Python 3.7 conda environment using the command:"
+  echo -e "conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev"
+fi
+
+# set compiler wrapper
+MPICC=$(command -v mpicc)
+MPI_HOME=${MPICC%/mpicc}
+if ! [ "$MPICC" ]; then
+  echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+  exit 1
+else
+  echo "Using mpicc:   " $MPICC
+  export PATH=$MPI_HOME:$PATH
+  openmpi_ver_string=$(mpicxx --showme:version)
+  export openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+  echo "Proceed with $openmpi_version version" | xargs
 fi
 
 # # check for cuda
