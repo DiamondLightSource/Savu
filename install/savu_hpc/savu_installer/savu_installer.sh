@@ -262,27 +262,28 @@ if [ ! $test_flag ]; then
       install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
       recipes=$savu_path/$install_path/../conda-recipes
     fi
+    # getting versions of mpi4py/hdf5/h5py from the versions file
+    string=$(awk '/^mpi4py/' $versions_file)
+    mpi4py_version=$(echo $string | cut -d " " -f 2)
+    string=$(awk '/^hdf5/' $versions_file)
+    hdf5_version=$(echo $string | cut -d " " -f 2)
+    string=$(awk '/^h5py/' $versions_file)
+    h5py_version=$(echo $string | cut -d " " -f 2)
 
     if [ $EXPLICIT_FILE = false ]; then
     echo "Installing mpi4py from savu-dep conda channel"
-    string=$(awk '/^mpi4py/' $versions_file)
-    mpi4py_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
     conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
 
     echo "Installing hdf5 from savu-dep conda channel"
-    string=$(awk '/^hdf5/' $versions_file)
-    hdf5_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
     conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
     echo "Installing h5py from savu-dep conda channel"
-    string=$(awk '/^h5py/' $versions_file)
-    h5py_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_H5PY=$h5py_version"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
     conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
-    echo "Installing pytorch..."
+    echo "Installing cudatoolkit and pytorch..."
     string=$(awk '/^cudatoolkit/' $versions_file)
     cudatoolkit_version=$(echo $string | cut -d " " -f 2)
     conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
@@ -306,7 +307,25 @@ if [ ! $test_flag ]; then
       conda update -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
     fi
   else
-    echo "Installation for $facility has been chosen, make sure you install your custom-build mpi4py/hdf5/h5py packages" | xargs
+    echo "Installation for $facility has been chosen, installing packages from the explicit list first" | xargs
+    conda update -n root --file $DIR/explicit_lists/savu_explicit_packages.txt
+
+    echo "Installing mpi4py from the recipe"
+    export VERSION_MPI4PI=$mpi4py_version
+    export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
+    . $recipes/installer.sh "mpi4py" $VERSION_BUILD_MPI4PI
+
+    echo "Installing hdf5 from the recipe"
+    export hdf5_XYZ_version=$hdf5_version
+    export PATCH_HDF="hdf5-"$hdf5_version
+    export RELEASE_HDF=${PATCH_HDF%.*}
+    export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
+    . $recipes/installer.sh "hdf5" $VERSION_BUILD_HDF5
+
+    echo "Installing h5py from the recipe"
+    export VERSION_H5PY=$h5py_version
+    export VERSION_BUILD_H5PY=$VERSION_H5PY"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
+    . $recipes/installer.sh "h5py" $VERSION_BUILD_H5PY
   fi
 
   # cleanup build artifacts
