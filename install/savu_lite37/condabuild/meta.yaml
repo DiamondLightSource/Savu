@@ -21,6 +21,7 @@ requirements:
   run:
     - python
     - ipython
+    - cudatoolkit 10.1
     - numpy
     - tomopy
     - astra-toolbox
@@ -60,6 +61,7 @@ requirements:
 
 test:
   imports:
+    - astra
     - colorama
     - h5py
     - mpi4py
