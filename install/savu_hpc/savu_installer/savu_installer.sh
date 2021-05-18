@@ -120,7 +120,7 @@ fi
 if [ $facility = dls ]; then
   echo "Proceed with the DLS-specific installation and will use locally installed openmpi..." | xargs
 else
-  echo -e "Proceed with $facility installation and will attempt to use pre-installed openmpi."
+  echo -e "Proceed with $facility installation and will attempt to use the pre-installed openmpi."
   echo -e "If a PC (non-MPI) installation is required, then install Savu-lite in a new Python 3.7 conda environment using the command:"
   echo -e "conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev"
 fi
@@ -259,10 +259,12 @@ if [ ! $test_flag ]; then
     path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
     savu_path=${path%/savu/__init__.py*}
 
+    echo $recipes
     # get the savu version
     if [ -z $recipes ]; then
       install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
       recipes=$savu_path/$install_path/../conda-recipes
+      echo $recipes
     fi
     # getting versions of mpi4py/hdf5/h5py from the versions file
     string=$(awk '/^mpi4py/' $versions_file)
