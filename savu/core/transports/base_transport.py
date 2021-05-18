@@ -26,6 +26,7 @@ import os
 import time
 import copy
 import h5py
+import math
 import logging
 import numpy as np
 
@@ -138,6 +139,9 @@ class BaseTransport(object):
             logging.info("Transferring the data")
             transfer_data = self._transfer_all_data(count)
 
+            if count == nTrans-1 and plugin.fixed_length == False:
+                prange = self.remove_extra_slices(prange, transfer_data[0].shape)
+
             # loop over the process data
             logging.info("process frames loop")
             result, kill = self._process_loop(
@@ -151,6 +155,17 @@ class BaseTransport(object):
 
         if not kill:
             cu.user_message("%s - 100%% complete" % (plugin.name))
+
+    def remove_extra_slices(self, prange, transfer_shape):
+        # loop over datasets:
+        data = self.pDict['in_data'][0]
+        pData = data._get_plugin_data()
+        mft = pData.meta_data.get("max_frames_transfer")
+        mfp = pData.meta_data.get("max_frames_process")
+        sdirs = data.get_slice_dimensions()
+        finish = np.prod([transfer_shape[j] for j in sdirs])
+        remove = int((mft - finish)/mfp)
+        return list(range(prange[0], prange[-1]+1-remove))
 
     def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
         kill_signal = False
@@ -213,7 +228,8 @@ class BaseTransport(object):
         """
         sl_dict = {}
         for data in data_list:
-            sl = data._get_transport_data()._get_slice_lists_per_process(dtype)
+            sl = data._get_transport_data().\
+                    _get_slice_lists_per_process(dtype)
             for key, value in sl.items():
                 if key not in sl_dict:
                     sl_dict[key] = [value]
