@@ -258,7 +258,6 @@ if [ ! $test_flag ]; then
   path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
   savu_path=${path%/savu/__init__.py*}
 
-  echo $recipes
   # get the savu version
   if [ -z $recipes ]; then
     install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")

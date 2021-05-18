@@ -116,6 +116,7 @@ https://conda.anaconda.org/conda-forge/noarch/nest-asyncio-1.5.1-pyhd8ed1ab_0.ta
 https://repo.anaconda.com/pkgs/main/linux-64/ninja-1.10.2-py37hff7bd54_0.tar.bz2
 https://conda.anaconda.org/fastai/noarch/nvidia-ml-py3-7.352.0-py_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/olefile-0.46-py37_0.tar.bz2
+https://conda.anaconda.org/conda-forge/linux-64/docutils-0.16-py37h89c1867_2.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.4.2-py_1.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/parso-0.7.0-pyh9f0ad1d_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/pickleshare-0.7.5-py_1003.tar.bz2
