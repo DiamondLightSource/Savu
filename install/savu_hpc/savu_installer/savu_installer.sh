@@ -249,30 +249,32 @@ if [ ! $test_flag ]; then
 
   conda install -y -q conda-build
 
-  if [ $facility = dls ]; then
-    echo "Building Savu..."
-    conda build $DIR/$savu_recipe
-    savubuild=`conda build $DIR/$savu_recipe --output`
-    echo "Installing Savu..."
-    conda install -y -q --use-local $savubuild
+  echo "Building Savu..."
+  conda build $DIR/$savu_recipe
+  savubuild=`conda build $DIR/$savu_recipe --output`
+  echo "Installing Savu..."
+  conda install -y -q --use-local $savubuild
 
-    path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
-    savu_path=${path%/savu/__init__.py*}
+  path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
+  savu_path=${path%/savu/__init__.py*}
 
+  echo $recipes
+  # get the savu version
+  if [ -z $recipes ]; then
+    install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
+    recipes=$savu_path/$install_path/../conda-recipes
     echo $recipes
-    # get the savu version
-    if [ -z $recipes ]; then
-      install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-      recipes=$savu_path/$install_path/../conda-recipes
-      echo $recipes
-    fi
-    # getting versions of mpi4py/hdf5/h5py from the versions file
-    string=$(awk '/^mpi4py/' $versions_file)
-    mpi4py_version=$(echo $string | cut -d " " -f 2)
-    string=$(awk '/^hdf5/' $versions_file)
-    hdf5_version=$(echo $string | cut -d " " -f 2)
-    string=$(awk '/^h5py/' $versions_file)
-    h5py_version=$(echo $string | cut -d " " -f 2)
+  fi
+
+  # getting versions of mpi4py/hdf5/h5py from the versions file
+  string=$(awk '/^mpi4py/' $versions_file)
+  mpi4py_version=$(echo $string | cut -d " " -f 2)
+  string=$(awk '/^hdf5/' $versions_file)
+  hdf5_version=$(echo $string | cut -d " " -f 2)
+  string=$(awk '/^h5py/' $versions_file)
+  h5py_version=$(echo $string | cut -d " " -f 2)
+
+  if [ $facility = dls ]; then
 
     if [ $EXPLICIT_FILE = false ]; then
     echo "Installing mpi4py from savu-dep conda channel"
