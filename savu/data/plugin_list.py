@@ -99,10 +99,17 @@ class PluginList(object):
             if plugin['active'] or active_pass:
                 plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
-                plugin_class = pu.load_class(plugin['id'])()
-                # Populate the parameters (including those from it's base classes)
-                plugin_tools = plugin_class.get_plugin_tools()
-                plugin_tools._populate_default_parameters()
+                plugin_class = None
+                try:
+                    plugin_class = pu.load_class(plugin['id'])()
+                    # Populate the parameters (including those from it's base classes)
+                    plugin_tools = plugin_class.get_plugin_tools()
+                    plugin_tools._populate_default_parameters()
+                except ImportError:
+                    # No plugin class found
+                    logging.error(f"No class found for {plugin['name']}")
+                except:
+                    print(f"There was a problem with {plugin['name']}")
 
                 plugin['doc'] = plugin_tools.docstring_info if plugin_class else ""
                 plugin['tools'] = plugin_tools if plugin_class else {}
@@ -578,7 +585,9 @@ class CitationInformation(object):
     def write(self, citation_group):
         # classes don't have to be encoded to ASCII
         citation_group.attrs[NX_CLASS] = 'NXcite'
-        description_array = np.array([self.description.encode('ascii')])
+        # Valid ascii sequences will be encoded, invalid ones will be
+        # preserved as escape sequences
+        description_array = np.array([self.description.encode('ascii','backslashreplace')])
         citation_group.create_dataset('description'.encode('ascii'),
                                       description_array.shape,
                                       description_array.dtype,
@@ -588,12 +597,12 @@ class CitationInformation(object):
                                       doi_array.shape,
                                       doi_array.dtype,
                                       doi_array)
-        endnote_array = np.array([self.endnote.encode('ascii')])
+        endnote_array = np.array([self.endnote.encode('ascii','backslashreplace')])
         citation_group.create_dataset('endnote'.encode('ascii'),
                                       endnote_array.shape,
                                       endnote_array.dtype,
                                       endnote_array)
-        bibtex_array = np.array([self.bibtex.encode('ascii')])
+        bibtex_array = np.array([self.bibtex.encode('ascii','backslashreplace')])
         citation_group.create_dataset('bibtex'.encode('ascii'),
                                       bibtex_array.shape,
                                       bibtex_array.dtype,

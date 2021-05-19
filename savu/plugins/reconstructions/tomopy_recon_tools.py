@@ -49,9 +49,9 @@ required for the chosen algorithm will be ignored.
 
         centre_pad:
             visibility: hidden
-            dtype: [None,int]
+            dtype: [int,bool]
             description: Not an option.
-            default: None
+            default: False
 
         """
 
@@ -62,7 +62,7 @@ required for the chosen algorithm will be ignored.
         bibtex:
                 @article{gursoy2014tomopy,
                 title={TomoPy: a framework for the analysis of synchrotron tomographic data},
-                author={G{\"u}rsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
+                author={Gürsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
                 journal={Journal of synchrotron radiation},
                 volume={21},
                 number={5},
@@ -73,7 +73,7 @@ required for the chosen algorithm will be ignored.
         endnote:
                 %0 Journal Article
                 %T TomoPy: a framework for the analysis of synchrotron tomographic data
-                %A Gu'ü'rsoy, Doga
+                %A Gürsoy, Doga
                 %A De Carlo, Francesco
                 %A Xiao, Xianghui
                 %A Jacobsen, Chris

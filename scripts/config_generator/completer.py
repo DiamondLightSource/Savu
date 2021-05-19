@@ -96,6 +96,11 @@ class Completer(object):
             return list_args
         return [x for x in list_args if x.lower().startswith(args[0].lower())]
 
+    def complete_level(self, args):
+        "Completions for the level command."
+        levels = ['basic', 'intermediate', 'advanced']
+        return [l for l in levels if l.lower().startswith(args[0].lower())]
+
     def _get_collections(self):
         """ Get plugin collection names. """
         import savu.plugins as plugins

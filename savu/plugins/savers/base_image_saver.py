@@ -46,12 +46,13 @@ class BaseImageSaver(BaseSaver, CpuPlugin):
         self.data_name = self.get_in_datasets()[0].get_name()
         self.count = 0
         self.group_name = self._get_group_name(self.data_name)
-        self.folder = "%s/%s-%s" % (self.exp.meta_data.get("out_path"),
-                                    self.name, self.data_name)
+        self.folder = "%s/%s_" % (self.exp.meta_data.get("out_path"),
+                                    self.name)
+        self.folder = self.folder + str(self.exp.meta_data.get('nPlugin'))
         if self.parameters['prefix']:
             self.filename = "%s/%s" % (self.folder, self.parameters['prefix'])
         else:
-            self.filename = "%s/%s_" % (self.folder, self.data_name)
+            self.filename = "%s/%s_" % (self.folder, "img")
             self.filename += '%s_' % self.exp.meta_data.get("datafile_name")
 
         if MPI.COMM_WORLD.rank == 0:
