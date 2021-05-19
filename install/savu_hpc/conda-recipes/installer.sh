@@ -11,7 +11,7 @@ echo "Installing $package..."
 conda install -y -q --use-local $build
 
 echo "Checking that $package is installed into conda environment"
-codna list
+conda list
 
 conda list $package > check_conda_package.txt
 if grep -q $installed_version check_conda_package.txt; then
