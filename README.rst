@@ -4,7 +4,7 @@
 
 .. start_of_main_text
 
-|logo|
+ |savu_logo|
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
@@ -96,11 +96,8 @@ Any questions regarding software can be addressed to scientificsoftware@diamond.
     :target: https://codescene.io/projects/3730/jobs/latest-successful/results
     :alt: Get more details at **codescene.io**
 
-..
-    Anything below this line is used when viewing README.rst and will be replaced
-    when included in index.rst
+.. exclude from index.rst
 
-.. |logo| image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
+.. |savu_logo| image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
     :scale: 100%
-    :align: center
     :alt: savu_logo
