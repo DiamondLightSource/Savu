@@ -54,7 +54,7 @@ class SliceLists(object):
             slice_list.append(tuple(getitem))
         return slice_list
 
-    def _get_slice_dirs_index(self, slice_dirs, shape, value, calc=None):
+    def _get_slice_dirs_index(self, slice_dirs, shape, value, extra=None, calc=None):
         """
         returns a list of arrays for each slice dimension, where each array
         gives the indices for that slice dimension.
@@ -138,14 +138,9 @@ class SliceLists(object):
         banked = []
         for s in split_list:
             b = self._split_list(s, max_frames)
-            if pad:
-                diff = max_frames - len(b[-1])
-                length = len(slice_dirs[0:slice_dirs.index(split_dim)])
-                idx = int(np.prod([sdir_shape[i] for i in range(length)])+1)
-                b2 = b[-1][-idx] if len(b[-1]) > 1 else None
-                b[-1][-1] = self._fix_list_length(
-                    b[-1][-1], b2, diff, split_dim) if diff else b[-1][-1]
             banked.extend(b)
+            if pad and any(pad):
+                b[-1][-1] = self._fix_list_length(b[-1][-1], pad)
 
         return banked
 
@@ -249,11 +244,11 @@ class SliceLists(object):
                 slice_list[i] = tuple(slice_list[i])
         return slice_list
 
-    def _fix_list_length(self, sl, sl2, length, dim):
+    def _fix_list_length(self, sl, pad):
         sl = list(sl)
-        s = sl[dim]
-        step = s.start - (sl2[dim].stop -1) if sl2 else s.step
-        sl[dim] = slice(s.start, s.stop + length*step, s.step)
+        steps = self.data.data_info.get("steps")
+        for i, s in enumerate(sl):
+            sl[i] = slice(s.start, s.stop + steps[i]*pad[i], s.step)
         return tuple(sl)
 
     def _get_local_single_slice_list(self, shape):
@@ -365,7 +360,7 @@ class LocalData(object):
         process_ssl = self.td._get_local_single_slice_list(shape)
         
         process_gsl = self.td._group_slice_list_in_one_dimension(
-                process_ssl, mf_process, self.sdir, pad=True) # pad if mfp is > nSlices (e.g. mfp = fixed int)
+                process_ssl, mf_process, self.sdir)
         return process_gsl
 
     def __get_unpad_slice_list(self, reps):
@@ -392,14 +387,15 @@ class GlobalData(object):
         self.pData = self.data._get_plugin_data()
         self.shape = self.data.get_shape()
 
-    def _get_dict(self):
-        return self._get_dict_in() if self.dtype == 'in' else \
+    def _get_dict(self, pad):
+        temp = self._get_dict_in(pad) if self.dtype == 'in' else \
             self._get_dict_out()
+        return temp
 
-    def _get_dict_in(self):
+    def _get_dict_in(self, pad):
         sl_dict = {}
         sl, current = \
-            self._get_slice_list(self.shape, current_sl=True, pad=True)
+            self._get_slice_list(self.shape, current_sl=True, pad=pad)
 
         sl_dict['current'], _ = self.trans._get_frames_per_process(current)
         sl, sl_dict['frames'] = self.trans._get_frames_per_process(sl)
@@ -415,8 +411,39 @@ class GlobalData(object):
         sl_dict['transfer'], _ = self.trans._get_frames_per_process(sl)
         return sl_dict
 
+    def _get_padded_shape(self, mft, orig_shape):
+        """
+        Get the (fake) shape of the data if it was exactly divisible by mft.
+        """
+        remaining = self.pData.meta_data.get('total_frames')%mft
+        trans_shape = self._get_sdim_shape(orig_shape, mft)
+        final_trans_shape = self._get_sdim_shape(orig_shape, remaining)
+        diff = np.array(trans_shape) - np.array(final_trans_shape)
+        return list(diff)
+
+    def _get_sdim_shape(self, orig_shape, nframes):
+        """
+        Get the shape of the slice dimensions given a fixed number of frames
+        """
+        sdims = self.data.get_slice_dimensions()
+        shape = list(orig_shape)
+        sdims_shape = [orig_shape[i] for i in sdims]
+        for s in sdims:
+            shape[s] = 1
+        
+        i = 0
+        while(nframes-1 > 0):
+            dim = sdims[i]
+            shape[dim] += 1
+            nframes -= np.prod(sdims_shape[0:i-1])
+            if shape[dim] == sdims_shape[i]:
+                i += 1
+        
+        return shape
+
     def _get_slice_list(self, shape, current_sl=None, pad=False):
         mft = self.pData._get_max_frames_transfer()
+        pad = self._get_padded_shape(mft, shape) if pad else False
         transfer_ssl = self.trans._get_global_single_slice_list(shape)
 
         if transfer_ssl is None:
@@ -432,7 +459,6 @@ class GlobalData(object):
             mfp = self.pData._get_max_frames_process()
             current_sl = self.trans._group_slice_list_in_multiple_dimensions(
                     transfer_ssl, mfp, slice_dims, pad=pad)
-
         split_list = self.pData.split
         transfer_gsl = self.__split_frames(transfer_gsl, split_list) if \
             split_list else transfer_gsl
