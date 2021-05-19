@@ -24,8 +24,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # get version from the version file in base of savu
 export savu_version=$(cat $DIR/version.txt)
-# dealing with a case when "master" passed as savu_version
-if [ "$savu_version" != "master" ]; then
+# dealing with a case when a branch name passed as savu_version
+if [ "$savu_version" == "3.0" ]; then
   export savu_version="v$savu_version"
 fi
 
