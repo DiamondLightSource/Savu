@@ -11,10 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-
-import sys, os
-import savu
-from os import path
+import os
+import sys
 
 autodoc_mock_imports = [
     "numpy",
@@ -33,6 +31,8 @@ autodoc_mock_imports = [
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../savu'))
+
+import savu
 
 print(sys.path)
 # -- General configuration -----------------------------------------------------
