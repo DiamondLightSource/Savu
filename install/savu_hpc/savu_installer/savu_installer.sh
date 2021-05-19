@@ -313,12 +313,12 @@ if [ ! $test_flag ]; then
     fi
   else
     echo "Installation for $facility has been chosen, installing packages from the explicit list first" | xargs
-    conda update -n root --file $DIR/explicit_lists/savu_explicit_packages.txt
+    #conda update -n root --file $DIR/explicit_lists/savu_explicit_packages.txt
 
     echo "Installing mpi4py from the recipe"
-    export VERSION_MPI4PI=$mpi4py_version
-    export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
-    . $recipes/installer.sh "mpi4py" $VERSION_BUILD_MPI4PI
+    export VERSION_MPI4PY=$mpi4py_version
+    export VERSION_BUILD_MPI4PY=$mpi4py_version"_openmpi_"$openmpi_version
+    . $recipes/installer.sh "mpi4py" $VERSION_BUILD_MPI4PY
 
     echo "Installing hdf5 from the recipe"
     export hdf5_XYZ_version=$hdf5_version

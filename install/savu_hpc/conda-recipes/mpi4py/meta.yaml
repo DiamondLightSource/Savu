@@ -1,10 +1,10 @@
 package:
   name: mpi4py
-  version: {{ environ['VERSION_BUILD_MPI4PI'] }}
+  version: {{ environ['VERSION_BUILD_MPI4PY'] }}
 
 source:
-  fn: mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
-  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{ environ['VERSION_MPI4PI'] }}.tar.gz
+  fn: mpi4py-{{ environ['VERSION_MPI4PY'] }}.tar.gz
+  url: https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-{{ environ['VERSION_MPI4PY'] }}.tar.gz
 
 requirements:
   host:
