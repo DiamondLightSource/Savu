@@ -13,7 +13,7 @@ class SimpleFitTools(PluginTools):
 
         PeakIndex:
             visibility: basic
-            dtype: [list[],list[str]]
+            dtype: [list[],list]
             description: The peak index
             default: []
 

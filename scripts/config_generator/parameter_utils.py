@@ -312,9 +312,7 @@ def _options_list(param_name, value, param_def):
         pvalid, error_str = is_valid(param_name, value, param_def)
         if pvalid:
             return pvalid, error_str
-
-    return pvalid, "The parameter %s does not match the options %s" \
-            % (param_name, dtype)
+    return pvalid, _error_message(param_name, dtype)
 
 
 def _list_combination(param_name, value, param_def):
@@ -490,7 +488,7 @@ def _check_type(param_name, value, param_def):
     pvalid, opt_err = _check_options(param_def, value, pvalid)
     if not pvalid:
         return pvalid, opt_err if opt_err \
-            else _error_message(dtype, param_name)
+            else _error_message(param_name, dtype)
 
     return True, ""
 
@@ -552,19 +550,22 @@ def _check_options(param_def, value, pvalid):
     return pvalid, option_error_str
 
 
-def _error_message(dtype, param_name):
+def _error_message(param_name, dtype):
     """Create an error message"""
     if isinstance(dtype, list):
-        type_options = "' or '".join([str(type_error_dict[t]) for t in dtype])
-        error_str = f"Your input for the parameter '{param_name}' must match" \
-                    f" the type '{type_options}'."
+        type_options = "' or '".join(
+            [str(type_error_dict[t] if t in type_error_dict else t)
+                for t in dtype]
+        )
+        error_str = f"The parameter '{param_name}' does not match" \
+                    f" the options: '{type_options}'."
     else:
-        error_str = f"Your input for the parameter '{param_name}' must " \
-                    f"match the type '{type_error_dict[dtype]}'."
+        error_str = f"The parameter '{param_name}' does not match " \
+                    f"the type: '{type_error_dict[dtype]}'."
     return error_str
 
 
-def _gui_error_message(dtype, param_name):
+def _gui_error_message(param_name, dtype):
     """Create an error string for the GUI
     Remove the paramter name, as the GUI message will be displayed below
     each parameter input box
@@ -579,7 +580,7 @@ def _gui_error_message(dtype, param_name):
 
 type_error_dict = {
     "preview": "preview slices",
-    "yamlfilepath": "yaml format",
+    "yamlfilepath": "yaml filepath",
     "filepath": "filepath",
     "h5path" : "hdf5 path",
     "filename": "file name",

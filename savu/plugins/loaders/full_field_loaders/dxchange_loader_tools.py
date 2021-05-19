@@ -12,12 +12,12 @@ class DxchangeLoaderTools(PluginTools):
             default: 'exchange/data'
         dark:
             visibility: intermediate
-            dtype: list[[h5path, None], int]
+            dtype: list[[h5path, None], float]
             description: Dark data path and scale
             default: "['exchange/data_dark', 1]"
         flat:
             visibility: intermediate
-            dtype: list[[h5path, None], int]
+            dtype: list[[h5path, None], float]
             description: Flat data path and scale value.
             default: "['exchange/data_white', 1]"
         logfile:
