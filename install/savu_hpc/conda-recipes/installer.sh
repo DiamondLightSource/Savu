@@ -14,10 +14,10 @@ echo "Checking that $package is installed into conda environment"
 
 conda list $package > check_conda_package.txt
 if grep -q $installed_version check_conda_package.txt; then
-    echo -e "\nPackage $package of v.$installed_version is found in Savu's environment, continue with the installation..."
+    echo -e "\nPackage $package of version $installed_version is found in Savu's environment, continue with the installation..."
     rm -f check_conda_package.txt
 else
-    echo -e "\nPackage $package of v.$installed_version is NOT found in Savu's environment! \nInstallation process terminated!"
+    echo -e "\nPackage $package of version $installed_version is NOT found in Savu's environment! \nInstallation process terminated!"
     rm -f check_conda_package.txt
     exit 0
 fi
