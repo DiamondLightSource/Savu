@@ -48,7 +48,7 @@ class Hdf5TransportData(BaseTransportData, SliceLists):
         pData._set_padding_dict()
         self.pad = True if pData.padding else False
         self.transfer_data = GlobalData(dtype, self)
-        trans_dict = self.transfer_data._get_dict()
+        trans_dict = self.transfer_data._get_dict(pData._plugin.fixed_length)
         proc_dict = LocalData(dtype, self)._get_dict()
         return self.__combine_dicts(trans_dict, proc_dict)
 
