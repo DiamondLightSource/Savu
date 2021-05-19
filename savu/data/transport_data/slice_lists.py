@@ -416,6 +416,8 @@ class GlobalData(object):
         Get the (fake) shape of the data if it was exactly divisible by mft.
         """
         remaining = self.pData.meta_data.get('total_frames')%mft
+        if not remaining:
+            return [0]*len(orig_shape)
         trans_shape = self._get_sdim_shape(orig_shape, mft)
         final_trans_shape = self._get_sdim_shape(orig_shape, remaining)
         diff = np.array(trans_shape) - np.array(final_trans_shape)
