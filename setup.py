@@ -118,14 +118,13 @@ setup(name='savu',
                   ('htmls', ['scripts/log_evaluation/testing.html']),
                   ('css', ['scripts/log_evaluation/style_sheet.css']),
                   (os.path.dirname(version_file), [version_file]),
-                  (os.path.dirname(sys_file), [sys_file]),
-                  (os.path.dirname(mod_file), [mod_file]),
+                  (os.path.dirname(sys_file), [sys_file]),                  
                   (os.path.dirname(templates_file), [templates_file]),
                   (os.path.dirname(templates_file1), [templates_file1]),
                   (os.path.dirname(templates_file2), [templates_file2]),
                   (os.path.dirname(templates_file3), [templates_file3]),
                   (os.path.dirname(env_file), [env_file])] \
-                  + conda_recipes + test_data,
+                  + conda_recipes + test_data + mod_file,
 
       include_package_data=True,
       zip_safe=False)
