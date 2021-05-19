@@ -125,7 +125,7 @@ setup(name='savu',
                   (os.path.dirname(templates_file2), [templates_file2]),
                   (os.path.dirname(templates_file3), [templates_file3]),
                   (os.path.dirname(env_file), [env_file])] \
-                  + conda_recipes + test_data + mod_file,
+                  + conda_recipes + test_data,
 
       include_package_data=True,
       zip_safe=False)
