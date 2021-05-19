@@ -4,13 +4,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. |savu_logo| image:: files_and_images/Savu_logo_2_L_Res_trans2.png
+.. image:: files_and_images/Savu_logo_2_L_Res_trans2.png
     :scale: 100%
+    :align: right
     :alt: savu_logo
 
 .. include:: ../../README.rst
     :start-after: start_of_main_text
-    :end-before: exclude from index.rst
 
 Table of Contents
 =================
