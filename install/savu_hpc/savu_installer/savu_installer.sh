@@ -94,6 +94,7 @@ fi
 arg_parse "-s" savu_recipe "$@"
 case $savu_recipe in
   "master") savu_recipe="savu_master" ;;
+  "recipes") savu_recipe="savu_recipes" ;;
   "local") savu_recipe="savu_local" ;;
   "") savu_recipe="savu" ;;
   *) echo "Unknown Savu installation version."; exit 1 ;;
