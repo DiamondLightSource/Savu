@@ -330,7 +330,7 @@ if [ ! $test_flag ]; then
 
     echo "Installing h5py from the recipe"
     export VERSION_H5PY=$h5py_version
-    export VERSION_BUILD_H5PY=$h5py_version"_openmpi_"$openmpi_version
+    export VERSION_BUILD_H5PY=$h5py_version
     . $recipes/installer.sh "h5py" $VERSION_BUILD_H5PY
   fi
 
