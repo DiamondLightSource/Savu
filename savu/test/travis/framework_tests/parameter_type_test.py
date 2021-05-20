@@ -172,7 +172,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "doc/source/files_and_images/plugin_guides/parameter_key.yaml"
+        value = "Savu/doc/source/files_and_images/plugin_guides/parameter_key.yaml"
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
@@ -207,7 +207,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        value = "Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -231,7 +231,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "savu/plugins/loaders/templates/nexus_templates/mm.yml"
+        value = "Savu/savu/plugins/loaders/templates/nexus_templates/mm.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
