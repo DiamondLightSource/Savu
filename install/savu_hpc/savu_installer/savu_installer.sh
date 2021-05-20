@@ -25,7 +25,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # get version from the version file in base of savu
 export savu_version=$(cat $DIR/version.txt)
 # dealing with a case when a branch name passed as savu_version
-if [ "$savu_version" == "3.0" ]; then
+if [ "$savu_version" != "master" ]; then
   export savu_version="v$savu_version"
 fi
 
@@ -94,7 +94,6 @@ fi
 arg_parse "-s" savu_recipe "$@"
 case $savu_recipe in
   "master") savu_recipe="savu_master" ;;
-  "recipes") savu_recipe="savu_recipes" ;;
   "local") savu_recipe="savu_local" ;;
   "") savu_recipe="savu" ;;
   *) echo "Unknown Savu installation version."; exit 1 ;;

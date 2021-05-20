@@ -121,6 +121,8 @@ https://conda.anaconda.org/fastai/noarch/nvidia-ml-py3-7.352.0-py_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/olefile-0.46-py37_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/docutils-0.16-py37h89c1867_2.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/pandocfilters-1.4.2-py_1.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/pathspec-0.8.1-pyhd3deb0d_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/pathtools-0.1.2-py_1.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/parso-0.7.0-pyh9f0ad1d_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/pickleshare-0.7.5-py_1003.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/pkginfo-1.7.0-py37h06a4308_0.tar.bz2

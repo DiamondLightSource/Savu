@@ -73,11 +73,9 @@ Documentation
 ========
 The full documentation is available at https://savu.readthedocs.org/en/latest/
 
-Installation (Linux only)
+Installation (Unix systems only)
 ========
-| Install Savu-lite package into an empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
-| ``conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev``
-
+| See all installation instructions `here <https://github.com/DiamondLightSource/Savu/tree/master/install/README.md>`
 
 License
 ========
