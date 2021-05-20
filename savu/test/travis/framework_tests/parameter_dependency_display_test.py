@@ -33,9 +33,9 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
     I have included the dependency text in the docstring for clarity
     """
 
-    def initial_setup(self):
+    def initial_setup(self,
+        ppath="savu.plugins.reconstructions.tomobar.tomobar_recon"):
         content = Content()
-        ppath = "savu.plugins.reconstructions.tomobar.tomobar_recon"
         plugin = pu.load_class(ppath)()
         tools = plugin.get_plugin_tools()
         tools._populate_default_parameters()
@@ -157,70 +157,70 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
     def test_default_choices(self):
         # DO change reg iterations to 100
         """
-        regularisation_iterations:
-                 visibility: basic
-                 dtype: int
-                 description:
-                   summary: Total number of regularisation iterations.
-                     The smaller the number of iterations, the smaller the effect
-                     of the filtering is. A larger number will affect the speed
-                     of the algorithm.
-                   range: Recommended value dependent upon method.
-                 default:
-                     regularisation_method:
-                       ROF_TV: 1000
-                       FGP_TV: 500
-                       PD_TV: 100
-                       SB_TV: 100
-                       LLT_ROF: 1000
-                       NDF: 1000
-                       Diff4th: 1000
-                       TGV: 80
-                       NLTV: 80
-                 dependency:
-                    regularisation_method
+        max_iterations:
+             visibility: basic
+             dtype: int
+             description:
+               summary: Total number of regularisation iterations.
+                 The smaller the number of iterations, the smaller the effect
+                 of the filtering is. A larger number will affect the speed
+                 of the algorithm.
+               range: Recommended value dependent upon method.
+             default:
+                 regularisation_method:
+                   ROF_TV: 1000
+                   FGP_TV: 500
+                   SB_TV: 100
+                   LLT_ROF: 1000
+                   NDF: 1000
+                   Diff4th: 1000
+                   TGV: 80
+                   NLTV: 80
+             dependency:
+                regularisation_method: [ROF_TV,FGP_TV,SB_TV,LLT_ROF,NDF,Diff4th,TGV,NLTV]
         """
-        plugin, tools, pdefs, content = self.initial_setup()
+        plugin, tools, pdefs, content = \
+            self.initial_setup(ppath="savu.plugins.basic_operations.no_process")
         key = "regularisation_method"
-        value = "PD_TV"
+        value = "SB_TV"
 
-        # TODO try on load in comparison to modify_main as modify_main does not change default..
         valid_modification = content.modify_main(
             key, value, plugin.tools, plugin.parameters, False
         )
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = pdefs["regularisation_iterations"]["display"]
+        display_value = pdefs["max_iterations"]["display"]
         self.assertTrue(display_value == "on")
 
     def test_default_choices2(self):
-        # Do not display regularisation_iterations
+        # Do not display max_iterations
         """
-        regularisation_iterations:
-                 visibility: basic
-                 dtype: int
-                 description:
-                   summary: Total number of regularisation iterations.
-                     The smaller the number of iterations, the smaller the effect
-                     of the filtering is. A larger number will affect the speed
-                     of the algorithm.
-                   range: Recommended value dependent upon method.
-                 default:
-                     regularisation_method:
-                       ROF_TV: 1000
-                       FGP_TV: 500
-                       PD_TV: 100
-                       SB_TV: 100
-                       LLT_ROF: 1000
-                       NDF: 1000
-                       Diff4th: 1000
-                       TGV: 80
-                       NLTV: 80
-                 dependency:
-                    regularisation_method
+        max_iterations:
+             visibility: basic
+             dtype: int
+             description:
+               summary: Total number of regularisation iterations.
+                 The smaller the number of iterations, the smaller the effect
+                 of the filtering is. A larger number will affect the speed
+                 of the algorithm.
+               range: Recommended value dependent upon method.
+             default:
+                 regularisation_method:
+                   ROF_TV: 1000
+                   FGP_TV: 500
+                   SB_TV: 100
+                   LLT_ROF: 1000
+                   NDF: 1000
+                   Diff4th: 1000
+                   TGV: 80
+                   NLTV: 80
+             dependency:
+                regularisation_method: [ROF_TV,FGP_TV,SB_TV,LLT_ROF,NDF,Diff4th,TGV,NLTV]
         """
-        plugin, tools, pdefs, content = self.initial_setup()
+        plugin, tools, pdefs, content = self.initial_setup(
+            ppath="savu.plugins.basic_operations.no_process"
+        )
         key = "regularisation_method"
         value = "None"
 
@@ -230,7 +230,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         self.assertTrue(valid_modification)
 
         # Check display list
-        display_value = pdefs["regularisation_iterations"]["display"]
+        display_value = pdefs["max_iterations"]["display"]
         self.assertTrue(display_value == "off")
 
 
