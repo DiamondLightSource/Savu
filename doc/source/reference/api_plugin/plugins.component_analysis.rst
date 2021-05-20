@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.component_analysis.base_component_analysis
    plugins.component_analysis.ica
@@ -14,6 +15,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.component_analysis
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

@@ -25,17 +25,6 @@ Alignment
    Sinogram Clean <plugin_documentation/plugins/alignment/sinogram_clean>
 
 
-Analysis
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Histogram <plugin_documentation/plugins/analysis/histogram>
-   Stats <plugin_documentation/plugins/analysis/stats>
-   Stxm Analysis <plugin_documentation/plugins/analysis/stxm_analysis>
-
-
 Azimuthal Integrators
 ########################################################
 
@@ -55,13 +44,13 @@ Basic Operations
 
    Arithmetic Operations <plugin_documentation/plugins/basic_operations/arithmetic_operations>
    Basic Operations <plugin_documentation/plugins/basic_operations/basic_operations>
-   Data Rescale <plugin_documentation/plugins/basic_operations/data_rescale>
    Get Data Statistics <plugin_documentation/plugins/basic_operations/get_data_statistics>
    No Process Plugin <plugin_documentation/plugins/basic_operations/no_process_plugin>
    Data Threshold <plugin_documentation/plugins/basic_operations/data_threshold>
-   Value Mask Replacement <plugin_documentation/plugins/basic_operations/value_mask_replacement>
    Elementwise Arrays Arithmetics <plugin_documentation/plugins/basic_operations/elementwise_arrays_arithmetics>
    No Process <plugin_documentation/plugins/basic_operations/no_process>
+   Rescale Intensity <plugin_documentation/plugins/basic_operations/rescale_intensity>
+   Value Substitution <plugin_documentation/plugins/basic_operations/value_substitution>
 
 
 Centering
@@ -71,7 +60,6 @@ Centering
    :maxdepth: 1 
 
    Vo Centering <plugin_documentation/plugins/centering/vo_centering>
-   Vo Centering Iterative <plugin_documentation/plugins/centering/vo_centering_iterative>
 
 
 Component Analysis
@@ -95,14 +83,11 @@ Corrections
    Dark Flat Field Correction <plugin_documentation/plugins/corrections/dark_flat_field_correction>
    Distortion Correction <plugin_documentation/plugins/corrections/distortion_correction>
    Monitor Correction <plugin_documentation/plugins/corrections/monitor_correction>
-   Monitor Correction Nd <plugin_documentation/plugins/corrections/monitor_correction_nd>
    Subpixel Shift <plugin_documentation/plugins/corrections/subpixel_shift>
    Time Based Correction <plugin_documentation/plugins/corrections/time_based_correction>
-   Time Based Plus Drift Correction <plugin_documentation/plugins/corrections/time_based_plus_drift_correction>
-   Timeseries Field Corrections <plugin_documentation/plugins/corrections/timeseries_field_corrections>
    Xrd Absorption Approximation <plugin_documentation/plugins/corrections/xrd_absorption_approximation>
+   Time Based Plus Drift Correction <plugin_documentation/plugins/corrections/time_based_plus_drift_correction>
    Mtf Deconvolution <plugin_documentation/plugins/corrections/mtf_deconvolution>
-   Distortion Correction Deprecated <plugin_documentation/plugins/corrections/distortion_correction_deprecated>
 
 
 Developing
@@ -121,10 +106,6 @@ Filters
    :maxdepth: 1 
 
    Band Pass <plugin_documentation/plugins/filters/band_pass>
-   Pymca <plugin_documentation/plugins/filters/pymca>
-   Dezinger <plugin_documentation/plugins/filters/dezinger>
-   Dezinger Simple <plugin_documentation/plugins/filters/dezinger_simple>
-   Dezinger Sinogram <plugin_documentation/plugins/filters/dezinger_sinogram>
    Find Peaks <plugin_documentation/plugins/filters/find_peaks>
    Fresnel Filter <plugin_documentation/plugins/filters/fresnel_filter>
    Hilbert Filter <plugin_documentation/plugins/filters/hilbert_filter>
@@ -132,6 +113,7 @@ Filters
    List To Projections <plugin_documentation/plugins/filters/list_to_projections>
    Paganin Filter <plugin_documentation/plugins/filters/paganin_filter>
    Poly Background Estimator <plugin_documentation/plugins/filters/poly_background_estimator>
+   Pymca <plugin_documentation/plugins/filters/pymca>
    Quantisation Filter <plugin_documentation/plugins/filters/quantisation_filter>
    Spectrum Crop <plugin_documentation/plugins/filters/spectrum_crop>
    Strip Background <plugin_documentation/plugins/filters/strip_background>
@@ -146,9 +128,33 @@ Denoising
 
    Ccpi Denoising Cpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu>
    Ccpi Denoising Cpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu_3D>
+   Ccpi Denoising Gpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu>
    Ccpi Denoising Gpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu_3D>
    Denoise Bregman Filter <plugin_documentation/plugins/filters/denoising/denoise_bregman_filter>
    Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
+   Median Filter Deprecated <plugin_documentation/plugins/filters/denoising/median_filter_deprecated>
+   Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
+
+
+Dezingers
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Dezinger <plugin_documentation/plugins/filters/dezingers/dezinger>
+   Dezinger Gpu <plugin_documentation/plugins/filters/dezingers/dezinger_gpu>
+   Dezinger Simple Deprecated <plugin_documentation/plugins/filters/dezingers/dezinger_simple_deprecated>
+   Dezinger Sinogram Deprecated <plugin_documentation/plugins/filters/dezingers/dezinger_sinogram_deprecated>
+
+
+Inpainting
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Inpainting <plugin_documentation/plugins/filters/inpainting/inpainting>
 
 
 Fitters
@@ -161,20 +167,13 @@ Fitters
    Simple Fit <plugin_documentation/plugins/fitters/simple_fit>
 
 
-Fluo Fitters
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
 Kinematics
 ########################################################
 
 .. toctree::
    :maxdepth: 1 
 
+   Stage Motion <plugin_documentation/plugins/kinematics/stage_motion>
 
 
 Loaders
@@ -185,6 +184,7 @@ Loaders
 
    Hdf5 Template Loader <plugin_documentation/plugins/loaders/hdf5_template_loader>
    Image Template Loader <plugin_documentation/plugins/loaders/image_template_loader>
+   Multi Savu Loader <plugin_documentation/plugins/loaders/multi_savu_loader>
    Random Hdf5 Loader <plugin_documentation/plugins/loaders/random_hdf5_loader>
    Savu Nexus Loader <plugin_documentation/plugins/loaders/savu_nexus_loader>
    Yaml Converter <plugin_documentation/plugins/loaders/yaml_converter>
@@ -202,6 +202,7 @@ Full Field Loaders
    Multi Nxtomo Loader <plugin_documentation/plugins/loaders/full_field_loaders/multi_nxtomo_loader>
    Nxtomo Loader <plugin_documentation/plugins/loaders/full_field_loaders/nxtomo_loader>
    Random 3D Tomo Loader <plugin_documentation/plugins/loaders/full_field_loaders/random_3d_tomo_loader>
+   Lfov Loader <plugin_documentation/plugins/loaders/full_field_loaders/lfov_loader>
 
 
 Mapping Loaders
@@ -252,19 +253,6 @@ I14 Loaders
    I14 Fluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i14_loaders/i14_fluo_loader>
 
 
-I18 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I18 Fluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i18_loaders/i18_fluo_loader>
-   I18 Mm Loader <plugin_documentation/plugins/loaders/mapping_loaders/i18_loaders/i18_mm_loader>
-   I18 Monitor Loader <plugin_documentation/plugins/loaders/mapping_loaders/i18_loaders/i18_monitor_loader>
-   I18 Stxm Loader <plugin_documentation/plugins/loaders/mapping_loaders/i18_loaders/i18_stxm_loader>
-   I18 Xrd Loader <plugin_documentation/plugins/loaders/mapping_loaders/i18_loaders/i18_xrd_loader>
-
-
 I22 Loaders
 --------------------------------------------------------
 
@@ -272,6 +260,38 @@ I22 Loaders
    :maxdepth: 1 
 
    I22 Tomo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i22_loaders/i22_tomo_loader>
+
+
+I18 Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Malcolm Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Nexus Templates
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+
+
+Utils
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
 
 
 Ptychography
@@ -289,12 +309,12 @@ Reconstructions
 .. toctree::
    :maxdepth: 1 
 
-   Ccpi Cgls Recon <plugin_documentation/plugins/reconstructions/ccpi_cgls_recon>
    Scikitimage Filter Back Projection <plugin_documentation/plugins/reconstructions/scikitimage_filter_back_projection>
    Scikitimage Sart <plugin_documentation/plugins/reconstructions/scikitimage_sart>
    Simple Recon <plugin_documentation/plugins/reconstructions/simple_recon>
    Tomopy Recon <plugin_documentation/plugins/reconstructions/tomopy_recon>
    Visual Hulls Recon <plugin_documentation/plugins/reconstructions/visual_hulls_recon>
+   Ccpi Cgls Recon <plugin_documentation/plugins/reconstructions/ccpi_cgls_recon>
 
 
 Astra Recons
@@ -304,6 +324,7 @@ Astra Recons
    :maxdepth: 1 
 
    Astra Recon Cpu <plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_cpu>
+   Astra Recon Gpu <plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_gpu>
 
 
 Tomobar
@@ -312,8 +333,9 @@ Tomobar
 .. toctree::
    :maxdepth: 1 
 
+   Tomobar Recon <plugin_documentation/plugins/reconstructions/tomobar/tomobar_recon>
+   Tomobar Recon 3D <plugin_documentation/plugins/reconstructions/tomobar/tomobar_recon_3D>
    Tomobar Recon Cpu <plugin_documentation/plugins/reconstructions/tomobar/tomobar_recon_cpu>
-   Tomobar Recon Fully 3D <plugin_documentation/plugins/reconstructions/tomobar/tomobar_recon_fully_3D>
 
 
 Reshape
@@ -325,6 +347,7 @@ Reshape
    Data Removal <plugin_documentation/plugins/reshape/data_removal>
    Downsample Filter <plugin_documentation/plugins/reshape/downsample_filter>
    Mipmap <plugin_documentation/plugins/reshape/mipmap>
+   Image Stitching <plugin_documentation/plugins/reshape/image_stitching>
 
 
 Ring Removal
@@ -344,6 +367,7 @@ Ring Removal
    Ring Removal Regularization <plugin_documentation/plugins/ring_removal/ring_removal_regularization>
    Ring Removal Sorting <plugin_documentation/plugins/ring_removal/ring_removal_sorting>
    Ring Removal Waveletfft <plugin_documentation/plugins/ring_removal/ring_removal_waveletfft>
+   Ring Removal Interpolation <plugin_documentation/plugins/ring_removal/ring_removal_interpolation>
 
 
 Savers
@@ -359,27 +383,6 @@ Savers
    Xrf Saver <plugin_documentation/plugins/savers/xrf_saver>
 
 
-I23Segmentation
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-   Final Segment I23 <plugin_documentation/plugins/segmentation/i23segmentation/final_segment_i23>
-   I23 Segment <plugin_documentation/plugins/segmentation/i23segmentation/i23_segment>
-   I23 Segment3D <plugin_documentation/plugins/segmentation/i23segmentation/i23_segment3D>
-
-
-Morphological Operations
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-   Morph Proc <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc>
-   Morph Remove Objects <plugin_documentation/plugins/segmentation/morphological_operations/morph_remove_objects>
-
-
 Evolving Contours
 ********************************************************
 
@@ -388,6 +391,8 @@ Evolving Contours
 
    Morph Snakes <plugin_documentation/plugins/segmentation/evolving_contours/morph_snakes>
    Morph Snakes3D <plugin_documentation/plugins/segmentation/evolving_contours/morph_snakes3D>
+   Region Grow <plugin_documentation/plugins/segmentation/evolving_contours/region_grow>
+   Region Grow3D <plugin_documentation/plugins/segmentation/evolving_contours/region_grow3D>
 
 
 Gaussian Mixtures
@@ -418,6 +423,18 @@ Masks Initialise
    Mask Initialiser <plugin_documentation/plugins/segmentation/masks_initialise/mask_initialiser>
 
 
+Morphological Operations
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Morph Proc <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc>
+   Morph Proc Line <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line>
+   Morph Proc Line3D <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line3D>
+   Morph Remove Objects <plugin_documentation/plugins/segmentation/morphological_operations/morph_remove_objects>
+
+
 Thresholding
 ********************************************************
 
@@ -425,6 +442,16 @@ Thresholding
    :maxdepth: 1 
 
    Thresh Segm <plugin_documentation/plugins/segmentation/thresholding/thresh_segm>
+
+
+Simulation
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
+   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
 
 
 Stats
@@ -443,15 +470,5 @@ Visualisation
    :maxdepth: 1 
 
    Ortho Slice <plugin_documentation/plugins/visualisation/ortho_slice>
-
-
-Simulation
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
-   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
 
 

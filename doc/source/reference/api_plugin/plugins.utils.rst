@@ -2,6 +2,6 @@ plugins.utils module
 ====================
 
 .. automodule:: plugins.utils
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

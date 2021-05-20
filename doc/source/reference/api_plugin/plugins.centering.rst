@@ -5,14 +5,14 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.centering.vo_centering
-   plugins.centering.vo_centering_iterative
 
 Module contents
 ---------------
 
 .. automodule:: plugins.centering
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

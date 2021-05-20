@@ -32,6 +32,10 @@ If you are using the command line please type ``-h`` or ``--help``.
 
 * :ref:`ref`
 
+* :ref:`level`
+
+* :ref:`expand`
+
 * :ref:`cite`
 
 * :ref:`coll`
@@ -40,16 +44,15 @@ If you are using the command line please type ``-h`` or ``--help``.
 
 * :ref:`exit`
 
-* :ref:`level`
-
 * :ref:`history`
 
 .. _open:
 
 open
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _open_arg_parser
@@ -59,9 +62,10 @@ open
 .. _help:
 
 help
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _help_arg_parser
@@ -71,9 +75,10 @@ help
 .. _disp:
 
 disp
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _disp_arg_parser
@@ -83,9 +88,10 @@ disp
 .. _list:
 
 list
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _list_arg_parser
@@ -95,9 +101,10 @@ list
 .. _save:
 
 save
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _save_arg_parser
@@ -107,9 +114,10 @@ save
 .. _mod:
 
 mod
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _mod_arg_parser
@@ -119,9 +127,10 @@ mod
 .. _set:
 
 set
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _set_arg_parser
@@ -131,9 +140,10 @@ set
 .. _add:
 
 add
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _add_arg_parser
@@ -143,9 +153,10 @@ add
 .. _rem:
 
 rem
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _rem_arg_parser
@@ -155,9 +166,10 @@ rem
 .. _move:
 
 move
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _move_arg_parser
@@ -167,21 +179,49 @@ move
 .. _ref:
 
 ref
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _ref_arg_parser
             :prog: ref
 
 
+.. _level:
+
+level
+----------------
+
+.. cssclass:: argstyle
+
+    .. argparse::
+            :module: scripts.config_generator.arg_parsers
+            :func: _level_arg_parser
+            :prog: level
+
+
+.. _expand:
+
+expand
+----------------
+
+.. cssclass:: argstyle
+
+    .. argparse::
+            :module: scripts.config_generator.arg_parsers
+            :func: _expand_arg_parser
+            :prog: expand
+
+
 .. _cite:
 
 cite
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _cite_arg_parser
@@ -191,9 +231,10 @@ cite
 .. _coll:
 
 coll
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _coll_arg_parser
@@ -203,9 +244,10 @@ coll
 .. _clear:
 
 clear
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _clear_arg_parser
@@ -215,33 +257,23 @@ clear
 .. _exit:
 
 exit
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _exit_arg_parser
             :prog: exit
 
 
-.. _level:
-
-level
---------------
-
-.. cssclass:: argstyle
-    .. argparse::
-            :module: scripts.config_generator.arg_parsers
-            :func: _level_arg_parser
-            :prog: level
-
-
 .. _history:
 
 history
---------------
+----------------
 
 .. cssclass:: argstyle
+
     .. argparse::
             :module: scripts.config_generator.arg_parsers
             :func: _history_arg_parser

@@ -5,9 +5,11 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.loaders.full_field_loaders.dxchange_loader
    plugins.loaders.full_field_loaders.image_loader
+   plugins.loaders.full_field_loaders.lfov_loader
    plugins.loaders.full_field_loaders.mrc_loader
    plugins.loaders.full_field_loaders.multi_nxtomo_loader
    plugins.loaders.full_field_loaders.nxtomo_loader
@@ -17,6 +19,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.loaders.full_field_loaders
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

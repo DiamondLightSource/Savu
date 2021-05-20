@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.driver.all_cpus_plugin
    plugins.driver.base_driver
@@ -19,6 +20,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.driver
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:
