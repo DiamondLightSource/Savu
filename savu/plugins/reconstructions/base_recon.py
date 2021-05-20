@@ -174,7 +174,7 @@ class BaseRecon(Plugin):
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
         if total_frames > len(cor):
-            cor = np.tile(cor, int(total_frames / len(cor)))
+            cor = np.tile(cor, total_frames // len(cor))
         return cor
 
     def __polyfit_cor(self, cor_dict, inData):

@@ -64,5 +64,41 @@ class RemoveRingsTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
+    def test_remove_unresponsive_fluctuating_rings(self):
+        process_list = 'filters/ring_removal/remove_unresponsive_fluctuating_rings_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_remove_all_rings(self):
+        process_list = 'filters/ring_removal/remove_all_rings_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_ring_removal_waveletfft(self):
+        process_list = 'filters/ring_removal/ring_removal_waveletfft_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_raven_filter(self):
+        process_list = 'filters/ring_removal/raven_filter_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_ccpi_ring_artefact_filter(self):
+        process_list = 'filters/ring_removal/ccpi_ring_artefact_filter_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_ring_removal_interpolation(self):
+        process_list = 'filters/ring_removal/ring_removal_interpolation_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
 if __name__ == "__main__":
     unittest.main()

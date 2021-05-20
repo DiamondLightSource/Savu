@@ -21,6 +21,7 @@
 
 """
 
+import logging
 import skimage.exposure
 import skimage.io
 import numpy as np
@@ -40,7 +41,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
 
     :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
     :u*param format: Image format. Default: 'tif'.
-    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 16.
+    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 32.
     :param max: Global max for tiff scaling. Default: None.
     :param min: Global min for tiff scaling. Default: None.
     :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
@@ -53,11 +54,27 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     def __init__(self, name='ImageSaver'):
         super(ImageSaver, self).__init__(name)
 
+    def setup(self):
+        data_pattern = self.parameters['pattern']
+        in_pData, _ = self.get_plugin_datasets()
+        try:
+            in_pData[0].plugin_data_setup(data_pattern, 'single')
+        except:
+            msg = "\n***************************************************"\
+            "**********\n"\
+            "Can't find the data pattern: {}.\nThe pattern parameter of " \
+            "this plugin must be relevant to its \nprevious plugin" \
+            "\n*************************************************************"\
+            "\n".format(data_pattern)
+            logging.warning(msg)
+            cu.user_message(msg)
+            raise ValueError(msg)
+
     def pre_process(self):
         super(ImageSaver, self).pre_process()
+        self.pData = self.get_plugin_in_datasets()[0]
         self.file_format = self.parameters['format']
         num_bit = self.parameters['num_bit']
-        self.pData = self.get_plugin_in_datasets()[0]
         if not (num_bit == 8 or num_bit == 16 or num_bit == 32):
             self.num_bit = 32
             msg = "\n***********************************************\n"\
@@ -133,7 +150,7 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
         return self._data_range
 
     def executive_summary(self):
-        if self._data_range == 'image':
+        if (self._data_range == 'image') and (self.num_bit != 32):
             return ["To rescale and normalise the data between global max and "
                     "min values, please run MaxAndMin plugin before "
                     "ImageSaver."]
