@@ -5,13 +5,15 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    plugins.savers.utils
+   plugins.savers.utils
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.savers.base_image_saver
    plugins.savers.base_saver
@@ -25,6 +27,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.savers
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

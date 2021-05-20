@@ -5,6 +5,7 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.segmentation.masks_initialise.mask_initialiser
 
@@ -12,6 +13,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.segmentation.masks_initialise
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

@@ -5,16 +5,17 @@ Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
-   plugins.segmentation.morphological_operations.merge_binary_mask
-   plugins.segmentation.morphological_operations.merge_binary_mask_3D
    plugins.segmentation.morphological_operations.morph_proc
+   plugins.segmentation.morphological_operations.morph_proc_line
+   plugins.segmentation.morphological_operations.morph_proc_line3D
    plugins.segmentation.morphological_operations.morph_remove_objects
 
 Module contents
 ---------------
 
 .. automodule:: plugins.segmentation.morphological_operations
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

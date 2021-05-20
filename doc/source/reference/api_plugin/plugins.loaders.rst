@@ -5,16 +5,18 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    plugins.loaders.full_field_loaders
-    plugins.loaders.mapping_loaders
-    plugins.loaders.templates
-    plugins.loaders.utils
+   plugins.loaders.full_field_loaders
+   plugins.loaders.mapping_loaders
+   plugins.loaders.templates
+   plugins.loaders.utils
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.loaders.base_loader
    plugins.loaders.hdf5_template_loader
@@ -28,6 +30,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.loaders
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

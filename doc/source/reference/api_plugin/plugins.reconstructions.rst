@@ -5,14 +5,16 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    plugins.reconstructions.astra_recons
-    plugins.reconstructions.tomobar
+   plugins.reconstructions.astra_recons
+   plugins.reconstructions.tomobar
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.reconstructions.base_recon
    plugins.reconstructions.ccpi_cgls_recon
@@ -26,6 +28,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.reconstructions
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

@@ -5,6 +5,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.loaders.templates.malcolm_templates
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

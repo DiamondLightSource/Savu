@@ -5,19 +5,20 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 4
 
-    plugins.filters.denoising
+   plugins.filters.denoising
+   plugins.filters.dezingers
+   plugins.filters.inpainting
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 4
 
    plugins.filters.band_pass
    plugins.filters.base_filter
-   plugins.filters.dezinger
-   plugins.filters.dezinger_simple
-   plugins.filters.dezinger_sinogram
    plugins.filters.dials_find_spots
    plugins.filters.find_peaks
    plugins.filters.fresnel_filter
@@ -37,6 +38,6 @@ Module contents
 ---------------
 
 .. automodule:: plugins.filters
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:

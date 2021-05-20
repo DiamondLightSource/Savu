@@ -2,6 +2,6 @@ plugins.centering.vo\_centering module
 ======================================
 
 .. automodule:: plugins.centering.vo_centering
-    :members:
-    :undoc-members:
-    :noindex:
+   :members:
+   :undoc-members:
+   :noindex:
