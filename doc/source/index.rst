@@ -4,6 +4,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. image:: files_and_images/Savu_logo_2_L_Res_trans2.png
+    :scale: 100%
+    :align: right
+    :alt: savu_logo
+
 .. include:: ../../README.rst
     :start-after: start_of_main_text
 
@@ -65,4 +70,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
 
