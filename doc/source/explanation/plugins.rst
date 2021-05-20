@@ -22,6 +22,8 @@ Therefore, the choice of loader is dependent upon the format of the data.
         and you don't have a GPU you will be limited to CPU plugins.
 
 
+.. _plugin_doc_list:
+
 Plugin Documentation
 ---------------------
 
@@ -32,3 +34,19 @@ search bar on the left to find a specific one.
    :maxdepth: 2
 
    ../reference/plugin_documentation
+
+
+..
+
+    .. _plugin_api_list:
+
+    Plugin API
+    ---------------------
+
+    Below is a list of the current plugins grouped by type. You may also use the
+    search bar on the left to find a specific one.
+
+    .. toctree::
+       :maxdepth: 2
+
+       ../reference/plugin_autosummary
