@@ -2,7 +2,7 @@ channels:
   - conda-forge
   - defaults
   - astra-toolbox/label/dev
-  - dkazanc
+  - savu-dep
   - ccpi
   - fastai
 dependencies:
@@ -21,6 +21,7 @@ dependencies:
   - larix
   - ccpi-reconstruction
   - ccpi-regulariser
+  - tomophantom
   - astra-toolbox
   - pyfai
   - pymca==5.5.5
