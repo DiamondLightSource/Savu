@@ -122,7 +122,7 @@ class PluginParameters(object):
                 # Change the string to an integer, float, list, str, dict
                 if not self.default_dependency_dict_exists(p_value):
                     p_value['default'] = pu._dumps(p_value['default'])
-                    self.param.set(p_name, p_value)
+                self.param.set(p_name, p_value)
 
     def _load_param_from_doc(self, tool_class):
         """Find the parameter information from the method docstring.
