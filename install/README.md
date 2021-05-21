@@ -17,7 +17,7 @@ Probably the easiest method since you'll be installing the pre-built version fro
 This will install *Savu-lite* into your Savu environment with all dependencies.
 
 #### 1b: Installation of *Savu-lite* using the explicit list of packages
-This method requires cloning the repository and then installing all the dependencies from the explicit list. Then *Savu-lite* is installed into the environment.
+This method requires cloning the repository and then installing all dependencies from the explicit list. Finally *Savu-lite* is then installed into the environment.
 1. Get the explicit list file from [HERE](https://github.com/DiamondLightSource/Savu/blob/master/install/savu_lite37/spec-savu_lite_latest.txt)
 2. `conda install --yes --name savu --file spec-savu_lite_latest.txt`
 3. From the main Savu folder run `python setup.py install`
