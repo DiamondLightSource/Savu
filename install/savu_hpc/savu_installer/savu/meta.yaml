@@ -1,11 +1,9 @@
-{% set version = "3.0" %}
-
 package:
   name: savu
-  version: {{ version }}
+  version: {{ environ['savu_version'] }}
 
 source:
-  url: https://github.com/DiamondLightSource/Savu/archive/v{{ version }}.tar.gz
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ environ['savu_version'] }}.tar.gz
 
 requirements:
   build:
