@@ -32,6 +32,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
     """
     This plugin uses ToMoBAR software and CPU Astra projector underneath to generate projection data.
     The plugin will project the given object using the metadata OR user-provided parallel-beam geometry.
+    In case when angles set to None, the metadata projection geometry will be used.
 
     :param angles_deg: Projection angles in degrees in a format [start, stop, step]. Default: None.
     :param det_horiz: The size of the _horizontal_ detector. Default: 300.
@@ -70,10 +71,11 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
         self.angles_total = len(self.angles_rad)
 
         out_shape_sino = self.new_shape(in_dataset[0].get_shape(), in_dataset[0])
-        label = ['x.pixels', 'proj.angles', 'y.pixels']
+        labels = ['rotation_angle.degrees', 'detector_y.pixel', 'detector_x.pixel']
+        #labels = ['x.pixels', 'proj.angles', 'y.pixels']
         pattern = {'name': 'SINOGRAM', 'slice_dims': (1,),
-                   'core_dims': (0,2)}
-        out_dataset[0].create_dataset(axis_labels=label, shape=out_shape_sino)
+                   'core_dims': (2,0)}
+        out_dataset[0].create_dataset(axis_labels=labels, shape=out_shape_sino)
         out_dataset[0].add_pattern(pattern['name'],
                                    slice_dims=pattern['slice_dims'],
                                    core_dims=pattern['core_dims'])

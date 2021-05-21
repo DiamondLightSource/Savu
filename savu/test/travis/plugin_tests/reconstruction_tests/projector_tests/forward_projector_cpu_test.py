@@ -29,10 +29,10 @@ from savu.test.travis.framework_tests.plugin_runner_test \
     import run_protected_plugin_runner
 
 class ForwardProjectorCpuTest(unittest.TestCase):
-    def __init__(self):
+    def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
-
+        
     def test_forward_projector_cpu(self):
         process_list = 'reconstruction/tomobar/forward_projector_cpu_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
