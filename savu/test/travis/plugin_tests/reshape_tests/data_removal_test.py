@@ -29,7 +29,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class DataRemovalTest(unittest.TestCase):
-    def __init__(self):
+    def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
 

@@ -29,21 +29,22 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class CcpiDenoisingCpuTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_ccpi_denoise_cpu(self):
         process_list = 'filters/ccpi/ccpi_denoising_cpu_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
+    """
     def test_ccpi_denoise3d_cpu(self):
         process_list = 'filters/ccpi/ccpi_denoising3d_cpu_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-
+    """
 if __name__ == "__main__":
     unittest.main()
