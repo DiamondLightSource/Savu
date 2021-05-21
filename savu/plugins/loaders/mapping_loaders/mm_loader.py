@@ -40,7 +40,8 @@ from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
 
 @register_plugin
 class MmLoader(BaseLoader):
-
+    """
+    """
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
         base = BaseMultiModalLoader()

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I22TomoLoader
+.. module:: i22_tomo_loader
    :platform: Unix
    :synopsis: A class for loading I22
 

@@ -70,14 +70,11 @@ class PluginList(object):
         template = {'active': True,
                     'name': None,
                     'id': None,
-                    'desc': None,
-                    'data': None,
-                    'user': [],
-                    'hide': []}
+                    'data': None}
         return template
 
     def __get_json_keys(self):
-        return ['data', 'desc', 'user', 'hide']
+        return ['data']
 
     def _populate_plugin_list(self, filename, active_pass=False, template=False):
         """ Populate the plugin list from a nexus file. """
@@ -102,6 +99,19 @@ class PluginList(object):
             if plugin['active'] or active_pass:
                 plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                 plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
+                plugin_class = None
+                try:
+                    # Load the related class
+                    plugin_class = pu.load_class(plugin['id'])()
+                    # Populate the parameters (including those from it's base classes)
+                    plugin_class._populate_default_parameters()
+                except ImportError:
+                    # No plugin class found
+                    logging.error(f"No class found for {plugin['name']}")
+
+                plugin['doc'] = plugin_class.docstring_info if plugin_class else ""
+                plugin['tools'] = plugin_class.tools if plugin_class else {}
+                plugin['param'] = plugin_class.p_dict if plugin_class else {}
                 plugin['pos'] = group.strip()
 
                 for param in parameters:
@@ -151,12 +161,12 @@ class PluginList(object):
 
     def __populate_plugins_group(self, plugins_group, plugin, count):
         if 'pos' in plugin.keys():
-            num = int(re.findall(r'\d+', plugin['pos'])[0])
-            letter = re.findall('[a-z]', plugin['pos'])
+            num = int(re.findall(r'\d+', str(plugin['pos']))[0])
+            letter = re.findall('[a-z]', str(plugin['pos']))
             letter = letter[0] if letter else ""
-            group_name = "%*i%*s" % (4, num, 1, letter)
+            group_name = '%i%s' % (num, letter)
         else:
-            group_name = "%*i" % (4, count)
+            group_name = count
 
         plugin_group = plugins_group.create_group(group_name.encode("ascii"))
 
@@ -165,12 +175,19 @@ class PluginList(object):
         json_keys = self.__get_json_keys()
 
         if 'cite' in plugin.keys():
-            if plugin['cite'] is not None:
-                self._output_plugin_citations(plugin['cite'], plugin_group)
+            citation_plugin = plugin['cite']
+            if citation_plugin:
+                self._output_plugin_citations(citation_plugin, plugin_group)
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
-            data = self.__dumps(plugin[key]) if key == 'data' else plugin[key]
+            if key == 'data':
+                data = {}
+                for k, v in plugin[key].items():
+                    #  Replace any missing quotes around variables.
+                    data[k] = pu._dumps(v)
+            else:
+                data = plugin[key]
 
             # get the string value
             data = json.dumps(data) if key in json_keys else plugin[key]
@@ -181,37 +198,6 @@ class PluginList(object):
             data = np.array([data])
             plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
 
-    def __dumps(self, data_dict):
-        """ Replace any missing quotes around variables
-        """
-        for key, val in data_dict.items():
-            if isinstance(val, str):
-                try:
-                    data_dict[key] = ast.literal_eval(val)
-                    continue
-                except Exception:
-                    pass
-                try:
-                    data_dict[key] = yaml.load(val, Loader=yaml.SafeLoader)
-                    continue
-                except Exception:
-                    pass
-                try:
-                    isdict = re.findall(r"[\{\}]+", val)
-                    if isdict:
-                        val = val.replace("[", "'[").replace("]", "]'")
-                        data_dict[key] = self.__dumps(yaml.load(val))
-                    else:
-                        data_dict[key] = pu.parse_config_string(val)
-                    continue
-                except Exception:
-                    # for when parameter tuning with lists is added to the framework
-                    if len(val.split(';')) > 1:
-                        pass
-                    else:
-                        raise Exception("Invalid string %s" % val)
-        return data_dict
-
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
         self.__set_loaders_and_savers()
@@ -221,22 +207,25 @@ class PluginList(object):
         self.__set_loaders_and_savers()
 
     def _output_plugin_citations(self, citations, group):
-        if not isinstance(citations, list):
-            citations = [citations]
-        for cite in citations:
-            citation_group = group.create_group(cite.name.encode("ascii"))
+        """Set the inner file path of the nexus file to be the citation
+        id to avoid using long titles including spaces.
+        """
+        cite_count = 1
+        for cite in citations.values():
+            # In case of a duplicate id, use the citation count number
+            str_id = cite.id + str(cite_count)
+            citation_group = group.create_group(str_id.encode("ascii"))
             cite.write(citation_group)
+            cite_count += 1
 
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
         for cite in framework_cites:
-            citation_group = group.require_group(cite['name'].encode("ascii"))
-            citation = CitationInformation()
-            citation.name = cite["name"]
-            citation.description = cite["description"]
-            citation.bibtex = cite["bibtex"]
-            citation.endnote = cite["endnote"]
-
+            citation_group = group.require_group(cite['short_name_article'].encode("ascii"))
+            citation = CitationInformation(**cite)
+            del cite['short_name_article']
+            for key, value in cite.items():
+                exec('citation.' + key + '= value')
             citation.write(citation_group)
 
     def _get_docstring_info(self, plugin):
@@ -324,7 +313,7 @@ class PluginList(object):
         self.n_savers = len(saver_idx)
 
     def _check_loaders(self):
-        """ Check plugin list starts with a loader and ends with a saver.
+        """ Check plugin list starts with a loader.
         """
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
@@ -332,16 +321,16 @@ class PluginList(object):
         if loaders:
             if loaders[0] != 0 or loaders[-1] + 1 != len(loaders):
                 raise Exception("All loader plugins must be at the beginning "
-                                "of the plugin list")
+                                "of the process list")
         else:
-            raise Exception("The first plugin in the plugin list must be a "
+            raise Exception("The first plugin in the process list must be a "
                             "loader plugin.")
 
     def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
         data_names = exp.index['in_data'].keys()
         saved_data = []
-        
+
         for i in self._get_savers_index():
             saved_data.append(self.plugin_list[i]['data']['in_datasets'])
         saved_data = set([s for sub_list in saved_data for s in sub_list])
@@ -357,7 +346,9 @@ class PluginList(object):
             process['pos'] = str(pos+1)
             process['data'] = plugin.parameters
             process['active'] = True
-            process['desc'] = plugin.parameters_desc
+            process['param'] = plugin.p_dict
+            process['doc'] = plugin.docstring_info
+            process['tools'] = plugin.tools
             self._add(pos+1, process)
 
     def _update_datasets(self, plugin_no, data_dict):
@@ -453,7 +444,7 @@ class Template(object):
 
         for plugin_no, entry in tdict.items():
             plugin = list(entry.keys())[0]
-            for key, value in list(entry.values())[0].iteritems():
+            for key, value in list(entry.values())[0].items():
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
@@ -498,11 +489,93 @@ class CitationInformation(object):
     Descriptor of Citation Information for plugins
     """
 
-    name: str = 'citation'
-    bibtex: str = "Default Bibtex"
-    description: str = "Default Description"
-    doi: str = "Default DOI"
-    endnote: str = "Default Endnote"
+    def __init__(self, description, bibtex='', endnote='', doi='',
+                 short_name_article='', dependency=''):
+        self.description = description
+        self.short_name_article = short_name_article
+        self.bibtex = bibtex
+        self.endnote = endnote
+        self.doi = doi
+        self.dependency = dependency
+        self.name = self._set_citation_name()
+        self.id = self._set_id()
+
+    def _set_citation_name(self):
+        """ Create a short identifier using the short name of the article
+        and the first author
+        """
+        cite_info = True if self.endnote or self.bibtex else False
+
+        if cite_info and self.short_name_article:
+            cite_name = self.short_name_article.title() + ' by ' \
+                        + self._get_first_author() + ' et al.'
+        elif cite_info:
+            cite_name = self._get_title() + ' by ' \
+                        + self._get_first_author() + ' et al.'
+        else:
+            # Set the tools class name as the citation name causes overwriting
+            # module_name = tool_class.__module__.split('.')[-1].replace('_', ' ')
+            # cite_name = module_name.split('tools')[0].title()
+            cite_name = self.description
+        return cite_name
+
+    def _set_citation_id(self, tool_class):
+        """ Create a short identifier using the bibtex identification
+        """
+        # Remove blank space
+        if self.bibtex:
+            cite_id = self._get_id()
+        else:
+            # Set the tools class name as the citation name
+            module_name = tool_class.__module__.split('.')[-1]
+            cite_id = module_name
+        return cite_id
+
+    def _set_id(self):
+        """ Retrieve the id from the bibtex """
+        cite_id = self.seperate_bibtex('@article{', ',')
+        return cite_id
+
+    def _get_first_author(self):
+        """ Retrieve the first author name """
+        if self.endnote:
+            first_author = self.seperate_endnote('%A ')
+        elif self.bibtex:
+            first_author = self.seperate_bibtex('author={', '}', author=True)
+        return first_author
+
+    def _get_title(self):
+        """ Retrieve the title """
+        if self.endnote:
+            title = self.seperate_endnote('%T ')
+        elif self.bibtex:
+            title = self.seperate_bibtex('title={', '}')
+        return title
+
+    def seperate_endnote(self, seperation_char):
+        """ Return the string contained between start characters
+        and a new line
+
+        :param seperation_char: Character to split the string at
+        :return: The string contained between start characters and a new line
+        """
+        item = self.endnote.partition(seperation_char)[2].split('\n')[0]
+        return item
+
+    def seperate_bibtex(self, start_char, end_char, author=False):
+        """ Return the string contained between provided characters
+
+        :param start_char: Character to split the string at
+        :param end_char: Character to end the split at
+        :return: The string contained between both characters
+        """
+        item = self.bibtex.partition(start_char)[2].split(end_char)[0]
+        if author:
+            # Return one author only
+            if ' and ' in item:
+                item = item.split(' and ')[0]
+
+        return item
 
     def write(self, citation_group):
         # classes don't have to be encoded to ASCII

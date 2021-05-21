@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ComponentAnalysisTest
+.. module:: pca_te
    :platform: Unix
    :synopsis: Test all the component analyses
 

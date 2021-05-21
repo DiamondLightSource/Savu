@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Umpa
+.. module:: umpa
    :platform: Unix
    :synopsis: Speckle matching using the UMPA method
 

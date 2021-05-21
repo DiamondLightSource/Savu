@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: diffraction_absoption_te
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>

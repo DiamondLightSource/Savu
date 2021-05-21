@@ -29,21 +29,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.corrections.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
 
-
 @register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
-    """
-    A Plugin to apply a simple dark and flat field correction to data.
-    :param pattern: Data processing pattern is 'PROJECTION' or \
-        'SINOGRAM'. Default: 'PROJECTION'.
-    :param lower_bound: Set all values below the lower_bound to this \
-        value. Default: None.
-    :param upper_bound: Set all values above the upper bound to this \
-        value. Default: None.
-    :param warn_proportion: Output a warning if this proportion of values, \
-        or greater, are below and/or above the lower/upper bounds, \
-        e.g enter 0.05 for 5%. Default: 0.05.
-    """
 
     def __init__(self):
         super(DarkFlatFieldCorrection,
@@ -179,3 +166,15 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             return summary
 
         return ["Nothing to Report"]
+        '''
+            A Plugin to apply a simple dark and flat field correction to data.
+            :param pattern: Data processing pattern is 'PROJECTION' or \
+                'SINOGRAM'. Default: 'PROJECTION'.
+            :param lower_bound: Set all values below the lower_bound to this \
+                value. Default: None.
+            :param upper_bound: Set all values above the upper bound to this \
+                value. Default: None.
+            :param warn_proportion: Output a warning if this proportion of values, \
+                or greater, are below and/or above the lower/upper bounds, \
+                e.g enter 0.05 for 5%. Default: 0.05.
+        '''

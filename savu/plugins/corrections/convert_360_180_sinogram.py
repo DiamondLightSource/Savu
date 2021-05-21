@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Convert 360-180 sinogram.
+.. module:: convert_360_180_sinogram.
    :platform: Unix
    :synopsis: A plugin working in sinogram space to convert 0-360 degree\\
     sinogram to 0-180 sinogram.
@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 import scipy.ndimage as ndi
 

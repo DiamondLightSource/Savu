@@ -27,12 +27,14 @@ import inspect
 
 from savu.plugins import utils as pu
 from savu.data.plugin_list import PluginList
+import scripts.config_generator.parameter_utils as param_u
+
 from . import mutations
 
 
 class Content(object):
 
-    def __init__(self, filename=None, level='user'):
+    def __init__(self, filename=None, level='basic'):
         self.disp_level = level
         self.plugin_list = PluginList()
         self.plugin_mutations = mutations.plugin_mutations
@@ -94,6 +96,9 @@ class Content(object):
             raise Exception(file_error)
 
     def save(self, filename, check='y', template=False):
+        self.check_plugin_list_exists()
+        # Check if a loader and saver are present.
+        self.plugin_list._check_loaders()
         if check.lower() == 'y':
             print(f"Saving file {filename}")
             if template:
@@ -106,9 +111,17 @@ class Content(object):
         if check.lower() == 'y':
             self.plugin_list.plugin_list = []
 
+    def check_plugin_list_exists(self):
+        """ Check if plugin list is populated. """
+        pos_list = self.get_positions()
+        if not pos_list:
+            print('There are no items to access in your list.')
+            raise Exception('Please add an item to the process list.')
+
     def add(self, name, str_pos):
         if name not in list(pu.plugins.keys()):
-            if name in list(self.failed.keys()):
+            if (self.failed is not None) \
+                    and (name in list(self.failed.keys())):
                 msg = "IMPORT ERROR: %s is unavailable due to the following" \
                       " error:\n\t%s" % (name, self.failed[name])
                 raise Exception(msg)
@@ -126,7 +139,6 @@ class Content(object):
         active = plugin_entry['active']
         plugin = pu.plugins[name]()
         plugin._populate_default_parameters()
-
         keep = self.get(pos)['data'] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]['active'] = active
@@ -135,6 +147,7 @@ class Content(object):
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
+        # Names of the parameter names present in both lists
         for param in union_params:
             self.modify(str_pos, param, keep[param], ref=True)
         # add any parameter mutations here
@@ -191,8 +204,8 @@ class Content(object):
             if skip:
                 print(f"Skipping plugin {pos}: {name}")
             else:
-                message = f"PLUGIN ERROR: The plugin {name} is unavailable in this version of Savu."
-                print(message)
+                message = f"PLUGIN ERROR: The plugin {name} is " \
+                          f"unavailable in this version of Savu."
                 raise Exception(f'Incompatible process list. {message}')
 
     def _mutate_plugins(self, name, pos, search=False):
@@ -233,21 +246,101 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]['pos'] = new
 
-    def modify(self, pos_str, subelem, value, ref=False):
-        if not ref:
-            value = self.value(value)
+    def modify(self, pos_str, param_name, value, ref=False):
+        """ Modify the plugin at pos_str and the parameter at param_name
+        The new value will be set if it is valid.
+
+        :param pos_str: The plugin position
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param ref: boolean Refresh the plugin
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter
+        """
         pos = self.find_position(pos_str)
-        data_elements = self.plugin_list.plugin_list[pos]['data']
-        if subelem.isdigit():
-            subelem = self.plugin_list.plugin_list[pos]['map'][int(subelem) - 1]
-        data_elements[subelem] = value
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        tools = plugin_entry['tools']
+        parameters = plugin_entry['data']
+        params = plugin_entry['param']
+        param_name, value = self.setup_modify(params, param_name, value, ref)
+        valid_modification = self.modify_main(param_name, value, tools, parameters)
+        return valid_modification
+
+    def setup_modify(self, params, param_name, value, ref):
+        """ Get the parameter keys in the correct order and find
+        the parameter name string
+
+        :param params: The plugin parameters
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param ref: boolean Refresh the plugin
+
+        return: param_name str to avoid discrepancy, value
+        """
+        if ref:
+            # For a refresh, refresh all keys, including those with
+            # dependencies (which have the display off)
+            keys = params.keys()
+        else:
+            # Select the correct group and order of parameters according to that
+            # on display to the user. This ensures correct parameter is modified.
+            keys = pu.set_order_by_visibility(params)
+            value = self.value(value)
+        param_name = pu.param_to_str(param_name, keys)
+        return param_name, value
+
+    def modify_main(self, param_name, value, tools, parameters):
+        """Check the parameter is within the current parameter list.
+        Check the new parameter value is valid, modify the parameter
+        value, update defaults, check if dependent parameters should
+        be made visible or hidden.
+
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param tools: The plugin tools
+        :param parameters: The plugin parameters
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter
+        """
+        parameter_valid = False
+        current_parameter_details = tools.param.get(param_name)
+        # If found, then the parameter is within the current parameter list
+        # displayed to the user
+        if current_parameter_details:
+            value_check = pu._dumps(value)
+            parameter_valid, error_str = param_u.is_valid(
+                param_name, value_check, current_parameter_details
+            )
+            if parameter_valid:
+                value = tools.check_for_default(value, param_name, parameters)
+                parameters[param_name] = value
+                tools.update_defaults(parameters, mod=param_name)
+                # Update the list of parameters to hide those dependent on others
+                tools.check_dependencies(parameters)
+            else:
+                print(error_str)
+                print("ERROR: This value has not been saved.")
+        else:
+            print("Not in parameter keys.")
+        return parameter_valid
 
     def value(self, value):
         if not value.count(';'):
             try:
                 value = eval(value)
             except (NameError, SyntaxError):
-                value = eval(f"'{value}'")
+                try:
+                    value = eval(f"'{value}'")
+                    # if there is one quotation mark there will be an error
+                except EOFError:
+                    raise Exception("There is an end of line error. Please check your"
+                          " input for the character \"\'\".")
+                except SyntaxError:
+                    raise Exception("There is a syntax error. Please check your input.")
+                except:
+                    raise Exception("Please check your input.")
         return value
 
     def convert_to_ascii(self, value):
@@ -322,6 +415,23 @@ class Content(object):
             pos_list.append(e['pos'])
         return pos_list
 
+    def get_param_arg_str(self, pos_str, subelem):
+        """Get the name of the parameter so that the display lists the
+        correct item when the parameter order has been updated
+
+        :param pos_str: The plugin position
+        :param subelem: The parameter
+        :return: The plugin.parameter_name argument
+        """
+        pos = self.find_position(pos_str)
+        current_parameter_list = \
+            self.plugin_list.plugin_list[pos]["param"]
+        current_parameter_list_ordered = \
+            pu.set_order_by_visibility(current_parameter_list)
+        param_name = pu.param_to_str(subelem, current_parameter_list_ordered)
+        param_argument = pos_str + '.' + param_name
+        return param_argument
+
     def get_split_positions(self):
         """ Separate numbers and letters in positions. """
         positions = self.get_positions()
@@ -335,9 +445,13 @@ class Content(object):
     def find_position(self, pos):
         """ Find the numerical index of a position (a string). """
         pos_list = self.get_positions()
-        if pos not in pos_list:
-            raise Exception("INPUT ERROR: Incorrect plugin position.")
-        return pos_list.index(pos)
+        if not pos_list:
+            print('There are no items to access in your list.')
+            raise Exception('Please add an item to the process list.')
+        else:
+            if pos not in pos_list:
+                raise Exception("Incorrect plugin position.")
+            return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
         if len(entry) == 1:
@@ -358,6 +472,31 @@ class Content(object):
             pos_list[i][1] = str(chr(ord(pos_list[i][1]) + inc))
             self.plugin_list.plugin_list[i]['pos'] = ''.join(pos_list[i])
 
+    def split_plugin_and_parameter(self, param):
+        """Separate the plugin number and parameter
+        """
+        if len(param.split('.')) is 2:
+            pos_str, param = param.split('.')
+            return pos_str, param
+        else:
+            raise Exception('Incorrect parameter number: Please enter the '
+                  'plugin number, followed by the parameter number. '
+                  'Use a decimal format.')
+
+    def get_start_stop(self, start, stop):
+        """Find the start and stop number for the plugin range selected
+        """
+        range_dict = {}
+        if start:
+            if '.' in start:
+                start, subelem = start.split('.')
+                range_dict['subelem'] = subelem
+            start = self.find_position(start)
+            stop = self.find_position(stop) + 1 if stop else start + 1
+            range_dict['start'] = start
+            range_dict['stop'] = stop
+        return range_dict
+
     def insert(self, plugin, pos, str_pos, replace=False):
         plugin_dict = self.create_plugin_dict(plugin)
         plugin_dict['pos'] = str_pos
@@ -372,18 +511,21 @@ class Content(object):
         plugin_dict['id'] = plugin.__module__
         plugin_dict['data'] = plugin.parameters
         plugin_dict['active'] = True
-        plugin_dict['desc'] = plugin.parameters_desc
-        plugin_dict['hide'] = plugin.parameters_hide
-        plugin_dict['user'] = plugin.parameters_user
-
-        dev_keys = [k for k in list(plugin_dict['data'].keys()) if k not in
-                    plugin_dict['user'] + plugin_dict['hide']]
-        plugin_dict['map'] = \
-            plugin_dict['user'] + dev_keys + plugin_dict['hide']
+        plugin_dict['tools'] = plugin.tools
+        plugin_dict['param'] = plugin.p_dict
+        plugin_dict['doc'] = plugin.docstring_info
         return plugin_dict
 
     def get(self, pos):
         return self.plugin_list.plugin_list[pos]
+
+    def level(self, level):
+        """ Set the visibility level of parameters """
+        if level:
+            self.disp_level = level
+            print(f"Level set to '{level}'")
+        else:
+            print(f"Level is set at '{self.disp_level}'")
 
     def remove(self, pos):
         if pos >= self.size:

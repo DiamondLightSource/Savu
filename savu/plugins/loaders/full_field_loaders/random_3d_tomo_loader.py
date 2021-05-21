@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: random_3d_tomo_loader
    :platform: Unix
    :synopsis: A full-field tomography loader that creates a NeXus file in \
    NXtomo format and contains a random number generated hdf5 dataset of a \

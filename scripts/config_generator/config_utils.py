@@ -31,7 +31,6 @@ import pkgutil
 
 import importlib.util
 from functools import wraps
-from . import arg_parsers as parsers
 import savu.plugins.utils as pu
 import savu.data.data_structures.utils as du
 
@@ -79,9 +78,9 @@ def _set_readline(completer):
 def parse_args(function):
     @wraps(function)
     def _parse_args_wrap_function(content, args):
-        doc = function.__doc__
         parser = '%s_arg_parser' % function.__name__
-        args = getattr(parsers, parser)(args.split(), doc)
+        from . import arg_parsers as parsers
+        args = getattr(parsers, parser)(args.split(), doc=False)
         if not args:
             return content
         return function(content, args)
@@ -158,7 +157,7 @@ def _dawn_setup():
 
 def _get_dawn_parameters(plugin):
     plugin._populate_default_parameters()
-    desc = plugin.parameters_desc
+    desc = plugin.p_dict['description']
     params = {}
     for key, value in plugin.parameters.items():
         if key not in ['in_datasets', 'out_datasets']:
@@ -175,6 +174,21 @@ def _populate_plugin_list(content, pfilter=""):
         content.add(key, str(count))
         count += 1
 
+def _search_plugin_file(module_name, pfilter):
+    """Check for string inside file"""
+    string_found = False
+
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+    file_dir = module_name.replace('.', '/')
+    file_path = savu_base_path + file_dir + '.py'
+    if os.path.isfile(file_path):
+        plugin_file = open(file_path, "r")
+        data = plugin_file.read().split()
+        if pfilter in data:
+            string_found = True
+        plugin_file.close()
+    return string_found
 
 def __get_filtered_plugins(pfilter):
     """ Get a sorted, filter list of plugins. """
@@ -190,16 +204,12 @@ def __get_filtered_plugins(pfilter):
                 key_list.append(key)
         elif pfilter in value.__module__ or pfilter in value.__name__:
             key_list.append(key)
+        else:
+            # Check if the word is present in the file
+            if _search_plugin_file(value.__module__, pfilter):
+                key_list.append(key)
 
     key_list.sort()
     return key_list
 
 
-def __get_start_stop(content, start, stop):
-    range_dict = {}
-    if start:
-        start = content.find_position(start)
-        stop = content.find_position(stop) + 1 if stop else start + 1
-        range_dict['start'] = start
-        range_dict['stop'] = stop
-    return range_dict

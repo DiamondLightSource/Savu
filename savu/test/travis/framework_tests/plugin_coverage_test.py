@@ -169,6 +169,9 @@ class PluginCoverageTest(unittest.TestCase):
         clazz = getattr(mod, mod2class.split('.')[-1])()
         return clazz
 
+    # Addition to allow access to this class from another test class
+    def runTest(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()

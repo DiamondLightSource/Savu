@@ -1,3 +1,5 @@
+:orphan:
+
 Installation Guide
 ******************
 
@@ -16,7 +18,7 @@ External Users
 
 .. toctree::
    
-   external_install
+   ../howto/external_install
 
 
 .. If you are external to Diamond and would like to install Savu, follow the `external installation guide <external_install.html>`_.

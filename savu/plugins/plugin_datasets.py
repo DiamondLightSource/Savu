@@ -80,7 +80,7 @@ class PluginDatasets(object):
         for pData in in_pData + out_pData:
             pData._set_meta_data()
             params[pData] = pData._get_plugin_data_size_params()
-        
+
         max_bytes = 0
         for key, value in params.items():
             if value['transfer_bytes'] > max_bytes:
@@ -126,7 +126,7 @@ class PluginDatasets(object):
                 self.exp.create_data_object("out_data", data)
             out_data = self.__get_data_objects('out_data')
         for data in out_data:
-            data.extra_dims = self.extra_dims
+            data.extra_dims = self.get_extra_dims()
         return out_data
 
     def _get_plugin_data(self, data_list):
@@ -143,8 +143,8 @@ class PluginDatasets(object):
             [x for x in data_list if x not in used and (used.add(x) or True)]
         for data in unique_data_list:
             pData_list.append(PluginData(data, self))
-            pData_list[-1].extra_dims = self.extra_dims
-            pData_list[-1].multi_params_dict = self.multi_params_dict
+            pData_list[-1].extra_dims = self.get_extra_dims()
+            pData_list[-1].multi_params_dict = self.get_multi_params_dict()
         return pData_list
 
     def _set_plugin_dataset_names(self):
@@ -155,7 +155,7 @@ class PluginDatasets(object):
         in_names = self._set_in_dataset_names(params)
         # case that an extra in_dataset is added in the plugin
         in_names = orig_in if len(orig_in) and \
-            len(in_names) > len(orig_in) else in_names        
+            len(in_names) > len(orig_in) else in_names
         self._set_out_dataset_names(params, in_names)
         # update the entry in the process list
         data_dict = {'in_datasets': params['in_datasets'],
@@ -292,3 +292,23 @@ class PluginDatasets(object):
             return (len(data.meta_data.get(key)),)
         except KeyError:
             return (0,)
+
+    def get_multi_params_dict(self):
+        """ Get the multi parameter dictionary. """
+        return self.multi_params_dict
+
+    def set_multi_params_dict(self, value):
+        self.multi_params_dict= value
+
+    def alter_multi_params_dict(self, key, value):
+        self.multi_params_dict[key] = value
+
+    def get_extra_dims(self):
+        """ Get the extra dimensions. """
+        return self.extra_dims
+
+    def set_extra_dims(self, value):
+        self.extra_dims = value
+
+    def append_extra_dims(self, value):
+        self.extra_dims.append(value)

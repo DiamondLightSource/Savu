@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Point-spread-function correction
+.. module:: image_stitching
    :platform: Unix
-   :synopsis: A plugin for stitching two tomo-datasets.
+   :synopsis: Point-spread-function correction. A plugin for stitching two tomo-datasets.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -30,16 +30,6 @@ import sys
 @register_plugin
 class ImageStitching(Plugin, CpuPlugin):
     """
-    Method to stitch images of two tomo-datasets including flat-field correction.
-    :u*param overlap: Overlap width between two images. Default: 354.
-    :u*param row_offset: Offset of row indices of projections in the second dataset \
-    compared to the first dataset. Default: -1.
-    :u*param crop: Parameters used to crop stitched image with respect to \
-    the edges of an image. Format: [crop_top, crop_bottom, crop_left, crop_right]. Default: [0, 0, 250, 250].
-    :u*param pattern: Data processing pattern is 'PROJECTION' or \
-        'SINOGRAM'. Default: 'PROJECTION'.
-    :param norm: Apply normalization before stitching. Default: True.
-    :param flat_use: Apply flat-field correction. Default: True.
     """
 
     def __init__(self):

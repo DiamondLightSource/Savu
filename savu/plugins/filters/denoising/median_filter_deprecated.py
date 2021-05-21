@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: median_3x3_filter
+.. module:: median_filter_deprecated
    :platform: Unix
    :synopsis: A plugin to filter each frame with a 3x3 median filter
 
@@ -33,10 +33,6 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class MedianFilterDeprecated(BaseFilter, CpuPlugin):
     """
-    A plugin to filter each frame with a 3x3 median filter
-
-    :u*param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
-    :u*param pattern: pattern to apply this to. Default: "PROJECTION".
     """
 
     def __init__(self):
