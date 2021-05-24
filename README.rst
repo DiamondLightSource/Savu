@@ -1,6 +1,6 @@
-|savu_full_tests|  |savu_install| |coverage| |codefactor| |scrutinizer| |zenodo|
+|savu_full_tests| |savu_install| |coverage| |codefactor| |scrutinizer| |zenodo|
 
-|savu-lite-v|  |savu-lite-latest| |platform| |downloads|
+|savu-lite-v| |savu-lite-latest| |platform| |downloads|
 
 .. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
     :scale: 100%
