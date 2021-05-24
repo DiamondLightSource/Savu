@@ -75,7 +75,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         theta = in_meta_data.get('rotation_angle')
 
         dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
-        size = tuple(self.parameters['output_size'])
+        size = self.parameters['output_size']
         size = in_pData.get_shape()[dim_detX] if size == 'auto' or \
             size is None else size
 

@@ -32,32 +32,6 @@ from ccpi.filters.regularisers import PatchSelect, NLTV
 
 @register_plugin
 class CcpiDenoisingCpu(Plugin, CpuPlugin):
-    """
-    'ROF_TV': Rudin-Osher-Fatemi Total Variation model;
-    'FGP_TV': Fast Gradient Projection Total Variation model;
-    'SB_TV': Split Bregman Total Variation model;
-    'PD_TV': Primal-Dual Total variation model;
-    'NLTV': Nonlocal Total Variation model;
-    'TGV': Total Generalised Variation model;
-    'LLT_ROF': Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi;
-    'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);
-    'DIFF4th': Fourth-order nonlinear diffusion model
-
-    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|NLTV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
-    :param reg_par: Regularisation (smoothing) parameter. Default: 0.01.
-    :param max_iterations: Total number of iterations. Default: 300.
-    :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
-     NDF, DIFF4th methods. Default: 0.001.
-    :param lipshitz_constant: TGV method, Lipshitz constant. Default: 12.
-    :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
-    :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 2.0.
-    :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
-    :param penalty_type: NDF method, Penalty type for the duffison, choose from\
-    huber, perona, tukey, constr, constrhuber. Default: 'huber'.
-    :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
-    :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
-    """
 
     def __init__(self):
         super(CcpiDenoisingCpu, self).__init__('CcpiDenoisingCpu')

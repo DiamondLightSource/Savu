@@ -29,7 +29,7 @@ class CcpiDenoisingCpuTools(PluginTools):
                     Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
 
-        reg_parameter:
+        reg_par:
              visibility: basic
              dtype: float
              description:
@@ -41,27 +41,27 @@ class CcpiDenoisingCpuTools(PluginTools):
                range: Recommended between 0.0001 and 0.1
              example: 'A good value to start with is {default}, {range}'
              default: 0.0001
-
+        
         max_iterations:
-             visibility: basic
-             dtype: int
-             description:
-               summary: Total number of regularisation iterations.
-                 The smaller the number of iterations, the smaller the effect
-                 of the filtering is. A larger number will affect the speed
-                 of the algorithm.
-               range: Recommended value dependent upon method.
-             default:
-                 method:
-                   ROF_TV: 2000
-                   FGP_TV: 500
-                   PD_TV: 500
-                   SB_TV: 100
-                   LLT_ROF: 2000
-                   NDF: 2000
-                   Diff4th: 1000
-                   TGV: 500
-                   NLTV: 5
+            visibility: basic
+            dtype: int
+            description: 
+                summary: Total number of regularisation iterations.  The 
+                    smaller the number of iterations, the smaller the effect of
+                    the filtering is.  A larger number will affect the speed of 
+                    the algorithm.
+                range: Recommended value dependent upon method.
+            default:
+                method:
+                    ROF_TV: 2000
+                    FGP_TV: 500
+                    PD_TV: 500
+                    SB_TV: 100
+                    LLT_ROF: 2000
+                    NDF: 2000
+                    Diff4th: 1000
+                    TGV: 500
+                    NLTV: 5
 
         time_step:
              visibility: advanced
@@ -144,7 +144,6 @@ class CcpiDenoisingCpuTools(PluginTools):
             description: Pattern to apply this to.
             default: 'VOLUME_XZ'
         """
-
 
     def citation1(self):
         """
