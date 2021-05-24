@@ -24,6 +24,7 @@ https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/libastra-1.9.9.dev4-
 https://conda.anaconda.org/conda-forge/linux-64/libgfortran-ng-7.5.0-hae1eefd_17.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libiconv-1.16-h516909a_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/liblief-0.10.1-he6710b0_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/yamllint-1.26.1-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libsodium-1.0.18-h36c2ea0_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libspatialindex-1.9.3-he1b5a44_3.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libuuid-2.32.1-h14c3975_1000.tar.bz2
