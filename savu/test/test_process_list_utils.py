@@ -1,7 +1,5 @@
 import os
 import fnmatch
-from scripts.config_generator.content import Content
-
 
 def get_all_files_from(folder):
     all_files = []
