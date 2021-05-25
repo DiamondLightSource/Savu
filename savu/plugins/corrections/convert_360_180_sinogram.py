@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: convert_360_180_sinogram.
+.. module:: convert_360_180_sinogram
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to convert 0-360 degree\\
+   :synopsis: A plugin working in sinogram space to convert 0-360 degree\
     sinogram to 0-180 sinogram.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
