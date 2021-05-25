@@ -73,5 +73,10 @@ class Test(unittest.TestCase):
         self.assertEqual(plugin.name, "ExampleMedianFilter")
         os.environ["SAVU_PLUGINS_PATH"] = ""
 
+    def test_get_tools_class(self):
+        mod = "savu.plugins.filters.denoising.denoise_bregman_filter_tools"
+        tools_class = pu.get_tools_class(mod)
+        self.assertEqual(tools_class.__name__, "DenoiseBregmanFilterTools")
+
 if __name__ == "__main__":
     unittest.main()
