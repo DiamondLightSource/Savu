@@ -1,12 +1,13 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class Convert360180SinogramTools(PluginTools):
-    """Method to convert the 0-360 degree sinogram to 0-180 sinogram.
+    """Method to convert a 360-degree sinogram to a 180-degree sinogram in
+    a half-acquisition scan.
     """
     def define_parameters(self):
         """
         center:
-              visibility: intermediate
+              visibility: basic
               dtype: float
               description: Center of rotation.
               default: 0.0

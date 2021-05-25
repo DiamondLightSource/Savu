@@ -6,7 +6,7 @@ class DarkFlatFieldCorrectionTools(PluginTools):
     def define_parameters(self):
         """
         pattern:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             options: [SINOGRAM, PROJECTION]
             description: Data processing pattern

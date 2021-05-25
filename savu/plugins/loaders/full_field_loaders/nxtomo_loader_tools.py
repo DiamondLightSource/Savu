@@ -6,14 +6,14 @@ class NxtomoLoaderTools(PluginTools):
     def define_parameters(self):
         """
         name:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: A name assigned to the dataset.
             default: tomo
         data_path:
-            visibility: intermediate
+            visibility: basic
             dtype: str
-            description: Path to the data inside the file.
+            description: Path to the data inside the hdf/nxs file.
             default: entry1/tomo_entry/data/data
         image_key_path:
             visibility: intermediate
@@ -22,20 +22,20 @@ class NxtomoLoaderTools(PluginTools):
               Set this parameter to None if use this loader for radiography.
             default: entry1/tomo_entry/instrument/detector/image_key
         dark:
-            visibility: intermediate
+            visibility: basic
             dtype: [list[filepath, h5path, float],list[None,None,float]]
             description: Specify the nexus file location where the dark field
               images are stored. Then specify the path within this nexus file,
               at which the dark images are located. The last value will be a
               scale value.
-            default: [None, None, 1]
+            default: [None, None, 1.0]
         flat:
-            visibility: intermediate
+            visibility: basic
             dtype: [list[filepath, h5path, float],list[None,None,float]]
             description: This parameter needs to be specified only if flats
               not stored in the same dataset as sample projections. Optional
               Path to the flat field data file, nxs path and scale value.
-            default: [None, None, 1]
+            default: [None, None, 1.0]
         angles:
             visibility: intermediate
             dtype: [str, int, None]

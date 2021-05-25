@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class VoCenteringTools(PluginTools):
-    """A plugin to calculate the centre of rotation using the Vo Method
+    """A plugin to calculate the centre of rotation using the Vo method
     """
     def define_parameters(self):
         """
@@ -9,12 +9,13 @@ class VoCenteringTools(PluginTools):
              visibility: basic
              dtype: preview
              description: A slice list of required frames (sinograms) to use in
-               the calculation of the centre of rotation (this will not reduce the data
-               size for subsequent plugins).
+               the calculation of the centre of rotation (this will not reduce
+               the data size for subsequent plugins).
              default: '[]'
-             example: 'The typical three dimensional data structure is [angles, detY, detZ], e.g. for
-               sinogram choose [:,sliceNo,:] [angles, detZ, detY]. If the data is four dimensional,
-               include a time parameter.'
+             example: 'The typical three dimensional data structure is
+                [angles, detY, detZ], e.g. for sinogram choose [:,sliceNo,:]
+                [angles, detZ, detY]. If the data is four dimensional, include
+                a time parameter.'
         start_pixel:
              visibility: intermediate
              dtype: [int,None]
@@ -22,14 +23,15 @@ class VoCenteringTools(PluginTools):
                use the horizontal centre of the image.
              default: 'None'
         search_area:
-             visibility: intermediate
+             visibility: basic
              dtype: list[float,float]
              description: Search area around the estimated centre of rotation
              default: [-50, 50]
         ratio:
              visibility: intermediate
              dtype: float
-             description: The ratio between the size of object and FOV of the camera
+             description: The ratio between the size of a sample and the field
+                of view of a camera
              default: 0.5
         search_radius:
              visibility: intermediate
