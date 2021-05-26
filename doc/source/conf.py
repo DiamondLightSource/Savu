@@ -21,10 +21,10 @@ autodoc_mock_imports = [
     "scipy",
     "h5py",
     "pyfftw",
-    "dials.array_family",
-    "dials.algorithms.image.threshold",
     "PyQt4",
     "yamllint",
+    "plugins",
+    "savu"
 ]
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

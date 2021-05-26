@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: convert_360_180_sinogram.
+.. module:: convert_360_180_sinogram
    :platform: Unix
    :synopsis: A plugin working in sinogram space to convert a 360-degree \
    sinogram to a 180-degree sinogram in a half-acquisition scan.

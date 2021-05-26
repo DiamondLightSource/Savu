@@ -43,11 +43,10 @@ def get_process_list_in_file(root, files):
     processes = []
     for fname in files:
         fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        for line in in_file:
-            if '.nxs' in line:
-                processes.append(get_nxs_file_name(line))
-        in_file.close()
+        with open(fname, 'r') as in_file:
+            for line in in_file:
+                if '.nxs' in line:
+                    processes.append(get_nxs_file_name(line))
     return processes
 
 def find_plugin_for_process_list(folder, proc_list):
@@ -72,18 +71,17 @@ def get_no_process_list_tests(root, files):
     processes = []
     for fname in files:
         fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        func = 'run_protected_plugin_runner_no_process_list'
-        exclude = ['def', 'search_str']
-        pos = 1
-        param = get_param_name(func, pos, in_file, exclude=exclude)
-        if param:
-            in_file.seek(0)
-            plugin_id_list = get_param_value_from_file(param, in_file)
-            for pid in plugin_id_list:
-                plugin_name = pid.split('.')[-1].split("'")[0]
-                processes.append(plugin_name + '.py')
-        in_file.close()
+        with open(fname, 'r') as in_file:
+            func = 'run_protected_plugin_runner_no_process_list'
+            exclude = ['def', 'search_str']
+            pos = 1
+            param = get_param_name(func, pos, in_file, exclude=exclude)
+            if param:
+                in_file.seek(0)
+                plugin_id_list = get_param_value_from_file(param, in_file)
+                for pid in plugin_id_list:
+                    plugin_name = pid.split('.')[-1].split("'")[0]
+                    processes.append(plugin_name + '.py')
     return processes
 
 def get_nxs_file_name(line):
@@ -136,16 +134,5 @@ def get_param_value_from_file(param, in_file):
             param_list.append(value)
     return param_list
 
-
-def refresh_process_file(path):
-    content = Content()
-    # open
-    content.fopen(path, update=True)
-    # refresh
-    positions = content.get_positions()
-    for pos_str in positions:
-        content.refresh(pos_str)
-    # save
-    content.save(content.filename)
 
 
