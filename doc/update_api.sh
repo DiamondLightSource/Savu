@@ -1,13 +1,19 @@
 #!/bin/bash
 
-python create_autosummary.py api framework_autosummary.rst framework
-python create_autosummary.py api_plugin plugin_autosummary.rst plugin
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $DIR
-export SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance'
-sphinx-apidoc -fMeTP $DIR/../ -o $DIR/source/api
 export SPHINX_APIDOC_OPTIONS='members,undoc-members,noindex'
-sphinx-apidoc -feT $DIR/../ -o $DIR/source/api_plugin
-#python create_dev_autosummary.py
+
+python -m doc.create_plugin_doc api_plugin plugin_autosummary.rst plugin
+python -m doc.create_plugin_doc plugin_documentation plugin_documentation.rst plugin
+
+# members will document all modules
+# undoc keeps modules without docstrings
+sphinx-apidoc -feT -o $DIR/source/reference/api_plugin $DIR/../savu/plugins/ $DIR/../savu/plugins/*tools* $DIR/../savu/plugins/**/*tools* $DIR/../savu/plugins/**/**/*tools* $DIR/../savu/plugins/**/**/**/*tools*
 # add -Q to suppress warnings
+
+# Pick up command prompt lines from plugin documentation and create tests
+# python -m doc.create_individual_doc_test
+# python -m unittest savu.test.travis.framework_tests.plugin_doc_test_runner
+
 sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/

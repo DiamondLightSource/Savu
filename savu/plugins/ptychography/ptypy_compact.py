@@ -106,7 +106,7 @@ class PtypyCompact(BasePtycho):
         p.scan = u.Param()
         p.scan.data = u.Param()
         p.scan.data.center = self.parameters['data_center']
-        p.scan.data.orientation = self.parameters['data_orientation']
+        p.scan.data.orientation = tuple(self.parameters['data_orientation'])
         p.scan.data.auto_center = self.parameters['data_auto_center']
         p.scan.illumination = u.Param()
         p.scan.illumination.photons = self.parameters['illumination_photons']

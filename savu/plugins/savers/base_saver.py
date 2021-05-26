@@ -23,13 +23,8 @@
 
 from savu.plugins.plugin import Plugin
 
-
 class BaseSaver(Plugin):
     """
-    A base plugin from which all data saver plugins should inherit.
-
-    :*param out_datasets: Hidden, dummy out_datasets entry. Default: []
-    :param in_datasets: The name of the dataset to save. Default: [].
     """
 
     def __init__(self, name="BaseSaver"):
@@ -60,3 +55,9 @@ class BaseSaver(Plugin):
 
     def get_max_frames(self):
         return 'single'
+
+    """A base plugin from which all data saver plugins should inherit.
+
+    :*param out_datasets: Hidden, dummy out_datasets entry. Default: []
+    :param in_datasets: The name of the dataset to save. Default: [].
+    """

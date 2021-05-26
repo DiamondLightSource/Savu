@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: XrdAbsorptionApproximation
+.. module:: xrd_absorption_approximation
    :platform: Unix
    :synopsis: A plugin apply xrd absorption approximation using stxm data
 .. moduleauthor:: Stephen W.T. Price <stephen.price@diamond.ac.uk>
@@ -29,16 +29,6 @@ import _xraylib as xl
 
 @register_plugin
 class XrdAbsorptionApproximation(BaseFilter, CpuPlugin):
-    """
-    McNears absorption correction, takes in a normalised absorption sinogram \
-    and xrd sinogram stack
-
-    a base absorption correction for stxm and xrd
-    :param azimuthal_offset: angle between detectors. Default: 0.
-    :param density: the density. Default: 3.5377.
-    :param compound: the compount. Default: 'Co0.2(Al2O3)0.8'.
-    :param log_me: should we log the transmission. Default: 1.
-    """
 
     def __init__(self):
         logging.debug("Starting Xrd Absorption Approximation")

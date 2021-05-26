@@ -34,7 +34,7 @@ class MedianFilterTest(unittest.TestCase):
 
     def test_median_filter(self):
         options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.median_filter'
+        plugin = 'savu.plugins.filters.denoising.median_filter'
         run_protected_plugin_runner_no_process_list(options, plugin)
 
 if __name__ == "__main__":

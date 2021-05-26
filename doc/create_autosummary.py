@@ -58,10 +58,11 @@ if __name__ == "__main__":
     out_folder, rst_file, api_type = sys.argv[1:]
 
     # determine Savu base path
-    savu_base_path = os.path.abspath('../')
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
 
     # open the autosummary file
-    f = open(savu_base_path + '/doc/source/' + rst_file, 'w')
+    f = open(savu_base_path + 'doc/source/reference/' + rst_file, 'w')
 
     if api_type == 'framework':
         f.write('Framework API \n===================\n')
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     # add header
     f.write('Information on specific functions, classes, and methods.\n \n')
 
-    base_path = savu_base_path + '/savu'
+    base_path = savu_base_path + 'savu'
     # create entries in the autosummary for each package
 
     exclude_file = ['__init__.py', 'win_readline.py']

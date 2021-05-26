@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: random_hdf5_loader
    :platform: Unix
    :synopsis: A loader that creates a random number generated hdf5 dataset of\
        any size.
@@ -122,7 +122,7 @@ class RandomHdf5Loader(BaseLoader):
         for i in range(total_frames):
             low, high = self.parameters['range']
             dset[tuple(sl)] = np.random.randint(
-                low, high=high, size=sub_size, dtype=self.parameters['dtype'])
+                low, high=high, size=sub_size, dtype=self.parameters['dtype_'])
             if sl[slice_dirs[idx]].stop == dset.shape[slice_dirs[idx]]:
                 idx += 1
                 if idx == len(slice_dirs):

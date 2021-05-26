@@ -1,3 +1,5 @@
+:orphan:
+
 Installation Guide
 ******************
 
@@ -8,4 +10,4 @@ Table of Contents
    :maxdepth: 2
 
    savu_lite
-   savu_hpc
+   howto/savu_hpc_rtd

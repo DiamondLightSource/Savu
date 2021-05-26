@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_driver
+.. module:: basic_driver
    :platform: Unix
    :synopsis: Base class or all driver plugins
 

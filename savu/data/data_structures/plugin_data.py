@@ -466,7 +466,8 @@ class PluginData(object):
             nFrames, self._frame_limit = nFrames
         self.max_frames = nFrames
         self.split = split
-        self._plugin.fixed_length = fixed_length
+        if not fixed_length:
+            self._plugin.fixed_length = fixed_length
 
     def __set_getall_pattern(self, getall, nFrames):
         """ Set framework changes required to get all of a pattern of lower

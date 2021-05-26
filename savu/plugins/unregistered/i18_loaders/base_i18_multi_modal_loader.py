@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: base_multi_modal_loader
+.. module:: base_i18_multi_modal_loader
    :platform: Unix
    :synopsis: Contains a base class from which all multi-modal loaders are \
    derived.

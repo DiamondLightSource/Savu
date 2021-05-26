@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Improve contrast (similar to the Paganin filter)
+.. module:: fresnel_filter
    :platform: Unix
    :synopsis: A plugin to improve the contrast of the reconstruction image.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
@@ -22,9 +22,9 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+
 import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
-from savu.data.plugin_list import CitationInformation
 
 
 @register_plugin
@@ -110,10 +110,4 @@ class FresnelFilter(Plugin, CpuPlugin):
             data[0], self.window, self.pattern, self.pad_width)
         return mat_filt
 
-    # def get_citation_information(self):
-    #     cite_info = CitationInformation()
-    #     cite_info.description = \
-    #         ("The filter built is based on the Fresnel propagator")
-    #     cite_info.bibtex = ()
-    #     cite_info.doi = " "
-    #     return cite_info
+

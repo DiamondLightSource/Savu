@@ -59,15 +59,15 @@ class BandPass(BaseFilter, CpuPlugin):
         part of the code that actually does all the work. the input here 'data'
         will contain the 3D block of data to process, and we need to return the
         data for the single frame in the middle of this. In this case we use
-        the scipy median filter with the 'kernmel_size' parameter, and return
+        the scipy median filter with the 'kernel_size' parameter, and return
         the same size data as you had originally.
         """
         data = data[0]
-        logging.debug("Data frame recieved for processing of shape %s",
+        logging.debug("Data frame received for processing of shape %s",
                       str(data.shape))
         if self.parameters['type'] == 'Low':
-            result = gaussian_filter(data, self.parameters['blur_width'])
+            result = gaussian_filter(data, tuple(self.parameters['blur_width']))
         elif self.parameters['type'] == 'High':
-            lp = gaussian_filter(data, self.parameters['blur_width'])
+            lp = gaussian_filter(data, tuple(self.parameters['blur_width']))
             result = data - lp
         return result

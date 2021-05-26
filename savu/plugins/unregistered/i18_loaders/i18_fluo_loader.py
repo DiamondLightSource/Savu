@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I18stxm_loader
+.. module:: i18_fluo_loader
    :platform: Unix
    :synopsis: A class for loading I18's stxm data
 
@@ -21,8 +21,8 @@
 
 """
 
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
-    base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.unregistered.i18_loaders.base_i18_multi_modal_loader\
+    import BaseI18MultiModalLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 

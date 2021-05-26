@@ -37,28 +37,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 @register_plugin
 class ProjectionShift(BaseFilter, CpuPlugin):
     """
-    Horizontal and vertical shift are calculated using a chosen method and \
-    added to the metadata.  The vertical and horizontal shifts can be \
-    corrected using the ProjectionVerticalAlignment and SinogramAlignment \
-    (in 'shift' mode) plugins respectively.
-
-    Method: Uses either skimage template_matching or orb feature tracking plus\
-    robust ransac matching to calculate the translation between different\
-    combinations of 10 consecutive projection images. A least squares solution\
-    to the shift values between images is calculated and returned for the\
-    middle 8 images.
-
-    :param method: Method used to calculate the shift between images. Choose \
-        from 'template_matching' and 'orb_ransac'. Default: 'orb_ransac'.
-    :param template: Position of the template to match (required) \
-        e.g. [300:500, 300:500]. Default: None.
-    :param threshold: e.g. [a, b] will set all values above a to \
-        b. Default: None.
-    :param n_keypoints: Number of keypoints to use in ORB feature \
-        detector.  Default: 20.
-    :param out_datasets: Set the output dataset name. Default: ['proj_shift'].
-
-    :config_warn: The template parameter is required and must not be None.
     """
 
     def __init__(self):

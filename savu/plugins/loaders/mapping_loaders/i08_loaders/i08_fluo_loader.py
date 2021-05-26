@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I08FluoLoader
+.. module:: i08_fluo_loader
    :platform: Unix
    :synopsis: A class for loading I08s xrf data
 

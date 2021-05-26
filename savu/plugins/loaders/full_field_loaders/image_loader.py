@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: image_loader
    :platform: Unix
    :synopsis: A class for loading standard tomography data in a variety of
     formats.

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_tomo_saver
+.. module:: hdf5_saver
    :platform: Unix
    :synopsis: A class to save data to a hdf5 output file.
 
@@ -31,16 +31,9 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.chunking import Chunking
 
-
 @register_plugin
 class Hdf5Saver(BaseSaver, CpuPlugin):
     """
-    A class to save tomography data to a hdf5 file
-
-    :param pattern: Optimise data storage to this access pattern: 'optimum' \
-        will automate this process by choosing the output pattern from the \
-        previous plugin, if it exists, else the first \
-        pattern. Default: 'optimum'.
     """
 
     def __init__(self, name='Hdf5Saver'):
@@ -104,3 +97,11 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
             plugin_dict['id'].split('.')[-1] + '.h5'
         out_path = self.exp.meta_data.get('out_path')
         return os.path.join(out_path, fname)
+        """
+         A class to save tomography data to a hdf5 file
+    
+        :param pattern: Optimise data storage to this access pattern: 'optimum' \
+            will automate this process by choosing the output pattern from the \
+            previous plugin, if it exists, else the first \
+            pattern. Default: 'optimum'.
+        """

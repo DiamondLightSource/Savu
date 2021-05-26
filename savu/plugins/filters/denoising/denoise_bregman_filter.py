@@ -15,7 +15,7 @@
 """
 .. module:: denoise_bregman_filter
    :platform: Unix
-   :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman
+   :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman \
               to solve the Total Variation ROF model
 
 .. moduleauthor:: Imanol Luengo <scientificsoftware@diamond.ac.uk>

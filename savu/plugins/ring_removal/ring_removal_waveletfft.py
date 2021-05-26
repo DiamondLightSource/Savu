@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: stripe removal using Wavelet-FFT approach doi: 10.1364/OE.17.008567
+.. module:: ring_removal_wavelengtfft
    :platform: Unix
-   :synopsis: A plugin removes ring artefacts
+   :synopsis: A plugin removes ring artefacts. Stripe removal using Wavelet-FFT approach.
 
 .. moduleauthor: Nghia Vo.
    Adapted from  tomopy source code:

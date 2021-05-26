@@ -31,11 +31,7 @@ from tomophantom.supp.qualitymetrics import QualityTools
 @register_plugin
 class TomoPhantomQuantification(Plugin, CpuPlugin):
     """
-    A plugin to calculate some standard image quality metrics
-
-    :param out_datasets: The default names . Default: ['quantification_values'].
     """
-
     def __init__(self):
         super(TomoPhantomQuantification, self).__init__("TomoPhantomQuantification")
 
@@ -76,3 +72,9 @@ class TomoPhantomQuantification(Plugin, CpuPlugin):
         return 1
     def get_max_frames(self):
         return 'single'
+
+        """
+           A plugin to calculate some standard image quality metrics
+    
+           :param out_datasets: The default names . Default: ['quantification_values'].
+        """
