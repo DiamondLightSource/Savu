@@ -35,18 +35,3 @@ search bar on the left to find a specific one.
 
    ../reference/plugin_documentation
 
-
-..
-
-    .. _plugin_api_list:
-
-    Plugin API
-    ---------------------
-
-    Below is a list of the current plugins grouped by type. You may also use the
-    search bar on the left to find a specific one.
-
-    .. toctree::
-       :maxdepth: 2
-
-       ../reference/plugin_autosummary
