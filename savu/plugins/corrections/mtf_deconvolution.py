@@ -15,9 +15,8 @@
 """
 .. module:: mtf_deconvolution
    :platform: Unix
-   :synopsis: Point-spread-function correction. A plugin for MTF (modulation \
-    transfer function) deconvolution or PSF (point spread function) correction \
-    in the Fourier domain.
+   :synopsis: A plugin for MTF (modulation transfer function) deconvolution or \
+    PSF (point spread function) correction in the Fourier domain.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -37,14 +36,6 @@ import savu.core.utils as cu
 
 @register_plugin
 class MtfDeconvolution(Plugin, CpuPlugin):
-    """
-    Method to correct the point-spread-function effect. \
-    Working on raw projections and flats.
-    :u*param file_path: Path to file containing a 2D array of a MTF function. \
-        File formats: 'npy', or 'tif'. Default: None.
-    :param pad_width: Pad the image before the deconvolution. Default: 128.
-
-    """
 
     def __init__(self):
         super(MtfDeconvolution, self).__init__("MtfDeconvolution")
