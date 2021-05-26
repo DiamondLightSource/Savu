@@ -78,57 +78,54 @@ class PluginList(object):
 
     def _populate_plugin_list(self, filename, active_pass=False, template=False):
         """ Populate the plugin list from a nexus file. """
-        plugin_file = h5py.File(filename, 'r')
+        with h5py.File(filename, 'r') as plugin_file:
+            if 'entry/savu_notes/version' in plugin_file:
+                self.version = plugin_file['entry/savu_notes/version'][()]
 
-        if 'entry/savu_notes/version' in plugin_file:
-            self.version = plugin_file['entry/savu_notes/version'][()]
+            plugin_group = plugin_file['entry/plugin']
+            self.plugin_list = []
+            single_val = ['name', 'id', 'pos', 'active']
+            exclude = ['citation']
+            for group in plugin_group.keys():
+                plugin = self._get_plugin_entry_template()
+                entry_keys = plugin_group[group].keys()
+                parameters = [k for k in entry_keys for e in exclude if k not in
+                              single_val and e not in k]
 
-        plugin_group = plugin_file['entry/plugin']
-        self.plugin_list = []
-        single_val = ['name', 'id', 'pos', 'active']
-        exclude = ['citation']
-        for group in plugin_group.keys():
-            plugin = self._get_plugin_entry_template()
-            entry_keys = plugin_group[group].keys()
-            parameters = [k for k in entry_keys for e in exclude if k not in
-                          single_val and e not in k]
+                if 'active' in entry_keys:
+                    plugin['active'] = plugin_group[group]['active'][0]
 
-            if 'active' in entry_keys:
-                plugin['active'] = plugin_group[group]['active'][0]
-
-            if plugin['active'] or active_pass:
-                plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
-                plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
-                plugin_class = None
-                try:
-                    plugin_class = pu.load_class(plugin['id'])()
-                    # Populate the parameters (including those from it's base classes)
-                    plugin_tools = plugin_class.get_plugin_tools()
-                    plugin_tools._populate_default_parameters()
-                except ImportError:
-                    # No plugin class found
-                    logging.error(f"No class found for {plugin['name']}")
-                except:
-                    print(f"There was a problem with {plugin['name']}")
-
-                plugin['doc'] = plugin_tools.docstring_info if plugin_class else ""
-                plugin['tools'] = plugin_tools if plugin_class else {}
-                plugin['param'] = plugin_tools.get_param_definitions() if \
-                    plugin_class else {}
-                plugin['pos'] = group.strip()
-
-                for param in parameters:
+                if plugin['active'] or active_pass:
+                    plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
+                    plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
+                    plugin_class = None
                     try:
-                        plugin[param] = json.loads(plugin_group[group][param][0])
-                    except ValueError as e:
-                        raise ValueError(f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON")
-                self.plugin_list.append(plugin)
+                        plugin_class = pu.load_class(plugin['id'])()
+                        # Populate the parameters (including those from it's base classes)
+                        plugin_tools = plugin_class.get_plugin_tools()
+                        plugin_tools._populate_default_parameters()
+                    except ImportError:
+                        # No plugin class found
+                        logging.error(f"No class found for {plugin['name']}")
+                    except:
+                        print(f"There was a problem with {plugin['name']}")
 
-        if template:
-            self.add_template()
-            self._template.update_process_list(template)
+                    plugin['doc'] = plugin_tools.docstring_info if plugin_class else ""
+                    plugin['tools'] = plugin_tools if plugin_class else {}
+                    plugin['param'] = plugin_tools.get_param_definitions() if \
+                        plugin_class else {}
+                    plugin['pos'] = group.strip()
 
-        plugin_file.close()
+                    for param in parameters:
+                        try:
+                            plugin[param] = json.loads(plugin_group[group][param][0])
+                        except ValueError as e:
+                            raise ValueError(f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON")
+                    self.plugin_list.append(plugin)
+
+            if template:
+                self.add_template()
+                self._template.update_process_list(template)
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, 'a') as nxs_file:

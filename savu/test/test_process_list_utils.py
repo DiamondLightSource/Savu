@@ -57,14 +57,13 @@ def find_plugin_for_process_list(folder, proc_list):
             fname_nohead = fname.rsplit('/',1)[1]
             fname_type = os.path.splitext(fname_nohead)[1]
             if (fname_type == '.py'):
-                in_file = open(fname, 'r')
-                for line in in_file:
-                    if '.nxs' in line:
-                        nxs_name = get_nxs_file_name(line)
-                        if fnmatch.fnmatch(str(nxs_name), proc_list):
-                            plugin_name = fname
-                            break
-                in_file.close()
+                with open(fname, 'r') as in_file:
+                    for line in in_file:
+                        if '.nxs' in line:
+                            nxs_name = get_nxs_file_name(line)
+                            if fnmatch.fnmatch(str(nxs_name), proc_list):
+                                plugin_name = fname
+                                break
     return plugin_name
 
 def get_no_process_list_tests(root, files):
