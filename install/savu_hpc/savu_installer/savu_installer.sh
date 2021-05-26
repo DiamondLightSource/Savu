@@ -28,6 +28,7 @@ export savu_version=$(cat $DIR/version.txt)
 if [ "$savu_version" != "master" ]; then
   export savu_version="v$savu_version"
 fi
+echo "--> Savu version has passed as $savu_version" | xargs
 
 # function for parsing optional arguments
 function arg_parse() {
@@ -92,7 +93,7 @@ fi
 
 # set the branch from which install savu
 arg_parse "-s" savu_branch "$@"
-# by default savy branch is "master", if the version branch is required then
+# by default the savu branch is "master", if the version branch is required then
 # do: export savu_branch="savu_version"
 if [ ! $savu_branch ]; then
   savu_branch="master"
