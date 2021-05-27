@@ -38,7 +38,7 @@ class DisplayFormatter(object):
     def _get_string(self, **kwargs):
         out_string = []
         verbosity = kwargs.get("verbose", False)
-        level = kwargs.get("level", "basic")
+        level = kwargs.get("current_level", "basic")
         datasets = kwargs.get("datasets", False)
         expand_dim = kwargs.get("expand_dim", None)
 

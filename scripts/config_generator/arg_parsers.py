@@ -105,7 +105,9 @@ def _disp_arg_parser(args=None, doc=True):
     all_str = "Display ALL parameters (user parameters only by default)."
     parser.add_argument("-a", "--all", action='store_true', help=all_str,
                         default=False)
-
+    l_str = "Display current parameter visibility level."
+    parser.add_argument("-l", "--level", action='store_true', help=l_str,
+                        default=False)
     dataset_str = "Display in_datasets and out_datasets."
     parser.add_argument("-d", "--datasets", action='store_true', help=dataset_str,
                         default=False)
@@ -229,7 +231,9 @@ def _level_arg_parser(args=None, doc=True):
     """ Argument parser for level command. """
     desc = sc.get_description()['level']
     parser = ArgumentParser(prog='level', description=desc)
-    parser.add_argument("level",  nargs='?', help="The visibility level."
+    level_str = "The visibility level. Display the current visibility level" \
+                " by using 'level' without an argument."
+    parser.add_argument("level",  nargs='?', help=level_str
                         , choices=['basic', 'intermediate', 'advanced'])
     return __arg_parser(parser, args, 'level', doc)
 
