@@ -24,7 +24,8 @@ autodoc_mock_imports = [
     "PyQt4",
     "yamllint",
     "plugins",
-    "savu"
+    "savu",
+    "setup"
 ]
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
