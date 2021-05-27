@@ -27,15 +27,16 @@ To install this version of Savu you will need an HPC cluster with a fast network
 a high performance parallel filesystem, such as GPFS or Lustre. Additionally you'll need an [openMPI](https://www.open-mpi.org/) library installed.
 
 #### 2a: Installation of *Savu* HPC _outside_ Diamond Light Source (DLS) systems
-1. Check that you do *NOT* have conda in your path with `which conda`. Note that the installer will install its own version of conda so it is essential to make sure that conda is not in the path.
+1. Check that you do *NOT* have conda in your path with `which conda`. Note that the installer will install its own version of conda so it is essential that conda is not in the path.
 2. Download the [INSTALLER](https://github.com/DiamondLightSource/Savu/blob/master/install/savu_hpc/savu_installer.tar.gz)
-3. Set the name of the facility, e.g. `export facility='facility_name'`
-4. `bash savu_installer/savu_installer.sh` and follow installation instructions
+3. Set the desired Github branch of Savu to install. E.g. if you need to install the latests changes in Savu, you can select the "master" branch as  `export savu_branch="master"` or if you need the _latest_ Savu [release](https://github.com/DiamondLightSource/Savu/releases) to be installed do `export savu_branch="savu_version"`
+4. Set the name of the facility, as: `export facility="facility_name"`
+5. `bash savu_installer/savu_installer.sh` and follow installation instructions
 
 #### 2b: Installation of *Savu* HPC at Diamond Light Source (DLS) systems (fastest)
 This is the fastest installation which uses pre-built against openmpi packages _mpi4py, hdf5, h5py_ from the [savu-dep](https://anaconda.org/savu-dep) conda channel.
-1. Do 1-2 steps as in *2a*.
-2. `export explicit_file='savu_list_openmpi4_1_1.txt'`
+1. Do 1-3 steps as in *2a*.
+2. `export explicit_file="savu_list_openmpi4_1_1.txt"`
 3. `bash savu_installer/savu_installer.sh` and follow installation instructions
 
 #### 2c: Installation of *Savu* HPC at Diamond Light Source (DLS) systems

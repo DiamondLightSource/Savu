@@ -1,6 +1,5 @@
 import os
 import fnmatch
-from scripts.config_generator.content import Content
 
 def get_all_files_from(folder):
     all_files = []
@@ -133,6 +132,3 @@ def get_param_value_from_file(param, in_file):
             value = line.split('=')[1].strip()
             param_list.append(value)
     return param_list
-
-
-

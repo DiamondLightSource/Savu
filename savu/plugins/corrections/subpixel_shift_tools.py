@@ -19,9 +19,8 @@ class SubpixelShiftTools(PluginTools):
             visibility: intermediate
             dtype: str
             description: The module to be used for image translation.  Choose
-                skimage for skimage.transform.SimilarityTransform and scipy for
-                scipy.ndimage.interpolation.
-            default: skimage
-            options: [skimage, scipy]
+                a method in the Skimage package or in the Scipy package.
+            default: scipy
+            options: [scipy, skimage]
 
         """
