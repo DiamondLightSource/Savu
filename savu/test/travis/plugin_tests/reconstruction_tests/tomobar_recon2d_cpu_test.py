@@ -35,7 +35,7 @@ class TomobarRecon2dCpuTest(unittest.TestCase):
 
     def test_tomobar_recon2d_cpu(self):
         process_list = 'reconstruction/tomobar/tomobar2d_cpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

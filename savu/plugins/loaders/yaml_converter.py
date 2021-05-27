@@ -76,7 +76,7 @@ class YamlConverter(BaseLoader):
         
         # try adding the path to savu
         yaml_savu = os.path.join(os.path.dirname(
-            __file__.split(os.path.join('savu', 'plugins'))[0]), yaml_file)
+            __file__.split(os.path.join('Savu', 'savu', 'plugins'))[0]), yaml_file)
         if os.path.exists(yaml_savu):
             return yaml_savu
 
