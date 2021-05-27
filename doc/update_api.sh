@@ -16,4 +16,4 @@ sphinx-apidoc -feT -o $DIR/source/reference/api_plugin $DIR/../savu/plugins/ $DI
 # python -m doc.create_individual_doc_test
 # python -m unittest savu.test.travis.framework_tests.plugin_doc_test_runner
 
-sphinx-build -a -E -j 2 -b html $DIR/source/ $DIR/build/
+sphinx-build -a -E -b html $DIR/source/ $DIR/build/
