@@ -28,7 +28,7 @@ Parameter definitions
             default: "[]"
         
         angle:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: The rotation angle for the output image in degrees.
             default: "0.0"
@@ -36,11 +36,11 @@ Parameter definitions
         crop_edges:
             visibility: intermediate
             dtype: int
-            description: When a rotation is applied to any image, the result will contain zeros around the edges, which can be removed by cropping the edges by a specified number of pixels.
+            description: When a rotation is applied to any image, the result will contain unused values around the edges, which can be removed by cropping the edges by a specified number of pixels.
             default: "0"
         
         auto_crop:
-            visibility: intermediate
+            visibility: basic
             dtype: bool
             description: If activated, this feature will automatically crop the image to eliminate any regions without data (because of the rotation).
             default: "False"

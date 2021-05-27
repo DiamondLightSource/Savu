@@ -30,7 +30,7 @@ Parameter definitions
             default: "[]"
         
         name:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: A name assigned to the dataset.
             default: tomo

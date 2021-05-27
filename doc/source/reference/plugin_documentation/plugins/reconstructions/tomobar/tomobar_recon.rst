@@ -229,6 +229,25 @@ Parameter definitions
             default: "0.0001"
             dependency: regularisation_method
         
+        regularisation_iterations:
+            visibility: basic
+            dtype: int
+            description: 
+                summary: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
+                range: Recommended value dependent upon method.
+            default: 
+                regularisation_method: 
+                    ROF_TV: "1000"
+                    FGP_TV: "500"
+                    PD_TV: "100"
+                    SB_TV: "100"
+                    LLT_ROF: "1000"
+                    NDF: "1000"
+                    Diff4th: "1000"
+                    TGV: "80"
+                    NLTV: "80"
+            dependency: regularisation_method
+        
         regularisation_PD_lip:
             visibility: advanced
             dtype: int
