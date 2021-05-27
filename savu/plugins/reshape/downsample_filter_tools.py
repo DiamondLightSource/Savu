@@ -1,7 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class DownsampleFilterTools(PluginTools):
-    """A plugin to reduce the data in the selected dimension by a proportion.
+    """A plugin to downsample and rescale data volume including options of
+    flipping and rotating images
     """
     def define_parameters(self):
         """
@@ -14,7 +15,8 @@ class DownsampleFilterTools(PluginTools):
             visibility: basic
             dtype: str
             description: One of 'mean', 'median', 'min', 'max'.
-            default: 'mean'
+            default: mean
+            options: [mean,median,min,max]
         pattern:
             visibility: basic
             dtype: str
