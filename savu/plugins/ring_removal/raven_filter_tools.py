@@ -5,24 +5,24 @@ class RavenFilterTools(PluginTools):
     """
     def define_parameters(self):
         """
-        u:
+        uvalue:
             visibility: basic
             dtype: int
             description: Cut-off frequency. To control the strength of filter,
                 e.g. strong=10, moderate=20, weak=50.
             default: 20
-        v:
+        vvalue:
             visibility: basic
             dtype: int
             description: Number of image-rows around the zero-frequency to be
                 applied the filter.
             default: 1
-        n:
+        nvalue:
             visibility: intermediate
             dtype: int
             description: To define the shape of filter
             default: 8
-        pad:
+        padFT:
             visibility: intermediate
             dtype: int
             description: Padding for Fourier transform.

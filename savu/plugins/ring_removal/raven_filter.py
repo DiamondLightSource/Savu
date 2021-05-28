@@ -38,7 +38,7 @@ class RavenFilter(BaseFilter, CpuPlugin):
         self.count = 0
 
     def set_filter_padding(self, in_data, out_data):
-        self.pad = self.parameters['pad']
+        self.pad = self.parameters['padFT']
         in_data[0].padding = {'pad_frame_edges': self.pad}
         out_data[0].padding = {'pad_frame_edges': self.pad}
 
@@ -49,9 +49,9 @@ class RavenFilter(BaseFilter, CpuPlugin):
         width1 = sino_shape[1] + 2 * self.pad
         height1 = sino_shape[0] + 2 * self.pad
 
-        v0 = np.abs(self.parameters['v'])
-        u0 = np.abs(self.parameters['u'])
-        n = np.abs(self.parameters['n'])
+        v0 = np.abs(self.parameters['vvalue'])
+        u0 = np.abs(self.parameters['uvalue'])
+        n = np.abs(self.parameters['nvalue'])
         # Create filter
         centerx = np.ceil(width1 / 2.0) - 1.0
         centery = np.int16(np.ceil(height1 / 2.0) - 1)
