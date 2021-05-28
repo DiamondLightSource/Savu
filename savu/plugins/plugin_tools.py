@@ -47,6 +47,8 @@ class PluginParameters(object):
         self.param = MetaData(ordered=True)
         self.docstring_info = {}
         self.parameters = {}
+        self.multi_params_dict = {}
+        self.extra_dims = []        
 
     def populate_parameters(self, tools_list):
         """ Set parameter definitions and default parameter values """
@@ -61,8 +63,6 @@ class PluginParameters(object):
     def initialise(self, params):
         # Override default parameter values with plugin list entries
         self.set_plugin_list_parameters(copy.deepcopy(params))
-        self.multi_params_dict = {}
-        self.extra_dims = []
         self._get_plugin().set_parameters(self.parameters)
         
     def _populate_default_parameters(self):
@@ -445,19 +445,35 @@ class PluginParameters(object):
         :param key: Parameter name
         :return:
         """
-        plugin = self.plugin_class
         if param_u.is_multi_param(key, value):
             value, error_str = pu.convert_multi_params(key, value)
             if not error_str:
                 parameters[key] = value
                 label = key + "_params." + type(value[0]).__name__
-                plugin.alter_multi_params_dict(
-                    len(plugin.get_multi_params_dict()),
+                self.alter_multi_params_dict(
+                    len(self.get_multi_params_dict()),
                     {"label": label, "values": value},
                 )
-                plugin.append_extra_dims(len(value))
+                self.append_extra_dims(len(value))
         else:
             parameters[key] = value
+
+    def get_multi_params_dict(self):
+        """ Get the multi parameter dictionary. """
+        return self.multi_params_dict
+
+    def alter_multi_params_dict(self, key, value):
+        self.multi_params_dict[key] = value
+
+    def get_extra_dims(self):
+        """ Get the extra dimensions. """
+        return self.extra_dims
+
+    def set_extra_dims(self, value):
+        self.extra_dims = value
+
+    def append_extra_dims(self, value):
+        self.extra_dims.append(value)
 
     def define_parameters(self):
         pass
