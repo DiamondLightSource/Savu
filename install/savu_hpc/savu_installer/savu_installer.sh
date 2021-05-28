@@ -28,6 +28,7 @@ export savu_version=$(cat $DIR/version.txt)
 if [ "$savu_version" != "master" ]; then
   export savu_version="v$savu_version"
 fi
+echo "--> Savu version has passed as $savu_version" | xargs
 
 # function for parsing optional arguments
 function arg_parse() {
@@ -90,14 +91,16 @@ if [ ! $conda_folder ]; then
   conda_folder=Savu_$savu_version
 fi
 
-# set the savu recipe
-arg_parse "-s" savu_recipe "$@"
-case $savu_recipe in
-  "master") savu_recipe="savu_master" ;;
-  "local") savu_recipe="savu_local" ;;
-  "") savu_recipe="savu" ;;
-  *) echo "Unknown Savu installation version."; exit 1 ;;
-esac
+# set the branch from which install savu
+arg_parse "-s" savu_branch "$@"
+# by default the savu branch is "master", if the version branch is required then
+# do: export savu_branch="savu_version"
+if [ ! $savu_branch ]; then
+  savu_branch="master"
+fi
+if [ "$savu_branch" == "savu_version" ]; then
+  savu_branch=$savu_version
+fi
 
 # override the conda recipes folder
 arg_parse "-r" recipes "$@"
@@ -249,9 +252,11 @@ if [ ! $test_flag ]; then
 
   conda install -y -q conda-build
 
+  echo -e "=============================================================\n"
   echo "Building Savu..."
-  conda build $DIR/$savu_recipe
-  savubuild=`conda build $DIR/$savu_recipe --output`
+  conda build $DIR/savu-recipe
+  savubuild=`conda build $DIR/savu-recipe --output`
+  echo -e "=============================================================\n"
   echo "Installing Savu..."
   conda install -y -q --use-local $savubuild
 
@@ -262,7 +267,6 @@ if [ ! $test_flag ]; then
   if [ -z $recipes ]; then
     install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
     recipes=$savu_path/$install_path/../conda-recipes
-    echo $recipes
   fi
 
   # getting versions of mpi4py/hdf5/h5py from the versions file
