@@ -24,5 +24,11 @@ will be replaced by the provided new value
               dtype: int
               description: The new value.
               default: 1
+        pattern:
+            visibility: advanced
+            dtype: str
+            options: [SINOGRAM, PROJECTION, VOLUME_XZ, VOLUME_YZ]
+            description: Pattern to apply this to.
+            default: 'VOLUME_XZ' 
 
         """

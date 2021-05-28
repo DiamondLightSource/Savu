@@ -1,30 +1,29 @@
 from savu.plugins.plugin_tools import PluginTools
 
+
 class RemoveLargeRingsTools(PluginTools):
-    """Method to remove large stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image).
+    """Methods working on a sinogram-image to remove large ring artifacts.
     """
+
     def define_parameters(self):
         """
         size:
-            visibility: intermediate
-            dtype: [float, list[float]]
+            visibility: basic
+            dtype: float
             description: Size of the median filter window. Greater is stronger.
             default: 71
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of large stripes.
               Greater is less sensitive.
             default: 3.0
         """
 
-
     def citation(self):
         """
-        The code of ring removal is the implementation
-        of the work of Nghia T. Vo et al. taken from algorithm 4,
-        5 in this paper
+        The code of ring removal is the implementation of the work of Nghia T.
+        Vo et al. taken from algorithm 4, 5 in this paper.
         bibtex:
                 @article{vo2018superior,
                 title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
