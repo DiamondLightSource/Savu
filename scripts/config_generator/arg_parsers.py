@@ -48,9 +48,10 @@ def __arg_parser(parser, args, command, doc):
     try:
         args = parser.parse_args(args=args)
     except MyException as e:
-        print(e)
-        print(f"Please type '{command} -h' for help.")
         args = e.args
+        if args is not None:
+            print(e)
+        print(f"Please type '{command} -h' for help.")
     return parser if doc==True else args
 
 
