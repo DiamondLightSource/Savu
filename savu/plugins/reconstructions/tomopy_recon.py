@@ -39,22 +39,6 @@ from savu.plugins.reconstructions.base_recon import BaseRecon
 
 @register_plugin
 class TomopyRecon(BaseRecon, CpuPlugin):
-    """
-     A wrapper to the tomopy reconstruction library. Extra keywords not \
-     required for the chosen algorithm will be ignored.
-
-    :u*param algorithm: The reconstruction algorithm (art|bart|fbp|gridrec|\
-        mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad\
-        |sirt). Default: 'gridrec'.
-    :u*param filter_name: Valid for fbp|gridrec, options: none|shepp|cosine|\
-     hann|hamming|ramlak|parzen|butterworth). Default: 'ramlak'.
-    :u*param reg_par: Regularization parameter for smoothing, valid for \
-        ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
-    :param n_iterations: Number of iterations - only valid for iterative \
-    algorithms. Default: 1.
-    :~param init_vol: Not an option. Default: None.
-    :~param centre_pad: Not an option. Default: None.
-    """
 
     def __init__(self):
         super(TomopyRecon, self).__init__("TomopyRecon")

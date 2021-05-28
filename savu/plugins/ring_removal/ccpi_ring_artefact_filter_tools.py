@@ -14,18 +14,18 @@ tomo_recon reconstruction software.
               increase to reduce ring supression.
             default: 0.005
 
-        param_n:
-            visibility: intermediate
-            dtype: int
-            description: Unknown description (for plate-like objects only).
-            default: 0
-
         num_series:
             visibility: basic
             dtype: int
             description: High aspect ration compensation (for plate-like
               objects only)
             default: 1
+
+        param_n:
+            visibility: intermediate
+            dtype: int
+            description: Unknown description (for plate-like objects only).
+            default: 0
         """
 
     def citation(self):

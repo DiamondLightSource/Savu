@@ -31,15 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class RavenFilter(BaseFilter, CpuPlugin):
-    """
-    Ring artefact removal method
-
-    :u*param uvalue: To define the shape of filter, e.g. bad=10, moderate=20,\
-        minor=50. Default: 20.
-    :param vvalue: How many rows to be applied the filter. Default: 2.
-    :param nvalue: To define the shape of filter. Default: 4.
-    :param padFT: Padding for Fourier transform. Default: 20.
-    """
 
     def __init__(self):
         logging.debug("Starting Raven Filter")
@@ -48,8 +39,6 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         self.pad = self.parameters['padFT']
-        # don't currently have functionality to pad top/bottom but not
-        # right/left so padding everywhere for now
         in_data[0].padding = {'pad_frame_edges': self.pad}
         out_data[0].padding = {'pad_frame_edges': self.pad}
 
@@ -57,8 +46,8 @@ class RavenFilter(BaseFilter, CpuPlugin):
         in_pData = self.get_plugin_in_datasets()[0]
         sino_shape = list(in_pData.get_shape())
 
-        width1 = sino_shape[1] + 2*self.pad
-        height1 = sino_shape[0] + 2*self.pad
+        width1 = sino_shape[1] + 2 * self.pad
+        height1 = sino_shape[0] + 2 * self.pad
 
         v0 = np.abs(self.parameters['vvalue'])
         u0 = np.abs(self.parameters['uvalue'])
@@ -67,12 +56,12 @@ class RavenFilter(BaseFilter, CpuPlugin):
         centerx = np.ceil(width1 / 2.0) - 1.0
         centery = np.int16(np.ceil(height1 / 2.0) - 1)
         self.row1 = centery - v0
-        self.row2 = centery + v0+1
-        listx = np.arange(width1)-centerx
-        filtershape = 1.0/(1.0 + np.power(listx/u0, 2*n))
+        self.row2 = centery + v0 + 1
+        listx = np.arange(width1) - centerx
+        filtershape = 1.0 / (1.0 + np.power(listx / u0, 2 * n))
         filtershapepad2d = np.zeros((self.row2 - self.row1, filtershape.size))
         filtershapepad2d[:] = np.float64(filtershape)
-        self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
+        self.filtercomplex = filtershapepad2d + filtershapepad2d * 1j
 
         a = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
         b = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)

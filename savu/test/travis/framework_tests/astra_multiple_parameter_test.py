@@ -59,7 +59,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
-        self.assertEqual(plugin.extra_dims[0], 3)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 3)
 
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
@@ -68,7 +68,7 @@ class AstraMultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['FBP', 'CGLS'])
-        self.assertEqual(plugin.extra_dims[0], 2)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 2)
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()

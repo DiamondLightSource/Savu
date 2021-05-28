@@ -1,23 +1,22 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RemoveAllRingsTools(PluginTools):
-    """Method to remove all types of stripe artifacts in a sinogram (<->
-ring artefacts in a reconstructed image).
+    """Methods working on a sinogram-image to remove most types of ring artifacts.
     """
     def define_parameters(self):
         """
-        la_size:
-            visibility: intermediate
-            dtype: int
-            description: Size of the median filter window to remove large stripes.
-            default: 71
         sm_size:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Size of the median filter window to remove small-to-medium stripes.
             default: 31
+        la_size:
+            visibility: basic
+            dtype: int
+            description: Size of the median filter window to remove large stripes.
+            default: 71
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of stripes. Greater is less sensitive.
             default: 3.0

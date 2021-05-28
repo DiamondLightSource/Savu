@@ -15,7 +15,8 @@
 """
 .. module:: remove_all_rings
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove large stripe artefacts
+   :synopsis: A plugin working in the sinogram space to remove most types of
+    ring artefacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,13 +30,13 @@ from scipy.ndimage import binary_dilation
 from scipy.ndimage import uniform_filter1d
 from scipy import interpolate
 
+
 @register_plugin
 class RemoveAllRings(Plugin, CpuPlugin):
-    """
-    """
+
     def __init__(self):
         super(RemoveAllRings, self).__init__(
-                "RemoveAllRings")
+            "RemoveAllRings")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -45,64 +46,66 @@ class RemoveAllRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def remove_stripe_based_sorting(self, matindex, sinogram, size):
-        """Algorithm 3 in the paper. Remove partial and full stripes \
-        using the sorting technique.        
+        """Algorithm 3 in the paper. To remove partial and full stripes.
         """
         sinogram = np.transpose(sinogram)
         matcomb = np.asarray(np.dstack((matindex, sinogram)))
         matsort = np.asarray(
             [row[row[:, 1].argsort()] for row in matcomb])
-        matsort[:, :, 1] = median_filter(matsort[:, :, 1],(size,1))
+        matsort[:, :, 1] = median_filter(matsort[:, :, 1], (size, 1))
         matsortback = np.asarray(
             [row[row[:, 0].argsort()] for row in matsort])
         sino_corrected = matsortback[:, :, 1]
         return np.transpose(sino_corrected)
 
     def detect_stripe(self, listdata, snr):
-        """Algorithm 4 in the paper. Used to locate stripe positions.
+        """Algorithm 4 in the paper. To locate stripe positions.
 
         Parameters
-        -----------
-            listdata : 1D normalized array.
-            snr : ratio used to discriminate between useful information and noise.
+        ----------
+        listdata : 1D normalized array.
+        snr : Ratio (>1.0) used to detect stripe locations.
 
         Returns
         -------
-            listmask : 1D binary mask.
-
+        listmask : 1D binary mask.
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
         xlist = np.arange(0, numdata, 1.0)
         ndrop = np.int16(0.25 * numdata)
         (_slope, _intercept) = np.polyfit(
-            xlist[ndrop:-ndrop-1], listsorted[ndrop:-ndrop - 1], 1)
+            xlist[ndrop:-ndrop - 1], listsorted[ndrop:-ndrop - 1], 1)
         numt1 = _intercept + _slope * xlist[-1]
         noiselevel = np.abs(numt1 - _intercept)
+        if noiselevel == 0.0:
+            raise ValueError(
+                "The method doesn't work on noise-free data. If you " \
+                "apply the method on simulated data, please add" \
+                " noise!")
         val1 = np.abs(listsorted[0] - _intercept) / noiselevel
         val2 = np.abs(listsorted[-1] - numt1) / noiselevel
         listmask = np.zeros_like(listdata)
-        if (val1 >= snr):
+        if val1 >= snr:
             upper_thresh = _intercept + noiselevel * snr * 0.5
             listmask[listdata > upper_thresh] = 1.0
-        if (val2 >= snr):
+        if val2 >= snr:
             lower_thresh = numt1 - noiselevel * snr * 0.5
             listmask[listdata <= lower_thresh] = 1.0
         return listmask
-    
+
     def remove_large_stripe(self, matindex, sinogram, snr, size):
-        """Algorithm 5 in the paper. Use to remove large stripes
+        """Algorithm 5 in the paper. To remove large stripes.
 
         Parameters
         -----------
-            sinogram : 2D array.
-            snr : ratio used to discriminate between useful information and noise.
-            size : window size of the median filter.
+        sinogram : 2D array.
+        snr : Ratio (>1.0) used to detect stripe locations.
+        size : Window size of the median filter.
 
         Returns
         -------
-            sinogram : stripe-removed sinogram.
-
+        sinogram : stripe-removed sinogram.
         """
         badpixelratio = 0.05
         (nrow, ncol) = sinogram.shape
@@ -111,10 +114,12 @@ class RemoveAllRings(Plugin, CpuPlugin):
         sinosmoothed = median_filter(sinosorted, (1, size))
         list1 = np.mean(sinosorted[ndrop:nrow - ndrop], axis=0)
         list2 = np.mean(sinosmoothed[ndrop:nrow - ndrop], axis=0)
-        listfact = list1 / list2
+        listfact = np.divide(list1, list2,
+                             out=np.ones_like(list1), where=list2 != 0)
         listmask = self.detect_stripe(listfact, snr)
-        listmask = binary_dilation(listmask, iterations=1).astype(listmask.dtype)
-        matfact = np.tile(listfact,(nrow,1))
+        listmask = binary_dilation(listmask, iterations=1).astype(
+            listmask.dtype)
+        matfact = np.tile(listfact, (nrow, 1))
         sinogram = sinogram / matfact
         sinogram1 = np.transpose(sinogram)
         matcombine = np.asarray(np.dstack((matindex, sinogram1)))
@@ -129,18 +134,18 @@ class RemoveAllRings(Plugin, CpuPlugin):
         return sinogram
 
     def remove_unresponsive_and_fluctuating_stripe(self, sinogram, snr, size):
-        """Algorithm 6 in the paper. Remove unresponsive or fluctuating stripes.
+        """Algorithm 6 in the paper. To remove unresponsive and fluctuating
+        stripes.
 
         Parameters
-        -----------
-            sinogram : 2D array.
-            snr : ratio used to discriminate between useful information and noise
-            size : window size of the median filter.
+        ----------
+        sinogram : 2D array.
+        snr : Ratio (>1.0) used to detect stripe locations.
+        size : Window size of the median filter.
 
         Returns
         -------
-            sinogram : stripe-removed sinogram.
-
+        sinogram : stripe-removed sinogram.
         """
         (nrow, _) = sinogram.shape
         sinosmoothed = np.apply_along_axis(uniform_filter1d, 0, sinogram, 10)
@@ -150,7 +155,8 @@ class RemoveAllRings(Plugin, CpuPlugin):
         listdiffbck[listdiffbck == 0.0] = nmean
         listfact = listdiff / listdiffbck
         listmask = self.detect_stripe(listfact, snr)
-        listmask = binary_dilation(listmask, iterations=1).astype(listmask.dtype)
+        listmask = binary_dilation(listmask, iterations=1).astype(
+            listmask.dtype)
         listmask[0:2] = 0.0
         listmask[-2:] = 0.0
         listx = np.where(listmask < 1.0)[0]
@@ -173,17 +179,23 @@ class RemoveAllRings(Plugin, CpuPlugin):
         self.width1 = sino_shape[width_dim]
         self.height1 = sino_shape[height_dim]
         listindex = np.arange(0.0, self.height1, 1.0)
-        self.matindex = np.tile(listindex,(self.width1,1))        
-        self.la_size = np.clip(np.int16(self.parameters['la_size']), 1, self.width1-1)
-        self.sm_size = np.clip(np.int16(self.parameters['sm_size']), 1, self.width1-1)
+        self.matindex = np.tile(listindex, (self.width1, 1))
+        self.la_size = np.clip(np.int16(self.parameters['la_size']), 1,
+                               self.width1 - 1)
+        self.sm_size = np.clip(np.int16(self.parameters['sm_size']), 1,
+                               self.width1 - 1)
         self.snr = np.clip(np.float32(self.parameters['snr']), 1.0, None)
-        
+
     def process_frames(self, data):
         """
-        Apply algorithm 6, 5, and 3 in the paper to removal all types of stripes.
+        Apply algorithm 6, 5, and 3 in the paper to removal all types of stripes
         """
-        sinogram = np.copy(data[0])        
-        sinogram = self.remove_unresponsive_and_fluctuating_stripe(sinogram, self.snr, self.la_size)        
-        sinogram = self.remove_large_stripe(self.matindex, sinogram, self.snr, self.la_size)
-        sinogram = self.remove_stripe_based_sorting(self.matindex, sinogram, self.sm_size) 
+        sinogram = np.copy(data[0])
+        sinogram = self.remove_unresponsive_and_fluctuating_stripe(sinogram,
+                                                                   self.snr,
+                                                                   self.la_size)
+        sinogram = self.remove_large_stripe(self.matindex, sinogram, self.snr,
+                                            self.la_size)
+        sinogram = self.remove_stripe_based_sorting(self.matindex, sinogram,
+                                                    self.sm_size)
         return sinogram
