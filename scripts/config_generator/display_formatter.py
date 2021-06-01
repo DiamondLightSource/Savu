@@ -26,6 +26,9 @@ import textwrap
 from colorama import Fore, Back, Style
 
 from savu.plugins import utils as pu
+import savu.data.framework_citations as fc
+from savu.data.plugin_list import CitationInformation
+
 
 WIDTH = 85
 
@@ -666,27 +669,27 @@ class CiteDisplay(DisplayFormatter):
         used.
         """
         title = self._get_quiet(p_dict, count, width)
-        citation = self._get_plugin_citation(p_dict, width)
-        return title + citation
+        citation = self._get_citation_str(p_dict["tools"].get_citations(),
+                                          width,
+                                          parameters=p_dict["data"])
+        framework_citations = self._get_framework_citations(width)
+        return framework_citations + title + citation
 
-    def _get_plugin_citation(self, p_dict, width):
+    def _get_citation_str(self, citation_dict, width, parameters=""):
         """Get the plugin citation information
 
-        :param p_dict: Dictionary containing plugin information
+        :param: citation_dict: Dictionay containing citation information
+        :param parameters: Dictionary containing parameter information
         :param width: The terminal display width for output strings
         :return: cite, A string containing plugin citations
         """
         margin = 6
         str_margin = " " * margin
-
-        cite = ""
-        parameters = p_dict["data"]
-        citation_dict = p_dict["tools"].get_citations()
         line_break = "\n" + str_margin + "-" * (width - margin) + "\n"
-
+        cite = ""
         if citation_dict:
             for citation in citation_dict.values():
-                if citation.dependency:
+                if citation.dependency and parameters:
                     # If the citation is dependent upon a certain parameter
                     # value being chosen
                     str_dep = self._get_citation_dependency_str(
@@ -730,6 +733,32 @@ class CiteDisplay(DisplayFormatter):
                     str_dep, width, Style.BRIGHT, Style.RESET_ALL, str_margin
                 )
         return str_dep
+
+    def _get_framework_title(self, width, fore_colour, back_colour):
+        title = "Framework Citations "
+        width -= len(title)
+        title_str = back_colour + fore_colour + title + " " * width \
+                    + Style.RESET_ALL
+        return title_str
+
+    def _get_framework_citations(self, width):
+        """ Create a string containing framework citations
+
+        :param width: Width of formatted text
+        :return: String with framework citations
+        """
+        citation_dict = {}
+        framework_cites = fc.get_framework_citations()
+        for cite in framework_cites:
+            citation = CitationInformation(**cite)
+            citation_dict.update({citation.name: citation})
+
+        title = \
+            self._get_framework_title(width, Fore.LIGHTWHITE_EX,
+                                             Back.LIGHTBLACK_EX)
+
+        cite = self._get_citation_str(citation_dict, width)
+        return title+cite+"\n"
 
     def _get_citation_lines(self, citation, width, str_margin):
         """Print certain information about the citation in order.
