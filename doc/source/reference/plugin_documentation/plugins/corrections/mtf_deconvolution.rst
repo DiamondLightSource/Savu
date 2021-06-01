@@ -4,7 +4,7 @@ Mtf Deconvolution
 Description
 --------------------------
 
-Method to correct the point-spread-function effect. Working on raw projections and flats. 
+Method to correct the point-spread-function effect. Working on raw     projections and flats. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/mtf_deconvolution_doc.rst>
@@ -31,13 +31,13 @@ Parameter definitions
             default: "[]"
         
         file_path:
-            visibility: intermediate
+            visibility: basic
             dtype: "[None,filepath]"
             description: "Path to file containing a 2D array of a MTF function. File formats are 'npy', or 'tif'."
             default: None
         
         pad_width:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Pad the image before the deconvolution.
             default: "128"

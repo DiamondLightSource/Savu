@@ -4,7 +4,7 @@ Remove Large Rings
 Description
 --------------------------
 
-Method to remove large stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image). 
+Methods working on a sinogram-image to remove large ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_large_rings_doc.rst>
@@ -31,13 +31,13 @@ Parameter definitions
             default: "[]"
         
         size:
-            visibility: intermediate
-            dtype: "[float, list[float]]"
+            visibility: basic
+            dtype: float
             description: Size of the median filter window. Greater is stronger.
             default: "71"
         
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of large stripes. Greater is less sensitive.
             default: "3.0"
