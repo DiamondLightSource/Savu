@@ -62,7 +62,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [1, 2, 3])
-        self.assertEqual(plugin.extra_dims[0], 3)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 3)
 
     def test_parameter_space_float(self):
         plugin = self.plugin_setup()
@@ -71,7 +71,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [0.2, 0.4, 0.6])
-        self.assertEqual(plugin.extra_dims[0], 3)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 3)
 
     def test_parameter_space_str(self):
         plugin = self.plugin_setup()
@@ -80,7 +80,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, ['line', 'strip'])
-        self.assertEqual(plugin.extra_dims[0], 2)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 2)
 
     def test_parameter_space_list(self):
         plugin = self.plugin_setup()
@@ -89,7 +89,7 @@ class MultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         params = plugin.parameters[key]
         self.assertEqual(params, [[0, 1], [1, 2]])
-        self.assertEqual(plugin.extra_dims[0], 2)
+        self.assertEqual(plugin.get_plugin_tools().extra_dims[0], 2)
 
     def test_parameter_space_extra_dims(self):
         plugin = self.plugin_setup()
@@ -99,7 +99,8 @@ class MultipleParameterTest(unittest.TestCase):
         plugin.tools.set_plugin_list_parameters(params)
         out_datasets = plugin.get_out_datasets()
         for data in out_datasets:
-            self.assertEqual(data.extra_dims, plugin.extra_dims)
+            self.assertEqual(data.extra_dims,
+                             plugin.get_plugin_tools().extra_dims)
 
     def test_parameter_space_data_shape(self):
         options = self.framework_options_setup()

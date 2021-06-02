@@ -46,9 +46,10 @@ class NxtomoLoaderTools(PluginTools):
             default: None
         3d_to_4d:
             visibility: intermediate
-            dtype: bool
-            description: Many tomography datasets can be loaded. Value of
-              True indicates the data must be reshaped.
+            dtype: [bool, int]
+            description: If this is 4D data stored in 3D then set this value 
+                to True, or to an integer value equivalent to the number of 
+                projections per 180-degree scan if the angles have not been set.
             default: False
         ignore_flats:
             visibility: intermediate
