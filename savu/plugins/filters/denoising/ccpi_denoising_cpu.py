@@ -16,8 +16,7 @@
 .. module:: ccpi_denoising_cpu
    :platform: Unix
    :synopsis: "CCPi-Regularisation/denoising Toolkit delivers a variety \
-                of variational 2D/3D denoising methods. The available methods are:  ROF_TV, \
-                FGP_TV(default), SB_TV, TGV, LLT_ROF, NDF, Diff4th"
+                of variational 2D/3D denoising methods."
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -25,6 +24,7 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+import numpy as np
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
@@ -55,14 +55,14 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         if (self.parameters['method'] == 'ROF_TV'):
             # set parameters for the ROF-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'time_marching_parameter': self.parameters['time_step'], \
                          'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'FGP_TV'):
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'tolerance_constant': self.parameters['tolerance_constant'], \
                          'methodTV': 0, \
@@ -70,14 +70,14 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         if (self.parameters['method'] == 'SB_TV'):
             # set parameters for the SB-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'tolerance_constant': self.parameters['tolerance_constant'], \
                          'methodTV': 0}
         if (self.parameters['method'] == 'TGV'):
             # set parameters for the TGV method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'alpha1': self.parameters['alpha1'], \
                          'alpha0': self.parameters['alpha0'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
@@ -86,7 +86,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         if (self.parameters['method'] == 'LLT_ROF'):
             # set parameters for the LLT-ROF method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'regularisation_parameterLLT': self.parameters['reg_parLLT'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'time_marching_parameter': self.parameters['time_step'], \
@@ -109,7 +109,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
                 #  Threshold-constrained huber diffusion
                 penaltyNDF = 5
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'edge_parameter': self.parameters['edge_par'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'time_marching_parameter': self.parameters['time_step'], \
@@ -118,7 +118,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         if (self.parameters['method'] == 'Diff4th'):
             # set parameters for the DIFF4th method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'edge_parameter': self.parameters['edge_par'], \
                          'number_of_iterations': self.parameters['max_iterations'], \
                          'time_marching_parameter': self.parameters['time_step'], \
@@ -126,7 +126,7 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         if (self.parameters['method'] == 'NLTV'):
             # set parameters for the NLTV method
             self.pars = {'algorithm': self.parameters['method'], \
-                         'regularisation_parameter': self.parameters['reg_par'], \
+                         'regularisation_parameter': self.parameters['reg_parameter'], \
                          'edge_parameter': self.parameters['edge_par'], \
                          'number_of_iterations': self.parameters['max_iterations']}
         return self.pars
@@ -134,15 +134,9 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
     # print "The full data shape is", self.get_in_datasets()[0].get_shape()
     # print "Example is", self.parameters['example']
     def process_frames(self, data):
-        import numpy as np
-        # input_temp = data[0]
-        # indices = np.where(np.isnan(input_temp))
-        # input_temp[indices] = 0.0
-        # self.pars['input'] = input_temp
         input_temp = np.nan_to_num(data[0])
         input_temp[input_temp > 10 ** 15] = 0.0
         self.pars['input'] = input_temp
-        # self.pars['input'] = np.nan_to_num(data[0])
 
         # Running Ccpi-RGLTK modules on GPU
         if (self.parameters['method'] == 'ROF_TV'):
