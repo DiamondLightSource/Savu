@@ -57,8 +57,11 @@ class DisplayFormatter(object):
         line_break = "%s" % ("-" * WIDTH)
         out_string.append(line_break)
 
-        display_args = {"subelem": subelem, "datasets": datasets,
-                        "expand_dim": expand_dim}
+        display_args = {
+            "subelem": subelem,
+            "datasets": datasets,
+            "expand_dim": expand_dim,
+        }
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
@@ -192,8 +195,9 @@ class ParameterFormatter(DisplayFormatter):
         try:
             for key in keys:
                 keycount += 1
-                params = self._create_display_string(desc, key, p_dict,
-                                                     params, keycount, width, breakdown)
+                params = self._create_display_string(
+                    desc, key, p_dict, params, keycount, width, breakdown
+                )
             return params
         except Exception as e:
             print("ERROR: " + str(e))
@@ -219,7 +223,7 @@ class ParameterFormatter(DisplayFormatter):
         return params
 
     def _get_dimensions(self, preview_list):
-        """ Check how many dimensions to display
+        """Check how many dimensions to display
 
         :param preview_list: The preview parameter
         :return: Dimensions to display
@@ -259,6 +263,7 @@ class ParameterFormatter(DisplayFormatter):
         :return: String containing split notation to display
         """
         import itertools
+
         basic_split_keys = ["start", "stop", "step"]
         all_split_keys = [*basic_split_keys, "chunk"]
         split_str = ""
@@ -268,7 +273,7 @@ class ParameterFormatter(DisplayFormatter):
             if len(val_list) < 3:
                 # Make sure the start stop step split keys are always shown,
                 # even when blank
-                val_list.append('')
+                val_list.append("")
             for slice_name, v in zip(all_split_keys, val_list):
                 # Only print up to the shortest list.
                 # (Only show the chunk value if it is in val_list)
@@ -276,8 +281,9 @@ class ParameterFormatter(DisplayFormatter):
         else:
             # Display the first value as 'start', keep stop and step blank
             val_list = [val]
-            for slice_name, v in itertools.zip_longest(basic_split_keys,
-                                                       val_list, fillvalue=""):
+            for slice_name, v in itertools.zip_longest(
+                basic_split_keys, val_list, fillvalue=""
+            ):
                 split_str += self._get_slice_str(slice_name, v, width)
 
         return split_str
@@ -292,8 +298,6 @@ class ParameterFormatter(DisplayFormatter):
         """
         margin = 6
         str_margin = " " * margin
-
-        style_on = Style.BRIGHT
         style_off = Style.RESET_ALL
 
         split_line_str = f"{label: >39} : {value}"
@@ -355,27 +359,55 @@ class DispDisplay(ParameterFormatter):
         keys = pu.set_order_by_visibility(p_dict["param"], level=level)
 
         filter = subelem if subelem else datasets
-        filter_items = [pu.param_to_str(subelem, keys)] \
-                        if subelem else ["in_datasets", "out_datasets"]
+        filter_items = (
+            [pu.param_to_str(subelem, keys)]
+            if subelem
+            else ["in_datasets", "out_datasets"]
+        )
         # If datasets parameter specified, only show these
         params = ""
         keycount = 0
+        prev_visibility = ""
         try:
             for key in keys:
                 keycount += 1
                 if filter:
                     if key in filter_items:
+                        params = \
+                            self._separator(key, p_dict, prev_visibility,
+                                            params, width)
                         params = self._create_display_string(desc, key,
                                        p_dict, params, keycount, width,
                                        breakdown, expand_dim)
                 else:
+                    params = \
+                        self._separator(key, p_dict, prev_visibility,
+                                        params, width)
                     params = self._create_display_string(desc, key, p_dict,
                                         params, keycount, width, breakdown,
                                         expand_dim)
+                prev_visibility = p_dict["param"][key]["visibility"]
+
             return params
         except Exception as e:
             print("ERROR: " + str(e))
             raise
+
+    def _separator(self, key, p_dict, prev_visibility, params, width):
+        """Add a line seperator to the parameter string 'params'
+
+        :param key: parameter name
+        :param p_dict: dictionary of parameter definitions
+        :param prev_visibility: visibility level for the previous parameter
+        :param params: parameter string
+        :param width: width of the console display
+        :return: parameter string
+        """
+        cur_visibility = p_dict["param"][key]["visibility"]
+        split = "-" * ((width - len(cur_visibility)) - 4)
+        if cur_visibility != prev_visibility:
+            params += "\n" + split + cur_visibility + "-" * 4
+        return params
 
     def _get_verbose(
         self, level, p_dict, count, width, display_args, breakdown=False
@@ -637,8 +669,9 @@ class ListDisplay(ParameterFormatter):
         synopsis = self._get_synopsis(p_dict, width, Fore.CYAN, Fore.RESET)
         return title + synopsis
 
-    def _get_verbose(self, level, p_dict, count, width, display_args,
-                     breakdown=False):
+    def _get_verbose(
+        self, level, p_dict, count, width, display_args, breakdown=False
+    ):
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN
         c_off = Back.RESET + Fore.RESET
@@ -669,9 +702,9 @@ class CiteDisplay(DisplayFormatter):
         used.
         """
         title = self._get_quiet(p_dict, count, width)
-        citation = self._get_citation_str(p_dict["tools"].get_citations(),
-                                          width,
-                                          parameters=p_dict["data"])
+        citation = self._get_citation_str(
+            p_dict["tools"].get_citations(), width, parameters=p_dict["data"]
+        )
         framework_citations = self._get_framework_citations(width)
         return framework_citations + title + citation
 
@@ -708,8 +741,9 @@ class CiteDisplay(DisplayFormatter):
             cite = f"\n\n{' '}No citations"
         return cite
 
-    def _get_citation_dependency_str(self, citation, parameters, width,
-                                     str_margin):
+    def _get_citation_dependency_str(
+        self, citation, parameters, width, str_margin
+    ):
         """Create a message for citations dependent on a
         certain parameter
 
@@ -737,12 +771,13 @@ class CiteDisplay(DisplayFormatter):
     def _get_framework_title(self, width, fore_colour, back_colour):
         title = "Framework Citations "
         width -= len(title)
-        title_str = back_colour + fore_colour + title + " " * width \
-                    + Style.RESET_ALL
+        title_str = (
+            back_colour + fore_colour + title + " " * width + Style.RESET_ALL
+        )
         return title_str
 
     def _get_framework_citations(self, width):
-        """ Create a string containing framework citations
+        """Create a string containing framework citations
 
         :param width: Width of formatted text
         :return: String with framework citations
@@ -758,7 +793,7 @@ class CiteDisplay(DisplayFormatter):
                                              Back.LIGHTBLACK_EX)
 
         cite = self._get_citation_str(citation_dict, width)
-        return title+cite+"\n"
+        return title + cite + "\n"
 
     def _get_citation_lines(self, citation, width, str_margin):
         """Print certain information about the citation in order.
