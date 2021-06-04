@@ -1,6 +1,6 @@
 :orphan:
 
-.. ::process_list:: test_data/process_lists/simple_tomo_pipeline_cpu.nxs
+.. ::process_list:: test_data/test_process_lists/filters/ring_removal/remove_all_rings_test.nxs
 
 Remove All Rings Documentation
 #################################################################
@@ -15,8 +15,8 @@ Remove All Rings Documentation
 An example of adding RingRemoval to your plugin list:
 
     >>> add RemoveAllRings
-    >>> mod 1.3 FBP
+    >>> mod 1.3 2.0
     >>> disp -vv
 
-    >>> open test_data/process_lists/simple_tomo_pipeline_cpu.nxs
+    >>> open test_data/test_process_lists/filters/ring_removal/remove_all_rings_test.nxs
     >>> disp -v

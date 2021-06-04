@@ -162,13 +162,13 @@ def get_unittest_process_list_function(process_lists):
             self.assertTrue(file_exists, msg=error_msg)
             if file_exists:
                 # Write the process list being tested to the logger
-                logger.debug('TEST PROCESS LIST: ' \\
+                logger.debug('REFRESH PROCESS LIST: ' \\
                             + savu_base_path + process_list_path)
                 saved_stdout = sys.stdout
                 try:
                     out = StringIO()
                     sys.stdout = out
-                    tplu.refresh_process_file(savu_base_path \\
+                    refresh.generate_test(savu_base_path \\
                                               + process_list_path)
                     output_value = out.getvalue().strip()
                     for check in output_checks:
@@ -220,16 +220,18 @@ def read_test_file(doc_file_path):
     process_lists = []
     with open(doc_file_path, 'r') as doc_file:
         for line in doc_file:
-            if '>>>' in line:
-                line = line.replace('>>>', '')
+            if ">>>" in line:
+                line = line.replace(">>>", "")
+                if "open " in line:
+                    # Replace file path with the correct full path
+                    line = line.replace("open ", "open "+savu_base_path)
                 testing_lines.append(line.strip())
-            if '.. ::process_list::' in line:
+            if ".. ::process_list::" in line:
                 # Documentation must include this line in order to update
                 # the plugin list before running it in the example
                 # '.. ' indicates a rst file comment
-                line = line.replace('.. ::process_list::', '')
+                line = line.replace(".. ::process_list::", "")
                 process_lists.append(line.strip())
-
     return testing_lines, process_lists
 
 def get_unittest_setup(file_name):
@@ -257,9 +259,9 @@ import logging.config
 from io import StringIO
 
 import savu.plugins.utils as pu
-import savu.test.test_process_list_utils as tplu
 import savu.test.travis.doc_tests.doc_test_utils as dtu
 import scripts.configurator_tests.savu_config_test_utils as sctu
+import scripts.configurator_tests.refresh_process_lists_test as refresh
 
 # Determine Savu base path
 savu_base_path = \\

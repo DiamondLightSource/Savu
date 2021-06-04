@@ -49,7 +49,7 @@ def savu_config_runner(input_list, output_checks,
             text_present = any(check in output for check in output_checks)
             if error_str:
                 # Check the error text is not present
-                error_msg = 'Error in command ouput.'
+                error_msg = _get_error_feedback(output, output_checks)
                 assert not text_present, error_msg
             else:
                 # Check the text is printed to the output
@@ -57,3 +57,18 @@ def savu_config_runner(input_list, output_checks,
 
         finally:
             sys.stdout = saved_stdout
+
+def _get_error_feedback(output, output_checks):
+    """Get the error message string
+
+    :param output: Output from savu_config and commands
+    :param output_checks: Strings to check for inside the produced output
+    :return: error_msg string
+    """
+    error_list = []
+    for line in output.split("\n"):
+        if any(check in line for check in output_checks):
+            error_list.append(prev_line)
+        prev_line = line
+    error_msg = "Error in command ouput: \n" + ("\n".join(error_list))
+    return error_msg
