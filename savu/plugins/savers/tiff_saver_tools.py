@@ -11,7 +11,7 @@ class TiffSaverTools(PluginTools):
             description: How to slice the data
             default: 'VOLUME_XZ'
         prefix:
-            visibility: basic
+            visibility: intermediate
             dtype: [None,str]
             description: Override the default output tiff file prefix.
             default: None

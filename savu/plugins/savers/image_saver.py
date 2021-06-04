@@ -34,23 +34,7 @@ import savu.core.utils as cu
 
 
 @register_plugin
-class ImageSaver(BaseImageSaver, CpuPlugin):
-    """
-    A class to save tomography data to image files.  Run the MaxAndMin plugin\
-    before this to rescale the data.
-
-    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :u*param format: Image format. Default: 'tif'.
-    :u*param num_bit: Bit depth of the tiff format (8, 16 or 32). Default: 32.
-    :param max: Global max for tiff scaling. Default: None.
-    :param min: Global min for tiff scaling. Default: None.
-    :param jpeg_quality: JPEG encoding quality (1 is worst, 100 is best). Default: 75.
-    :param prefix: Override the default output jpg file prefix. Default: None.
-
-    :config_warn: Do not use this plugin if the raw data is greater than \
-    100 GB.
-    """
-
+class ImageSaver(BaseImageSaver, CpuPlugin)
     def __init__(self, name='ImageSaver'):
         super(ImageSaver, self).__init__(name)
 

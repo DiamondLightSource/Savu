@@ -33,10 +33,6 @@ import collections
 
 @register_plugin
 class EdfSaver(BaseSaver, CpuPlugin):
-    """
-    A class to save xrf data to edf files
-    """
-
     def __init__(self, name='EdfSaver'):
         super(EdfSaver, self).__init__(name)
         self.folder = None

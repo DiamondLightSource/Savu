@@ -7,7 +7,7 @@ before this to rescale the data.
     def define_parameters(self):
         """
         pattern:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: How to slice the data.
             default: VOLUME_XZ
@@ -44,7 +44,7 @@ before this to rescale the data.
             default: 75
 
         prefix:
-             visibility: datasets
+             visibility: intermediate
              dtype: [None,str]
              description: Override the default output jpg file prefix
              default: None
