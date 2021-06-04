@@ -83,10 +83,17 @@ class Content(object):
         return float('.'.join([split_vals[0], ''.join(split_vals[1:])]))
 
     def display(self, formatter, **kwargs):
-        if 'level' not in list(kwargs.keys()):
-            kwargs['level'] = self.disp_level
-        kwargs["expand_dim"] = self.expand_dim
-        print('\n' + formatter._get_string(**kwargs) + '\n')
+        # Set current level
+        if 'current_level' not in list(kwargs.keys()):
+            kwargs['current_level'] = self.disp_level
+        if 'disp_level' in list(kwargs.keys()) \
+                and kwargs['disp_level'] is True:
+            # Display level
+            print(f"Level is set at '{kwargs['current_level']}'")
+        else:
+            # Display parameter
+            kwargs["expand_dim"] = self.expand_dim
+            print('\n' + formatter._get_string(**kwargs) + '\n')
 
     def check_file(self, filename):
         if not filename:

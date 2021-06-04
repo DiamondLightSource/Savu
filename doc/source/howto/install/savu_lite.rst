@@ -1,4 +1,4 @@
-Installing Savu on a PC
+How to install Savu on a PC
 =================================
 
 Savu-lite is designed to run on a local PC workstation. The main functionality of Savu is preserved with Savu-lite except the MPI part.

@@ -33,6 +33,7 @@ Table of Contents
     :caption: How To's
     :maxdepth: 2
 
+    howto/installation
     howto/user_guide
     dev_guides/dev_savu_overview
     dev_guides/dev_plugin_overview

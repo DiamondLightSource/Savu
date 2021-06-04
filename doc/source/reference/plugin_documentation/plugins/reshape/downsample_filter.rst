@@ -4,7 +4,7 @@ Downsample Filter
 Description
 --------------------------
 
-A plugin to reduce the data in the selected dimension by a proportion. 
+A plugin to downsample and rescale data volume including options of flipping and rotating images 
 
 Parameter definitions
 --------------------------
@@ -38,6 +38,7 @@ Parameter definitions
             dtype: str
             description: "One of 'mean', 'median', 'min', 'max'."
             default: mean
+            options: "['mean', 'median', 'min', 'max']"
         
         pattern:
             visibility: basic

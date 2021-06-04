@@ -4,7 +4,7 @@ Vo Centering
 Description
 --------------------------
 
-A plugin to calculate the centre of rotation using the Vo Method 
+A plugin to calculate the centre of rotation using the Vo method 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/centering/vo_centering_doc.rst>
@@ -42,7 +42,7 @@ Parameter definitions
             default: None
         
         search_area:
-            visibility: intermediate
+            visibility: basic
             dtype: "list[float,float]"
             description: Search area around the estimated centre of rotation
             default: "[-50, 50]"
@@ -50,7 +50,7 @@ Parameter definitions
         ratio:
             visibility: intermediate
             dtype: float
-            description: The ratio between the size of object and FOV of the camera
+            description: The ratio between the size of a sample and the field of view of a camera
             default: "0.5"
         
         search_radius:

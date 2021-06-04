@@ -248,6 +248,51 @@ Parameter definitions
             description: Filepath required
             default: Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml
         
+        regularisation_method:
+            visibility: advanced
+            dtype: str
+            options: "['ROF_TV', 'FGP_TV', 'SB_TV', 'NLTV', 'TGV', 'LLT_ROF', 'NDF', 'Diff4th', 'None']"
+            description: 
+                summary: The denoising method
+                verbose: Iterative methods can help to solve ill-posed inverse problems by choosing a suitable noise model for the measurement
+                options: 
+                    ROF_TV: Rudin-Osher-Fatemi Total Variation model. It is a good model for piecewise-constant images with sharp abrupt boundaries.
+                    FGP_TV: Fast Gradient Projection Total Variation model
+                    SB_TV: Split Bregman Total Variation model
+                    LLT_ROF: Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi
+                    NDF: Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey)
+                    TGV: Total Generalised Variation
+                    NLTV: Non Local Total Variation
+                    Diff4th: Fourth-order nonlinear diffusion model
+            default: FGP_TV
+        
+        max_iterations:
+            visibility: basic
+            dtype: int
+            description: 
+                summary: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
+                range: Recommended value dependent upon method.
+            default: 
+                regularisation_method: 
+                    ROF_TV: "2000"
+                    FGP_TV: "500"
+                    SB_TV: "100"
+                    LLT_ROF: "2000"
+                    NDF: "2000"
+                    Diff4th: "1000"
+                    TGV: "500"
+                    NLTV: "5"
+            dependency: 
+                regularisation_method: 
+                    ROF_TV
+                    FGP_TV
+                    SB_TV
+                    LLT_ROF
+                    NDF
+                    Diff4th
+                    TGV
+                    NLTV
+        
 Key
 ^^^^^^^^^^
 

@@ -24,14 +24,10 @@ import numpy as np
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-import sys
 
 
 @register_plugin
 class ImageStitching(Plugin, CpuPlugin):
-    """
-    """
-
     def __init__(self):
         super(ImageStitching, self).__init__('ImageStitching')
 

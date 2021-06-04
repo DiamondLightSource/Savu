@@ -244,8 +244,10 @@ class PluginParameters(object):
         so that the display order is unchanged.
         """
         datasets = ["in_datasets", "out_datasets"]
+        exceptions = ["not", "hidden"]
         if p_key in datasets:
-            if p["visibility"] != "datasets" and p["visibility"] != "not":
+            if p["visibility"] != "datasets" \
+                    and p["visibility"] not in exceptions:
                 p["visibility"] = "datasets"
 
     def _check_options(self, param_info_dict, tool_class):
