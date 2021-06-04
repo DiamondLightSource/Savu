@@ -17,30 +17,34 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test classes for ccpi denoising plugins (CPU)
+   :synopsis: unittest test classes for ccpi denoising plugins (GPU)
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
+
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
-class CcpiDenoisingCpuTest(unittest.TestCase):
+
+class CcpiDenoisingGpuTest(unittest.TestCase):
     def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
 
-    def test_ccpi_denoise_cpu(self):
-        process_list = 'filters/ccpi/ccpi_denoising_cpu_test.nxs'
+    def test_ccpidenoising2d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising_gpu_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
-    def test_ccpi_denoise3d_cpu(self):
-        process_list = 'filters/ccpi/ccpi_denoising_cpu3d_test.nxs'
+    def test_ccpidenoising3d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising_gpu3d_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

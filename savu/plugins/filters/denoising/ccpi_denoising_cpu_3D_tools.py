@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class CcpiDenoisingCpu3dTools(PluginTools):
-    """Wrapper for CCPi-Regularisation Toolkit (GPU) for
+    """Wrapper for CCPi-Regularisation Toolkit (CPU) for
 efficient 2D/3D denoising.
     """
     def define_parameters(self):
@@ -9,14 +9,14 @@ efficient 2D/3D denoising.
         method:
              visibility: advanced
              dtype: str
-             options: [ROF_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
+             options: [ROF_TV, PD_TV, FGP_TV, SB_TV, NLTV, TGV, LLT_ROF, NDF, Diff4th]
              description:
                summary: The denoising method
-               verbose: "Iterative methods can help to solve ill-posed
-                          inverse problems by choosing a suitable noise
-                          model for the measurement"
+               verbose: "Variational denoising algorithms can be used to filter
+                          the data while preserving the important features"
                options:
                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
+                   PD_TV: Primal-Dual Total variation model
                    FGP_TV: Fast Gradient Projection Total Variation model
                    SB_TV: Split Bregman Total Variation model
                    LLT_ROF: "Lysaker, Lundervold and Tai model combined
@@ -28,19 +28,25 @@ efficient 2D/3D denoising.
                    Diff4th: Fourth-order nonlinear diffusion model
              default: FGP_TV
 
+        padding:
+            visibility: advanced
+            dtype: int
+            description: The amount of pixels to pad each slab of the cropped projection data.
+            default: 7
+
         reg_parameter:
              visibility: basic
              dtype: float
              description:
-               summary: "Regularisation (smoothing) parameter. The higher the value, the
+               summary: "The regularisation (smoothing) parameter. The higher the value, the
                  stronger the smoothing effect"
-               range: Recommended between 0 and 1
-             default: 0.01
+               range: Recommended between 0 and 0.001
+             default: 0.00001
 
         max_iterations:
              visibility: basic
              dtype: int
-             description: 'Total number of regularisation iterations.'
+             description: 'The total number of regularisation iterations.'
              default: 300
 
         time_step:
@@ -114,6 +120,12 @@ efficient 2D/3D denoising.
              description: Tolerance constant to stop iterations earlier.
              default: 0.0
 
+        pattern:
+            visibility: advanced
+            dtype: str
+            options: [SINOGRAM, PROJECTION, VOLUME_YZ, VOLUME_XZ, VOLUME_XY]
+            description: Pattern to apply this to.
+            default: 'VOLUME_XZ'
         """
 
 
