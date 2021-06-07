@@ -34,28 +34,28 @@ Parameter definitions
             visibility: basic
             dtype: list
             description: Parameters of the radial distortion
-            default: "[1.00015076, 1.9289e-06, -2.4325e-08, 1.00439e-11, -3.99352e-15]"
+            default: "[1.0, 0.0, 0.0, 0.0, 0.0]"
         
         center_from_top:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: The centre of distortion in pixels from the top of the image.
-            default: "995.24"
+            default: "1080.0"
         
         center_from_left:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: The centre of distortion in pixels from the left of the image.
-            default: "1283.25"
+            default: "1280.0"
         
         file_path:
-            visibility: intermediate
+            visibility: basic
             dtype: "[None,filepath]"
-            description: Path to the text file having distortion coefficients . Set to None for manually inputing.
+            description: Path to the text file having distortion coefficients. Set to None for manually inputing.
             default: None
         
         crop_edges:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: When applied to previewed/cropped data, the result may contain zeros around the edges, which can be removed by cropping the edges by a specified number of pixels
             default: "0"

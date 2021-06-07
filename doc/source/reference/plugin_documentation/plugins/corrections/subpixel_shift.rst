@@ -36,9 +36,9 @@ Parameter definitions
         transform_module:
             visibility: intermediate
             dtype: str
-            description: The module to be used for image translation.  Choose skimage for skimage.transform.SimilarityTransform and scipy for scipy.ndimage.interpolation.
-            default: skimage
-            options: "['skimage', 'scipy']"
+            description: The module to be used for image translation.  Choose a method in the Skimage package or in the Scipy package.
+            default: scipy
+            options: "['scipy', 'skimage']"
         
 Key
 ^^^^^^^^^^

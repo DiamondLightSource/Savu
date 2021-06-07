@@ -29,10 +29,10 @@ Parameter definitions
         
         centre_of_rotation:
             visibility: basic
-            dtype: "[float, str, list[float], dict{int:float}]"
+            dtype: "[float, str, dict{int:float}]"
             description: Centre of rotation to use for the reconstruction.
             default: "0.0"
-            example: It could be a scalar, a list, or a file containing centre of rotations
+            example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
         init_vol:
             visibility: hidden
@@ -40,56 +40,33 @@ Parameter definitions
             description: Not an option.
             default: None
         
-        centre_pad:
-            visibility: hidden
-            dtype: "[int,bool]"
-            description: Not an option.
-            default: "False"
-        
-        outer_pad:
-            visibility: intermediate
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
-            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
-            default: "False"
-            dependency: 
-                algorithm: 
-                    FP_CUDA
-                    FBP_CUDA
-                    BP_CUDA
-                    FP
-                    FBP
-                    BP
-        
         log:
-            visibility: advanced
+            visibility: intermediate
             dtype: bool
             description: 
-                summary: Take the log of the data before reconstruction (true or false).
-                verbose: Should be set to false if PaganinFilter is set beforehand
+                summary: Option to take the log of the data before reconstruction.
+                verbose: Should be set to false if you use PaganinFilter
             default: "True"
-            example: Set to True to take the log of the data before reconstruction
+            example: Set to True to take the log of the data before reconstruction.
         
         preview:
-            visibility: advanced
+            visibility: intermediate
             dtype: preview
             description: A slice list of required frames.
             default: "[]"
-            example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
         
         force_zero:
             visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
-            example: "[0,1]"
+            example: "[0, 1]"
         
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
-            example: "Is this a proper name for this parameter? Would mask_diameter or mask_circle be more accurate?"
         
         log_func:
             visibility: advanced
@@ -140,6 +117,23 @@ Parameter definitions
             dtype: int
             description: Number of iterations - only valid for iterative algorithms.
             default: "1"
+        
+        outer_pad:
+            visibility: intermediate
+            dtype: "[bool,int,float]"
+            description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
+            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
+            default: "False"
+            dependency: 
+                algorithm: 
+                    fbp
+                    gridrec
+        
+        centre_pad:
+            visibility: hidden
+            dtype: "[int,bool]"
+            description: Not an option.
+            default: "False"
         
 Key
 ^^^^^^^^^^

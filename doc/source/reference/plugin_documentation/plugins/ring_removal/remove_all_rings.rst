@@ -4,7 +4,7 @@ Remove All Rings
 Description
 --------------------------
 
-Method to remove all types of stripe artifacts in a sinogram (<-> ring artefacts in a reconstructed image). 
+Methods working on a sinogram-image to remove most types of ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_all_rings_doc.rst>
@@ -30,20 +30,20 @@ Parameter definitions
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
         
-        la_size:
-            visibility: intermediate
-            dtype: int
-            description: Size of the median filter window to remove large stripes.
-            default: "71"
-        
         sm_size:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Size of the median filter window to remove small-to-medium stripes.
             default: "31"
         
+        la_size:
+            visibility: basic
+            dtype: int
+            description: Size of the median filter window to remove large stripes.
+            default: "71"
+        
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of stripes. Greater is less sensitive.
             default: "3.0"

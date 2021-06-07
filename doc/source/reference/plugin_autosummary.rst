@@ -469,6 +469,5 @@ Visualisation
 .. toctree::
    :maxdepth: 1 
 
-   Ortho Slice <api_plugin/plugins.visualisation.ortho_slice>
 
 
