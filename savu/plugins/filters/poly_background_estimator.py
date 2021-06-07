@@ -15,7 +15,7 @@
 """
 .. module:: poly_background_estimator
    :platform: Unix
-   :synopsis: A plugin to find the peaks
+   :synopsis: A plugin to find peaks in spectra
 
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
@@ -35,15 +35,6 @@ def division_zero(x,y):
 
 @register_plugin
 class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
-    """
-    This plugin uses peakutils to find peaks in spectra. This is then metadata.
-    :param out_datasets: Create a list of the dataset(s). Default: ['Peaks'].
-    :param n: max number of polys. Default: 2.
-    :param MaxIterations: max number of iterations. Default: 12.
-    :param weights: weightings to apply. Default: '1/data'.
-    :param pvalue: ratio of variance between successive poly \
-        iterations. Default: 0.9.
-    """
 
     def __init__(self):
         super(PolyBackgroundEstimator,

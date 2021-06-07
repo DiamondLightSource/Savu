@@ -95,6 +95,6 @@ def load_yaml_doc(doc):
     all_params = ""
     try:
         all_params = yu.read_yaml_from_doc(doc)
-    except:
-        print("\nError reading the yaml structure from Yaml Utils.")
+    except Exception as e:
+        print("\nError reading the yaml structure from Yaml Utils.\n %s" % e)
     return all_params

@@ -29,10 +29,10 @@ Parameter definitions
         
         centre_of_rotation:
             visibility: basic
-            dtype: "[float, str, list[float], dict{int:float}]"
+            dtype: "[float, str, dict{int:float}]"
             description: Centre of rotation to use for the reconstruction.
             default: "0.0"
-            example: It could be a scalar, a list, or a file containing centre of rotations
+            example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
         outer_pad:
             visibility: basic
@@ -64,12 +64,28 @@ Parameter definitions
             example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
         
         init_vol:
-            visibility: advanced
-            dtype: "[None,str]"
+            visibility: intermediate
+            dtype: "[None, str]"
             description: Dataset to use as volume initialiser (does not currently work with preview)
             default: None
             example: "Type the name of the initialised dataset e.g. ['tomo']"
         
+<<<<<<< HEAD
+        log:
+            visibility: intermediate
+            dtype: bool
+            description: 
+                summary: Option to take the log of the data before reconstruction.
+                verbose: Should be set to false if you use PaganinFilter
+            default: "True"
+            example: Set to True to take the log of the data before reconstruction.
+        
+        preview:
+            visibility: intermediate
+            dtype: preview
+            description: A slice list of required frames.
+            default: "[]"
+=======
         centre_pad:
             visibility: advanced
             dtype: "[bool,int,float]"
@@ -85,14 +101,24 @@ Parameter definitions
                     FBP
                     BP
             example: "Is it a scalar or a list?"
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         
         force_zero:
             visibility: advanced
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
-            example: "[0,1]"
+            example: "[0, 1]"
         
+<<<<<<< HEAD
+        ratio:
+            visibility: intermediate
+            dtype: float
+            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
+            default: "0.95"
+        
+=======
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str

@@ -33,12 +33,6 @@ from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 @dawn_compatible(OUTPUT_TYPE_METADATA_ONLY)
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
-    """
-    uses pymca to fit spectral data
-
-    :u*param config: path to the config file. Default: 'Savu/test_data/data/test_config.cfg'.
-
-    """
 
     def __init__(self):
         logging.debug("fitting spectrum")

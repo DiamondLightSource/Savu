@@ -468,7 +468,10 @@ Simulation
 .. toctree::
    :maxdepth: 1 
 
+<<<<<<< HEAD
+=======
    Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
    Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
 
 
