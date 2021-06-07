@@ -855,8 +855,7 @@ search bar on the left to find a specific one.
 3. How to create a test
 ============================================
 
-
-Testing something else in line with text example_
+Testing something else in line with text example:
 
 In order to submit a new plugin to Savu on Github, you **MUST** provide a test for your new plugin.
 To create a test follow the steps below:
@@ -911,7 +910,7 @@ Save the file as "your_module_name.py"
     Median Filter Example
     ---------------------
 
-    This examples recreates one of the core plugins, a median filter.  The code is
+    This example recreates one of the core plugins, a median filter.  The code is
     available in the main Savu repository under the plugin_examples folder.
 
     .. literalinclude:: ../../../plugin_examples/example_median_filter.py

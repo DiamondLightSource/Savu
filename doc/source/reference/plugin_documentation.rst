@@ -47,9 +47,9 @@ Basic Operations
    Get Data Statistics <plugin_documentation/plugins/basic_operations/get_data_statistics>
    No Process Plugin <plugin_documentation/plugins/basic_operations/no_process_plugin>
    Data Threshold <plugin_documentation/plugins/basic_operations/data_threshold>
-   Elementwise Arrays Arithmetics <plugin_documentation/plugins/basic_operations/elementwise_arrays_arithmetics>
    No Process <plugin_documentation/plugins/basic_operations/no_process>
    Rescale Intensity <plugin_documentation/plugins/basic_operations/rescale_intensity>
+   Elementwise Arrays Arithmetics <plugin_documentation/plugins/basic_operations/elementwise_arrays_arithmetics>
    Value Substitution <plugin_documentation/plugins/basic_operations/value_substitution>
 
 
@@ -83,11 +83,11 @@ Corrections
    Dark Flat Field Correction <plugin_documentation/plugins/corrections/dark_flat_field_correction>
    Distortion Correction <plugin_documentation/plugins/corrections/distortion_correction>
    Monitor Correction <plugin_documentation/plugins/corrections/monitor_correction>
+   Mtf Deconvolution <plugin_documentation/plugins/corrections/mtf_deconvolution>
    Subpixel Shift <plugin_documentation/plugins/corrections/subpixel_shift>
    Time Based Correction <plugin_documentation/plugins/corrections/time_based_correction>
-   Xrd Absorption Approximation <plugin_documentation/plugins/corrections/xrd_absorption_approximation>
    Time Based Plus Drift Correction <plugin_documentation/plugins/corrections/time_based_plus_drift_correction>
-   Mtf Deconvolution <plugin_documentation/plugins/corrections/mtf_deconvolution>
+   Xrd Absorption Approximation <plugin_documentation/plugins/corrections/xrd_absorption_approximation>
 
 
 Developing
@@ -106,34 +106,18 @@ Filters
    :maxdepth: 1 
 
    Band Pass <plugin_documentation/plugins/filters/band_pass>
-   Find Peaks <plugin_documentation/plugins/filters/find_peaks>
+   Pymca <plugin_documentation/plugins/filters/pymca>
    Fresnel Filter <plugin_documentation/plugins/filters/fresnel_filter>
-   Hilbert Filter <plugin_documentation/plugins/filters/hilbert_filter>
+   Find Peaks <plugin_documentation/plugins/filters/find_peaks>
    Image Interpolation <plugin_documentation/plugins/filters/image_interpolation>
+   Hilbert Filter <plugin_documentation/plugins/filters/hilbert_filter>
    List To Projections <plugin_documentation/plugins/filters/list_to_projections>
    Paganin Filter <plugin_documentation/plugins/filters/paganin_filter>
    Poly Background Estimator <plugin_documentation/plugins/filters/poly_background_estimator>
-   Pymca <plugin_documentation/plugins/filters/pymca>
    Quantisation Filter <plugin_documentation/plugins/filters/quantisation_filter>
    Spectrum Crop <plugin_documentation/plugins/filters/spectrum_crop>
    Strip Background <plugin_documentation/plugins/filters/strip_background>
    Threshold Filter <plugin_documentation/plugins/filters/threshold_filter>
-
-
-Denoising
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-   Ccpi Denoising Cpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu>
-   Ccpi Denoising Cpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu_3D>
-   Ccpi Denoising Gpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu>
-   Ccpi Denoising Gpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu_3D>
-   Denoise Bregman Filter <plugin_documentation/plugins/filters/denoising/denoise_bregman_filter>
-   Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
-   Median Filter Deprecated <plugin_documentation/plugins/filters/denoising/median_filter_deprecated>
-   Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
 
 
 Dezingers
@@ -155,6 +139,22 @@ Inpainting
    :maxdepth: 1 
 
    Inpainting <plugin_documentation/plugins/filters/inpainting/inpainting>
+
+
+Denoising
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Ccpi Denoising Cpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu>
+   Ccpi Denoising Cpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_cpu_3D>
+   Ccpi Denoising Gpu <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu>
+   Ccpi Denoising Gpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu_3D>
+   Denoise Bregman Filter <plugin_documentation/plugins/filters/denoising/denoise_bregman_filter>
+   Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
+   Median Filter Deprecated <plugin_documentation/plugins/filters/denoising/median_filter_deprecated>
+   Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
 
 
 Fitters
@@ -212,13 +212,13 @@ Mapping Loaders
    :maxdepth: 1 
 
    Mm Loader <plugin_documentation/plugins/loaders/mapping_loaders/mm_loader>
+   Nxptycho Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxptycho_loader>
    Nxfluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxfluo_loader>
    Nxmonitor Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxmonitor_loader>
-   Nxptycho Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxptycho_loader>
+   Txm Loader <plugin_documentation/plugins/loaders/mapping_loaders/txm_loader>
    Nxstxm Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxstxm_loader>
    Nxxrd Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxxrd_loader>
    P2R Fly Scan Detector Loader <plugin_documentation/plugins/loaders/mapping_loaders/p2r_fly_scan_detector_loader>
-   Txm Loader <plugin_documentation/plugins/loaders/mapping_loaders/txm_loader>
 
 
 I08 Loaders
@@ -309,8 +309,8 @@ Reconstructions
 .. toctree::
    :maxdepth: 1 
 
-   Scikitimage Filter Back Projection <plugin_documentation/plugins/reconstructions/scikitimage_filter_back_projection>
    Scikitimage Sart <plugin_documentation/plugins/reconstructions/scikitimage_sart>
+   Scikitimage Filter Back Projection <plugin_documentation/plugins/reconstructions/scikitimage_filter_back_projection>
    Simple Recon <plugin_documentation/plugins/reconstructions/simple_recon>
    Tomopy Recon <plugin_documentation/plugins/reconstructions/tomopy_recon>
    Visual Hulls Recon <plugin_documentation/plugins/reconstructions/visual_hulls_recon>
@@ -383,6 +383,18 @@ Savers
    Xrf Saver <plugin_documentation/plugins/savers/xrf_saver>
 
 
+Morphological Operations
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Morph Proc <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc>
+   Morph Remove Objects <plugin_documentation/plugins/segmentation/morphological_operations/morph_remove_objects>
+   Morph Proc Line3D <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line3D>
+   Morph Proc Line <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line>
+
+
 Evolving Contours
 ********************************************************
 
@@ -423,18 +435,6 @@ Masks Initialise
    Mask Initialiser <plugin_documentation/plugins/segmentation/masks_initialise/mask_initialiser>
 
 
-Morphological Operations
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-   Morph Proc <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc>
-   Morph Proc Line <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line>
-   Morph Proc Line3D <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line3D>
-   Morph Remove Objects <plugin_documentation/plugins/segmentation/morphological_operations/morph_remove_objects>
-
-
 Thresholding
 ********************************************************
 
@@ -442,16 +442,6 @@ Thresholding
    :maxdepth: 1 
 
    Thresh Segm <plugin_documentation/plugins/segmentation/thresholding/thresh_segm>
-
-
-Simulation
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
-   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
 
 
 Stats
@@ -469,5 +459,19 @@ Visualisation
 .. toctree::
    :maxdepth: 1 
 
+   Ortho Slice <plugin_documentation/plugins/visualisation/ortho_slice>
+
+
+Simulation
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+<<<<<<< HEAD
+=======
+   Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
+   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
 
 

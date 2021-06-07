@@ -15,71 +15,59 @@
 """
 .. module:: ccpi_denoising_gpu_3D
    :platform: Unix
-   :synopsis: GPU modules of CCPi-Regularisation Toolkit (CcpiRegulToolkitCpu)
+   :synopsis: GPU modules of CCPi-Regularisation Toolkit (CcpiRegulToolkitGpu)
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.multi_threaded_plugin import MultiThreadedPlugin
+from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+import numpy as np
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
 
 @register_plugin
-class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
-    """
-    'ROF_TV': Rudin-Osher-Fatemi Total Variation model;
-    'FGP_TV': Fast Gradient Projection Total Variation model;
-    'SB_TV': Split Bregman Total Variation model;
-    'PD_TV': Primal-Dual Total variation model;
-    'NLTV': Nonlocal Total Variation model;
-    'TGV': Total Generalised Variation model;
-    'LLT_ROF': Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi;
-    'NDF': Nonlinear/Linear Diffusion model (Perona-Malik, Huber or Tukey);
-    'DIFF4th': Fourth-order nonlinear diffusion model
-
-    :param method: Choose methods |ROF_TV|FGP_TV|SB_TV|NLTV|TGV|LLT_ROF|NDF|Diff4th. Default: 'FGP_TV'.
-    :param reg_par: Regularisation (smoothing) parameter. Default: 0.01.
-    :param max_iterations: Total number of iterations. Default: 300.
-    :param time_step: Time marching step, relevant for ROF_TV, LLT_ROF,\
-     NDF, Diff4th methods. Default: 0.001.
-    :param lipshitz_constant: TGV method, Lipshitz constant. Default: 12.
-    :param alpha1: TGV method, parameter to control the 1st-order term. Default: 1.0.
-    :param alpha0: TGV method, parameter to control the 2nd-order term. Default: 2.0.
-    :param reg_parLLT: LLT-ROF method, parameter to control the 2nd-order term. Default: 0.05.
-    :param penalty_type: NDF method, Penalty type for the duffison, choose from\
-    huber, perona, tukey, constr, constrhuber. Default: 'huber'.
-    :param edge_par: NDF and Diff4th methods, noise magnitude parameter. Default: 0.01.
-    :param tolerance_constant: tolerance constant to stop iterations earlier. Default: 0.0.
-    """
+class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def __init__(self):
         super(CcpiDenoisingGpu3d, self).__init__("CcpiDenoisingGpu3d")
 
+    def set_filter_padding(self, in_pData, out_pData):
+        self.pad = self.parameters['padding']
+        pad_slice_dir = '%s.%s' % (self.slice_dir[0], self.pad)
+        pad_dict = {'pad_directions': [pad_slice_dir], 'pad_mode': 'edge'}
+        in_pData[0].padding = pad_dict
+        out_pData[0].padding = pad_dict
+
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
+        pattern_type=self.parameters['pattern']
         in_pData, out_pData = self.get_plugin_datasets()
-        
-        getall = ['VOLUME_XZ', 'voxel_y']
-        in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
+
+        self.slice_dir = list(in_dataset[0].get_slice_dimensions())
+        procs = self.exp.meta_data.get("processes")
+        procs = len([i for i in procs if 'GPU' in i])
+        nSlices = int(np.ceil(in_dataset[0].get_shape()[self.slice_dir[0]]/float(procs)))
+        self._set_max_frames(nSlices)
 
     def pre_process(self):
         self.device = 'gpu'
         if (self.parameters['method'] == 'ROF_TV'):
             # set parameters for the ROF-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
                 'tolerance_constant': self.parameters['tolerance_constant'] }
         if (self.parameters['method'] == 'FGP_TV'):
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'tolerance_constant': self.parameters['tolerance_constant'],\
                 'methodTV': 0 ,\
@@ -87,14 +75,14 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
         if (self.parameters['method'] == 'SB_TV'):
             # set parameters for the SB-TV method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'tolerance_constant': self.parameters['tolerance_constant'],\
                 'methodTV': 0 }
         if (self.parameters['method'] == 'TGV'):
             # set parameters for the TGV method
             self.pars = {'algorithm': self.parameters['method'],\
-                'regularisation_parameter' : self.parameters['reg_par'],\
+                'regularisation_parameter' : self.parameters['reg_parameter'],\
                 'alpha1' : self.parameters['alpha1'],\
                 'alpha0': self.parameters['alpha0'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
@@ -103,7 +91,7 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
         if (self.parameters['method'] == 'LLT_ROF'):
             # set parameters for the LLT-ROF method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'regularisation_parameterLLT':self.parameters['reg_parLLT'], \
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
@@ -126,7 +114,7 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
                 #  Threshold-constrained huber diffusion
                 penaltyNDF = 5
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'edge_parameter':self.parameters['edge_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
@@ -135,7 +123,7 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
         if (self.parameters['method'] == 'Diff4th'):
             # set parameters for the Diff4th method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'edge_parameter':self.parameters['edge_par'],\
                 'number_of_iterations': self.parameters['max_iterations'],\
                 'time_marching_parameter': self.parameters['time_step'],\
@@ -143,13 +131,12 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
         if (self.parameters['method'] == 'NLTV'):
             # set parameters for the NLTV method
             self.pars = {'algorithm': self.parameters['method'], \
-                'regularisation_parameter':self.parameters['reg_par'],\
+                'regularisation_parameter':self.parameters['reg_parameter'],\
                 'edge_parameter':self.parameters['edge_par'],\
                 'number_of_iterations': self.parameters['max_iterations']}
         return self.pars
 
     def process_frames(self, data):
-        import numpy as np
         input_temp = np.nan_to_num(data[0])
         input_temp[input_temp > 10**15] = 0.0
         self.pars['input'] = input_temp
@@ -232,8 +219,10 @@ class CcpiDenoisingGpu3d(Plugin, MultiThreadedPlugin):
                               parsNLTV_init['regularisation_parameter'],
                               parsNLTV_init['iterations'])
             del H_i,H_j,Weights
-        #print "calling process frames", data[0].shape
         return im_res
+
+    def _set_max_frames(self, frames):
+        self._max_frames = frames
 
     def nInput_datasets(self):
         return 1

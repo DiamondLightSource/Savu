@@ -74,8 +74,8 @@ def _disp(content, args):
     verbosity = parsers._get_verbosity(args)
     level = 'advanced' if args.all else content.disp_level
     datasets = True if args.datasets else False
-    content.display(formatter, level=level, verbose=verbosity,
-                    datasets=datasets, **range_dict)
+    content.display(formatter, current_level=level, verbose=verbosity,
+                    datasets=datasets, disp_level=args.level, **range_dict)
     return content
 
 

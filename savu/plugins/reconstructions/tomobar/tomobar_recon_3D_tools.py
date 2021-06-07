@@ -18,7 +18,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
             visibility: advanced
             dtype: int
             description: The amount of pixels to pad each slab of the cropped projection data.
-            default: 17
+            default: 13
 
         data_fidelity:
             visibility: advanced

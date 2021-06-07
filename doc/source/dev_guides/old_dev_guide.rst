@@ -122,12 +122,7 @@ Boost.python aims to expose C++ classes/functions to python, without changing th
 
 The output file for this example is a example.so file.  Transfer this file to \lib and import as a python module, e.g. import example, then simply access a function from within your python code as example.example_function1(...).
 
-The class and header files example.cpp and example.hpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension. 
-
-.. TODO file missing
-
-.. literalinclude:: ../../../extension_examples/example.hpp
-   :linenos:
+The class file example.cpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension.
 
 .. literalinclude:: ../../../extension_examples/example.cpp
    :linenos:

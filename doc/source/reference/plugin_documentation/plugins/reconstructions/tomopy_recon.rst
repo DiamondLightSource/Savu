@@ -34,11 +34,26 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
+<<<<<<< HEAD
         init_vol:
             visibility: hidden
             dtype: "[None,int]"
             description: Not an option.
             default: None
+=======
+        outer_pad:
+            visibility: basic
+            dtype: "[bool,int,float]"
+            description: Pad the sinogram width. Choose from True (defaults to sqrt(2)), False, or float <= 2.1.
+            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
+            default: "0.1"
+        
+        ratio:
+            visibility: basic
+            dtype: float
+            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
+            default: "0.98"
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         
         log:
             visibility: intermediate
@@ -55,19 +70,34 @@ Parameter definitions
             description: A slice list of required frames.
             default: "[]"
         
+        init_vol:
+            visibility: hidden
+            dtype: "[None,int]"
+            description: Not an option.
+            default: None
+        
+        centre_pad:
+            visibility: hidden
+            dtype: "[int,bool]"
+            description: Not an option.
+            default: "False"
+        
         force_zero:
-            visibility: intermediate
+            visibility: advanced
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
+<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
+=======
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
@@ -76,7 +106,7 @@ Parameter definitions
             example: You write a function as default
         
         vol_shape:
-            visibility: basic
+            visibility: advanced
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.

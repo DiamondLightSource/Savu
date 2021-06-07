@@ -34,9 +34,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class Mipmap(Plugin, CpuPlugin):
-    """
-    """
-
     def __init__(self):
         super(Mipmap, self).__init__("Mipmap")
 
