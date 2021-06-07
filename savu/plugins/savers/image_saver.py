@@ -34,7 +34,7 @@ import savu.core.utils as cu
 
 
 @register_plugin
-class ImageSaver(BaseImageSaver, CpuPlugin)
+class ImageSaver(BaseImageSaver, CpuPlugin):
     def __init__(self, name='ImageSaver'):
         super(ImageSaver, self).__init__(name)
 
