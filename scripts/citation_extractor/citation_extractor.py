@@ -10,8 +10,8 @@ class NXcitation(object):
     def __init__(self, description, doi, endnote, bibtex):
         self.description = description
         self.doi = doi
-        self.endnote = endnote
-        self.bibtex = bibtex
+        self.endnote = endnote.decode('UTF-8')
+        self.bibtex = bibtex.decode('UTF-8')
 
     def get_bibtex_ref(self):
         return self.bibtex.split(',')[0].split('{')[1]
