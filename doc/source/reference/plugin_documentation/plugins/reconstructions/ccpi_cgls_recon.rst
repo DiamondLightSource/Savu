@@ -29,10 +29,45 @@ Parameter definitions
         
         centre_of_rotation:
             visibility: basic
-            dtype: "[float, str, list[float], dict{int:float}]"
+            dtype: "[float, str, dict{int:float}]"
             description: Centre of rotation to use for the reconstruction.
             default: "0.0"
-            example: It could be a scalar, a list, or a file containing centre of rotations
+            example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
+        
+<<<<<<< HEAD
+        init_vol:
+            visibility: advanced
+            dtype: "[None,str]"
+            description: Not an option.
+            default: None
+=======
+        outer_pad:
+            visibility: advanced
+            dtype: "[bool,int,float]"
+            description: Not an option.
+            default: "False"
+        
+        ratio:
+            visibility: basic
+            dtype: float
+            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
+            default: "0.98"
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
+        
+        log:
+            visibility: intermediate
+            dtype: bool
+            description: 
+                summary: Option to take the log of the data before reconstruction.
+                verbose: Should be set to false if you use PaganinFilter
+            default: "True"
+            example: Set to True to take the log of the data before reconstruction.
+        
+        preview:
+            visibility: intermediate
+            dtype: preview
+            description: A slice list of required frames.
+            default: "[]"
         
         init_vol:
             visibility: advanced
@@ -46,42 +81,22 @@ Parameter definitions
             description: Not an option.
             default: "False"
         
-        outer_pad:
-            visibility: advanced
-            dtype: "[bool,int,float]"
-            description: Not an option.
-            default: "False"
-        
-        log:
-            visibility: advanced
-            dtype: bool
-            description: 
-                summary: Take the log of the data before reconstruction (true or false).
-                verbose: Should be set to false if PaganinFilter is set beforehand
-            default: "True"
-            example: Set to True to take the log of the data before reconstruction
-        
-        preview:
-            visibility: advanced
-            dtype: preview
-            description: A slice list of required frames.
-            default: "[]"
-            example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
-        
         force_zero:
-            visibility: intermediate
+            visibility: advanced
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
-            example: "[0,1]"
+            example: "[0, 1]"
         
+<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
-            example: "Is this a proper name for this parameter? Would mask_diameter or mask_circle be more accurate?"
         
+=======
+>>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
@@ -90,7 +105,7 @@ Parameter definitions
             example: You write a function as default
         
         vol_shape:
-            visibility: basic
+            visibility: advanced
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -115,6 +130,18 @@ Parameter definitions
             description: This algorithm requires a multiple of 8 frames for processing and this number may affect performance depending on your data size (choose from 8, 16, 24, 32)
             options: "[8, 16, 24, 32]"
             default: "16"
+        
+        outer_pad:
+            visibility: advanced
+            dtype: "[bool,int,float]"
+            description: Not an option.
+            default: "False"
+        
+        centre_pad:
+            visibility: hidden
+            dtype: "[bool,int,float]"
+            description: Not an option.
+            default: "False"
         
         enforce_position:
             visibility: advanced

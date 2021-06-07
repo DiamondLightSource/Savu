@@ -2,7 +2,7 @@ from savu.plugins.plugin_tools import PluginTools
 
 class ImageStitchingTools(PluginTools):
     """Method to stitch images of two tomo-datasets including
-flat-field correction.
+    flat-field correction.
     """
     def define_parameters(self):
         """
@@ -30,6 +30,7 @@ flat-field correction.
             description: "Data processing pattern is 'PROJECTION' or
              'SINOGRAM'."
             default: 'PROJECTION'
+            options: [PROJECTION, SINOGRAM]
         norm:
             visibility: intermediate
             dtype: bool

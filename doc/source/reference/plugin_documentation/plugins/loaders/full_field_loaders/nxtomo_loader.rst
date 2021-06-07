@@ -30,15 +30,15 @@ Parameter definitions
             default: "[]"
         
         name:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: A name assigned to the dataset.
             default: tomo
         
         data_path:
-            visibility: intermediate
+            visibility: basic
             dtype: str
-            description: Path to the data inside the file.
+            description: Path to the data inside the hdf/nxs file.
             default: entry1/tomo_entry/data/data
         
         image_key_path:
@@ -48,16 +48,16 @@ Parameter definitions
             default: entry1/tomo_entry/instrument/detector/image_key
         
         dark:
-            visibility: intermediate
+            visibility: basic
             dtype: "[list[filepath, h5path, float],list[None,None,float]]"
             description: Specify the nexus file location where the dark field images are stored. Then specify the path within this nexus file, at which the dark images are located. The last value will be a scale value.
-            default: "['None', 'None', 1]"
+            default: "['None', 'None', 1.0]"
         
         flat:
-            visibility: intermediate
+            visibility: basic
             dtype: "[list[filepath, h5path, float],list[None,None,float]]"
             description: This parameter needs to be specified only if flats not stored in the same dataset as sample projections. Optional Path to the flat field data file, nxs path and scale value.
-            default: "['None', 'None', 1]"
+            default: "['None', 'None', 1.0]"
         
         angles:
             visibility: intermediate
@@ -67,8 +67,8 @@ Parameter definitions
         
         3d_to_4d:
             visibility: intermediate
-            dtype: bool
-            description: Many tomography datasets can be loaded. Value of True indicates the data must be reshaped.
+            dtype: "[bool, int]"
+            description: If this is 4D data stored in 3D then set this value to True, or to an integer value equivalent to the number of projections per 180-degree scan if the angles have not been set.
             default: "False"
         
         ignore_flats:

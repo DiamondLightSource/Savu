@@ -9,5 +9,5 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   savu_lite
-   howto/savu_hpc_rtd
+   install/savu_lite
+   install/savu_hpc_rtd

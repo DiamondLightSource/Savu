@@ -34,6 +34,13 @@ Parameter definitions
             options: "['addition', 'subtraction', 'multiplication', 'division']"
             default: multiplication
         
+        pattern:
+            visibility: advanced
+            dtype: str
+            options: "['SINOGRAM', 'PROJECTION', 'VOLUME_XZ', 'VOLUME_YZ']"
+            description: Pattern to apply this to.
+            default: VOLUME_XZ
+        
 Key
 ^^^^^^^^^^
 

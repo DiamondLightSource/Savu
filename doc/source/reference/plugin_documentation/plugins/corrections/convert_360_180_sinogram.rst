@@ -4,7 +4,7 @@ Convert 360 180 Sinogram
 Description
 --------------------------
 
-Method to convert the 0-360 degree sinogram to 0-180 sinogram. 
+Method to convert a 360-degree sinogram to a 180-degree sinogram in a half-acquisition scan. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/convert_360_180_sinogram_doc.rst>
@@ -29,7 +29,7 @@ Parameter definitions
             default: "['in_datasets[0]', 'cor']"
         
         center:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Center of rotation.
             default: "0.0"

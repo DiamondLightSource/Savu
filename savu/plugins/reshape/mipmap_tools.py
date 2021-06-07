@@ -30,7 +30,7 @@ each dimension than the previous dataset.
             default: 'Mipmap'
 
         out_datasets:
-            visibility: datasets
+            visibility: hidden
             dtype: [list[],list[str]]
             description: Hidden out_datasets list as this is created
               dynamically.
