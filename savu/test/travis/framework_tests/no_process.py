@@ -26,7 +26,6 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
-@register_plugin
 class NoProcess(Plugin, CpuPlugin):
     """
     """
