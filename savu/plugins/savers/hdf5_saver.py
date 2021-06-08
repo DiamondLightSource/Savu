@@ -33,9 +33,6 @@ from savu.data.chunking import Chunking
 
 @register_plugin
 class Hdf5Saver(BaseSaver, CpuPlugin):
-    """
-    """
-
     def __init__(self, name='Hdf5Saver'):
         super(Hdf5Saver, self).__init__(name)
         self.in_data = None
@@ -97,11 +94,3 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
             plugin_dict['id'].split('.')[-1] + '.h5'
         out_path = self.exp.meta_data.get('out_path')
         return os.path.join(out_path, fname)
-        """
-         A class to save tomography data to a hdf5 file
-    
-        :param pattern: Optimise data storage to this access pattern: 'optimum' \
-            will automate this process by choosing the output pattern from the \
-            previous plugin, if it exists, else the first \
-            pattern. Default: 'optimum'.
-        """

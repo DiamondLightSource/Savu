@@ -1,13 +1,13 @@
 :orphan:
 
 .. ::process_list:: test_data/process_lists/vo_centering_process.nxs
-.. ::process_list:: test_data/process_lists/vo_centering_process2.nxs
+.. ::process_list:: test_data/process_lists/vo_centering_test.nxs
 
 Projection Shift Documentation
 #################################################################
 
     >>> add NxtomoLoader
-    >>> mod 1.1 5
+    >>> mod 1.1 []
     >>> disp -a
 
 (Change this) Include your plugin documentation here. Use a restructured text format.

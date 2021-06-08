@@ -24,9 +24,6 @@
 from savu.plugins.plugin import Plugin
 
 class BaseSaver(Plugin):
-    """
-    """
-
     def __init__(self, name="BaseSaver"):
         super(BaseSaver, self).__init__(name)
         self.frame = None
@@ -55,9 +52,3 @@ class BaseSaver(Plugin):
 
     def get_max_frames(self):
         return 'single'
-
-    """A base plugin from which all data saver plugins should inherit.
-
-    :*param out_datasets: Hidden, dummy out_datasets entry. Default: []
-    :param in_datasets: The name of the dataset to save. Default: [].
-    """

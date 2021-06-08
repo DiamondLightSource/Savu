@@ -8,7 +8,7 @@ class Hdf5SaverTools(PluginTools):
         pattern:
             visibility: basic
             dtype: str
-            description: Optimise data storage to this access pattern
+            description: Optimise data storage to this access pattern.
               'optimum' will automate this process by choosing the output
               pattern from the previous plugin, if it exists, else the
               first pattern.

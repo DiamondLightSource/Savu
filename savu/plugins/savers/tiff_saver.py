@@ -30,9 +30,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class TiffSaver(BaseImageSaver, CpuPlugin):
-    """
-    """
-
     def __init__(self, name='TiffSaver'):
         super(TiffSaver, self).__init__(name)
 

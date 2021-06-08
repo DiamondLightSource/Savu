@@ -705,8 +705,12 @@ class CiteDisplay(DisplayFormatter):
         citation = self._get_citation_str(
             p_dict["tools"].get_citations(), width, parameters=p_dict["data"]
         )
-        framework_citations = self._get_framework_citations(width)
-        return framework_citations + title + citation
+        if count == 1:
+            # Display framework citations before the first citation
+            framework_citations = self._get_framework_citations(width)
+            return framework_citations + title + citation
+
+        return title + citation
 
     def _get_citation_str(self, citation_dict, width, parameters=""):
         """Get the plugin citation information

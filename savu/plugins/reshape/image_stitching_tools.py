@@ -30,7 +30,6 @@ class ImageStitchingTools(PluginTools):
             description: "Data processing pattern is 'PROJECTION' or
              'SINOGRAM'."
             default: 'PROJECTION'
-            options: [PROJECTION, SINOGRAM]
         norm:
             visibility: intermediate
             dtype: bool
