@@ -88,9 +88,8 @@ def _h5path(value): # Extend this later as we need to know which file to apply t
 
 def _savufilepath(value, returnpath=False):
     """ A file path inside the Savu directory"""
-    savu_base_path = \
-        os.path.dirname(os.path.realpath(__file__)).split('Savu')[0]
-    value = os.path.join(savu_base_path, value)
+    savu_base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),                                  '../../')
+    value = os.path.join(savu_base_path, value.split('Savu/')[1])
     if returnpath:
         return os.path.isfile(value), value
     return os.path.isfile(value)
@@ -545,8 +544,8 @@ def _check_options(param_def, value, pvalid):
             option_error_str = (
                 "That does not match one of the required options."
             )
-            option_error_str += Fore.CYAN + "\nSome options are:\n"
-            option_error_str += "\n".join(options) + Fore.RESET
+            option_error_str += Fore.CYAN + "\nThe options are:\n"
+            option_error_str += "\n".join(str(o) for o in options) + Fore.RESET
     return pvalid, option_error_str
 
 
