@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
-.. module:: tomo_recon
+.. module:: plugins_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: unittest test classes for plugins
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
 import unittest
-from savu.test import test_utils as tu
-from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
 
-class PluginRunnerDenoiseBregmanTest(unittest.TestCase):
+import savu.test.test_utils as tu
+from savu.test.travis.framework_tests.plugin_runner_test import \
+        run_protected_plugin_runner
+import savu.test.base_checkpoint_test
+import tempfile
+import os
+
+
+class MedianFilterCpuTest(unittest.TestCase):
     def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
 
-    def test_denoise_bregman_test(self):
-        process_list = 'filters/denoise/denoise_bregman_test.nxs'
+    def test_median_cpu_filter(self):
+        process_list = 'filters/denoise/median_filter_cpu_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
