@@ -26,13 +26,13 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class PymcaTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = 'i18_test_data.nxs'
-    experiment = None
+    def setUp(self):
+        self.data_file = 'i18_test_data.nxs'
+        self.experiment = None
 
     def test_simple_fit_runs(self):
         process_list = 'pymca/pymca_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

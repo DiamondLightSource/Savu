@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class BandPassTools(PluginTools):
-    """A plugin to filter each frame with a BandPass T
+    """A plugin to filter each frame with a gaussian
 
     """
     def define_parameters(self):
