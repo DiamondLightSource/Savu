@@ -177,8 +177,6 @@ class PluginList(object):
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
-        self._save_citations(plugin, plugin_group)
-
         for key in required_keys:
             # only need to apply dumps if saving in configurator
             if key == 'data':
@@ -234,7 +232,6 @@ class PluginList(object):
         """ execute citations to variable
         :param cite: citation dictionary
         """
-        del cite['short_name_article']
         for key, value in cite.items():
             exec('citation.' + key + '= value')
 
@@ -248,6 +245,7 @@ class PluginList(object):
         for cite in citations:
             citation_group = group.require_group(cite['short_name_article'].encode("ascii"))
             citation = CitationInformation(**cite)
+            del cite['short_name_article']
             self._exec_citations(cite, citation)
             citation.write(citation_group)
 
