@@ -29,7 +29,7 @@ import scripts.config_generator.parameter_utils as param_u
 
 class PreviewParameterTest(unittest.TestCase):
     def initial_setup(self):
-        ppath = "savu.plugins.basic_operations.no_process"
+        ppath = "savu.test.travis.framework_tests.no_process"
         plugin = pu.load_class(ppath)()
         plugin_tools = plugin.get_plugin_tools()
         plugin_tools._populate_default_parameters()

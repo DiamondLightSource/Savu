@@ -180,7 +180,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
                 regularisation_method: [ROF_TV,FGP_TV,SB_TV,LLT_ROF,NDF,Diff4th,TGV,NLTV]
         """
         plugin, tools, pdefs, content = \
-            self.initial_setup(ppath="savu.plugins.basic_operations.no_process")
+            self.initial_setup(ppath="savu.test.travis.framework_tests.no_process")
         key = "regularisation_method"
         value = "SB_TV"
 
