@@ -15,12 +15,12 @@
 """
 .. module:: median_filter_gpu
    :platform: Unix
-   :synopsis: A plugin to apply 2D/3D median filter (GPU) from Larix software
+   :synopsis: A plugin to apply 2D/3D median filter (GPU)
 
 .. moduleauthor::Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-from savu.plugins.plugin import Plugin
+from savu.plugins.filters.denoising.base_median_filter import BaseMedianFilter
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 
@@ -28,22 +28,13 @@ import numpy as np
 from larix.methods.misc_gpu import MEDIAN_FILT_GPU
 
 @register_plugin
-class MedianFilterGpu(Plugin, GpuPlugin):
-    """
-    """
+class MedianFilterGpu(BaseMedianFilter, GpuPlugin):
 
     def __init__(self):
         super(MedianFilterGpu, self).__init__('MedianFilterGpu')
         self.GPU_index = None
         self.res = False
         self.start = 0
-
-    def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def process_frames(self, data):
         input_temp = np.float32(data[0])
@@ -62,19 +53,5 @@ class MedianFilterGpu(Plugin, GpuPlugin):
                 result =np.swapaxes(result,0,1)
         return result
 
-    def set_filter_padding(self, in_data, out_data):
-        if (self.parameters['dimension'] == '3D'):
-            padding = (self.parameters['kernel_size']-1)/2
-        else:
-            padding = 0
-        in_data[0].padding = {'pad_multi_frames': padding}
-        out_data[0].padding = {'pad_multi_frames': padding}
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        return 1
-
-    def get_plugin_pattern(self):
-        return self.parameters['pattern']
+    def set_options(self, cfg):
+        return cfg
