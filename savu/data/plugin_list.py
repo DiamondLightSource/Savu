@@ -210,16 +210,17 @@ class PluginList(object):
     def _save_citations(self, plugin, group):
         """ Save all the citations in the plugin
         """
-        citation_plugin = plugin['tools'].get_citations()
-        if citation_plugin:
-            count = 1
-            for citation in citation_plugin.values():
-                group_label = f"citation{count}"
-                if not citation.dependency \
-                        or self._dependent_citation_used(plugin, citation):
-                    self._save_citation_group(citation, citation.__dict__,
-                                              group, group_label)
-                    count += 1
+        if 'tools' in plugin.keys():
+            citation_plugin = plugin['tools'].get_citations()
+            if citation_plugin:
+                count = 1
+                for citation in citation_plugin.values():
+                    group_label = f"citation{count}"
+                    if not citation.dependency \
+                            or self._dependent_citation_used(plugin, citation):
+                        self._save_citation_group(citation, citation.__dict__,
+                                                  group, group_label)
+                        count += 1
 
     def _dependent_citation_used(self, plugin, citation):
         """Find the parameter value inside the process list. Check if the
