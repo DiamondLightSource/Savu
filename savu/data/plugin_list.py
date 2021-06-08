@@ -212,9 +212,9 @@ class PluginList(object):
         """Save all plugin citations from current plugin list
         """
         for plugin in self.plugin_list:
-            self._save_citations(plugin, group, exec_citation=True)
+            self._save_citations(plugin, group)
 
-    def _save_citations(self, plugin, group, exec_citation=False):
+    def _save_citations(self, plugin, group):
         """ Save all the citations in the plugin
         """
         citation_plugin = plugin['tools'].get_citations()
@@ -222,14 +222,30 @@ class PluginList(object):
             count = 1
             for citation in citation_plugin.values():
                 group_label = f"{plugin['name']}_{count}"
-                citation_group = group.require_group(group_label.encode("ascii"))
-                if exec_citation:
-                    self._exec_citations(citation.__dict__, citation)
-                citation.write(citation_group)
-                count += 1
+                if citation.dependency:
+                    if self._dependent_citation_used(plugin, citation):
+                        self._save_citation_group(citation, citation.__dict__,
+                                                  group, group_label)
+                        count += 1
+                else:
+                    self._save_citation_group(citation, citation.__dict__,
+                                              group, group_label)
+                    count += 1
+
+    def _dependent_citation_used(self, plugin, citation):
+        """Find the parameter value inside the process list. Check if the
+        parameter value matches the citation dependency requirement.
+        """
+        parameters = plugin['data']
+        for (citation_dependent_parameter, citation_dependent_value) \
+                in citation.dependency.items():
+            current_value = parameters[citation_dependent_parameter]
+            if current_value == citation_dependent_value:
+                return True
+        return False
 
     def _exec_citations(self, cite, citation):
-        """ execute citations to variable
+        """Execute citations to variable
         :param cite: citation dictionary
         """
         for key, value in cite.items():
@@ -243,11 +259,23 @@ class PluginList(object):
         :return:
         """
         for cite in citations:
-            citation_group = group.require_group(cite['short_name_article'].encode("ascii"))
-            citation = CitationInformation(**cite)
+            label = cite['short_name_article']
             del cite['short_name_article']
-            self._exec_citations(cite, citation)
-            citation.write(citation_group)
+            self._save_citation_group(CitationInformation(**cite), cite,
+                                      group, label)
+
+    def _save_citation_group(self, citation, cite_dict, group, group_label):
+        """
+
+        :param citation: Citation object
+        :param cite_dict: Citation dictionary
+        :param group: Group
+        :param group_label: Group label
+        :return:
+        """
+        citation_group = group.require_group(group_label.encode("ascii"))
+        self._exec_citations(cite_dict, citation)
+        citation.write(citation_group)
 
     def _get_docstring_info(self, plugin):
         plugin_inst = pu.plugins[plugin]()
