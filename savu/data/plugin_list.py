@@ -128,15 +128,12 @@ class PluginList(object):
                 self._template.update_process_list(template)
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'a') as nxs_file:
+        with h5py.File(out_filename, 'w') as nxs_file:
 
             entry = nxs_file.require_group('entry')
 
             self._save_framework_citations(self._overwrite_group(
                 entry, 'framework_citations', 'NXcollection'))
-
-            self._save_plugin_citations(self._overwrite_group(
-                entry, 'plugin_citations', 'NXcite'))
 
             self.__save_savu_notes(self._overwrite_group(
                 entry, 'savu_notes', 'NXnote'))
@@ -177,6 +174,8 @@ class PluginList(object):
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
+        self._save_citations(plugin, plugin_group)
+
         for key in required_keys:
             # only need to apply dumps if saving in configurator
             if key == 'data':
@@ -208,12 +207,6 @@ class PluginList(object):
         framework_cites = fc.get_framework_citations()
         self._save_f_citations(framework_cites, group)
 
-    def _save_plugin_citations(self, group):
-        """Save all plugin citations from current plugin list
-        """
-        for plugin in self.plugin_list:
-            self._save_citations(plugin, group)
-
     def _save_citations(self, plugin, group):
         """ Save all the citations in the plugin
         """
@@ -221,13 +214,9 @@ class PluginList(object):
         if citation_plugin:
             count = 1
             for citation in citation_plugin.values():
-                group_label = f"{plugin['name']}_{count}"
-                if citation.dependency:
-                    if self._dependent_citation_used(plugin, citation):
-                        self._save_citation_group(citation, citation.__dict__,
-                                                  group, group_label)
-                        count += 1
-                else:
+                group_label = f"citation{count}"
+                if not citation.dependency \
+                        or self._dependent_citation_used(plugin, citation):
                     self._save_citation_group(citation, citation.__dict__,
                                               group, group_label)
                     count += 1
@@ -265,7 +254,7 @@ class PluginList(object):
                                       group, label)
 
     def _save_citation_group(self, citation, cite_dict, group, group_label):
-        """
+        """Save the citations to the provided group label
 
         :param citation: Citation object
         :param cite_dict: Citation dictionary
