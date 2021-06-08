@@ -32,13 +32,13 @@ def _find_test_modules(tests, nxs_file):
                 print("\t--->", t)
 
 def main():
-    base_folder = "/home/qmm55171/Documents/Git/git_repos/Savu/test_data/"
+    base_folder = "/home/algol/Documents/DEV/Savu/test_data/"
     args = __option_parser(doc=False)
     plugin_name = args.plugin
     process_lists = list(Path(base_folder + "test_process_lists").rglob("*.nxs"))
     process_lists += list(Path(base_folder + "process_lists").rglob("*.nxs"))
-    
-    test_path = "/home/qmm55171/Documents/Git/git_repos/Savu/savu/test/"
+
+    test_path = "/home/algol/Documents/DEV/Savu/savu/test/"
     tests = list(Path(test_path + "travis").rglob("*.py"))
     tests += list(Path(test_path + "jenkins").rglob("*.py"))
 
@@ -53,7 +53,7 @@ def main():
                         _find_test_modules(tests, nxs_file)
         except OSError:
             pass
-                    
+
 
 if __name__ == '__main__':
     main()

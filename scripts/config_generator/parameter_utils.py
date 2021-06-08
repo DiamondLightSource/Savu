@@ -361,8 +361,8 @@ def _check_list_combination(param_name, value, param_def):
 
 
 def _matched_brackets(string, dtype, bstart, bend):
-    start_brackets = [m.start() for m in re.finditer('\%s' % bstart, string)]
-    end_brackets = [m.start() for m in re.finditer('\%s' % bend, string)]
+    start_brackets = [m.start() for m in re.finditer(r'\%s' % bstart, string)]
+    end_brackets = [m.start() for m in re.finditer(r'\%s' % bend, string)]
     matched = []
     # Match start and end brackets
     while(end_brackets):
@@ -641,4 +641,3 @@ def _is_valid_options_list_type(dtype):
         if not pvalid:
             break
     return pvalid, error_str
-
