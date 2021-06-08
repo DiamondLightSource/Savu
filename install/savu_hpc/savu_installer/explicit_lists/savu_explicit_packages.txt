@@ -301,6 +301,7 @@ https://conda.anaconda.org/conda-forge/noarch/pyls-spyder-0.3.2-pyhd8ed1ab_0.tar
 https://conda.anaconda.org/conda-forge/noarch/pytest-xdist-2.2.1-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/spacy-2.3.4-py37he5a615d_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/sphinx-3.5.3-pyhd8ed1ab_0.tar.bz2
+https://conda.anaconda.org/conda-forge/noarch/sphinx-panels-0.5.2-pyhd3deb0d_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/ipykernel-5.5.3-py37h085eea5_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/numpydoc-1.1.0-py_1.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/qtconsole-5.0.3-pyhd8ed1ab_0.tar.bz2
