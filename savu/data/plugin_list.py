@@ -135,6 +135,9 @@ class PluginList(object):
             self._save_framework_citations(self._overwrite_group(
                 entry, 'framework_citations', 'NXcollection'))
 
+            self._save_plugin_citations(self._overwrite_group(
+                entry, 'plugin_citations', 'NXcite'))
+
             self.__save_savu_notes(self._overwrite_group(
                 entry, 'savu_notes', 'NXnote'))
 
@@ -174,10 +177,7 @@ class PluginList(object):
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
-        if 'cite' in plugin.keys():
-            citation_plugin = plugin['cite']
-            if citation_plugin:
-                self._output_plugin_citations(citation_plugin, plugin_group)
+        self._save_citations(plugin, plugin_group)
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
@@ -206,26 +206,49 @@ class PluginList(object):
         del self.plugin_list[idx]
         self.__set_loaders_and_savers()
 
-    def _output_plugin_citations(self, citations, group):
-        """Set the inner file path of the nexus file to be the citation
-        id to avoid using long titles including spaces.
-        """
-        cite_count = 1
-        for cite in citations.values():
-            # In case of a duplicate id, use the citation count number
-            str_id = cite.id + str(cite_count)
-            citation_group = group.create_group(str_id.encode("ascii"))
-            cite.write(citation_group)
-            cite_count += 1
-
     def _save_framework_citations(self, group):
         framework_cites = fc.get_framework_citations()
-        for cite in framework_cites:
+        self._save_f_citations(framework_cites, group)
+
+    def _save_plugin_citations(self, group):
+        """Save all plugin citations from current plugin list
+        """
+        for plugin in self.plugin_list:
+            self._save_citations(plugin, group, exec_citation=True)
+
+    def _save_citations(self, plugin, group, exec_citation=False):
+        """ Save all the citations in the plugin
+        """
+        citation_plugin = plugin['tools'].get_citations()
+        if citation_plugin:
+            count = 1
+            for citation in citation_plugin.values():
+                group_label = f"{plugin['name']}_{count}"
+                citation_group = group.require_group(group_label.encode("ascii"))
+                if exec_citation:
+                    self._exec_citations(citation.__dict__, citation)
+                citation.write(citation_group)
+                count += 1
+
+    def _exec_citations(self, cite, citation):
+        """ execute citations to variable
+        :param cite: citation dictionary
+        """
+        del cite['short_name_article']
+        for key, value in cite.items():
+            exec('citation.' + key + '= value')
+
+    def _save_f_citations(self, citations, group):
+        """ Save all the citations in dict
+
+        :param citations: Citation dict
+        :param group: Group for nxs file
+        :return:
+        """
+        for cite in citations:
             citation_group = group.require_group(cite['short_name_article'].encode("ascii"))
             citation = CitationInformation(**cite)
-            del cite['short_name_article']
-            for key, value in cite.items():
-                exec('citation.' + key + '= value')
+            self._exec_citations(cite, citation)
             citation.write(citation_group)
 
     def _get_docstring_info(self, plugin):

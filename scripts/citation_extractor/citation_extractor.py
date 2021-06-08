@@ -108,7 +108,7 @@ def main():
     infile = h5py.File(args.in_file, 'r')
     citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
     if citation_manager is not None:
-        with open(args.out_file, 'a') as outfile:
+        with open(args.out_file, 'w') as outfile:
             outfile.write(citation_manager.__str__())
     print("Extraction complete")
 
