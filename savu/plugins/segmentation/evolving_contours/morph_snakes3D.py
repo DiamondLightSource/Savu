@@ -32,8 +32,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes3d(Plugin, MultiThreadedPlugin):
-    """
-    """
+
 
     def __init__(self):
         super(MorphSnakes3d, self).__init__("MorphSnakes3d")
@@ -41,7 +40,7 @@ class MorphSnakes3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         getall = ["VOLUME_XZ", "voxel_y"]
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
         in_pData[1].plugin_data_setup('VOLUME_3D', 'single', getall=getall) # the initialisation (mask)

@@ -29,8 +29,6 @@ from sklearn.mixture import GaussianMixture
 
 @register_plugin
 class GmmSegment3d(Plugin, MultiThreadedPlugin):
-    """
-    """
 
     def __init__(self):
         super(GmmSegment3d, self).__init__("GmmSegment3d")

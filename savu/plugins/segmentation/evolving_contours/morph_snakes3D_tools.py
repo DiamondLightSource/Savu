@@ -5,7 +5,7 @@ class MorphSnakes3dTools(PluginTools):
 Morphsnakes module. When initialised with a mask, the active contour
 propagates to find the minimum of energy (a possible edge countour).
     """
-    
+
     def define_parameters(self):
         """
         lambda1:
@@ -25,7 +25,7 @@ propagates to find the minimum of energy (a possible edge countour).
             default: 1
 
         smoothing:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: 'Number of times the smoothing operator is applied
               per iteration, reasonable values are around 1-4 and larger

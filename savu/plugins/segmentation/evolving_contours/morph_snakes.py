@@ -31,8 +31,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes(Plugin, CpuPlugin):
-    """
-    """
+
 
     def __init__(self):
         super(MorphSnakes, self).__init__("MorphSnakes")
