@@ -19,7 +19,7 @@ class DezingerTools(PluginTools):
               description: Kernel size of the median filter.
               default: 3
         dimension:
-              visibility: basic
+              visibility: intermediate
               dtype: str
               description: dimensionality of the filter 2D/3D.
               default: 3D

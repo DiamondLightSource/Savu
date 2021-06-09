@@ -18,7 +18,7 @@ the near neighbourhood
               description: Number of frames included in average.
               default: 5
         mode:
-              visibility: basic
+              visibility: intermediate
               dtype: int
               description: 'output mode, 0=normal 5=zinger strength 6=zinger
                 yes/no.'

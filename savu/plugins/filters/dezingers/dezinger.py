@@ -27,8 +27,6 @@ from larix.methods.misc import MEDIAN_DEZING
 
 @register_plugin
 class Dezinger(Plugin, CpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(Dezinger, self).__init__("Dezinger")
