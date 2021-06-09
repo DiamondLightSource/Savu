@@ -45,8 +45,6 @@ import numpy as np
 
 @register_plugin
 class GeoDistance(Plugin, CpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(GeoDistance, self).__init__("GeoDistance")

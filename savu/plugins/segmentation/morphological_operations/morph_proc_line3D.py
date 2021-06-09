@@ -29,8 +29,6 @@ from larix.methods.segmentation import MORPH_PROC_LINE
 
 @register_plugin
 class MorphProcLine3d(Plugin, MultiThreadedPlugin):
-    """
-    """
 
     def __init__(self):
         super(MorphProcLine3d, self).__init__("MorphProcLine3d")
@@ -40,7 +38,7 @@ class MorphProcLine3d(Plugin, MultiThreadedPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         getall = ["VOLUME_XZ", "voxel_y"]
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)

@@ -29,8 +29,6 @@ from larix.methods.segmentation import MORPH_PROC_LINE
 
 @register_plugin
 class MorphProcLine(Plugin, CpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(MorphProcLine, self).__init__("MorphProcLine")

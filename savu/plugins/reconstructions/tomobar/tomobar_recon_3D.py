@@ -17,7 +17,7 @@
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
    for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
-   This plugin will divide 3D projection data into overalpped subsets using padding, which maskes it fast (GPU driver).
+   This plugin will divide 3D projection data into overlapping subsets using padding.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -32,8 +32,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class TomobarRecon3d(BaseRecon, GpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")

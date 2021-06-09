@@ -31,17 +31,6 @@ from copy import deepcopy
 
 @register_plugin
 class StripBackground(BaseFilter, CpuPlugin):
-    """
-    1D background removal. PyMca magic function
-
-    :param iterations: Number of iterations. Default: 100.
-    :param window: Half width of the rolling window. Default: 10.
-    :param SG_filter_iterations: How many iterations until smoothing \
-        occurs. Default: 5.
-    :param SG_width: Whats the savitzgy golay window. Default: 35.
-    :param SG_polyorder: Whats the savitzgy-golay poly order. Default: 5.
-    :param out_datasets: A list of the dataset(s) to process. Default: ['in_datasets[0]','background'].
-    """
 
     def __init__(self):
         logging.debug("Stripping background")

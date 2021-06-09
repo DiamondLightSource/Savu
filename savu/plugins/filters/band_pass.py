@@ -24,20 +24,12 @@ import logging
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
 from scipy.ndimage.filters import gaussian_filter
-
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
 class BandPass(BaseFilter, CpuPlugin):
-    """
-    A plugin to filter each frame with a BandPass T
-
-    :param blur_width: Kernel Size. Default: (0 ,3 ,3).
-    :param type: filter type (High|Low). Default: 'High'.
-    """
 
     def __init__(self):
         """

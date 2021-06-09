@@ -6,7 +6,7 @@ class GeoDistance3dTools(PluginTools):
     def define_parameters(self):
         """
         lambda:
-            visibility: basic
+            visibility: intermediate
             dtype: float
             description: Weighting between 0 and 1
             default: 0.5

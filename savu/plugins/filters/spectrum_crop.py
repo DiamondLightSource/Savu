@@ -28,13 +28,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class SpectrumCrop(BaseFilter, CpuPlugin):
-    """
-    crops a spectrum to a range
-
-    :param crop_range: range to crop to. Default: [2., 18.].
-    :param axis: range to crop to. Default: "energy".
-
-    """
 
     def __init__(self):
         logging.debug("cropping spectrum")

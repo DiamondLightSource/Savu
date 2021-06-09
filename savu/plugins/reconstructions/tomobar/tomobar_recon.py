@@ -31,8 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class TomobarRecon(BaseRecon, GpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")

@@ -14,7 +14,8 @@ class NXcitation(object):
         self.bibtex = bibtex.decode('UTF-8')
 
     def get_bibtex_ref(self):
-        return self.bibtex.split(',')[0].split('{')[1]
+        return self.bibtex.split(',')[0].split('{')[1] \
+            if self.bibtex else ""
 
     def get_first_author(self):
         parts = self.endnote.split('\n')

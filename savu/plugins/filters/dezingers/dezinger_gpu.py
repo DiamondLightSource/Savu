@@ -26,8 +26,6 @@ from larix.methods.misc_gpu import MEDIAN_DEZING_GPU
 
 @register_plugin
 class DezingerGpu(Plugin, GpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(DezingerGpu, self).__init__("DezingerGpu")

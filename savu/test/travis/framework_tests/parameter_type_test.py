@@ -30,7 +30,7 @@ import scripts.config_generator.parameter_utils as param_u
 
 class ParameterTypeTest(unittest.TestCase):
     def initial_setup(self):
-        ppath = "savu.plugins.basic_operations.no_process"
+        ppath = "savu.test.travis.framework_tests.no_process"
         plugin = pu.load_class(ppath)()
         tools = plugin.get_plugin_tools()
         tools._populate_default_parameters()
@@ -221,7 +221,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that incorrect yaml file is not accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        value = "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -298,7 +298,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that incorrect filepath is not accepted
         pdefs = self.initial_setup()
         key = "file_path_param"
-        value = "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        value = "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
