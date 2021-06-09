@@ -46,8 +46,6 @@ import numpy as np
 
 @register_plugin
 class GeoDistance3d(Plugin, MultiThreadedPlugin):
-    """
-    """
 
     def __init__(self):
         super(GeoDistance3d, self).__init__("GeoDistance3d")

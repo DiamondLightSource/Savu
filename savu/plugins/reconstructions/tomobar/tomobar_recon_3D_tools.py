@@ -4,7 +4,7 @@ class TomobarRecon3dTools(PluginTools):
     """A Plugin to reconstruct full-field tomographic projection data using
 state-of-the-art regularised iterative algorithms from the ToMoBAR package.
 ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA
-toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
+toolbox and the CCPi RGL toolkit.
     """
     def define_parameters(self):
         """
@@ -60,7 +60,7 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
                   suggested value is 15 iterations, however the
                   algorithm can stop prematurely based on the tolerance
                   value."
-             default: 20
+             default: 15
 
         algorithm_verbose:
              visibility: advanced
@@ -89,12 +89,13 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
             default: ENABLE
 
         regularisation_method:
-             visibility: advanced
+             visibility: intermediate
              dtype: str
              options: [ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF, NDF,
               TGV, NLTV, Diff4th]
              description:
-               summary: The denoising method
+               summary: The regularisation (denoising) method to stabilise
+                the iterative recovery
                verbose: "Iterative methods can help to solve ill-posed
                           inverse problems by choosing a suitable noise
                           model for the measurement"
@@ -118,18 +119,31 @@ toolbox and the CCPi RGL toolkit: https://github.com/vais-ral/CCPi-Regularisatio
              description:
                summary: "Regularisation parameter. The higher the value, the
                  stronger the smoothing effect"
-               range: Recommended between 0 and 1
-             default: 0.0001
+               range: Recommended between 1e-06 and 1e-04
+             default: 5e-06
 
         regularisation_iterations:
-             visibility: basic
+             visibility: intermediate
              dtype: int
              description:
-               summary: "Total number of regularisation iterations.
+               summary: Total number of regularisation iterations.
                  The smaller the number of iterations, the smaller the effect
                  of the filtering is. A larger number will affect the speed
-                 of the algorithm."
-             default: 80
+                 of the algorithm.
+               range: Recommended value dependent upon method.
+             default:
+                 regularisation_method:
+                   ROF_TV: 300
+                   FGP_TV: 100
+                   PD_TV: 100
+                   SB_TV: 100
+                   LLT_ROF: 300
+                   NDF: 300
+                   Diff4th: 300
+                   TGV: 150
+                   NLTV: 30
+             dependency:
+                regularisation_method
 
         regularisation_device:
              visibility: advanced

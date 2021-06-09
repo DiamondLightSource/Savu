@@ -33,15 +33,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class DezingerDeprecated(BaseFilter, CpuPlugin):
-    """
-    A plugin for cleaning x-ray strikes based on statistical evaluation of \
-    the near neighbourhood
-    :param outlier_mu: Threshold for defecting outliers, greater is less \
-    sensitive. Default: 10.0.
-    :param kernel_size: Number of frames included in average. Default: 5.
-    :param mode: output mode, 0=normal 5=zinger strength 6=zinger \
-        yes/no. Default: 0.
-    """
 
     def __init__(self):
         super(DezingerDeprecated, self).__init__("DezingerDeprecated")
