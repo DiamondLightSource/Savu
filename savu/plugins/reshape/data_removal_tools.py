@@ -6,18 +6,18 @@ class DataRemovalTools(PluginTools):
     def define_parameters(self):
         """
         indices:
-            visibility: intermediate
+            visibility: basic
             dtype: [list, str, None]
             description: A list or range of values to remove, e.g. [0, 1, 2]
               , 0:2 (start:stop) or 0:2:1 (start:stop:step).
             default: None
         pattern:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: Explicitly state the slicing pattern.
             default: 'SINOGRAM'
         dim:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Data dimension to reduce.
             default: 0

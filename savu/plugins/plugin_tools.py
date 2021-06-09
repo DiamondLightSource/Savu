@@ -108,21 +108,34 @@ class PluginParameters(object):
         """
         param_info_dict = self._load_param_from_doc(tool_class)
         if param_info_dict:
-            # Check if the required keys are included
-            self._check_required_keys(param_info_dict, tool_class)
-            # Check that option values are valid
-            self._check_options(param_info_dict, tool_class)
-            # Check that the dataset visibility is set
-            self._check_visibility(param_info_dict, tool_class)
-            # Check that the visibility levels are valid
-            self._check_dtype(param_info_dict, tool_class)
-            # Use a display option to apply to dependent parameters later.
-            self._set_display(param_info_dict)
             for p_name, p_value in param_info_dict.items():
-                # Change the string to an integer, float, list, str, dict
-                if not self.default_dependency_dict_exists(p_value):
-                    p_value['default'] = pu._dumps(p_value['default'])
-                self.param.set(p_name, p_value)
+                if p_name in self.param.get_dictionary():
+                    for k,v in p_value.items():
+                        self.param[p_name][k] = v
+                else:
+                    self.param.set(p_name, p_value)
+        self._check_param_defs(tool_class)
+
+    def _check_param_defs(self, tool_class):
+        """Check the parameter definitions for errors
+
+        :param tool_class: tool_class to use for error message
+        """
+        pdefs = self.param.get_dictionary()
+        # Check if the required keys are included
+        self._check_required_keys(pdefs, tool_class)
+        # Check that option values are valid
+        self._check_options(pdefs, tool_class)
+        # Check that the visibility is valid
+        self._check_visibility(pdefs, tool_class)
+        # Check that the dtype is valid
+        self._check_dtype(pdefs, tool_class)
+        # Use a display option to apply to dependent parameters later.
+        self._set_display(pdefs)
+        for k,v in pdefs.items():
+            # Change the string to an integer, float, list, str, dict
+            if not self.default_dependency_dict_exists(v):
+                v['default'] = pu._dumps(v['default'])
 
     def _load_param_from_doc(self, tool_class):
         """Find the parameter information from the method docstring.
@@ -145,7 +158,6 @@ class PluginParameters(object):
                         raise Exception(error_msg)
 
         return param_info_dict
-
 
     def check_for_default(self, value, param_name, parameters):
         """If the value is changed to be 'default', then set the original
@@ -195,20 +207,22 @@ class PluginParameters(object):
         """
         plugin_error_str = f"There was an error with {tool_class.__name__}"
         for p_key, p_dict in param_info_dict.items():
-            dtype = p_dict['dtype'].replace(" ", "")
-            try:
-                pvalid, error_str = param_u.is_valid_dtype(dtype)
-                if not pvalid:
-                    raise Exception("Invalid parameter definition %s:\n %s"
-                                    % (p_key, error_str))
-            except IndexError:
-                print(plugin_error_str)
-            if not self.default_dependency_dict_exists(p_dict):
-                default_value = pu._dumps(p_dict["default"])
-                pvalid, error_str = param_u.is_valid(p_key, default_value,
-                                             p_dict, check=True)
-                if not pvalid:
-                    raise Exception(f"{plugin_error_str}: {error_str}")
+            dtype = p_dict.get("dtype")
+            if dtype:
+                dtype = dtype.replace(" ", "")
+                try:
+                    pvalid, error_str = param_u.is_valid_dtype(dtype)
+                    if not pvalid:
+                        raise Exception("Invalid parameter definition %s:\n %s"
+                                        % (p_key, error_str))
+                except IndexError:
+                    print(plugin_error_str)
+                if not self.default_dependency_dict_exists(p_dict):
+                    default_value = pu._dumps(p_dict["default"])
+                    pvalid, error_str = param_u.is_valid(p_key, default_value,
+                                                 p_dict, check=True)
+                    if not pvalid:
+                        raise Exception(f"{plugin_error_str}: {error_str}")
 
     def _check_visibility(self, param_info_dict, tool_class):
         """Make sure that the visibility choice is valid"""
@@ -222,6 +236,7 @@ class PluginParameters(object):
         ]
         visibility_valid = True
         for p_key, p in param_info_dict.items():
+            # Check dataset visibility level is correct
             self._check_data_keys(p_key, p)
             # Check that the data types are valid choices
             if p["visibility"] not in visibility_levels:
