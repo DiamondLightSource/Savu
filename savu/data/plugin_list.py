@@ -128,7 +128,7 @@ class PluginList(object):
                 self._template.update_process_list(template)
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'w') as nxs_file:
+        with h5py.File(out_filename, 'a') as nxs_file:
 
             entry = nxs_file.require_group('entry')
 
