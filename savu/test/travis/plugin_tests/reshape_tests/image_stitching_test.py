@@ -15,9 +15,9 @@
 
 
 """
-.. module:: data_removal_test
+.. module:: image_stitching_test
    :platform: Unix
-   :synopsis: unittest for data_removal
+   :synopsis: unittest for image_stitching
 
 .. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
 
@@ -28,13 +28,13 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
-class DataRemovalTest(unittest.TestCase):
+class ImageStitchingTest(unittest.TestCase):
     global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = None
+    data_file = '24737'
+    experiment = 'tomo'
 
     def test_process_preview(self):
-        process_list = 'reshape/data_removal_test.nxs'
+        process_list = 'reshape/image_stitching_test.nxs'
         #options = tu.initialise_options(data_file, experiment, process_list)
         #run_protected_plugin_runner(options)
         #tu.cleanup(options)
