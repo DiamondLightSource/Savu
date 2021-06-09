@@ -6,7 +6,7 @@ class GeoDistanceTools(PluginTools):
     def define_parameters(self):
         """
         lambda:
-            visibility: basic
+            visibility: intermediate
             dtype: float
             description: Weighting between 0 and 1
             default: 0.5
@@ -18,7 +18,7 @@ class GeoDistanceTools(PluginTools):
             default: 4
 
         out_datasets:
-            visibility: datasets
+            visibility: intermediate
             dtype: [list[],list[str]]
             description: The default names.
             default: "['GeoDist, 'max_values']"
