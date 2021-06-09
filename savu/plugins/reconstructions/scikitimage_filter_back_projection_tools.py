@@ -7,50 +7,41 @@ inverse radon transform from scikit-image.
 
     def define_parameters(self):
         """
-
         output_size:
-            visibility: basic
+            visibility: intermediate
             dtype: [None, int,list[int,int],str]
-            description: Number of rows and columns in the reconstruction.
+            description: Integer number of rows and columns in the
+                reconstruction, or 'auto'.
             default: auto
 
         filter:
             visibility: intermediate
             dtype: str
-            description: "Filter used in frequency domain filtering. Ramp
-              filter used by default. Assign None to use no filter."
+            description: Filter used in frequency domain filtering.
             options: [ramp, shepp-logan, cosine, hamming, hann, None]
             default: ramp
 
         interpolation:
-            visibility: advanced
+            visibility: intermediate
             dtype: int
-            description: "Interpolation method used in reconstruction.
-              Methods available: 'linear', 'nearest', and 'cubic'
-              ('cubic' is slow)."
+            description: Interpolation method used in reconstruction 
+                ('cubic' option is slow)
             options: [linear,nearest,cubic]
             default: linear
 
         circle:
-            visibility: advanced
+            visibility: intermediate
             dtype: bool
-            description: "Assume the reconstructed image is zero outside
+            description: Assume the reconstructed image is zero outside
               the inscribed circle. Also changes the default output_size
-              to match the behaviour of radon called with circle=True."
+              to match the behaviour of radon called with circle=True.
             default: False
 
-        outer_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
-
-        centre_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
-
+        vol_shape:
+             visibility: hidden
+             dtype: [str, int]
+             description: None
+             default: fixed            
         """
 
     def citation(self):

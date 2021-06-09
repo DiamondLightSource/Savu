@@ -32,25 +32,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
-    """
-    A Plugin to reconstruct an image by filter back projection
-    using the inverse radon transform from scikit-image.
-
-    :param output_size: Number of rows and columns in the \
-        reconstruction. Default: 'auto'.
-    :param filter: Filter used in frequency domain filtering Ramp filter used \
-        by default. Filters available: ramp, shepp-logan, cosine, hamming, \
-        hann. Assign None to use no filter. Default: 'ramp'.
-    :param interpolation: interpolation method used in reconstruction. \
-        Methods available: 'linear', 'nearest', and 'cubic' \
-        ('cubic' is slow). Default: 'linear'.
-    :param circle: Assume the reconstructed image is zero outside the \
-        inscribed circle. Also changes the default output_size to match the \
-        behaviour of radon called with circle=True. Default: False.
-
-    :~param outer_pad: Not required. Default: False.
-    :~param centre_pad: Not required. Default: False.
-    """
 
     def __init__(self):
         logging.debug("initialising Scikitimage Filter Back Projection")
