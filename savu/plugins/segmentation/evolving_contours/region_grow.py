@@ -15,7 +15,7 @@
 """
 .. module:: region_grow
    :platform: Unix
-   :synopsis: Fast region-grow type segmentation from Larix toolbox to evolve a given mask
+   :synopsis: Fast region-grow type segmentation (2D) from Larix toolbox to evolve a given mask
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -29,8 +29,6 @@ import numpy as np
 
 @register_plugin
 class RegionGrow(Plugin, CpuPlugin):
-    """
-    """
 
     def __init__(self):
         super(RegionGrow, self).__init__("RegionGrow")

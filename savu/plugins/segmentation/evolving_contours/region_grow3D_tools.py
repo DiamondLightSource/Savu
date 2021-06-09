@@ -4,7 +4,7 @@ class RegionGrow3dTools(PluginTools):
     """Fast 3D segmentation by evolving the user-given mask, the initialised
 mask should be set in the central part of the object to be segmented.
     """
-    
+
     def define_parameters(self):
         """
         threshold:
@@ -14,11 +14,11 @@ mask should be set in the central part of the object to be segmented.
             default: 1.0
 
         method:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: a method to collect statistics from the
               given mask (mean, median, value).
-            default: method
+            default: mean
 
         iterations:
             visibility: basic
@@ -27,7 +27,7 @@ mask should be set in the central part of the object to be segmented.
             default: 500
 
         connectivity:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: the connectivity of the local neighbourhood,
               choose 4, 6, 8 or 26.

@@ -29,19 +29,19 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class MorphprocLineTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_morphproc_line2d(self):
         process_list = 'segmentation/morphproc/morphproc_line_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_morphproc_line3d(self):
         process_list = 'segmentation/morphproc/morphproc_line3d_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
