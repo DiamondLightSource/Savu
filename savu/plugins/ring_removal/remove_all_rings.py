@@ -15,8 +15,8 @@
 """
 .. module:: remove_all_rings
    :platform: Unix
-   :synopsis: A plugin working in the sinogram space to remove most types of
-    ring artefacts.
+   :synopsis: Combination of methods working in the sinogram space to remove
+    most types of ring artefacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """

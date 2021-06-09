@@ -1,29 +1,35 @@
 from savu.plugins.plugin_tools import PluginTools
 
+
 class RemoveUnresponsiveAndFluctuatingRingsTools(PluginTools):
-    """Method to remove large stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image).
+    """Method working in the sinogram space to remove ring artifacts caused by
+    dead pixels.
     """
+
     def define_parameters(self):
         """
         size:
-            visibility: intermediate
-            dtype: [float, list[float]]
+            visibility: basic
+            dtype: int
             description: Size of the median filter window. Greater is stronger.
-            default: 71
+            default: 51
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of large stripes.
               Greater is less sensitive.
             default: 3.0
+        residual:
+            visibility: intermediate
+            dtype: bool
+            description: Removing residual stripes if True.
+            default: True
         """
 
     def citation(self):
         """
-        The code of ring removal is the implementation
-        of the work of Nghia T. Vo et al. taken from algorithm 4,
-        5, 6 in this paper
+        The code of ring removal is the implementation of the work of Nghia T.
+        Vo et al. taken from algorithm 4, 5, 6 in this paper.
         bibtex:
                 @article{vo2018superior,
                 title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},

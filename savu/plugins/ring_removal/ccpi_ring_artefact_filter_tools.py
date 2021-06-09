@@ -1,8 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class CcpiRingArtefactFilterTools(PluginTools):
-    """This plugin applies the same ring removal method as the DLS
-tomo_recon reconstruction software.
+    """Regularization-based method for removing ring artifacts.
     """
     def define_parameters(self):
         """

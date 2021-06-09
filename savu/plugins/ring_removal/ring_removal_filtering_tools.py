@@ -1,25 +1,22 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalFilteringTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image) using a filtering-based
-method in the combination with a sorting-based method.
-Note that it's different to a FFT-based or wavelet-FFT-based
-method.
+    """Method working in the sinogram space to remove ring artifacts by
+    combining a filtering and sorting technique.
     """
     def define_parameters(self):
         """
         sigma:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Sigma of the Gaussian window. Used to separate the
               low-pass and high-pass components of each sinogram column.
             default: 3
         size:
-            visibility: intermediate
+            visibility: basic
             dtype: [float, list[float]]
-            description:  Size of the median filter window. Used to
-              clean stripes.
+            description:  Size of the median filter window. Used to clean
+              stripes.
             default: 31
         """
 
@@ -27,7 +24,7 @@ method.
     def citation(self):
         """
         The code of ring removal is the implementation of the work of
-        Nghia T. Vo et al. taken from algorithm 2 and 3 in this paper
+        Nghia T. Vo et al. taken from algorithm 2 and 3 in this paper.
         bibtex:
                 @article{vo2018superior,
                 title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},

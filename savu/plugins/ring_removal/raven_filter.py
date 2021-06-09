@@ -15,7 +15,7 @@
 """
 .. module:: raven_filter
    :platform: Unix
-   :synopsis: A plugin to remove ring artefacts
+   :synopsis: FFT-based method for removing ring artifacts.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """

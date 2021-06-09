@@ -1,9 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalInterpolationTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring artefacts
-in a reconstructed image) using a combination of a detection technique
-and an interpolation technique.
+    """Interpolation-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """

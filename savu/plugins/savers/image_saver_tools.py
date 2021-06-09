@@ -13,13 +13,13 @@ before this to rescale the data.
             default: VOLUME_XZ
 
         format:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: Image format.
             default: tif
 
         num_bit:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Bit depth of the tiff format (8, 16 or 32).
             default: 16

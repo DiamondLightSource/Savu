@@ -1,7 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RemoveAllRingsTools(PluginTools):
-    """Methods working on a sinogram-image to remove most types of ring artifacts.
+    """Combination of methods working in the sinogram space to remove most types
+     of ring artefacts.
     """
     def define_parameters(self):
         """

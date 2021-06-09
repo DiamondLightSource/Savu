@@ -15,7 +15,7 @@
 """
 .. module:: ring_removal_fitting
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -25,27 +25,16 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from scipy.ndimage import median_filter
 import pyfftw.interfaces.scipy_fftpack as fft
 from scipy.signal import savgol_filter
 
+
 @register_plugin
 class RingRemovalFitting(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a \
-    reconstructed image) using a fitting-based method. It's suitable for use \
-    on low-contrast sinogram and/or for removing blurry rings.
-
-    :param sigmax: Sigma of the Gaussian window in x-direction which controls\
-     the strength of the removal. Default: 5.
-    :param sigmay: Sigma of the Gaussian window in y-direction. Default: 20.
-    :param order: polynomial fit order. Default: 2.
-    """
 
     def __init__(self):
         super(RingRemovalFitting, self).__init__(
-                "RingRemovalFitting")
+            "RingRemovalFitting")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -59,19 +48,19 @@ class RingRemovalFitting(Plugin, CpuPlugin):
 
         Parameters
         -----------
-            height, width : shape of the window.
-            sigmax, sigmay : sigmas of the window.
+        height, width : shape of the window.
+        sigmax, sigmay : sigmas of the window.
 
         Returns
         ---------
-            win2d : 2D window.
+            2D array.
         """
-        centerx = (width-1.0) / 2.0
-        centery = (height-1.0) / 2.0
-        y, x = np.ogrid[-centery:height-centery, -centerx:width-centerx]
-        numx = 2.0*sigmax*sigmax
-        numy = 2.0*sigmay*sigmay
-        win2d = np.exp(-(x*x/numx+y*y/numy))
+        centerx = (width - 1.0) / 2.0
+        centery = (height - 1.0) / 2.0
+        y, x = np.ogrid[-centery:height - centery, -centerx:width - centerx]
+        numx = 2.0 * sigmax * sigmax
+        numy = 2.0 * sigmay * sigmay
+        win2d = np.exp(-(x * x / numx + y * y / numy))
         return win2d
 
     def pre_process(self):
@@ -81,38 +70,38 @@ class RingRemovalFitting(Plugin, CpuPlugin):
         height_dim = \
             in_pData[0].get_data_dimension_by_axis_label('rotation_angle')
         sino_shape = list(in_pData[0].get_shape())
-        self.pad = 50 # To reduce artifact caused by FFT
-        self.width1 = sino_shape[width_dim] + 2*self.pad
-        self.height1 = sino_shape[height_dim] + 2*self.pad
+        self.pad = min(int(0.1 * sino_shape[height_dim]), 50)
+        self.width1 = sino_shape[width_dim] + 2 * self.pad
+        self.height1 = sino_shape[height_dim] + 2 * self.pad
         sigmax = np.clip(np.int16(
-            self.parameters['sigmax']), 1, self.width1-1)
+            self.parameters['sigmax']), 1, self.width1 - 1)
         sigmay = np.clip(np.int16(
-            self.parameters['sigmay']), 1, self.height1-1)
+            self.parameters['sigmay']), 1, self.height1 - 1)
         self.window2d = self._create_2d_window(
             self.height1, self.width1, sigmax, sigmay)
         self.order = np.clip(
-            np.int16(self.parameters['order']), 0, self.height1-1)
+            np.int16(self.parameters['order']), 0, self.height1 - 1)
         listx = np.arange(0, self.width1)
         listy = np.arange(0, self.height1)
-        x,y = np.meshgrid(listx, listy)
-        self.matsign = np.power(-1.0,x+y)
+        x, y = np.meshgrid(listx, listy)
+        self.matsign = np.power(-1.0, x + y)
 
     def process_frames(self, data):
         sinogram = data[0]
         (height, _) = sinogram.shape
-        if height%2==0:
+        if height % 2 == 0:
             height = height - 1
         sinofit = np.abs(savgol_filter(
-            sinogram, height, self.order, axis=0, mode = 'mirror'))
+            sinogram, height, self.order, axis=0, mode='mirror'))
         sinofit2 = np.pad(
-            sinofit,((0, 0), (self.pad, self.pad)), mode = 'edge')
+            sinofit, ((0, 0), (self.pad, self.pad)), mode='edge')
         sinofit2 = np.pad(
-            sinofit2,((self.pad, self.pad), (0, 0)), mode = 'mean')
+            sinofit2, ((self.pad, self.pad), (0, 0)), mode='mean')
         sinofitsmooth = np.real(fft.ifft2(fft.fft2(
-            sinofit2*self.matsign)*self.window2d)*self.matsign)
-        sinofitsmooth = sinofitsmooth[self.pad:self.height1-self.pad,
-                                      self.pad:self.width1-self.pad]
+            sinofit2 * self.matsign) * self.window2d) * self.matsign)
+        sinofitsmooth = sinofitsmooth[self.pad:self.height1 - self.pad,
+                        self.pad:self.width1 - self.pad]
         num1 = np.mean(sinofit)
         num2 = np.mean(sinofitsmooth)
-        sinofitsmooth = num1*sinofitsmooth/num2
-        return sinogram/sinofit*sinofitsmooth
+        sinofitsmooth = num1 * sinofitsmooth / num2
+        return sinogram / sinofit * sinofitsmooth
