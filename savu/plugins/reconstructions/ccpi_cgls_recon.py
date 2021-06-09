@@ -49,6 +49,7 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
 
     def process_frames(self, data):
         sino = data[0]
+        print("in ccpi plugin", sino.shape)
         cors, angles, vol_shape, init = self.get_frame_params()
 
         voxels = ccpi_alg.cgls(sino.astype(np.float32),
@@ -82,18 +83,3 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
             logging.warn('incorrect number of frames requested for cgls_recon,'
                          ' using %s', default)
         return n_frames
-        """     A Plugin to run the CCPi implementation of the CGLS reconstruction \
-         algorithm.
-    
-        :u*param n_iterations: Number of iterations. Default: 5.
-        :u*param resolution: number of output voxels (res = n_pixels/n_voxels), \
-        set res > 1 for reduced resolution. Default: 1.
-        :param n_frames: This algorithm requires a multiple of 8 frames for \
-        processing and this number may affect performance depending on your data \
-        size (choose from 8, 16, 24, 32). Default: 16.
-    
-        :~param centre_pad: Not an option. Default: False.
-        :*param outer_pad: Not an option. Default: False.
-        :*param init_vol: Not an option. Default: None.
-        :*param enforce_positive: Not an option. Default: False.
-        """

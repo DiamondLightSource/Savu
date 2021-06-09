@@ -11,47 +11,29 @@ algorithm.
         n_iterations:
             visibility: basic
             dtype: int
-            description: Number of rows and columns in the reconstruction.
+            description: Number of iterations to perform.
             default: 5
 
         resolution:
-            visibility: basic
+            visibility: intermediate
             dtype: float
             description: Number of output voxels (res = n_pixels/n_voxels),
               set res > 1 for reduced resolution.
             default: 1
 
         n_frames:
-            visibility: basic
+            visibility: intermediate
             dtype: int
-            description:  This algorithm requires a multiple of 8 frames for
-              processing and this number may affect performance depending on
-              your data size (choose from 8, 16, 24, 32)
+            description:  This algorithm requires a multiple of 8 frames at a
+                time for processing and this number may affect performance 
+                depending on your data size.
             options: [8,16,24,32]
             default: 16
 
-        outer_pad:
-            visibility: advanced
-            dtype: [bool,int,float]
-            description: Not an option.
-            default: False
-
-        centre_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not an option.
-            default: False
-
         init_vol:
-            visibility: advanced
+            visibility: hidden
             dtype: [None,str]
             description: Not an option.
             default: None
-
-        enforce_position:
-            visibility: advanced
-            dtype: [bool,int]
-            description: Not an option.
-            default: False
 
         """
