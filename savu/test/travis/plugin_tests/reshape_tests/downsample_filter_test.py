@@ -34,7 +34,7 @@ class DownsampleFilterTest(unittest.TestCase):
     experiment = None
 
     def test_process_preview(self):
-        process_list = 'reshape/downsample_filter.nxs'
+        process_list = 'reshape/downsample_filter_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
