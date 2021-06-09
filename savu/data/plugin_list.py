@@ -128,7 +128,7 @@ class PluginList(object):
                 self._template.update_process_list(template)
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'w') as nxs_file:
+        with h5py.File(out_filename, 'a') as nxs_file:
 
             entry = nxs_file.require_group('entry')
 
@@ -142,7 +142,8 @@ class PluginList(object):
 
             count = 1
             for plugin in self.plugin_list:
-                self.__populate_plugins_group(plugins_group, plugin, count)
+                plugin_group = self._get_plugin_group(plugins_group, plugin, count)
+                self.__populate_plugins_group(plugin_group, plugin)
 
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + '.savu'
@@ -159,17 +160,12 @@ class PluginList(object):
         from savu.version import __version__
         notes['version'] = __version__
 
-    def __populate_plugins_group(self, plugins_group, plugin, count):
-        if 'pos' in plugin.keys():
-            num = int(re.findall(r'\d+', str(plugin['pos']))[0])
-            letter = re.findall('[a-z]', str(plugin['pos']))
-            letter = letter[0] if letter else ""
-            group_name = '%i%s' % (num, letter)
-        else:
-            group_name = count
+    def __populate_plugins_group(self, plugin_group, plugin):
+        """Populate the plugin group information which will be saved
 
-        plugin_group = plugins_group.create_group(group_name.encode("ascii"))
-
+        :param plugin_group: Plugin group to save to
+        :param plugin: Plugin to be saved
+        """
         plugin_group.attrs[NX_CLASS] = 'NXnote'.encode('ascii')
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
@@ -195,6 +191,24 @@ class PluginList(object):
             data = np.array([data])
             plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
 
+    def _get_plugin_group(self, plugins_group, plugin, count):
+        """Return the plugin_group, into which the plugin information
+         will be saved
+
+        :param plugins_group: Current group to save inside
+        :param plugin: Plugin to be saved
+        :param count: Order number of the plugin in the process list
+        :return: plugin group
+        """
+        if 'pos' in plugin.keys():
+            num = int(re.findall(r'\d+', str(plugin['pos']))[0])
+            letter = re.findall('[a-z]', str(plugin['pos']))
+            letter = letter[0] if letter else ""
+            group_name = '%i%s' % (num, letter)
+        else:
+            group_name = count
+        return plugins_group.create_group(group_name.encode("ascii"))
+
     def _add(self, idx, entry):
         self.plugin_list.insert(idx, entry)
         self.__set_loaders_and_savers()
@@ -203,15 +217,14 @@ class PluginList(object):
         del self.plugin_list[idx]
         self.__set_loaders_and_savers()
 
-    def _save_framework_citations(self, group):
-        framework_cites = fc.get_framework_citations()
-        self._save_f_citations(framework_cites, group)
-
     def _save_citations(self, plugin, group):
-        """ Save all the citations in the plugin
+        """Save all the citations in the plugin
+
+        :param plugin: dictionary of plugin information
+        :param group: Group to save to
         """
         if 'tools' in plugin.keys():
-            citation_plugin = plugin['tools'].get_citations()
+            citation_plugin = plugin.get("tools").get_citations()
             if citation_plugin:
                 count = 1
                 for citation in citation_plugin.values():
@@ -223,8 +236,13 @@ class PluginList(object):
                         count += 1
 
     def _dependent_citation_used(self, plugin, citation):
-        """Find the parameter value inside the process list. Check if the
-        parameter value matches the citation dependency requirement.
+        """Check if any Plugin parameter values match the citation
+        dependency requirement.
+
+        :param plugin: dictionary of plugin information
+        :param citation: A plugin citation
+        :return: bool True if the citation is for a parameter value
+            being used inside this plugin
         """
         parameters = plugin['data']
         for (citation_dependent_parameter, citation_dependent_value) \
@@ -241,14 +259,13 @@ class PluginList(object):
         for key, value in cite.items():
             exec('citation.' + key + '= value')
 
-    def _save_f_citations(self, citations, group):
+    def _save_framework_citations(self, group):
         """ Save all the citations in dict
 
-        :param citations: Citation dict
         :param group: Group for nxs file
-        :return:
         """
-        for cite in citations:
+        framework_cites = fc.get_framework_citations()
+        for cite in framework_cites:
             label = cite['short_name_article']
             del cite['short_name_article']
             self._save_citation_group(CitationInformation(**cite), cite,
