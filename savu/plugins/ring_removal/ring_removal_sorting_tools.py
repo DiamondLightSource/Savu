@@ -1,15 +1,14 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalSortingTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image) using a sorting-based method.
-It works particularly well for removing partial rings.
+    """Sorting-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """
         size:
-            visibility: intermediate
-            dtype: [float, list[float]]
+            visibility: basic
+            dtype: int
             description: Size of the median filter window. Greater is stronger.
             default: 31
         """
@@ -17,7 +16,7 @@ It works particularly well for removing partial rings.
     def citation(self):
         """
         The code of ring removal is the implementation of the work of
-        Nghia T. Vo et al. taken from algorithm 3 in this paper
+        Nghia T. Vo et al. taken from algorithm 3 in this paper.
         bibtex:
                 @article{vo2018superior,
                 title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},

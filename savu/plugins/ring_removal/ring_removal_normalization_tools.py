@@ -1,20 +1,18 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalNormalizationTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a
-reconstructed image) using a normalization-based method. A simple
-improvement to handle partial stripes is included.
-
+    """Normalization-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """
         radius:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Radius of the Gaussian kernel.
             default: 11
         number_of_chunks:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description:  Divide the sinogram to many chunks of rows
             default: 1

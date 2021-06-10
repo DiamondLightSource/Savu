@@ -15,7 +15,7 @@
 """
 .. module:: ring_removal_regularization
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts     
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>    
    
 """
@@ -27,15 +27,6 @@ import numpy as np
 
 @register_plugin
 class RingRemovalRegularization(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a\ 
-    reconstructed image) using a regularization-based method. 
-    A simple improvement to handle partial stripes is included.    
-    :param alpha: The correction strength. Smaller is stronger. Default: 0.005
-    :param number_of_chunks: Divide the sinogram to many chunks of rows. \
-    Default: 1
-    """
 
     def __init__(self):
         super(RingRemovalRegularization, self).__init__(

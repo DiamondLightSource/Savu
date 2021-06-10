@@ -1,25 +1,26 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalWaveletfftTools(PluginTools):
-    """Ring artefact removal method
+    """Wavelet-FFt-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """
-        nvalue:
-            visibility: intermediate
-            dtype: int
-            description: Order of the the Daubechies (DB) wavelets.
-            default: 5
         sigma:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Damping parameter. Larger is stronger.
             default: 1
         level:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Wavelet decomposition level.
-            default: 3
+            default: 4
+        nvalue:
+            visibility: intermediate
+            dtype: int
+            description: Order of the the Daubechies (DB) wavelets.
+            default: 8
         padFT:
             visibility: intermediate
             dtype: int
