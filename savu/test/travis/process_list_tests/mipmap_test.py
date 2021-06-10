@@ -30,7 +30,7 @@ class MipmapTest(unittest.TestCase):
 
     def test_mipmap(self):
         data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('mipmap_test.nxs')
+        process_file = tu.get_test_process_path('reshape/mipmap_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

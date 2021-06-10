@@ -34,7 +34,7 @@ class MipmapTest(unittest.TestCase):
     experiment = None
 
     def test_process_preview(self):
-        process_list = 'reshape/mipmap.nxs'
+        process_list = 'reshape/mipmap_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
