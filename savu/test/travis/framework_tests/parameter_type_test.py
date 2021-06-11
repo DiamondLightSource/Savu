@@ -240,7 +240,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that filepath is accepted
         pdefs = self.initial_setup()
         key = "file_path_param"
-        value = self._get_savu_base_path() + "system_files/dls/test_dev_script.txt"
+        value = self._get_savu_base_path() + "system_files/dls/system_parameters.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
