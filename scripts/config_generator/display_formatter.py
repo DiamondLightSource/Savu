@@ -403,10 +403,15 @@ class DispDisplay(ParameterFormatter):
         :param width: width of the console display
         :return: parameter string
         """
+        offset = 2
+        align = "left"
         cur_visibility = p_dict["param"][key]["visibility"]
-        split = "-" * ((width - len(cur_visibility)) - 4)
+        split = "-" * ((width - len(cur_visibility)) - offset)
         if cur_visibility != prev_visibility:
-            params += "\n" + split + cur_visibility + "-" * 4
+            if align == "left":
+                params += "\n" + "-" * offset + cur_visibility + split
+            else:
+                params += "\n" + split + cur_visibility + "-" * offset
         return params
 
     def _get_verbose(
