@@ -25,7 +25,7 @@ class ImageStitchingTools(PluginTools):
               crop_left, crop_right]."
             default: [0, 0, 250, 250]
         pattern:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: "Data processing pattern is 'PROJECTION' or
              'SINOGRAM'."

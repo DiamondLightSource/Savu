@@ -31,7 +31,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class DownsampleFilterTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
-    experiment = None
+    experiment = 'tomo'
 
     def test_process_preview(self):
         process_list = 'reshape/downsample_filter_test.nxs'
