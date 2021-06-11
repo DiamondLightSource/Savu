@@ -21,6 +21,7 @@
 
 """
 
+import os
 import unittest
 import numpy as np
 
@@ -174,7 +175,10 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "Savu/doc/source/files_and_images/plugin_guides/parameter_key.yaml"
+        savu_base_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), '../../../../')
+        yaml_file = "doc/source/files_and_images/plugin_guides/parameter_key.yaml"
+        value = os.path.join(savu_base_path, yaml_file)
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
             key, value_check, pdefs[key]
@@ -247,8 +251,8 @@ class ParameterTypeTest(unittest.TestCase):
         key = "file_path_param"
 
         import os
-        savu_base_path = \
-            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+        savu_base_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), '../../../../')
 
         value = savu_base_path + "system_files/dls/test_dev_script.txt"
 
