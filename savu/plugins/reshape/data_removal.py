@@ -48,7 +48,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         in_data.amend_axis_label_values(
             in_pData._get_data_slice_list(self.sl))
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         return data[0][self.sl]
 
     def setup(self):
