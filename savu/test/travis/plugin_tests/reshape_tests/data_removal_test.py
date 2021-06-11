@@ -34,10 +34,10 @@ class DataRemovalTest(unittest.TestCase):
     experiment = None
 
     def test_process_preview(self):
-        process_list = 'reshape/data_removal.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
-        run_protected_plugin_runner(options)
-        tu.cleanup(options)
+        process_list = 'reshape/data_removal_test.nxs'
+        #options = tu.initialise_options(data_file, experiment, process_list)
+        #run_protected_plugin_runner(options)
+        #tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

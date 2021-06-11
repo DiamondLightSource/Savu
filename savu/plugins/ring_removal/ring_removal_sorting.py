@@ -15,7 +15,7 @@
 """
 .. module:: ring_removal_sorting
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,20 +29,10 @@ from scipy.ndimage import median_filter
 
 @register_plugin
 class RingRemovalSorting(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a \
-    reconstructed image) using a sorting-based method. It works particularly well\
-    for removing partial rings.
-
-    :param size: Size of the median filter window. Greater is stronger.\
-     Default: 31.
-
-    """
 
     def __init__(self):
         super(RingRemovalSorting, self).__init__(
-                "RingRemovalSorting")
+            "RingRemovalSorting")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -61,16 +51,15 @@ class RingRemovalSorting(Plugin, CpuPlugin):
         self.width1 = sino_shape[width_dim]
         self.height1 = sino_shape[height_dim]
         listindex = np.arange(0.0, self.height1, 1.0)
-        self.matindex = np.tile(listindex,(self.width1,1))        
+        self.matindex = np.tile(listindex, (self.width1, 1))
 
     def process_frames(self, data):
         sinogram = np.transpose(np.copy(data[0]))
-        size = np.clip(np.int16(self.parameters['size']), 1, self.width1-1)
+        size = np.clip(np.int16(self.parameters['size']), 1, self.width1 - 1)
         matcomb = np.asarray(np.dstack((self.matindex, sinogram)))
         matsort = np.asarray([row[row[:, 1].argsort()] for row in matcomb])
-        matsort[:, :, 1] = median_filter(matsort[:, :, 1],(size,1))
+        matsort[:, :, 1] = median_filter(matsort[:, :, 1], (size, 1))
         matsortback = np.asarray(
             [row[row[:, 0].argsort()] for row in matsort])
         sino_corrected = matsortback[:, :, 1]
         return np.transpose(sino_corrected)
-

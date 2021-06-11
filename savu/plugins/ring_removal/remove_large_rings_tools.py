@@ -2,7 +2,7 @@ from savu.plugins.plugin_tools import PluginTools
 
 
 class RemoveLargeRingsTools(PluginTools):
-    """Methods working on a sinogram-image to remove large ring artifacts.
+    """Method working in the sinogram space to remove large ring artifacts.
     """
 
     def define_parameters(self):

@@ -1,19 +1,18 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalRegularizationTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image) using a regularization-based
-method. A simple improvement to handle partial stripes is included.
+    """Regularization-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """
         alpha:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: The correction strength. Smaller is stronger.
             default: 0.005
         number_of_chunks:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Divide the sinogram to many chunks of rows.
             default: 1

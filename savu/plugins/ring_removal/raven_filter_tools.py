@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RavenFilterTools(PluginTools):
-    """Ring artefact removal method
+    """FFT-based method for removing ring artifacts.
     """
     def define_parameters(self):
         """
