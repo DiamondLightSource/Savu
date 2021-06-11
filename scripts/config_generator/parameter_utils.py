@@ -90,7 +90,10 @@ def _savufilepath(value, returnpath=False):
     """ A file path inside the Savu directory"""
     savu_base_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '../../')
-    value = os.path.join(savu_base_path, value.split('Savu/')[1])
+    
+    split_path = value.split('Savu')
+    if len(split_path) > 1:
+        value = os.path.join(savu_base_path, split_path[1][1:])
     if returnpath:
         return os.path.isfile(value), value
     return os.path.isfile(value)

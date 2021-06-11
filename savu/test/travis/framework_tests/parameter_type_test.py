@@ -176,17 +176,6 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_yaml(self):
-        # Check that yaml file is accepted
-        pdefs = self.initial_setup()
-        key = "yaml_file"
-        value = self._get_savu_base_path() + "/doc/source/files_and_images/plugin_guides/parameter_key.yaml"
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
     def test_yaml_1(self):
         # Check that integer is not accepted
         pdefs = self.initial_setup()
