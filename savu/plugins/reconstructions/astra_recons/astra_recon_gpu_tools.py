@@ -9,14 +9,14 @@ class AstraReconGpuTools(PluginTools):
             visibility: basic
             dtype: [int,bool]
             description: Output the residual norm at each iteration
-              (Error in the solution - iterative solvers only)
+              (Error in the solution)
             default: False
             dependency:
               algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
         algorithm:
             visibility: basic
             dtype: str
-            options: [FBP_CUDA, SIRT_CUDA, SART_CUDA, CGLS_CUDA, FP_CUDA,
+            options: [FBP_CUDA, SIRT_CUDA, SART_CUDA, CGLS_CUDA,
               BP_CUDA, SIRT3D_CUDA, CGLS3D_CUDA]
             description:
                 summary: Reconstruction type
@@ -25,13 +25,12 @@ class AstraReconGpuTools(PluginTools):
                   SIRT_CUDA: Simultaneous Iterative Reconstruction Technique
                   SART_CUDA: Simultaneous Algebraic Reconstruction Technique
                   CGLS_CUDA: Conjugate Gradient Least Squares
-                  FP_CUDA: Forward Projection
                   BP_CUDA: Backward Projection
                   SIRT3D_CUDA: Simultaneous Iterative Reconstruction Technique 3D
                   CGLS3D_CUDA: Conjugate Gradient Least Squares 3D
             default: FBP_CUDA
         FBP_filter:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             options: [none,
                 ram-lak,
@@ -72,8 +71,13 @@ class AstraReconGpuTools(PluginTools):
                 flat-top:
                 kaiser:
                 parzen:
-            default: 'ram-lak'
-
+            default: 'ram-lak'            
+        outer_pad:
+             dependency:
+               algorithm: [FBP_CUDA, BP_CUDA]
+        centre_pad:
+             dependency:
+               algorithm: [FBP_CUDA, BP_CUDA]               
         """
 
 

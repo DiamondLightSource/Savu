@@ -152,10 +152,6 @@ class BaseAstraVectorRecon(BaseRecon):
         if proj_id:
             astra.projector.delete(proj_id)
 
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return ['FBP', 'FBP_CUDA']
-
     def _get_single(self):
         return 'single'
 

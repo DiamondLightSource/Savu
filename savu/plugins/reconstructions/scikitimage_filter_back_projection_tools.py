@@ -38,10 +38,7 @@ inverse radon transform from scikit-image.
             default: False
 
         vol_shape:
-             visibility: hidden
-             dtype: [str, int]
-             description: None
-             default: fixed            
+             visibility: hidden          
         """
 
     def citation(self):
