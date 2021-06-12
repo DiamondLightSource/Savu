@@ -128,7 +128,7 @@ class DisplayFormatter(object):
         doc_link = doc_str.get("documentation_link")
         if doc_link:
             documentation_link = self._get_equal_lines(doc_link, width,
-                                            info_colour, colour_off, " " * 2)
+                                            info_colour, colour_off, " "*2)
             info +="\n"+documentation_link
 
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
@@ -213,20 +213,46 @@ class ParameterFormatter(DisplayFormatter):
                                width, breakdown, expand_dim=None):
         margin = 6
         str_margin = " " * margin
-        temp = "\n   %2i)   %29s : %s"
+        temp = f"  {keycount})  {key} :"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
             val = pu._dumps(val)
             if expand_dim == "all":
-                val = self._preview_output(val, width, self._get_dimensions(val))
+                val = self._preview_output(val, width,
+                                           self._get_dimensions(val))
             else:
                 pu.check_valid_dimension(expand_dim, val)
                 val = self._dim_slice_output(val, width, expand_dim)
-        params += temp % (keycount, key, val)
+        # Add balancing spaces between {keycount} and {key}
+        spacing = self._get_str_spacing(temp, width, 20)
+        temp = f"  {keycount})  {spacing}{key} : {val}"
+        params += "\n" + self._get_equal_lines(temp, width, Fore.RESET,
+                                               Fore.RESET, " "*2)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
                                               width, params, breakdown)
         return params
+
+    def _get_str_spacing(self, temp, width, new_space):
+        """Create string containing parameter number and value.
+        Add balancing spaces between keycount and key
+
+        :param temp: temporary string
+        :param new_space: length of space to optionally add when the
+           width is large enough
+        :param width: Terminal/display width
+        :return: Spacing of display output, so that it is inline with
+           the preceeding lines
+        """
+        space = new_space * " "
+        temp_length = len(space) + len(temp)
+        while temp_length < (width//2):
+            new_space += 1
+            temp_length += 1
+        while temp_length > (width//2):
+            new_space -= 1
+            temp_length -= 1
+        return new_space * " "
 
     def _get_dimensions(self, preview_list):
         """Check how many dimensions to display
@@ -237,14 +263,26 @@ class ParameterFormatter(DisplayFormatter):
         return 1 if not preview_list else len(preview_list)
 
     def _preview_output(self, preview, width, dims):
-        """ Compile output string lines for preview syntax"""
+        """Compile output string lines for preview syntax
+
+        :param preview: The preview parameter value
+        :param width: Width of the display output
+        :param dims: Number of dimensions to display
+        :return: String containing preview parameter value
+        """
         temp_str = ""
         for dim in range(1, dims + 1):
             temp_str += self._dim_slice_output(preview, width, dim)
         return temp_str
 
     def _dim_slice_output(self, preview_list, width, dims):
-        """Compile the string lines for dimension and slice notation syntax"""
+        """Compile the string lines for dimension and slice notation syntax
+
+        :param preview_list: The list of preview parameter entries
+        :param width: Width of the display output
+        :param dims: Number of dimensions to display
+        :return: String containing preview parameter value of dimension chosen
+        """
         temp_str = ""
         # If there are multiple values in list format
         # Only show the values for the dimensions chosen
