@@ -41,17 +41,25 @@ required for the chosen algorithm will be ignored.
               algorithms."
             default: 1
 
+        outer_pad:
+             visibility: intermediate
+             dtype: [bool, float]
+             description: 'Pad the sinogram width to fill the
+               reconstructed volume for asthetic purposes. Choose
+               from True (defaults to sqrt(2)), False or
+               float <= 2.1.'
+             warning: This will increase the size of the data and
+               the time to compute the reconstruction. Only available
+               for selected algorithms and will be ignored otherwise.
+             default: False
+             dependency:
+               algorithm: [fbp, gridrec]
+
         init_vol:
             visibility: hidden
             dtype: [None,int]
             description: Not an option.
             default: None
-
-        centre_pad:
-            visibility: hidden
-            dtype: [int,bool]
-            description: Not an option.
-            default: False
 
         """
 

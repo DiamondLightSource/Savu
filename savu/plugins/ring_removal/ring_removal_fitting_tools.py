@@ -1,26 +1,24 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class RingRemovalFittingTools(PluginTools):
-    """Method to remove stripe artefacts in a sinogram (<-> ring
-artefacts in a reconstructed image) using a fitting-based method.
-It's suitable for use on low-contrast sinogram and/or for removing
-blurry rings.
+    """Fitting-based method working in the sinogram space to remove ring
+    artifacts.
     """
     def define_parameters(self):
         """
         sigmax:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Sigma of the Gaussian window in x-direction which
-              controls the strength of the removal.
+              controls the strength of the removal. Smaller is stronger.
             default: 5
         sigmay:
             visibility: intermediate
             dtype: int
-            description: Sigma of the Gaussian window in y-direction
-            default: 20
+            description: Sigma of the Gaussian window in y-direction.
+            default: 30
         order:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: polynomial fit order.
             default: 2

@@ -15,7 +15,8 @@
 """
 .. module:: remove_large_rings
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove large stripe artefacts
+   :synopsis: Method working in the sinogram space to remove large ring
+    artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """

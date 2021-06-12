@@ -120,7 +120,3 @@ class TomopyRecon(BaseRecon, CpuPlugin):
             'pml_quad': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par'],
             'sirt': ['num_gridx', 'num_gridy', 'num_iter'],
         }
-
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return ['fbp', 'gridrec']

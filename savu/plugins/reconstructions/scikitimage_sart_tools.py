@@ -15,7 +15,7 @@ inverse radon transform from scikit-image.
             default: 1
 
         output_size:
-            visibility: basic
+            visibility: intermediate
             dtype: [None, int, list[int,int]]
             description: Number of rows and columns in the reconstruction.
             default: None
@@ -29,7 +29,7 @@ inverse radon transform from scikit-image.
             default: ramp
 
         interpolation:
-            visibility: advanced
+            visibility: intermediate
             dtype: int
             description: "Interpolation method used in reconstruction.
               Methods available: linear, nearest, and cubic (cubic is slow)."
@@ -37,7 +37,7 @@ inverse radon transform from scikit-image.
             default: linear
 
         circle:
-            visibility: advanced
+            visibility: intermediate
             dtype: bool
             description: "Assume the reconstructed image is zero outside
               the inscribed circle. Also changes the default output_size
@@ -45,7 +45,7 @@ inverse radon transform from scikit-image.
             default: False
 
         image:
-           visibility: advanced
+           visibility: intermediate
            dtype: [None,list]
            description:  "2D array, dtype=float, optional.  Image containing
              an initial reconstruction estimate. Shape of this array should
@@ -54,7 +54,7 @@ inverse radon transform from scikit-image.
            default: None
 
         projection_shifts:
-            visibility: advanced
+            visibility: intermediate
             dtype: [list, None]
             description: "1D array dtype = float Shift the projections
               contained in radon_image (the sinogram) by this many pixels
@@ -63,7 +63,7 @@ inverse radon transform from scikit-image.
             default: None
 
         clip:
-            visibility: advanced
+            visibility: intermediate
             dtype: [list,None]
             description: "length-2 sequence of floats. Force all values in
               the reconstructed tomogram to lie in the range [clip[0],
@@ -77,18 +77,6 @@ inverse radon transform from scikit-image.
               higher value can improve the convergence rate, but one runs the risk
               of instabilities. Values close to or higher than 1 are not recommended.
             default: None
-
-        outer_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
-
-        centre_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
 
         """
 

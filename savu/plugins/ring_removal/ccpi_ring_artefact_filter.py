@@ -15,7 +15,7 @@
 """
 .. module:: ccpi_ring_artefact_filter
    :platform: Unix
-   :synopsis: A plugin to perform ring artefact removal
+   :synopsis: Regularization-based method for removing ring artifacts.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

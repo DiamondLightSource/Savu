@@ -196,10 +196,12 @@ class NxtomoLoader(BaseLoader):
 
     def __set_data(self, data_obj, name, func):
         path, entry, scale = self.parameters[name]
+            
         if path.split('/')[0] == 'Savu':
             import os
-            path = os.path.join(os.path.abspath(__file__).split(
-                "Savu/savu/plugins")[0], path)
+            savu_base_path = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), '..', '..', '..', '..')
+            path = os.path.join(savu_base_path, path.split('Savu')[1][1:])
 
         ffile = h5py.File(path, 'r')
         try:

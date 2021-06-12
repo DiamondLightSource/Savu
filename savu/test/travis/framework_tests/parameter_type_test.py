@@ -21,6 +21,7 @@
 
 """
 
+import os
 import unittest
 import numpy as np
 
@@ -36,6 +37,11 @@ class ParameterTypeTest(unittest.TestCase):
         tools._populate_default_parameters()
         pdefs = tools.get_param_definitions()
         return pdefs
+
+    def _get_savu_base_path(self):
+        savu_base_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), '../../../../')
+        return savu_base_path
 
     def test_int(self):
         # Check that integer is accepted
@@ -170,17 +176,6 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
-    def test_yaml(self):
-        # Check that yaml file is accepted
-        pdefs = self.initial_setup()
-        key = "yaml_file"
-        value = "Savu/doc/source/files_and_images/plugin_guides/parameter_key.yaml"
-        value_check = pu._dumps(value)
-        valid_modification, error_str = param_u.is_valid(
-            key, value_check, pdefs[key]
-        )
-        self.assertTrue(valid_modification)
-
     def test_yaml_1(self):
         # Check that integer is not accepted
         pdefs = self.initial_setup()
@@ -209,7 +204,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        value = self._get_savu_base_path() + "/savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -221,7 +216,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that incorrect yaml file is not accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        value = self._get_savu_base_path() + "savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -233,7 +228,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml file is accepted
         pdefs = self.initial_setup()
         key = "yaml_file"
-        value = "Savu/savu/plugins/loaders/templates/nexus_templates/mm.yml"
+        value = self._get_savu_base_path() + "savu/plugins/loaders/templates/nexus_templates/mm.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -245,12 +240,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that filepath is accepted
         pdefs = self.initial_setup()
         key = "file_path_param"
-
-        import os
-        savu_base_path = \
-            os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
-
-        value = savu_base_path + "system_files/dls/test_dev_script.txt"
+        value = self._get_savu_base_path() + "system_files/dls/system_parameters.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -286,7 +276,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that yaml filepath is accepted
         pdefs = self.initial_setup()
         key = "file_path_param"
-        value = "Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml"
+        value = self._get_savu_base_path() + "savu/plugins/loaders/templates/nexus_templates/fluo.yml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
@@ -298,7 +288,7 @@ class ParameterTypeTest(unittest.TestCase):
         # Check that incorrect filepath is not accepted
         pdefs = self.initial_setup()
         key = "file_path_param"
-        value = "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        value = self._get_savu_base_path() + "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(

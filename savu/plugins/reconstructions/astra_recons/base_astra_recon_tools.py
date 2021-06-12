@@ -8,11 +8,30 @@ class BaseAstraReconTools(PluginTools):
         n_iterations:
             visibility: basic
             dtype: int
-            description: Number of Iterations is only valid for iterative algorithms
+            description: Number of iterations to perform.
             default: 1
             dependency:
               algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
-
+        outer_pad:
+             visibility: intermediate
+             dtype: [bool, float]
+             description: 'Pad the sinogram width to fill the
+               reconstructed volume for asthetic purposes. Choose
+               from True (defaults to sqrt(2)), False or
+               float <= 2.1.'
+             warning: This will increase the size of the data and
+               the time to compute the reconstruction. Only available
+               for selected algorithms and will be ignored otherwise.
+             default: False
+        centre_pad:
+              visibility: intermediate
+              dtype: [bool, float]
+              description: Pad the sinogram to centre it in order
+                to fill the reconstructed volume ROI for asthetic
+                purposes.
+              warning: This will significantly increase the size of
+                the data and the time to compute the reconstruction)
+              default: False              
         """
 
 
