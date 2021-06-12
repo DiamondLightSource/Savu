@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import os
 import textwrap
 
 from colorama import Fore, Back, Style
@@ -40,6 +40,7 @@ class DisplayFormatter(object):
 
     def _get_string(self, **kwargs):
         out_string = []
+        width = self._get_terminal_width()
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("current_level", "basic")
         datasets = kwargs.get("datasets", False)
@@ -54,7 +55,7 @@ class DisplayFormatter(object):
 
         count = start
         plugin_list = self.plugin_list[start:stop]
-        line_break = "%s" % ("-" * WIDTH)
+        line_break = "%s" % ("-" * width)
         out_string.append(line_break)
 
         display_args = {
@@ -65,7 +66,7 @@ class DisplayFormatter(object):
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
-                WIDTH, level, p_dict, count, verbosity, display_args
+                width, level, p_dict, count, verbosity, display_args
             )
             out_string.append(description)
             out_string.append(line_break)
@@ -94,10 +95,9 @@ class DisplayFormatter(object):
         pos = "%2s" % (str(pos) + ")") if pos else ""
         title = "%s %s %s" % (active, pos, p_dict["name"])
         title = title if quiet else title + " (%s)" % p_dict["id"]
-        width -= len(title)
-        return (
-            back_colour + fore_colour + title + " " * width + Style.RESET_ALL
-        )
+        title_str = self._get_equal_lines(
+            title, width, back_colour+fore_colour, Style.RESET_ALL, " "*2)
+        return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = (
@@ -169,6 +169,12 @@ class DisplayFormatter(object):
             data_dict[key] = val
         return data_dict
 
+    def _get_terminal_width(self):
+        """Return the width of the terminal"""
+        try:
+            return os.get_terminal_size().columns
+        except (AttributeError, OSError) as ae:
+            return 85
 
 class ParameterFormatter(DisplayFormatter):
     def __init__(self, plugin_list):
@@ -686,7 +692,7 @@ class ListDisplay(ParameterFormatter):
         return default_str + info
 
     def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
-        all_params = self._get_param_details("all", p_dict, 100)
+        all_params = self._get_param_details("all", p_dict, width)
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN
         warn_c = Fore.RED
