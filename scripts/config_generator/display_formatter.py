@@ -92,11 +92,11 @@ class DisplayFormatter(object):
 
     def _get_plugin_title(self, p_dict, width, fore_colour, back_colour,
                           active="", quiet=False, pos=None):
-        pos = "%2s" % (str(pos) + ")") if pos else ""
-        title = "%s %s %s" % (active, pos, p_dict["name"])
-        title = title if quiet else title + " (%s)" % p_dict["id"]
+        pos = f"{pos})" if pos else ""
+        title = f"{active} {pos} {p_dict['name']}"
+        title = title if quiet else f"{title} ({p_dict['id']})"
         title_str = self._get_equal_lines(
-            title, width, back_colour+fore_colour, Style.RESET_ALL, " "*2)
+            title, width, back_colour+fore_colour, Style.RESET_ALL, "")
         return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
@@ -213,7 +213,7 @@ class ParameterFormatter(DisplayFormatter):
                                width, breakdown, expand_dim=None):
         margin = 6
         str_margin = " " * margin
-        temp = f"  {keycount})  {key} :"
+        temp = f"  {keycount}){key} :"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
             val = pu._dumps(val)
@@ -225,7 +225,7 @@ class ParameterFormatter(DisplayFormatter):
                 val = self._dim_slice_output(val, width, expand_dim)
         # Add balancing spaces between {keycount} and {key}
         spacing = self._get_str_spacing(temp, width, 20)
-        temp = f"  {keycount})  {spacing}{key} : {val}"
+        temp = f"  {keycount}){spacing}{key} : {val}"
         params += "\n" + self._get_equal_lines(temp, width, Fore.RESET,
                                                Fore.RESET, " "*2)
         if desc:
@@ -244,12 +244,13 @@ class ParameterFormatter(DisplayFormatter):
         :return: Spacing of display output, so that it is inline with
            the preceeding lines
         """
+        off_center = 6
         space = new_space * " "
         temp_length = len(space) + len(temp)
-        while temp_length < (width//2):
+        while temp_length < (width//2)-off_center:
             new_space += 1
             temp_length += 1
-        while temp_length > (width//2):
+        while temp_length > (width//2)-off_center:
             new_space -= 1
             temp_length -= 1
         return new_space * " "
