@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
-.. module:: image_saver_test
+.. module:: hdf5_saver_test
    :platform: Unix
-   :synopsis: Unit test for image_saver plugin
+   :synopsis: unittest for hdf5 saver
 
-.. moduleauthor:: Dan Nixon <daniel.nixon.stfc.ac.uk>
+.. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
 
 """
-import unittest
-from savu.test import test_utils as tu
-from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
 
-class ImageSaverTest(unittest.TestCase):
+import unittest
+import savu.test.test_utils as tu
+from savu.test.travis.framework_tests.plugin_runner_test import \
+        run_protected_plugin_runner
+
+class Hdf5SaverTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
     experiment = None
 
-    def test_image_saver(self):
-        process_list = 'imagesavers/image_saver_test.nxs'
+    def test_hdf5_saver(self):
+        process_list = 'savers/hdf5_saver_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
