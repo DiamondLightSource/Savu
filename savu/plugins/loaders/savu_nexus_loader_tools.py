@@ -2,11 +2,11 @@ from savu.plugins.plugin_tools import PluginTools
 
 class SavuNexusLoaderTools(PluginTools):
     """A class to load datasets, and associated metadata, from a Savu output
-nexus file.
+    nexus file.
 
-By default, the last instance of each unique dataset name will be loaded.
-Opt instead to load a subset of these datasets, or individual datasets by
-populating the parameters.
+    By default, the last instance of each unique dataset name will be loaded.
+    Opt instead to load a subset of these datasets, or individual datasets by
+    populating the parameters.
 
     """
     def define_parameters(self):
@@ -21,7 +21,7 @@ populating the parameters.
         datasets:
               visibility: basic
               dtype: [list[],list[str]]
-              description: Overuuride the default by choosing specific
+              description: Override the default by choosing specific
                 dataset(s) to load, by stating the NXdata name.
               default: []
         names:
