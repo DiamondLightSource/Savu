@@ -32,15 +32,19 @@ def _find_test_modules(tests, nxs_file):
                 print("\t--->", t)
 
 def main():
-    base_folder = "/home/algol/Documents/DEV/Savu/test_data/"
+    base_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
+
+    test_data_dir = os.path.join(base_dir, "test_data")
     args = __option_parser(doc=False)
     plugin_name = args.plugin
-    process_lists = list(Path(base_folder + "test_process_lists").rglob("*.nxs"))
-    process_lists += list(Path(base_folder + "process_lists").rglob("*.nxs"))
+    process_lists = list(Path(os.path.join(
+        test_data_dir, "test_process_lists")).rglob("*.nxs"))
+    process_lists += list(Path(os.path.join(
+        test_data_dir, "process_lists")).rglob("*.nxs"))
 
-    test_path = "/home/algol/Documents/DEV/Savu/savu/test/"
-    tests = list(Path(test_path + "travis").rglob("*.py"))
-    tests += list(Path(test_path + "jenkins").rglob("*.py"))
+    test_dir = os.path.join(base_dir, 'savu', 'test')
+    tests = list(Path(os.path.join(test_dir, "travis")).rglob("*.py"))
+    tests += list(Path(os.path.join(test_dir, "jenkins")).rglob("*.py"))
 
     for nxs_file in process_lists:
         try:
