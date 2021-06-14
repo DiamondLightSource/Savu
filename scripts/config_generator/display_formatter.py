@@ -243,13 +243,13 @@ class ParameterFormatter(DisplayFormatter):
         :return: Spacing of display output, so that it is inline with
            the preceeding lines
         """
-        off_center = 6
+        offset = 13
         space = new_space * " "
         temp_length = len(space) + len(temp)
-        while temp_length < (width//2)-off_center:
+        while temp_length < (width // 2) - offset:
             new_space += 1
             temp_length += 1
-        while temp_length > (width//2)-off_center:
+        while temp_length > (width // 2) - offset:
             new_space -= 1
             temp_length -= 1
         return new_space * " "
