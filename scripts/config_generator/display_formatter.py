@@ -41,6 +41,7 @@ class DisplayFormatter(object):
     def _get_string(self, **kwargs):
         out_string = []
         width = self._get_terminal_width()
+
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("current_level", "basic")
         datasets = kwargs.get("datasets", False)
@@ -172,9 +173,10 @@ class DisplayFormatter(object):
     def _get_terminal_width(self):
         """Return the width of the terminal"""
         try:
-            return os.get_terminal_size().columns
+            terminal_width = os.get_terminal_size().columns
+            return terminal_width if terminal_width < WIDTH else WIDTH
         except (AttributeError, OSError) as ae:
-            return 85
+            return WIDTH
 
 class ParameterFormatter(DisplayFormatter):
     def __init__(self, plugin_list):
