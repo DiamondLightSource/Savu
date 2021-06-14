@@ -33,7 +33,7 @@ class DataRemovalTest(unittest.TestCase):
     data_file = '24737.nxs'
     experiment = 'tomo'
 
-    def test_process_preview(self):
+    def test_data_removal(self):
         process_list = 'reshape/data_removal_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
