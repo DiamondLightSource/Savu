@@ -20,7 +20,7 @@
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
-
+import os
 import textwrap
 
 from colorama import Fore, Back, Style
@@ -40,6 +40,8 @@ class DisplayFormatter(object):
 
     def _get_string(self, **kwargs):
         out_string = []
+        width = self._get_terminal_width()
+
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("current_level", "basic")
         datasets = kwargs.get("datasets", False)
@@ -54,7 +56,7 @@ class DisplayFormatter(object):
 
         count = start
         plugin_list = self.plugin_list[start:stop]
-        line_break = "%s" % ("-" * WIDTH)
+        line_break = "%s" % ("-" * width)
         out_string.append(line_break)
 
         display_args = {
@@ -65,7 +67,7 @@ class DisplayFormatter(object):
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
-                WIDTH, level, p_dict, count, verbosity, display_args
+                width, level, p_dict, count, verbosity, display_args
             )
             out_string.append(description)
             out_string.append(line_break)
@@ -91,13 +93,12 @@ class DisplayFormatter(object):
 
     def _get_plugin_title(self, p_dict, width, fore_colour, back_colour,
                           active="", quiet=False, pos=None):
-        pos = "%2s" % (str(pos) + ")") if pos else ""
-        title = "%s %s %s" % (active, pos, p_dict["name"])
-        title = title if quiet else title + " (%s)" % p_dict["id"]
-        width -= len(title)
-        return (
-            back_colour + fore_colour + title + " " * width + Style.RESET_ALL
-        )
+        pos = f"{pos})" if pos else ""
+        title = f"{active} {pos} {p_dict['name']}"
+        title = title if quiet else f"{title} ({p_dict['id']})"
+        title_str = self._get_equal_lines(
+            title, width, back_colour+fore_colour, Style.RESET_ALL, "")
+        return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = (
@@ -128,7 +129,7 @@ class DisplayFormatter(object):
         doc_link = doc_str.get("documentation_link")
         if doc_link:
             documentation_link = self._get_equal_lines(doc_link, width,
-                                            info_colour, colour_off, " " * 2)
+                                            info_colour, colour_off, " "*2)
             info +="\n"+documentation_link
 
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
@@ -169,6 +170,13 @@ class DisplayFormatter(object):
             data_dict[key] = val
         return data_dict
 
+    def _get_terminal_width(self):
+        """Return the width of the terminal"""
+        try:
+            terminal_width = os.get_terminal_size().columns
+            return terminal_width if terminal_width < WIDTH else WIDTH
+        except (AttributeError, OSError) as ae:
+            return WIDTH
 
 class ParameterFormatter(DisplayFormatter):
     def __init__(self, plugin_list):
@@ -207,20 +215,44 @@ class ParameterFormatter(DisplayFormatter):
                                width, breakdown, expand_dim=None):
         margin = 6
         str_margin = " " * margin
-        temp = "\n   %2i)   %29s : %s"
+        temp = f"  {keycount}){key} :"
+        # Add spaces depending on console width
+        spacing = self._get_console_spacing(temp, width, 20)
+        temp = f"  {keycount}){spacing}{key} : "
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
-            val = pu._dumps(val)
-            if expand_dim == "all":
-                val = self._preview_output(val, width, self._get_dimensions(val))
-            else:
-                pu.check_valid_dimension(expand_dim, val)
-                val = self._dim_slice_output(val, width, expand_dim)
-        params += temp % (keycount, key, val)
+            params += self._get_expand_output(temp, val, params, width,
+                                              expand_dim)
+        else:
+            temp = f"{temp}{val}"
+            params += "\n" + self._get_equal_lines(temp, width, Fore.RESET,
+                                                   Fore.RESET, " "*2)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
-                                              width, params, breakdown)
+                                              params, width, breakdown)
         return params
+
+    def _get_console_spacing(self, temp, width, new_space):
+        """Create string containing parameter number and value.
+        Add balancing spaces between keycount and key
+
+        :param temp: temporary string
+        :param new_space: length of space to optionally add when the
+           width is large enough
+        :param width: Terminal/display width
+        :return: Spacing of display output, so that it is inline with
+           the preceeding lines
+        """
+        off_center = 6
+        space = new_space * " "
+        temp_length = len(space) + len(temp)
+        while temp_length < (width//2)-off_center:
+            new_space += 1
+            temp_length += 1
+        while temp_length > (width//2)-off_center:
+            new_space -= 1
+            temp_length -= 1
+        return new_space * " "
 
     def _get_dimensions(self, preview_list):
         """Check how many dimensions to display
@@ -230,15 +262,48 @@ class ParameterFormatter(DisplayFormatter):
         """
         return 1 if not preview_list else len(preview_list)
 
-    def _preview_output(self, preview, width, dims):
-        """ Compile output string lines for preview syntax"""
+    def _get_expand_output(self, temp, val, params, width, expand_dim):
+        """Compile output string lines for expand syntax
+
+        :param temp: Parameter name and number string
+        :param val: Preview parameter value
+        :param params: Full display output string
+        :param width: Width of the display output
+        :param expand_dim: Number of dimensions to display
+        :return: Display string containing preview parameter value
+        """
+        val = pu._dumps(val)
+        if expand_dim == "all":
+            val = self._output_all_dimensions(val, width,
+                                       self._get_dimensions(val))
+        else:
+            pu.check_valid_dimension(expand_dim, val)
+            val = self._dim_slice_output(val, width, expand_dim)
+        expand_str = "\n" + self._get_equal_lines(temp, width, Fore.RESET,
+                                               Fore.RESET, " " * 2)
+        return expand_str + val
+
+    def _output_all_dimensions(self, preview, width, dims):
+        """Compile output string lines for all dimensions
+
+        :param preview: The preview parameter value
+        :param width: Width of the display output
+        :param dims: Number of dimensions to display
+        :return: String containing preview parameter value
+        """
         temp_str = ""
         for dim in range(1, dims + 1):
             temp_str += self._dim_slice_output(preview, width, dim)
         return temp_str
 
     def _dim_slice_output(self, preview_list, width, dims):
-        """Compile the string lines for dimension and slice notation syntax"""
+        """Compile the string lines for dimension and slice notation syntax
+
+        :param preview_list: The list of preview parameter entries
+        :param width: Width of the display output
+        :param dims: Number of dimensions to display
+        :return: String containing preview parameter value of dimension chosen
+        """
         temp_str = ""
         # If there are multiple values in list format
         # Only show the values for the dimensions chosen
@@ -249,7 +314,13 @@ class ParameterFormatter(DisplayFormatter):
             preview_display_value = preview_list[dims - 1]
 
         prev_val = self._set_syntax(preview_display_value)
-        temp_str += f"\n   {'dim' + str(dims): >37} : "
+        param_margin = " "*4
+        temp = f"{param_margin}{'dim' + str(dims)} :"
+        # Add spaces depending on console width
+        new_space = self._get_console_spacing(temp, width, 20)
+        temp = f"{param_margin}{new_space}  {'dim' + str(dims)} : "
+        temp_str += "\n" + self._get_equal_lines(temp, width, Fore.RESET,
+                                               Fore.RESET, " "*2)
         temp_str += self._get_slice_notation_info(prev_val, width)
 
         return temp_str
@@ -285,7 +356,6 @@ class ParameterFormatter(DisplayFormatter):
                 basic_split_keys, val_list, fillvalue=""
             ):
                 split_str += self._get_slice_str(slice_name, v, width)
-
         return split_str
 
     def _get_slice_str(self, label, value, width):
@@ -296,13 +366,16 @@ class ParameterFormatter(DisplayFormatter):
         :param width: The console text width
         :return: A string with a "label: value" format
         """
-        margin = 6
-        str_margin = " " * margin
         style_off = Style.RESET_ALL
+        param_margin = " "*4
+        slice_margin = " "*7
+        split_line_str = f"{param_margin}{label} :"
+        # Add spaces depending on console width
+        spacing = self._get_console_spacing(split_line_str, width, 20)
+        split_line_str = f"{param_margin}{spacing}{slice_margin}{label} : {value}"
 
-        split_line_str = f"{label: >39} : {value}"
         split_text = self._get_equal_lines(
-            split_line_str, width, style_off, style_off, str_margin
+            split_line_str, width, style_off, style_off, " "*2
         )
         return "\n" + split_text
 
@@ -403,10 +476,15 @@ class DispDisplay(ParameterFormatter):
         :param width: width of the console display
         :return: parameter string
         """
+        offset = 2
+        align = "left"
         cur_visibility = p_dict["param"][key]["visibility"]
-        split = "-" * ((width - len(cur_visibility)) - 4)
+        split = "-" * ((width - len(cur_visibility)) - offset)
         if cur_visibility != prev_visibility:
-            params += "\n" + split + cur_visibility + "-" * 4
+            if align == "left":
+                params += "\n" + "-" * offset + cur_visibility + split
+            else:
+                params += "\n" + split + cur_visibility + "-" * offset
         return params
 
     def _get_verbose(
@@ -483,8 +561,8 @@ class DispDisplay(ParameterFormatter):
             ["*" + "\n ".join(w.split("\n")) for w in warnings if w]
         )
 
-    def _append_description(self, desc, key, p_dict, str_margin, width,
-                            params, breakdown):
+    def _append_description(self, desc, key, p_dict, str_margin, params,
+                            width, breakdown):
         c_off = Back.RESET + Fore.RESET
         description_verbose = False
         description_keys = ""
@@ -681,7 +759,7 @@ class ListDisplay(ParameterFormatter):
         return default_str + info
 
     def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
-        all_params = self._get_param_details("all", p_dict, 100)
+        all_params = self._get_param_details("all", p_dict, width)
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN
         warn_c = Fore.RED

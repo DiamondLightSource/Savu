@@ -58,6 +58,17 @@ class YamlParameterTest(unittest.TestCase):
         with self.assertRaises(Exception):
             pdefs = self.initial_setup(self.test_parameter_visibility)
 
+    def test_parameter_visibility_missing(self):
+        """
+        # Missing visibility level for regular parameter
+        parameter:
+            dtype: int
+            description: None
+            default: 8
+        """
+        with self.assertRaises(Exception):
+            pdefs = self.initial_setup(self.test_parameter_visibility_missing)
+
     def test_in_dataset_visibility(self):
         """
         # Incorrect visibility level for in datasets parameter
@@ -69,7 +80,7 @@ class YamlParameterTest(unittest.TestCase):
         """
         pdefs = self.initial_setup(self.test_in_dataset_visibility)
 
-        # All dataset visibility levels are reset to 'datasets'
+        # basic/int/adv dataset visibility levels are reset to 'datasets'
         self.assertEqual(pdefs['in_datasets']['visibility'], 'datasets')
 
     def test_out_dataset_visibility(self):
@@ -83,7 +94,7 @@ class YamlParameterTest(unittest.TestCase):
         """
         pdefs = self.initial_setup(self.test_out_dataset_visibility)
 
-        # All dataset visibility levels are reset to 'datasets'
+        # basic/int/adv dataset visibility levels are reset to 'datasets'
         self.assertEqual(pdefs['out_datasets']['visibility'], 'datasets')
 
     def test_dataset_visibility(self):
@@ -97,8 +108,22 @@ class YamlParameterTest(unittest.TestCase):
         """
         pdefs = self.initial_setup(self.test_dataset_visibility)
 
-        # All dataset visibility levels are reset to 'datasets'
+        # unknown dataset visibility levels are reset to 'datasets'
         self.assertEqual(pdefs['in_datasets']['visibility'], 'datasets')
+
+    def test_dataset_hidden_visibility(self):
+        """
+        # Allow hidden visibility level for datasets parameter
+        in_datasets:
+            visibility: hidden
+            dtype: [list[],list[str]]
+            description: None
+            default: []
+        """
+        pdefs = self.initial_setup(self.test_dataset_hidden_visibility)
+
+        # hidden and not dataset visibility levels are NOT reset to 'datasets'
+        self.assertEqual(pdefs['in_datasets']['visibility'], 'hidden')
 
     def test_parameter_dtype(self):
         """
@@ -123,6 +148,27 @@ class YamlParameterTest(unittest.TestCase):
         """
         # Currently no problem with empty description
         pdefs = self.initial_setup(self.test_parameter_description)
+
+    def  test_parameter_hidden_1(self):
+        """
+        # Hidden parameter doesn't require options, only default value
+        parameter:
+            visibility: hidden
+            default: 8
+        """
+        # Currently no problem with
+        pdefs = self.initial_setup(self.test_parameter_hidden_1)
+
+    def  test_parameter_hidden_additional_options(self):
+        """
+        # No error raised with unrequired parameter options
+        parameter:
+            visibility: hidden
+            default: 8
+            options: [two,three]
+        """
+        # Currently no problem
+        pdefs = self.initial_setup(self.test_parameter_hidden_additional_options)
 
     def test_parameter_missing(self):
         """

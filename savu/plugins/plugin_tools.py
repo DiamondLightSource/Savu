@@ -181,9 +181,12 @@ class PluginParameters(object):
 
         for p_key, p in param_info_dict.items():
             all_keys = p.keys()
-            if p.get("visibility") == "hidden":
-                # For hidden keys, only require a default value key
-                required_keys = ["default"]
+            if p.get("visibility"):
+                if p.get("visibility") == "hidden":
+                    # For hidden keys, only require a default value key
+                    required_keys = ["default"]
+            else:
+                required_keys = ["visibility"]
 
             if not all(d in all_keys for d in required_keys):
                 missing_key_dict[p_key] = set(required_keys) - set(all_keys)
@@ -271,8 +274,9 @@ class PluginParameters(object):
         """
         options_valid = True
         for p_key, p in param_info_dict.items():
-            desc = param_info_dict[p_key]["description"]
-            if isinstance(desc, dict):
+            desc = param_info_dict[p_key].get("description")
+            # desc not present for hidden keys
+            if desc and isinstance(desc, dict):
                 options = param_info_dict[p_key].get("options")
                 option_desc = desc.get("options")
                 if options and option_desc:

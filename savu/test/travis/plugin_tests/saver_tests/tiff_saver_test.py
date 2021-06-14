@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 """
-.. module:: tomo_recon
+.. module:: tiff_saver_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
+   :synopsis: unittest for tiff saver
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
 
 """
+
 import unittest
-from savu.test import test_utils as tu
+import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
+        run_protected_plugin_runner
 
 class TiffSaverTest(unittest.TestCase):
     global data_file, experiment
@@ -31,7 +34,7 @@ class TiffSaverTest(unittest.TestCase):
     experiment = None
 
     def test_tiff_saver(self):
-        process_list = 'imagesavers/tiff_saver_test.nxs'
+        process_list = 'savers/tiff_saver_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

@@ -15,9 +15,9 @@
 
 
 """
-.. module:: downsample_filter_test
+.. module:: image_saver_test
    :platform: Unix
-   :synopsis: unittest for downsample filter
+   :synopsis: unittest for image saver
 
 .. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
 
@@ -28,13 +28,13 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
-class DownsampleFilterTest(unittest.TestCase):
+class ImageSaverTest(unittest.TestCase):
     global data_file, experiment
     data_file = '24737.nxs'
-    experiment = 'tomo'
+    experiment = None
 
-    def test_downsample_filter(self):
-        process_list = 'reshape/downsample_filter_test.nxs'
+    def test_image_saver(self):
+        process_list = 'savers/image_saver_test.nxs'
         options = tu.initialise_options(data_file, experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

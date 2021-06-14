@@ -33,7 +33,7 @@ class ImageStitchingTest(unittest.TestCase):
     data_file = '24737'
     experiment = 'tomo'
 
-    def test_process_preview(self):
+    def test_image_stitching(self):
         process_list = 'reshape/image_stitching_test.nxs'
         #options = tu.initialise_options(data_file, experiment, process_list)
         #run_protected_plugin_runner(options)

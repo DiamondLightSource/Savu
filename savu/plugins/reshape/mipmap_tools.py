@@ -31,10 +31,8 @@ each dimension than the previous dataset.
 
         out_datasets:
             visibility: hidden
-            dtype: [list[],list[str]]
             description: Hidden out_datasets list as this is created
               dynamically.
-            default: []
 
         """
 
