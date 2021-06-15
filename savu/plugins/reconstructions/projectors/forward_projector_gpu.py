@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: forward_projector_cpu
+.. module:: forward_projector_gpu
    :platform: Unix
    :synopsis: A forward data projector using ToMoBAR software
 
@@ -21,16 +21,16 @@
 """
 
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 
 from tomobar.methodsDIR import RecToolsDIR
 import numpy as np
 
 @register_plugin
-class ForwardProjectorCpu(Plugin, CpuPlugin):
+class ForwardProjectorGpu(Plugin, GpuPlugin):
     """
-    This plugin uses ToMoBAR software and CPU Astra projector to generate parallel-beam projection data.
+    This plugin uses ToMoBAR software and GPU Astra projector to generate parallel-beam projection data.
     The plugin will project the given object using the available metadata OR user-provided geometry.
     In case when angles set to None, the metadata projection geometry will be used.
 
@@ -41,7 +41,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
     """
 
     def __init__(self):
-        super(ForwardProjectorCpu, self).__init__('ForwardProjectorCpu')
+        super(ForwardProjectorGpu, self).__init__('ForwardProjectorGpu')
 
     def pre_process(self):
         #getting metadata
@@ -95,7 +95,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
                             CenterRotOffset = -self.cor+self.det_horiz_half-0.5, # Center of Rotation (CoR) scalar
                             AnglesVec = self.angles_rad, # array of angles in radians
                             ObjSize = objsize_image, # a scalar to define reconstructed object dimensions
-                            device_projector='cpu')
+                            device_projector='gpu')
         sinogram_new = RectoolsDIR.FORWPROJ(image)
         return sinogram_new
 

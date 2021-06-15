@@ -17,7 +17,7 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: forward projector using tomobar cpu test
+   :synopsis: forward projector using tomobar gpu test
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -28,13 +28,13 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test \
     import run_protected_plugin_runner
 
-class ForwardProjectorCpuTest(unittest.TestCase):
+class ForwardProjectorGpuTest(unittest.TestCase):
     def setUp(self):
         self.data_file = '24737.nxs'
         self.experiment = 'tomo'
 
-    def test_forward_projector_cpu(self):
-        process_list = 'reconstruction/tomobar/forward_projector_cpu_test.nxs'
+    def test_forward_projector_gpu(self):
+        process_list = 'reconstruction/tomobar/forward_projector_gpu_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
