@@ -1,11 +1,11 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class I18XrdLoaderTools(PluginTools):
-    """A class to load I18's data from an xrd file
+    """A class to load tomography data from an xrd file
     """
     def define_parameters(self):
         """
-        monitor_detector:
+        data_path:
             visibility: basic
             dtype: [None,str]
             description: Path to the folder containing the data.

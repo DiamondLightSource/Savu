@@ -5,7 +5,7 @@ class I18StxmLoaderTools(PluginTools):
     """
     def define_parameters(self):
         """
-        monitor_detector:
+        stxm_detector:
             visibility: basic
             dtype: str
             description: Path to stxm.

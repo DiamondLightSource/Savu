@@ -31,11 +31,6 @@ import time
 
 #@register_plugin
 class SimpleFitXrf(BaseFluoFitter):
-    """
-    This plugin fits XRF peaks.
-    :param width_guess: An initial guess at the width. Default: 0.02.
-
-    """
     def __init__(self):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 

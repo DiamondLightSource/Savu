@@ -28,13 +28,6 @@ from savu.plugins.utils import register_plugin
 
 
 class I18FluoLoader(BaseI18MultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :u*param fluo_detector: path to \
-        stxm. Default:'entry1/xspress3/AllElementSum'.
-    :param name: The name assigned to the dataset. Default: 'fluo'.
-    """
-
     def __init__(self, name='I18FluoLoader'):
         super(I18FluoLoader, self).__init__(name)
 

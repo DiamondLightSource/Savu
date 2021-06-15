@@ -40,9 +40,6 @@ from savu.core.utils import docstring_parameter
 
 
 class I18MmLoader(BaseLoader):
-    """
-
-    """
     def __init__(self, name='I18MmLoader'):
         super(I18MmLoader, self).__init__(name)
         base = BaseI18MultiModalLoader()

@@ -13,13 +13,13 @@ class FastxrfFittingTools(PluginTools):
 
         sample_attenuators:
             visibility: intermediate
-            dtype: list
+            dtype: [list, list[]]
             description: Attentuators used and thickness.
-            default: ["FitWeights", "FitWidths", "FitAreas", "residuals"]
+            default: []
 
         detector_distance:
             visibility: intermediate
-            dtype: int
+            dtype: float
             description: sample to the detector in mm.
             default: 70
 
@@ -50,7 +50,7 @@ class FastxrfFittingTools(PluginTools):
         average_spectrum:
             visibility: intermediate
             dtype: [None,int]
-            description: pass an average to do the strip.
+            description: Pass an average to do the strip.
             default: None
 
         """

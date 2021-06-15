@@ -28,13 +28,6 @@ from savu.plugins.utils import register_plugin
 
 
 class I18StxmLoader(BaseI18MultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param stxm_detector: path to \
-        stxm. Default:'entry1/raster_counterTimer01/It'.
-    :param name: The name assigned to the dataset. Default: 'stxm'.
-    """
-
     def __init__(self, name='I18StxmLoader'):
         super(I18StxmLoader, self).__init__(name)
 

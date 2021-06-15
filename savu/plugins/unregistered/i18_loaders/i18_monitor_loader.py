@@ -28,9 +28,6 @@ from savu.plugins.utils import register_plugin
 
 
 class I18MonitorLoader(BaseI18MultiModalLoader):
-    """
-    """
-
     def __init__(self, name='I18MonitorLoader'):
         super(I18MonitorLoader, self).__init__(name)
 
