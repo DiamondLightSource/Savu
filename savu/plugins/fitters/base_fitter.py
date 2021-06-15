@@ -152,7 +152,7 @@ class BaseFitter(Plugin, CpuPlugin):
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
         numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
-        npts = len(fitmatrix) / numargsinp
+        npts = len(fitmatrix) // numargsinp
         #print npts
         weights = rest[:npts]
         #print 'the weights are'+str(weights)
