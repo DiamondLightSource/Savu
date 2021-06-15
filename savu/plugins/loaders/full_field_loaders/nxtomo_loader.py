@@ -27,8 +27,6 @@ import numpy as np
 
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-import savu.plugins.docstring_parser as doc
-import savu.core.utils as cu
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
