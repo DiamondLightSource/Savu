@@ -180,7 +180,7 @@ class BaseRecon(Plugin):
         else:
             xDim = inData.get_data_dimension_by_axis_label('detector_x')
             detector_x_dim = inData.get_shape()[xDim]
-        outData.meta_data.set("detector_x", copy.deepcopy(detector_x_dim))
+        outData.meta_data.set("detector_x_length", copy.deepcopy(detector_x_dim))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')

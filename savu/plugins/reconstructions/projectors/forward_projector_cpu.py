@@ -59,7 +59,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
             in_meta_data=self.get_in_meta_data()[0]
             angles_meta_deg = in_meta_data.get('rotation_angle')
             self.angles_rad = np.deg2rad(angles_meta_deg)
-            self.detectors_horiz = in_meta_data.get('detector_x')
+            self.detectors_horiz = in_meta_data.get('detector_x_length')
         else:
             # user-set parameters
             angles_list=self.parameters['angles_deg']
