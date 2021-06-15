@@ -24,8 +24,6 @@
 from savu.plugins.plugin import Plugin
 
 class BaseLoader(Plugin):
-    """
-    """
     def __init__(self, name='BaseLoader'):
         super(BaseLoader, self).__init__(name)
         self.hits = []
