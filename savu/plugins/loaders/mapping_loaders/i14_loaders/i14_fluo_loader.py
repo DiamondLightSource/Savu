@@ -29,11 +29,6 @@ import h5py as h5
 
 @register_plugin
 class I14FluoLoader(BaseLoader):
-    """
-    A class to load i14s xrf data
-    :param mono_path: The mono energy. Default: '/entry/instrument/beamline/DCM/dcm_energy'.
-    """
-
     def __init__(self, name='I14FluoLoader'):
         super(I14FluoLoader, self).__init__(name)
 
