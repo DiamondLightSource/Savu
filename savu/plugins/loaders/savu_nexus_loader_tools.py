@@ -25,7 +25,7 @@ class SavuNexusLoaderTools(PluginTools):
                 dataset(s) to load, by stating the NXdata name.
               default: []
         names:
-              visibility: basic
+              visibility: intermediate
               dtype: [list[],list[str]]
               description: Override the dataset names associated with the
                 datasets parameter above.

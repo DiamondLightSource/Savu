@@ -14,8 +14,10 @@ class BaseLoaderTools(PluginTools):
               description: A slice list of required frames.
               default: []
         in_datasets:
+              # inherited but not needed
               visibility: hidden
         out_datasets:
+              # inherited but not needed
               visibility: hidden
 
         """
