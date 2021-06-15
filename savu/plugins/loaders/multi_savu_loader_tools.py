@@ -33,7 +33,7 @@ class MultiSavuLoaderTools(PluginTools):
                 'name.units'."
               default: 'scan.number'
         range:
-              visibility: intermediate
+              visibility: basic
               dtype: list[int,int]
               description: The start and end of file numbers.
               default: '[0,10]'

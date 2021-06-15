@@ -22,6 +22,7 @@
 """
 import os
 import copy
+import json
 import logging
 
 from colorama import Fore
@@ -133,6 +134,9 @@ class PluginParameters(object):
         # Use a display option to apply to dependent parameters later.
         self._set_display(pdefs)
         for k,v in pdefs.items():
+            # Change empty OrderedDict to dict (due to yaml loader)
+            if isinstance(v['default'], OrderedDict):
+                v['default'] = json.loads(json.dumps(v['default']))
             # Change the string to an integer, float, list, str, dict
             if not self.default_dependency_dict_exists(v):
                 v['default'] = pu._dumps(v['default'])

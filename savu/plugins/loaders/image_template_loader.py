@@ -31,14 +31,6 @@ from savu.plugins.loaders.yaml_converter import YamlConverter
 
 @register_plugin
 class ImageTemplateLoader(YamlConverter):
-    """
-    A class to load data from a folder of FabIO compatible images using data
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    """
-
     def __init__(self, name='ImageTemplateLoader'):
         super(ImageTemplateLoader, self).__init__(name)
 

@@ -32,23 +32,6 @@ import savu.core.utils as cu
 
 @register_plugin
 class P2rFlyScanDetectorLoader(BaseLoader):
-    """
-    A class to load p2r fly scan detector data from a Nexus file.
-
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param image_key_path: Path to the image key entry inside the nxs \
-        file. Default: 'entry1/tomo_entry/instrument/detector/image_key'.
-    :param dark: Optional path to the dark field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param flat: Optional Path to the flat field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: Set to true if this reshape is required. Default: False.
-    :param ignore_flats: List of batch numbers of flats (start at 1) to \
-        ignore. Default: None.
-    """
-
     def __init__(self, name='P2rFlyScanDetectorLoader'):
         super(P2rFlyScanDetectorLoader, self).__init__(name)
 

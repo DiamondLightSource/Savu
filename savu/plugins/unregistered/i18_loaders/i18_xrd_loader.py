@@ -35,13 +35,6 @@ import savu.test.test_utils as tu
 
 
 class I18XrdLoader(BaseI18MultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param data_path: Path to the folder containing the data. Default: None.
-    :param calibration_path: path to the calibration file. Default: None.
-    :param name: The name assigned to the dataset. Default: 'xrd'.
-    """
-
     def __init__(self, name='I18XrdLoader'):
         super(I18XrdLoader, self).__init__(name)
 

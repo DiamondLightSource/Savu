@@ -2,9 +2,9 @@ from savu.plugins.plugin_tools import PluginTools
 
 class RandomHdf5LoaderTools(PluginTools):
     """A hdf5 dataset of a specified size is created at runtime using numpy
-random sampling (numpy.random) and saved to file. This created dataset
-will be used as the input file, and the input file path passed to Savu
-will be ignored (use a dummy).
+    random sampling (numpy.random) and saved to file. This created dataset
+    will be used as the input file, and the input file path passed to Savu
+    will be ignored (use a dummy).
     """
     def define_parameters(self):
         """

@@ -30,11 +30,6 @@ import numpy as np
 
 @register_plugin
 class I22TomoLoader(BaseLoader):
-    """
-    A class to load tomography data for I22 that has been previously processed\
-    using dawn
-    """
-
     def __init__(self, name='I22TomoLoader'):
         super(I22TomoLoader, self).__init__(name)
 

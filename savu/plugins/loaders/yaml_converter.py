@@ -38,16 +38,6 @@ from savu.data.experiment_collection import Experiment
 
 
 class YamlConverter(BaseLoader):
-    """
-    A class to load data from a non-standard nexus/hdf5 file using \
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    :*param template_param: A hidden parameter to hold parameters passed in \
-        via a savu template file. Default: '{}'
-    """
-
     def __init__(self, name='YamlConverter'):
         super(YamlConverter, self).__init__(name)
 

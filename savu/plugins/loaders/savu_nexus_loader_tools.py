@@ -13,11 +13,11 @@ class SavuNexusLoaderTools(PluginTools):
         """
         preview:
               visibility: basic
-              dtype: [preview, dict{str:preview}, dict]
+              dtype: [preview, dict{str:preview}, dict{}]
               description: A slice list of required frames to apply to ALL
                 datasets, else a dictionary of slice lists where the key is
                 the dataset name.
-              default: []
+              default: {}
         datasets:
               visibility: basic
               dtype: [list[],list[str]]

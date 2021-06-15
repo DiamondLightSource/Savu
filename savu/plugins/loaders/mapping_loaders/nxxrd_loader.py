@@ -32,13 +32,6 @@ import savu.test.test_utils as tu
 
 @register_plugin
 class NxxrdLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXxrd file
-
-    :param calibration_path: path to the calibration file. Default: None.
-    :param name: The name assigned to the dataset. Default: 'xrd'.
-    """
-
     def __init__(self):
         super(NxxrdLoader, self).__init__("NxxrdLoader")
         # converting lengths to metres

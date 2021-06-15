@@ -30,52 +30,6 @@ from ptypy import utils as u
 
 @register_plugin
 class PtypyCompact(BasePtycho):
-    """
-    This plugin performs ptychography using the ptypy package.
-    :param data_center: See online documentation. Default: None.
-    :param data_orientation:See online documentation . Default: None.
-    :param data_auto_center: See online documentation. Default: True.
-    :param geometry_shape:See online documentation . Default: 128.
-    :param illumination_photons: See online documentation. Default: None.
-    :param illumination_diversity_noise: See online documentation. Default: None.
-    :param illumination_diversity_power: See online documentation. Default: 0.1.
-    :param illumination_diversity_shift: See online documentation. Default: None.
-    :param sample_model: See online documentation. Default: None.
-    :param sample_fill: See online documentation. Default: 1.
-    :param sample_diversity_noise: See online documentation. Default: None.
-    :param sample_diversity_power: See online documentation. Default: 0.1.
-    :param sample_diversity_shift: See online documentation. Default: None.
-    :param coherence_num_probe_modes: See online documentation. Default: 1.
-    :param coherence_num_object_modes: See online documentation. Default: 1.
-    :param coherence_spectrum: See online documentation. Default: None.
-    :param coherence_object_dispersion: See online documentation. Default: None.
-    :param coherence_probe_dispersion: See online documentation. Default: None.
-    :param common_numiter_contiguous: See online documentation. Default: 1.
-    :param common_probe_support: See online documentation. Default: 0.7.
-    :param common_clip_object: See online documentation. Default: None.
-    :param DM_num_iter: See online documentation. Default: 30.
-    :param DM_alpha: See online documentation. Default: 1.
-    :param DM_probe_update_start: See online documentation. Default: 2.
-    :param DM_update_object_first: See online documentation. Default: True.
-    :param DM_overlap_converge_factor: See online documentation. Default: 0.05.
-    :param DM_overlap_max_iterations: See online documentation. Default: 10.
-    :param DM_probe_inertia: See online documentation. Default: 0.001.
-    :param DM_object_inertia: See online documentation. Default: 0.1.
-    :param DM_fourier_relax_factor: See online documentation. Default: 0.01.
-    :param DM_obj_smooth_std: See online documentation. Default: 20.
-    :param ML_num_iter: See online documentation. Default: 5.
-    :param ML_type: See online documentation. Default: "gaussian".
-    :param ML_floating_intensities: See online documentation. Default: False.
-    :param ML_intensity_renormalization: See online documentation. Default: 1.
-    :param ML_reg_del2: See online documentation. Default: True.
-    :param ML_reg_del2_amplitude: See online documentation. Default: 0.01.
-    :param ML_smooth_gradient: See online documentation. Default: 0.
-    :param ML_scale_precond: See online documentation. Default: False.
-    :param ML_scale_probe_object: See online documentation. Default: 1.
-    :param ML_probe_update_start: See online documentation. Default: 0.
-
-    """
-
     def __init__(self):
         super(PtypyCompact, self).__init__("PtypyCompact")
 

@@ -29,11 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class NxmonitorLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXmonitor file
-    :param name: The name assigned to the dataset. Default: 'monitor'.
-    """
-
     def __init__(self, name='NxmonitorLoader'):
         super(NxmonitorLoader, self).__init__(name)
 

@@ -37,8 +37,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class MmLoader(BaseLoader):
-
-
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
         self.fluo_keys = self.add_default_params(fluo(), 'fluo')

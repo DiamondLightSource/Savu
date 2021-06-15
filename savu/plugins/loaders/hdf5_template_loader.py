@@ -36,14 +36,6 @@ from savu.data.data_structures.data_types.stitch_data import StitchData
 
 @register_plugin
 class Hdf5TemplateLoader(YamlConverter):
-    """
-    A class to load data from a non-standard nexus/hdf5 file using \
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    """
-
     def __init__(self, name='Hdf5TemplateLoader'):
         super(Hdf5TemplateLoader, self).__init__(name)
 

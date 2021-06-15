@@ -47,7 +47,7 @@ class PtypyCompactTools(PluginTools):
               default: None
         sample_model:
               visibility: intermediate
-              dtype: [None,list]
+              dtype: [None,str]
               description: See online documentation
               default: None
         sample_fill:

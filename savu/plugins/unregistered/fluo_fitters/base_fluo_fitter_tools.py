@@ -5,16 +5,7 @@ class BaseFluoFitterTools(PluginTools):
     """
     def define_parameters(self):
         """
-        in_datasets:
-            visibility: datasets
-            dtype: [list[],list[str]]
-            description: Create a list of the dataset(s)
-            default: []
-
         out_datasets:
-            visibility: datasets
-            dtype: [list[],list[str]]
-            description: A
             default: ["FitWeights", "FitWidths", "FitAreas", "residuals"]
 
         width_guess:
@@ -43,19 +34,19 @@ class BaseFluoFitterTools(PluginTools):
 
         include_pileup:
            visibility: intermediate
-           dtype: str
+           dtype: bool
            description: Include pileup
-           default: 1
+           default: True
 
         include_escape:
             visibility: intermediate
-            dtype: int
+            dtype: bool
             description: Include escape
-            default: 1
+            default: True
 
         fitted_energy_range_keV:
            visibility: intermediate
-           dtype: list[float]
+           dtype: list[float, float]
            description: The fitted energy range.
            default: [2.,18.]
 
@@ -63,6 +54,6 @@ class BaseFluoFitterTools(PluginTools):
            visibility: intermediate
            dtype: list[str]
            description: The fitted elements,
-           default: ['Zn','Cu', 'Ar']
+           default: ['Zn','Cu','Ar']
 
         """
