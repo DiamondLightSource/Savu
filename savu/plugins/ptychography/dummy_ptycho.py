@@ -28,10 +28,6 @@ import numpy as np
 
 @register_plugin
 class DummyPtycho(BasePtycho):
-    """
-    This plugin performs ptychography using the ptypy package
-    """
-
     def __init__(self):
         super(DummyPtycho, self).__init__("DummyPtycho")
 

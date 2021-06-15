@@ -32,14 +32,6 @@ import h5py as h5
 
 @register_plugin
 class PtypyBatch(BasePtycho):
-    """
-    This plugin performs ptychography using the ptypy package. The same parameter set is used across 
-    all slices and is based on the output from a previous reconstruction. 
-    :param ptyr_file: The ptyd for a previously successful reconstruction. Default: '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/analysis92713/recons/92713/92713_DM_0030_0.ptyr'.
-    :param mask_file: The mask file. Default: '/dls/science/users/clb02321/DAWN_stable/I13Test_Catalysts/processing/catalyst_data/analysis92713/new_mask2.hdf'.
-    :param mask_entry: The mask entry. Default: '/mask'.
-    """
-
     def __init__(self):
         super(PtypyBatch, self).__init__("PtypyBatch")
 

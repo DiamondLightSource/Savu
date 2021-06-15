@@ -27,14 +27,6 @@ import numpy as np
 
 
 class BasePtycho(Plugin, CpuPlugin):  # also make one for gpu
-    """
-    A base plugin for doing ptychography. Other ptychography plugins should \
-    inherit from this.
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to \
-        process. Default: ['probe', 'object_transmission', 'positions'].
-    """
-
     def __init__(self, name):
         super(BasePtycho, self).__init__(name)
 
