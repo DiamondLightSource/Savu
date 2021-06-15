@@ -64,7 +64,7 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
             # user-set parameters
             angles_list=self.parameters['angles_deg']
             self.cor=self.parameters['centre_of_rotation']
-            self.angles_rad = np.deg2rad(np.arange(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
+            self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
             self.detectors_horiz = self.parameters['det_horiz']
 
         self.det_horiz_half=0.5*self.detectors_horiz
@@ -77,6 +77,11 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
                    'core_dims': (2,0)}
         out_dataset[0].create_dataset(axis_labels=labels, shape=out_shape_sino)
         out_dataset[0].add_pattern(pattern['name'],
+                                   slice_dims=pattern['slice_dims'],
+                                   core_dims=pattern['core_dims'])
+        pattern2 = {'name': 'PROJECTION', 'slice_dims': (0,),
+                   'core_dims': (1,2)}
+        out_dataset[0].add_pattern(pattern2['name'],
                                    slice_dims=pattern['slice_dims'],
                                    core_dims=pattern['core_dims'])
         out_pData[0].plugin_data_setup(pattern['name'], self.get_max_frames())
