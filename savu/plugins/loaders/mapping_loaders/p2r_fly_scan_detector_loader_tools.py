@@ -7,7 +7,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
         """
         data_path:
             visibility: intermediate
-            dtype: str
+            dtype: h5path
             description: Path to the data inside the file
             default: 'entry1/tomo_entry/data/data'
         image_key_path:
@@ -28,7 +28,7 @@ class P2rFlyScanDetectorLoaderTools(PluginTools):
               scale value.
             default: '[None, None, 1]'
         angles:
-            visibility: intermediate
+            visibility: basic
             dtype: [None,str,int]
             description: A python statement to be evaluated or a file.
             default: None
