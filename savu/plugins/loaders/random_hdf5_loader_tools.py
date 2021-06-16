@@ -20,7 +20,7 @@ class RandomHdf5LoaderTools(PluginTools):
                 with each dimension, of the form ['name1.unit1', 'name2.unit2',...]"
               default: []
         patterns:
-              visibility: intermediate
+              visibility: basic
               dtype: [list[],list[str]]
               description: "A list of data access patterns e.g.
                 [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where
