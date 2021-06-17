@@ -446,3 +446,32 @@ def indent_multi_line_str(text, indent_level=1, justify=False):
 def indent(text, indent_level=1):
     text = (" " * 4 * indent_level) + text
     return text
+
+
+def sort_alphanum(_list):
+    """Sort list numerically and alphabetically
+    *While maintaining original list value types*
+
+    :param _list: Input list to be sorted
+    :return: List sorted by number and letter alphabetically
+    """
+    return sorted(_list, key=_alphanum)
+
+
+def _str_to_int(_str):
+    """Convert the input str to an int if possible
+
+    :param _str: input string
+    :return: integer if text is a digit, else string
+    """
+    return int(_str) if _str.isdigit() else _str
+
+
+def _alphanum(_str):
+    """Split string into numbers and letters
+
+    :param _str:
+    :return: list of numbers and letters
+    """
+    char_list = re.split("([0-9]+)", _str)
+    return [_str_to_int(c) for c in char_list]

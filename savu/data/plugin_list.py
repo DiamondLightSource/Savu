@@ -84,7 +84,7 @@ class PluginList(object):
             self.plugin_list = []
             single_val = ["name", "id", "pos", "active"]
             exclude = ["citation"]
-            ordered_pl_keys = self._sort_alphanum(list(plugin_group.keys()))
+            ordered_pl_keys = pu.sort_alphanum(list(plugin_group.keys()))
             for group in ordered_pl_keys:
                 plugin = self._get_plugin_entry_template()
                 entry_keys = plugin_group[group].keys()
@@ -458,16 +458,6 @@ class PluginList(object):
                 raise
 
         return False
-
-    def _sort_alphanum(self, l):
-        """Sort numerically and alphabetically
-
-        :param l: Input list to be sorted
-        :return: List sorted by number and letter alphabetically
-        """
-        str_to_int = lambda text: int(text) if text.isdigit() else text
-        alphanum_key = lambda key: [str_to_int(c) for c in re.split("([0-9]+)", key)]
-        return sorted(l, key=alphanum_key)
 
 
 class Template(object):
