@@ -123,6 +123,8 @@ class PluginParameters(object):
         :param tool_class: tool_class to use for error message
         """
         pdefs = self.param.get_dictionary()
+        # Remove ignored parameters
+        self._remove_ignored_params(pdefs)
         # Check if the required keys are included
         self._check_required_keys(pdefs, tool_class)
         # Check that option values are valid
@@ -239,7 +241,6 @@ class PluginParameters(object):
             "advanced",
             "datasets",
             "hidden",
-            "not",
         ]
         visibility_valid = True
         for p_key, p in param_info_dict.items():
@@ -266,7 +267,7 @@ class PluginParameters(object):
         so that the display order is unchanged.
         """
         datasets = ["in_datasets", "out_datasets"]
-        exceptions = ["not", "hidden"]
+        exceptions = ["hidden"]
         if p_key in datasets:
             if p["visibility"] != "datasets" \
                     and p["visibility"] not in exceptions:
@@ -297,6 +298,14 @@ class PluginParameters(object):
             raise Exception(
                 f"Please check the parameter options for {tool_class.__name__}"
             )
+
+    def _remove_ignored_params(self, param_info_dict):
+        """Remove any parameters with visibility = ignore"""
+        p_dict_copy = param_info_dict.copy()
+        for p_key, p in p_dict_copy.items():
+            visibility = param_info_dict[p_key].get("visibility")
+            if visibility == "ignore":
+                del param_info_dict[p_key]
 
     def _set_display(self, param_info_dict):
         """Initially, set all of the parameters to display 'on'
