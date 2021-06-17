@@ -26,14 +26,8 @@ from savu.plugins.fitters.base_fitter import BaseFitter
 import numpy as np
 from copy import deepcopy
 
-@register_plugin
+#@register_plugin
 class ReproduceFit(BaseFitter):
-    """
-    This plugin reproduces the fitted curves. Its for diagnostics.
-    :param in_datasets: Create a list of the dataset(s). Default: ["FitWeights", "FitWidths", "FitAreas","Backgrounds"].
-    :param out_datasets: A. Default: ["Sum", "Individual_curves"].
-
-    """
 
     def __init__(self):
         super(ReproduceFit, self).__init__("ReproduceFit")
