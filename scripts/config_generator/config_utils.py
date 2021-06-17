@@ -34,25 +34,27 @@ from functools import wraps
 import savu.plugins.utils as pu
 import savu.data.data_structures.utils as du
 
-if os.name == 'nt':
+if os.name == "nt":
     from . import win_readline as readline
 else:
     import readline
 
 histfile = os.path.join(os.path.expanduser("~"), ".savuhist")
 histlen = 1000
-logging.basicConfig(level='CRITICAL')
+logging.basicConfig(level="CRITICAL")
 error_level = 0
 
 
 class DummyFile(object):
-    def write(self, x): pass
+    def write(self, x):
+        pass
 
 
 def _redirect_stdout():
     save_stdout = sys.stdout
     sys.stdout = DummyFile()
     return save_stdout
+
 
 def load_history_file(hfile):
     try:
@@ -62,15 +64,17 @@ def load_history_file(hfile):
         pass
     atexit.register(write_history_to_file)
 
+
 def write_history_to_file():
     try:
         readline.write_history_file(histfile)
     except IOError:
         pass
 
+
 def _set_readline(completer):
     # we want to treat '/' as part of a word, so override the delimiters
-    readline.set_completer_delims(' \t\n;')
+    readline.set_completer_delims(" \t\n;")
     readline.parse_and_bind("tab: complete")
     readline.set_completer(completer)
 
@@ -78,8 +82,9 @@ def _set_readline(completer):
 def parse_args(function):
     @wraps(function)
     def _parse_args_wrap_function(content, args):
-        parser = '%s_arg_parser' % function.__name__
+        parser = "%s_arg_parser" % function.__name__
         from . import arg_parsers as parsers
+
         args = getattr(parsers, parser)(args.split(), doc=False)
         if not args:
             return content
@@ -140,7 +145,7 @@ def _load_module(finder, module_name, failed_imports, error_mode):
 def _is_registered_plugin(mod):
     with open(mod.__file__) as f:
         for line in f:
-            if "@register_plugin" in line and line.replace(' ', '')[0] != '#':
+            if "@register_plugin" in line and line.replace(" ", "")[0] != "#":
                 return True
     return False
 
@@ -157,11 +162,11 @@ def _dawn_setup():
 
 def _get_dawn_parameters(plugin):
     plugin.get_plugin_tools()._populate_default_parameters()
-    desc = plugin.p_dict['description']
+    desc = plugin.p_dict["description"]
     params = {}
     for key, value in plugin.parameters.items():
-        if key not in ['in_datasets', 'out_datasets']:
-            params[key] = {'value': value, 'hint': desc[key]}
+        if key not in ["in_datasets", "out_datasets"]:
+            params[key] = {"value": value, "hint": desc[key]}
     return params
 
 
@@ -173,6 +178,7 @@ def _populate_plugin_list(content, pfilter=""):
     for key in sorted_plugins:
         content.add(key, str(count))
         count += 1
+
 
 def _search_plugin_file(module_name, pfilter):
     """Check for string inside file"""
@@ -190,11 +196,12 @@ def _search_plugin_file(module_name, pfilter):
         plugin_file.close()
     return string_found
 
+
 def __get_filtered_plugins(pfilter):
     """ Get a sorted, filter list of plugins. """
     key_list = []
     star_search = \
-        pfilter.split('*')[0] if pfilter and '*' in pfilter else False
+        pfilter.split("*")[0] if pfilter and "*" in pfilter else False
 
     for key, value in pu.plugins.items():
         if star_search:
@@ -211,5 +218,3 @@ def __get_filtered_plugins(pfilter):
 
     key_list.sort()
     return key_list
-
-
