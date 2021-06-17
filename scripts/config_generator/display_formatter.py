@@ -278,7 +278,7 @@ class ParameterFormatter(DisplayFormatter):
             preview_display_value = preview_list[dims - 1]
 
         prev_val = self._set_syntax(preview_display_value)
-        temp_str += f"\n   {'dim' + str(dims): >37} : "
+        temp_str += f"\n   {'dim' + str(dims): >28} : "
         temp_str += self._get_slice_notation_info(prev_val, width)
 
         return temp_str
@@ -329,7 +329,7 @@ class ParameterFormatter(DisplayFormatter):
         str_margin = " " * margin
         style_off = Style.RESET_ALL
 
-        split_line_str = f"{label: >39} : {value}"
+        split_line_str = f"{label: >30} : {value}"
         split_text = self._get_equal_lines(
             split_line_str, width, style_off, style_off, str_margin
         )
