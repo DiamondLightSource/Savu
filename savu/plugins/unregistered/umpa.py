@@ -28,7 +28,7 @@ from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
-@register_plugin
+#@register_plugin
 class Umpa(BaseFilter, CpuPlugin):
     """
     A plugin to perform speckle tracking using the UMPA method
