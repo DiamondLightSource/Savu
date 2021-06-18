@@ -8,13 +8,13 @@ class BandPassTools(PluginTools):
         """
         blur_width:
               visibility: basic
-              dtype: list
+              dtype: list[int]
               description: Kernel size
               default: [0, 3, 3]
         type:
               visibility: basic
               dtype: str
-              description: 'Filter type (High|Low).'
+              description: Filter type.
               options: [High, Low]
               default: High
 
