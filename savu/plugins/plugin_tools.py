@@ -165,16 +165,18 @@ class PluginParameters(object):
 
         return param_info_dict
 
-    def check_for_default(self, value, param_name, parameters):
+    def check_for_default(self, mod_param, mod_value):
         """If the value is changed to be 'default', then set the original
         default value. If the default contains a dictionary, then search
         for the correct value
         """
         param_info_dict = self.param.get_dictionary()
-        if str(value) == "default":
-            default = param_info_dict[param_name]["default"]
-            value = self._set_default(default, parameters, param_name)
-        return value
+        if str(mod_value) == "default":
+            if self.default_dependency_dict_exists(param_info_dict[mod_param]):
+                mod_value = self.get_dependent_default(param_info_dict[mod_param])
+            else:
+                mod_value = param_info_dict[mod_param]["default"]
+        return mod_value
 
     def _check_required_keys(self, param_info_dict, tool_class):
         """Check the four keys ['dtype', 'description', 'visibility',
@@ -395,14 +397,11 @@ class PluginParameters(object):
                             name, desc, parent_name, value)
 
     def make_recommendation(self, child_name, desc, parent_name, value): 
-        desc["range"] = (
-            f"The recommended value with the chosen "
-            f"{str(parent_name)} would be {str(value)}"
-        )
-        recommendation = (
-            f"It's recommended that you update {str(child_name)}"
-            f" to {str(value)}"
-        )
+        if isinstance(desc, dict):
+            desc["range"] = f"The recommended value with the chosen " \
+                            f"{parent_name} would be {value}"
+        recommendation = f"It's recommended that you update {child_name}"\
+                         f" to {value}"
         print(Fore.RED + recommendation + Fore.RESET)
 
         

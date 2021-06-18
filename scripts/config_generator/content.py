@@ -364,7 +364,7 @@ class Content(object):
             )
             if parameter_valid:
                 # If default choice is requested, then find the default value and set it
-                value = tools.check_for_default(value, param_name, parameters)
+                value = tools.check_for_default(param_name, value)
                 # Save the value
                 parameters[param_name] = value
                 tools.warn_dependents(param_name, value)
