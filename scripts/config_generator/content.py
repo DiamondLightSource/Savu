@@ -460,12 +460,12 @@ class Content(object):
                     value = eval(f"'{value}'")
                     # if there is one quotation mark there will be an error
                 except EOFError:
-                    raise Exception(
+                    raise EOFError(
                         "There is an end of line error. Please check your"
                         ' input for the character "\'".'
                     )
                 except SyntaxError:
-                    raise Exception(
+                    raise SyntaxError(
                         "There is a syntax error. Please check your input."
                     )
                 except:
@@ -576,10 +576,10 @@ class Content(object):
         pos_list = self.get_positions()
         if not pos_list:
             print("There are no items to access in your list.")
-            raise Exception("Please add an item to the process list.")
+            raise ValueError("Please add an item to the process list.")
         else:
             if pos not in pos_list:
-                raise Exception("Incorrect plugin position.")
+                raise ValueError("Incorrect plugin position.")
             return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
@@ -790,7 +790,7 @@ class Content(object):
                     value, current_preview_value, dim, slice
                 )
             else:
-                raise Exception(
+                raise ValueError(
                     "Invalid preview dimension slice value. Please "
                     "enter a float, an integer or a string including "
                     "only mid and end keywords."
@@ -803,7 +803,7 @@ class Content(object):
                     value, current_preview_value, dim
                 )
             else:
-                raise Exception(
+                raise ValueError(
                     "Invalid preview dimension value. Please "
                     "enter a float, an integer or slice notation."
                 )
@@ -847,7 +847,7 @@ class Content(object):
             return value
         else:
             raise Exception(
-                "There is no existing slice notation " "to modify."
+                "There is no existing slice notation to modify."
             )
 
     def _get_modified_slice(self, start_stop_split, value, slice):
