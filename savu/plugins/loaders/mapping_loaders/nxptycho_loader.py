@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: nxptycho_loader
    :platform: Unix
    :synopsis: A class for loading nxstxm data
 
@@ -30,11 +30,6 @@ import logging
 
 @register_plugin
 class NxptychoLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param name: The name assigned to the dataset. Default: 'ptycho'.
-    """
-
     def __init__(self, name='NxptychoLoader'):
         super(NxptychoLoader, self).__init__(name)
 

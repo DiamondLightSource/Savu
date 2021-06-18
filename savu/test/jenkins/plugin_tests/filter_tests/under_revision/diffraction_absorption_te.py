@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: pyfai_azimuthal_integration_test
+.. module:: diffraction_absoption_te
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
@@ -26,10 +26,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class DiffractionAbsorptionTest(unittest.TestCase):
     global data_file, experiment
-    data_file = 'i18_test_data.nxs'
+    #data_file = 'i18_test_data.nxs'
+    data_file = 'mm.nxs'
 
     def test_diffraction_correction(self):
-        process_list = 'diffraction/diffraction_absorption_correction_test.nxs'
+        process_list = 'under_revision/diffraction_absorption_correction_test.nxs'
         options = tu.initialise_options(data_file, None, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

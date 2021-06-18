@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """
 .. module:: plugin_runner
    :platform: Unix
@@ -28,6 +29,7 @@ from savu.data.experiment_collection import Experiment
 class PluginRunner(object):
     """ Plugin list runner, which passes control to the transport layer.
     """
+
     def __init__(self, options, name='PluginRunner'):
         class_name = "savu.core.transports." + options["transport"] \
                      + "_transport"
@@ -170,7 +172,7 @@ class PluginRunner(object):
         self.exp.meta_data.set("nPlugin", count)
         plugin = pu.plugin_loader(self.exp, plugin_dict, check=True)
         plugin._revert_preview(plugin.get_in_datasets())
-        plugin_dict['cite'] = plugin.get_citation_information()
+        plugin_dict['cite'] = plugin.tools.get_citations()
         plugin._clean_up()
         self.exp._merge_out_data_to_in(plugin_dict)
 

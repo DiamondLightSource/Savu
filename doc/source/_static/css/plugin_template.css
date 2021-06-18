@@ -1,0 +1,17 @@
+td a:link, td a:visited {
+    line-height: 2em;
+    border-radius: .25rem;
+    display: inline;
+    padding: .25rem .5rem;
+    color: white;
+    background-color: #2c7aa3;
+}
+
+td a:hover, td a:active {
+  line-height: 2em;
+    border-radius: .25rem;
+    display: inline;
+    padding: .25rem .5rem;
+    color: white;
+    background-color: #609ebf;
+}

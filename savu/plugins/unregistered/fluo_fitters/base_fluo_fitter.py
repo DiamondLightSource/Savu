@@ -35,20 +35,6 @@ from copy import deepcopy
 
 
 class BaseFluoFitter(Plugin, CpuPlugin):
-    """
-    This plugin fits peaks. Either XRD or XRF for now.
-    :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
-    :param width_guess: An initial guess at the width. Default: 0.02.
-    :param mono_energy: the mono energy. Default: 18.0.
-    :param peak_shape: Which shape do you want. Default: "gaussian".
-    :param pileup_cutoff_keV: The cut off. Default: 5.5.
-    :param include_pileup: Include pileup. Default: 1.
-    :param include_escape: Include escape. Default: 1.
-    :param fitted_energy_range_keV: The fitted energy range. Default: [2.,18.].
-    :param elements: The fitted elements. Default: ['Zn','Cu', 'Ar'].
-    """
-
     def __init__(self, name="BaseFluoFitter"):
         super(BaseFluoFitter, self).__init__(name)
 

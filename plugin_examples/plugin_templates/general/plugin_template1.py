@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template1
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.
@@ -22,6 +22,8 @@
 
 """
 
+import sys
+
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
@@ -29,9 +31,8 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate1(Plugin, CpuPlugin):
-    """
-    A simple plugin template with one in_dataset and one out_dataset with\
-    similar characteristics, e.g. median filter.
+    """A simple plugin template with one in_dataset and one out_dataset with
+similar characteristics, e.g. median filter.
 
     :param example: Example of a plugin parameter. Default: None.
     """

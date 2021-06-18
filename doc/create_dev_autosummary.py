@@ -26,7 +26,7 @@ import os
 def add_folder(f):
     f.write('\n.. toctree::')
     f.write('\n   :glob:\n')
-    f.write('\n   ../api_plugin_dev/*\n')
+    f.write('\n   ../api_plugin/*\n')
 
 
 def add_package_entry(f, root, dirs, files, output):
@@ -70,11 +70,12 @@ def amend_folder(api_folder):
 if __name__ == "__main__":
 
     # determine Savu base path
-    savu_base_path = os.path.abspath('../')
-    api_folder = savu_base_path + '/doc/source/api_plugin_dev'
+    savu_base_path = \
+        os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
+    api_folder = savu_base_path + 'doc/source/reference/api_plugin'
 
     # open the autosummary file
-    f = open(savu_base_path + '/doc/source/dev_autosummary.rst', 'w')
+    f = open(savu_base_path + 'doc/source/reference/dev_autosummary.rst', 'w')
 
     # add header
     f.write('API Documentation \n===================\n')

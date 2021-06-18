@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: A plugin to initialise a binary mask for level sets and distance transform segmentations
+.. module:: mask_initialise
    :platform: Unix
    :synopsis: A plugin to initialise a binary mask for level sets and distance transform segmentations
 

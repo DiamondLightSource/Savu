@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 2D segmentation using Morphological Level Sets or active countours
+.. module:: morph_snakes
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: 2D segmentation using Morphological Level Sets or active countours.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -31,22 +31,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes(Plugin, CpuPlugin):
-    """
-    A Plugin to segment reconstructed data using Morphsnakes module. When initialised
-    with a mask, the active contour propagates to find the minimum of energy (a possible edge countour).
 
-    :param lambda1:  Weight parameter for the outer region, if lambda1 is larger than \
-        lambda2, the outer region will contain a larger range of values than \
-        the inner region. Default: 1.
-    :param lambda2:  Weight parameter for the inner region, if lambda2 is larger than \
-        lambda1, the inner region will contain a larger range of values than \
-        the outer region. Default: 1.
-    :param smoothing: Number of times the smoothing operator is applied per iteration, \
-        reasonable values are around 1-4 and larger values lead to smoother segmentations. Default: 1.
-    :param iterations: The number of iterations. Default: 350.
-    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
-    :param out_datasets: The default names. Default: ['MASK_MORPH_EVOLVED'].
-    """
 
     def __init__(self):
         super(MorphSnakes, self).__init__("MorphSnakes")

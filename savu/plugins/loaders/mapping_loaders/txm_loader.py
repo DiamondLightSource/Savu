@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nxstxm_loader
+.. module:: txm_loader
    :platform: Unix
    :synopsis: A class for loading nxstxm data
 
@@ -29,10 +29,6 @@ import h5py
 
 @register_plugin
 class TxmLoader(BaseLoader):
-    """
-    A class to load tomography data from the txm
-    """
-
     def __init__(self, name='TxmLoader'):
         super(TxmLoader, self).__init__(name)
 

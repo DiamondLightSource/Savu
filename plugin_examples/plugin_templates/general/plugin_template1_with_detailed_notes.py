@@ -16,7 +16,7 @@
 # the information below is used in the auto-API creation for documentation
 # and the synopsis appears in the configurator.
 """
-.. module:: plugin_template
+.. module:: plugin_template1_with_detailed_notes
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.
@@ -30,13 +30,12 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 # this decorator is required for the configurator to recognise the plugin
-#@register_plugin
+@register_plugin
+class PluginTemplate1WithDetailedNotes(Plugin, CpuPlugin):
 # Each class must inherit from the Plugin class and a driver
-class PluginTemplate1(Plugin, CpuPlugin):
-    """
-    A description of the plugin - the synopsis above appears as the short
-    plugin description in the configurator and anything written here
-    appears as the longer description (-vv flag).
+    """A description of the plugin - the synopsis above appears as the short
+plugin description in the configurator and anything written here
+appears as the longer description (-vv flag).
 
     :param example: Example of a plugin parameter. Default: None.
 

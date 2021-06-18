@@ -32,12 +32,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class TimeBasedCorrection(BaseCorrection, CpuPlugin):
-    """
-    Apply a time-based dark and flat field correction to data.
-
-    :param in_range: Set to True if you require values in the \
-        range [0, 1]. Default: False.
-    """
 
     def __init__(self, name="TimeBasedCorrection"):
         super(TimeBasedCorrection, self).__init__(name)
@@ -77,9 +71,9 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
     def process_frames(self, data):
         proj = data[0]
         frame = self.get_global_frame_index()[self.count]
-        flat = self.calculate_flat_field(
+        flat = self.calculate_flat_field(frame, proj,
                 *self.find_nearest_frames(self.flat_idx, frame))
-        dark = self.calculate_dark_field(
+        dark = self.calculate_dark_field(frame, proj,
                 *self.find_nearest_frames(self.dark_idx, frame))
 
         if self.parameters['in_range']:
@@ -117,11 +111,11 @@ class TimeBasedCorrection(BaseCorrection, CpuPlugin):
 
         return [before, after], dist
 
-    def calculate_flat_field(self, frames, distance):
+    def calculate_flat_field(self, frame, data, frames, distance):
         return self.flat[frames[0]]*distance[0] + \
             self.flat[frames[1]]*distance[1]
 
-    def calculate_dark_field(self, frames, distance):
+    def calculate_dark_field(self, frame, data, frames, distance):
         return self.dark[frames[0]]*distance[0] + \
             self.dark[frames[1]]*distance[1]
 

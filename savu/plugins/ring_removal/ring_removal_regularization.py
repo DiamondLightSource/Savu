@@ -13,30 +13,20 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts  
+.. module:: ring_removal_regularization
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts     
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>    
    
 """
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 
 
 @register_plugin
 class RingRemovalRegularization(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a\ 
-    reconstructed image) using a regularization-based method. 
-    A simple improvement to handle partial stripes is included.    
-    :param alpha: The correction strength. Smaller is stronger. Default: 0.005
-    :param number_of_chunks: Divide the sinogram to many chunks of rows. \
-    Default: 1
-    """
 
     def __init__(self):
         super(RingRemovalRegularization, self).__init__(
@@ -93,24 +83,3 @@ class RingRemovalRegularization(Plugin, CpuPlugin):
             mat_corr[:] = list_corr
             sinogram[bindex:eindex, :] = sinogram[bindex:eindex, :] + mat_corr
         return np.exp(-sinogram)
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Sofya Titarenko et al. taken from this paper.")
-        cite_info.bibtex = \
-            ("@article{TITARENKO20101489,\n" +
-             "title={An analytical formula for ring artefact suppression in \
-             X-ray tomography},\n" +
-             "author={Sofya Titarenko, Philip J. Withers and \
-             Anatoly Yagola},\n" +
-             "journal={Applied Mathematics Letters},\n" +
-             "volume={23},\n" +
-             "number={12},\n" +
-             "pages={1489 - 1495},\n" +
-             "year={2010},\n" +
-             "publisher={Elsevier}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1016/j.aml.2010.08.022"
-        return cite_info

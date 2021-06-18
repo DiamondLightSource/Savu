@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: image_interpolation_te
    :platform: Unix
    :synopsis: testing the nx_xrd loader
 

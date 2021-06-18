@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I08FluoLoader
+.. module:: i08_fluo_loader
    :platform: Unix
    :synopsis: A class for loading I08s xrf data
 
@@ -29,11 +29,6 @@ import h5py as h5
 
 @register_plugin
 class I08FluoLoader(BaseLoader):
-    """
-    A class to load i08s xrf data
-    :param mono_path: The mono energy. Default: '/entry/instrument/PlaneGratingMonochromator/pgm_energy'.
-    """
-
     def __init__(self, name='I08FluoLoader'):
         super(I08FluoLoader, self).__init__(name)
 

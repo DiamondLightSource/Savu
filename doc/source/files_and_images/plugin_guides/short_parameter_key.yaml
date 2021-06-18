@@ -1,0 +1,7 @@
+visibility: The visibility level of the parameter
+dtype: The type of data
+description: A short explanation of the parameter
+default: The default value
+options: A list of permitted values
+dependency: The name of the parameter and value which this parameter depends upon
+range: A guide for the range of the parameter

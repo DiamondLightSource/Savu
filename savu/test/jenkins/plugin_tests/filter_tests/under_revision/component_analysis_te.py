@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ComponentAnalysisTest
+.. module:: component_analysis_te
    :platform: Unix
    :synopsis: Test all the component analyses
 

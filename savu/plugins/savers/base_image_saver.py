@@ -30,9 +30,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 class BaseImageSaver(BaseSaver, CpuPlugin):
-    """
-    """
-
     def __init__(self, name):
         super(BaseImageSaver, self).__init__(name)
         self.count = None

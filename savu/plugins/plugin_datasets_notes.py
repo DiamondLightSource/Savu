@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: data_notes
+.. module:: plugin_datasets_notes
    :platform: Unix
    :synopsis: A module containing extended doc strings for the data module.
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

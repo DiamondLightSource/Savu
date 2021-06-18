@@ -96,13 +96,18 @@ class Completer(object):
             return list_args
         return [x for x in list_args if x.lower().startswith(args[0].lower())]
 
+    def complete_level(self, args):
+        "Completions for the level command."
+        levels = ['basic', 'intermediate', 'advanced']
+        return [l for l in levels if l.lower().startswith(args[0].lower())]
+
     def _get_collections(self):
         """ Get plugin collection names. """
         import savu.plugins as plugins
         import copy
 
         path = plugins.__path__[0]
-        exclude_dir = ['driver', 'utils']
+        exclude_dir = ['driver', 'utils', '__pycache__']
         arrow = ' ==> '
         for root, dirs, files in os.walk(path):
             depth = root.count(os.path.sep) - path.count(os.path.sep)

@@ -30,14 +30,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class QuantisationFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to quantise an image into discrete levels.
-
-    :param explicit_min_max: False if min/max intensity comes from the metadata, True if it's user-defined. Default: False.
-    :param min_intensity: Global minimum intensity. Default: 0.
-    :param max_intensity: Global maximum intensity. Default: 65535.
-    :param levels: Number of levels. Default: 5.
-    """
 
     def __init__(self):
         """

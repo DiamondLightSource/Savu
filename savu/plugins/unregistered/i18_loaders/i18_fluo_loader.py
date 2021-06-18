@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I18stxm_loader
+.. module:: i18_fluo_loader
    :platform: Unix
    :synopsis: A class for loading I18's stxm data
 
@@ -21,20 +21,13 @@
 
 """
 
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
-    base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.unregistered.i18_loaders.base_i18_multi_modal_loader\
+    import BaseI18MultiModalLoader
 import numpy as np
 from savu.plugins.utils import register_plugin
 
 
 class I18FluoLoader(BaseI18MultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :u*param fluo_detector: path to \
-        stxm. Default:'entry1/xspress3/AllElementSum'.
-    :param name: The name assigned to the dataset. Default: 'fluo'.
-    """
-
     def __init__(self, name='I18FluoLoader'):
         super(I18FluoLoader, self).__init__(name)
 

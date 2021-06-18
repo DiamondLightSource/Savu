@@ -28,33 +28,11 @@ import pyfftw.interfaces.scipy_fftpack as fft
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin, dawn_compatible
-from savu.data.plugin_list import CitationInformation
 
 
 @dawn_compatible
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to apply Paganin filter (contrast enhancement) on projections.
-
-    :param Energy: Given X-ray energy in keV. Default: 53.0.
-    :param Distance: Distance from sample to detection - Unit is \
-        metre. Default: 1.0.
-    :param Resolution: Pixel size - Unit is micron. Default: 1.28.
-    :u*param Ratio: ratio of delta/beta. Default: 250.0.
-    :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
-    :param Padleftright: Pad to the left and right of projection. Default: 10.
-    :param Padmethod: Numpy pad method. Default: 'edge'.
-    :param increment: Increment all values by this amount before taking the \
-        log. Default: 0.0.
-
-    :config_warn: The 'log' parameter in the reconstruction should be set to \
-    FALSE.
-    :config_warn: Previewing a subset of sinograms will alter the result, due \
-    to the global nature of this filter. If this is necessary, ensure they \
-    are consecutive.
-
-    """
 
     def __init__(self):
         logging.debug("initialising Paganin Filter")
@@ -79,12 +57,12 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self._setup_paganin(*self.get_plugin_in_datasets()[0].get_shape())
 
     def _setup_paganin(self, height, width):
-        micron = 10**(-6)
+        micron = 10 ** (-6)
         keV = 1000.0
         distance = self.parameters['Distance']
         energy = self.parameters['Energy'] * keV
         resolution = self.parameters['Resolution'] * micron
-        wavelength = (1240.0 / energy) * 10.0**(-9)
+        wavelength = (1240.0 / energy) * 10.0 ** (-9)
         ratio = self.parameters['Ratio']
 
         height1 = height + 2 * self.parameters['Padtopbottom']
@@ -121,40 +99,3 @@ class PaganinFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The contrast enhancement used in this processing chain is taken\
-             from this work.")
-        cite_info.bibtex = \
-            ("@article{paganin2002simultaneous,\n" +
-             "title={Simultaneous phase and amplitude extraction from a single\
-             defocused image of a homogeneous object},\n" +
-             "author={Paganin, David and Mayo, SC and Gureyev, Tim E and \
-             Miller, Peter R and Wilkins, Steve W},\n" +
-             "journal={Journal of microscopy},\n" +
-             "volume={206},\n" +
-             "number={1},\n" +
-             "pages={33--40},\n" +
-             "year={2002},\n" +
-             "publisher={Wiley Online Library}" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Simultaneous phase and amplitude extraction from a single \
-             defocused image of a homogeneous object\n" +
-             "%A Paganin, David\n" +
-             "%A Mayo, SC\n" +
-             "%A Gureyev, Tim E\n" +
-             "%A Miller, Peter R\n" +
-             "%A Wilkins, Steve W\n" +
-             "%J Journal of microscopy\n" +
-             "%V 206\n" +
-             "%N 1\n" +
-             "%P 33-40\n" +
-             "%@ 1365-2818\n" +
-             "%D 2002\n" +
-             "%I Wiley Online Library\n")
-        cite_info.doi = "doi: DOI: 10.1046/j.1365-2818.2002.01010.x"
-        return cite_info

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tiff_saver
+.. module:: xrf_saver
    :platform: Unix
    :synopsis: A class to save output in tiff format
 
@@ -33,10 +33,6 @@ import collections
 
 @register_plugin
 class XrfSaver(BaseSaver, CpuPlugin):
-    """
-    A class to save xrf data to Diamond Mapping .nxs format. It can also save to edf and rgb for pymca visualisation.
-    """
-
     def __init__(self, name='XrfSaver'):
         super(XrfSaver, self).__init__(name)
         self.folder = None
