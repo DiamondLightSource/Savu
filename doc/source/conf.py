@@ -88,7 +88,7 @@ extensions = [
     # Add links to highlighted source code
     "sphinx.ext.viewcode",
     # Documents command line tools with argparser library
-    "sphinxarg.ext",
+#    "sphinxarg.ext",
 ]
 autosummary_generate = True
 
