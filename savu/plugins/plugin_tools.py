@@ -65,7 +65,7 @@ class PluginParameters(object):
         # Override default parameter values with plugin list entries
         self.set_plugin_list_parameters(copy.deepcopy(params))
         self._get_plugin().set_parameters(self.parameters)
-        
+
     def _populate_default_parameters(self):
         """
         This method should populate all the required parameters with
@@ -490,6 +490,111 @@ class PluginParameters(object):
                 self.append_extra_dims(len(value))
         else:
             parameters[key] = value
+
+    def _get_expand_dict(self, preview, expand_dim):
+        """Create dict for expand syntax
+
+        :param preview: Preview parameter value
+        :param expand_dim: Number of dimensions to return dict for
+        :return: dict
+        """
+        expand_dict = {}
+        preview_list = pu._dumps(preview)
+        if expand_dim == "all":
+            expand_dict = \
+                self._output_all_dimensions(preview_list,
+                     self._get_dimensions(preview_list))
+        else:
+            pu.check_valid_dimension(expand_dim, preview_list)
+            dim_key = f"dim{expand_dim}"
+            expand_dict[dim_key] = \
+                self._dim_slice_output(preview_list, expand_dim)
+        return expand_dict
+
+    def _get_dimensions(self, preview_list):
+        """
+        :param preview_list: The preview parameter list
+        :return: Dimensions to display
+        """
+        return 1 if not preview_list else len(preview_list)
+
+    def _output_all_dimensions(self, preview_list, dims):
+        """Compile output string lines for all dimensions
+
+        :param preview_list: The preview parameter list
+        :param dims: Number of dimensions to display
+        :return: dict
+        """
+        prev_dict = {}
+        for dim in range(1, dims + 1):
+            dim_key = f"dim{dim}"
+            prev_dict[dim_key] = self._dim_slice_output(preview_list, dim)
+        return prev_dict
+
+    def _dim_slice_output(self, preview_list, dim):
+        """If there are multiple values in list format
+        Only save the values for the dimensions chosen
+
+        :param preview_list: The preview parameter list
+        :param dim: dimension to return the slice notation dictionary for
+        :return slice notation dictionary
+        """
+        if not preview_list:
+            # If empty
+            preview_display_value = ":"
+        else:
+            preview_display_value = preview_list[dim - 1]
+        prev_val = self._set_all_syntax(preview_display_value)
+        return self._get_slice_notation_dict(prev_val)
+
+    def _get_slice_notation_dict(self, val):
+        """Create a dict for slice notation information,
+        start:stop:step (and chunk if provided)
+
+        :param val: The list value in slice notation
+        :return: dictionary of slice notation
+        """
+        import itertools
+
+        basic_slice_keys = ["start", "stop", "step"]
+        all_slice_keys = [*basic_slice_keys, "chunk"]
+        slice_dict = {}
+
+        if pu.is_slice_notation(val):
+            val_list = val.split(":")
+            if len(val_list) < 3:
+                # Make sure the start stop step slice keys are always shown,
+                # even when blank
+                val_list.append("")
+            for slice_name, v in zip(all_slice_keys, val_list):
+                # Only print up to the shortest list.
+                # (Only show the chunk value if it is in val_list)
+                slice_dict[slice_name] = v
+        else:
+            val_list = [val]
+            for slice_name, v in itertools.zip_longest(
+                    basic_slice_keys, val_list, fillvalue=""
+            ):
+                slice_dict[slice_name] = v
+        return slice_dict
+
+    def _set_all_syntax(self, val, replacement_str=""):
+        """Remove additional spaces from val, replace colon when 'all'
+        data is selected
+
+        :param val: Slice notation value
+        :param replacement_str: String to replace ':' with
+        :return:
+        """
+        if isinstance(val, str):
+            if pu.is_slice_notation(val):
+                if val == ":":
+                    val = replacement_str
+                else:
+                    val = val.strip()
+            else:
+                val = val.strip()
+        return val
 
     def get_multi_params_dict(self):
         """ Get the multi parameter dictionary. """
