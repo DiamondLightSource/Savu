@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: savu_loader
+.. module:: savu_nexus_loader
    :platform: Unix
    :synopsis: A class for loading savu output data.
 
@@ -37,24 +37,6 @@ from savu.core.utils import ensure_string
 
 @register_plugin
 class SavuNexusLoader(BaseLoader):
-    """
-    A class to load datasets, and associated metadata, from a Savu output
-    nexus file.
-
-    By default, the last instance of each unique dataset name will be loaded.
-    Opt instead to load a subset of these datasets, or individual datasets by
-    populating the parameters.
-
-    :u*param preview: A slice list of required frames to apply to ALL \
-    datasets, else a dictionary of slice lists where the key is the dataset \
-    name. Default: {}.
-
-    :u*param datasets: Override the default by choosing specific dataset(s) to\
-    load, by stating the NXdata name. Default: [].
-    :u*param names: Override the dataset names associated with the datasets \
-    parameter above. Default: [].
-    """
-
     def __init__(self, name='SavuNexusLoader'):
         super(SavuNexusLoader, self).__init__(name)
         self._all_preview_params = None

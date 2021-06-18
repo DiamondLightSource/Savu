@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: i13fluo_loader
+.. module:: i13_fluo_loader
    :platform: Unix
    :synopsis: A class for loading xrf data
 
@@ -30,17 +30,6 @@ import h5py
 
 @register_plugin
 class I13FluoLoader(BaseLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param fluo_offset: fluo scale offset. Default: 0.0.
-    :param fluo_gain: fluo gain. Default: 0.01.
-    :param is_tomo: The mono energy. Default: True.
-    :param theta_step: The theta step. Default:1.0.
-    :param theta_start: The theta start. Default: -90.0.
-    :param theta_end: The theta end. Default: 90.0.
-    :param mono_energy: The mono energy. Default: 11.8.
-    """
-
     def __init__(self, name='I13FluoLoader'):
         super(I13FluoLoader, self).__init__(name)
 

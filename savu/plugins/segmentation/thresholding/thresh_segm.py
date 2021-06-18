@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Segmentation by threhsolding based on lower and upper intensities
+.. module:: thresh_segm
    :platform: Unix
    :synopsis: Segmentation by threhsolding based on lower and upper intensities
 
@@ -28,14 +28,6 @@ import numpy as np
 
 @register_plugin
 class ThreshSegm(Plugin, CpuPlugin):
-    """
-    A Plugin to segment the data by providing two scalar values for lower and upper intensities
-
-    :param min_intensity: A scalar to define lower limit for intensity, all values below are set to zero. Default: 0.
-    :param max_intensity: A scalar to define upper limit for intensity, all values above are set to zero. Default: 0.01.
-    :param value: An integer to set all values between min_intensity and max_intensity. Default: 1.
-    :param pattern: pattern to apply this to. Default: "VOLUME_YZ".
-    """
 
     def __init__(self):
         super(ThreshSegm, self).__init__("ThreshSegm")

@@ -30,12 +30,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class ThresholdFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to quantise an image into discrete levels.
-
-    :param explicit_threshold: False if plugin calculates black/white threshold, True if it's user-defined. Default: True.
-    :param intensity_threshold: Threshold for black/white quantisation. Default: 32768.
-    """
 
     def __init__(self):
         """

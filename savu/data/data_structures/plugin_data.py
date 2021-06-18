@@ -158,6 +158,10 @@ class PluginData(object):
             size_list[i] = min(dshape[i], mft)
             mft //= np.prod(size_list) if np.prod(size_list) > 1 else 1
             i += 1
+            
+        # case of fixed integer max_frames, where max_frames > nSlices
+        if mft > 1:
+            size_list[0] *= mft
 
         self.meta_data.set('size_list', size_list)
         return size_list
@@ -466,7 +470,8 @@ class PluginData(object):
             nFrames, self._frame_limit = nFrames
         self.max_frames = nFrames
         self.split = split
-        self._plugin.fixed_length = fixed_length
+        if not fixed_length:
+            self._plugin.fixed_length = fixed_length
 
     def __set_getall_pattern(self, getall, nFrames):
         """ Set framework changes required to get all of a pattern of lower
@@ -486,7 +491,6 @@ class PluginData(object):
         If copy=pData (another PluginData instance) then copy """
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
-
         if not copy and not calc:
             mft, mft_shape, mfp = self._calculate_max_frames()
         elif calc:

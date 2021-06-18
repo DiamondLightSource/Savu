@@ -27,7 +27,7 @@ def get_framework_citations():
 
     cite_info = []
 
-    cite_info.append({'name': 'Savu'})
+    cite_info.append({'short_name_article': 'Savu'})
     cite_info[0]['description'] = \
         ("The Savu framework design is described in this paper.")
     cite_info[0]['bibtex'] = \
@@ -48,7 +48,7 @@ def get_framework_citations():
          "%J arXiv preprint arXiv:1610.08015\n" +
          "%D 2016")
 
-    cite_info.append({'name': 'HDF5'})
+    cite_info.append({'short_name_article': 'HDF5'})
     cite_info[1]['description'] = \
         ("Savu uses parallel HDF5 as a backend.")
     cite_info[1]['bibtex'] = \
@@ -64,7 +64,7 @@ def get_framework_citations():
          "%A HDF Group\n" +
          "%D 2014\n")
 
-    cite_info.append({'name': 'MPI'})
+    cite_info.append({'short_name_article': 'MPI'})
     cite_info[2]['description'] = ("HDF5 uses the Message Passing Interface\n" +
         "standard for interprocess communication")
     cite_info[2]['bibtex'] = \

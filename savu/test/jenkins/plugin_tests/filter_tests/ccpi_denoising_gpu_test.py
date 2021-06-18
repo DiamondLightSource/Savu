@@ -17,12 +17,11 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: unittest test classes for ccpi denoising plugins (GPU)
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 
 import savu.test.test_utils as tu
@@ -32,14 +31,21 @@ import savu.test.base_checkpoint_test
 import tempfile
 import os
 
-class CcpiDenoisingGpuTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
 
-    def test_ccpi_denoise_gpu(self):
+class CcpiDenoisingGpuTest(unittest.TestCase):
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
+
+    def test_ccpidenoising2d_gpu(self):
         process_list = 'filters/ccpi/ccpi_denoising_gpu_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_ccpidenoising3d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising_gpu3d_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

@@ -22,12 +22,11 @@
 
 """
 
-from savu.data.transport_data.slice_lists import \
-    SliceLists, LocalData, GlobalData
+from savu.data.transport_data.slice_lists import LocalData, GlobalData
 from savu.data.transport_data.base_transport_data import BaseTransportData
 
 
-class BasicTransportData(BaseTransportData, SliceLists):
+class BasicTransportData(BaseTransportData):
     """
     The Hdf5TransportData class performs the organising and movement of data.
     """

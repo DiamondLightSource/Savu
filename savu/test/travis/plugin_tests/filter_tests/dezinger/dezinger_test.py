@@ -28,9 +28,9 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class DezingerTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     #def test_dezing_filter(self):
     #    options = tu.initialise_options(None, 'tomoRaw', None)
@@ -40,13 +40,13 @@ class DezingerTest(unittest.TestCase):
 
     def test_dezinger_sinogram(self):
         process_list = 'filters/dezinger/dezinger_sinogram_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
         
     def test_dezinger(self):
         process_list = 'filters/dezinger/dezinger_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)              
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: A plugin to calculate global statistics (max, min sum, mean) of the input data
+.. module:: get_data_statistics
    :platform: Unix
    :synopsis: A plugin to calculate global statistics (max, min, sum, mean) of the input data
 
@@ -28,12 +28,6 @@ import numpy as np
 
 @register_plugin
 class GetDataStatistics(Plugin, CpuPlugin):
-    """
-    Collect input data global statistcs.
-
-    :param out_datasets: The default names . Default: ['data, data_statistics'].
-    """
-
     def __init__(self):
         super(GetDataStatistics, self).__init__("GetDataStatistics")
 
@@ -41,11 +35,11 @@ class GetDataStatistics(Plugin, CpuPlugin):
 
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-
+        pattern_type=self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
+
         fullData = in_dataset[0]
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
         self.new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 4)

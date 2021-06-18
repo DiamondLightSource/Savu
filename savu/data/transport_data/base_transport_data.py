@@ -75,7 +75,8 @@ class BaseTransportData(object):
         nSlices = self.params['shape'][self.params['sdir'][0]]
         self.mfp = nFrames if isinstance(nFrames, int) else min(mft, nSlices)
 
-        fchoices, size_list = self._get_frame_choices(self.params['sdir'], mft)
+        fchoices, size_list = self._get_frame_choices(
+            self.params['sdir'], 1, mft)
         self.mft = mft
         return int(mft), size_list[fchoices.index(mft)]
 
@@ -139,7 +140,6 @@ class BaseTransportData(object):
         #slice_shape = [self.params['shape'][d] for d in sdir]
         #nSlices = np.prod(slice_shape)
         nSlices = self.params['shape'][sdir[0]]
-
         nFrames = 1 if isinstance(nFrames, str) else nFrames
         fchoices, size_list = self._get_frame_choices(
             sdir, nFrames, min(max_mft, max(nFrames, nSlices)))
@@ -194,22 +194,6 @@ class BaseTransportData(object):
                          "preferred of %s." % (nFrames, max_mft))
             max_mft = nFrames
         return min_mft, max_mft
-
-    def _get_slice_dir_index(self, dim, boolean=False):
-        starts, stops, steps, chunks = \
-            self.data.get_preview().get_starts_stops_steps()
-        if chunks[dim] > 1:
-            dir_idx = np.ravel(np.transpose(self._get_slice_dir_matrix(dim)))
-            if boolean:
-                return self.__get_bool_slice_dir_index(dim, dir_idx)
-            return dir_idx
-        else:
-            fix_dirs, value = \
-                self.data._get_plugin_data()._get_fixed_dimensions()
-            if dim in fix_dirs:
-                return value[fix_dirs.index(dim)]
-            else:
-                return np.arange(starts[dim], stops[dim], steps[dim])
 
     def __get_bool_slice_dir_index(self, dim, dir_idx):
         shape = self.data_info.get('orig_shape')[dim]
@@ -266,7 +250,7 @@ class BaseTransportData(object):
         with their product less than max_mft and return a list of these
         products. """
         temp = [1]*len(sdir)
-        #temp[0] = min_mft # this works for ccpi but not mpimap
+        temp[0] = min_mft
         shape = self.data.get_shape()
         idx = 0
         choices = []

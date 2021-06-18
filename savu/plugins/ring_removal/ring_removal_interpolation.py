@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: ring_removal_interpolation
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -23,7 +23,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 from scipy import interpolate
 from scipy.ndimage import median_filter
@@ -32,17 +31,6 @@ from scipy.ndimage import binary_dilation
 
 @register_plugin
 class RingRemovalInterpolation(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts\
-    in a reconstructed image) using a combination of a detection technique\
-    and an interpolation technique. 
-
-    :u*param size: Size of the median filter window. Greater is stronger\
-    . Default: 31.
-    :u*param snr: Ratio used to locate stripe artifacts. Greater is\
-     less sensitive. Default: 3.0.
-    """
 
     def __init__(self):
         super(RingRemovalInterpolation, self).__init__(
@@ -56,14 +44,16 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-        ---------
-        Return:     - 1D binary mask.
+        """Algorithm 4 in the paper. To locate stripe positions.
+
+        Parameters
+        ----------
+        listdata : 1D normalized array.
+        snr : Ratio (>1.0) used to detect stripe locations.
+
+        Returns
+        -------
+        listmask : 1D binary mask.
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
@@ -73,13 +63,18 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
             xlist[ndrop:-ndrop - 1], listsorted[ndrop:-ndrop - 1], 1)
         numt1 = _intercept + _slope * xlist[-1]
         noiselevel = np.abs(numt1 - _intercept)
+        if noiselevel == 0.0:
+            raise ValueError(
+                "The method doesn't work on noise-free data. If you " \
+                "apply the method on simulated data, please add" \
+                " noise!")
         val1 = np.abs(listsorted[0] - _intercept) / noiselevel
         val2 = np.abs(listsorted[-1] - numt1) / noiselevel
         listmask = np.zeros_like(listdata)
-        if (val1 >= snr):
+        if val1 >= snr:
             upper_thresh = _intercept + noiselevel * snr * 0.5
             listmask[listdata > upper_thresh] = 1.0
-        if (val2 >= snr):
+        if val2 >= snr:
             lower_thresh = numt1 - noiselevel * snr * 0.5
             listmask[listdata <= lower_thresh] = 1.0
         return listmask
@@ -101,8 +96,7 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         """
-        Combine algorithm 4, 5, and 6 in the paper. Remove stripes by: locating stripes
-        and using an interpolation technique to remove them.
+        Combination of algorithm 4, 5, and 6 in the paper.
         """
         sinogram = np.copy(data[0])
         badpixelratio = 0.05  # To avoid false detection
@@ -111,7 +105,8 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
         sinosmoothed = median_filter(sinosorted, (1, self.size))
         list1 = np.mean(sinosorted[ndrop:self.height1 - ndrop], axis=0)
         list2 = np.mean(sinosmoothed[ndrop:self.height1 - ndrop], axis=0)
-        listfact = list1 / list2
+        listfact = np.divide(list1, list2, out=np.ones_like(list1),
+                             where=list2 != 0)
         listmask = self.detect_stripe(listfact, self.snr)
         listmask = binary_dilation(
             listmask, iterations=1).astype(listmask.dtype)
@@ -128,24 +123,3 @@ class RingRemovalInterpolation(Plugin, CpuPlugin):
             matzmiss = finter(listxmiss, listy)
             sinogram[:, listxmiss] = matzmiss
         return sinogram
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 4, 5, 6 in this paper.")
-        cite_info.bibtex = \
-            ("@article{Vo:18,\n" +
-             "title={Superior techniques for eliminating ring artifacts in\
-              X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo, Robert C. Atwood,\
-              and Michael Drakopoulos},\n" +
-             "journal={Opt. Express},\n" +
-             "volume={26},\n" +
-             "number={22},\n" +
-             "pages={28396--28412},\n" +
-             "year={2018},\n" +
-             "publisher={OSA}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
-        return cite_info

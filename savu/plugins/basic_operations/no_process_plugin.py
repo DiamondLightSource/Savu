@@ -26,11 +26,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class NoProcessPlugin(Plugin, CpuPlugin):
-    """
-    The base class from which all plugins should inherit.
-    :u*param pattern: Explicitly state the slicing pattern. Default: None.
-    :param dummy: Dummy parameter for testing. Default: 10.
-    """
 
     def __init__(self):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")

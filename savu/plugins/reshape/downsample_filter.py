@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: Downsampling and rescaling plugin.
+.. module:: downsample_filter
    :platform: Unix
    :synopsis: A plugin to downsample and rescale data volume.
 
@@ -33,26 +33,6 @@ import savu.core.utils as cu
 
 @register_plugin
 class DownsampleFilter(Plugin, CpuPlugin):
-    """
-    A plugin to downsample and rescale data volume including options of 
-    flipping and rotating images.
-
-    :u*param bin_size: Bin Size for the downsample. Default: 3.
-    :u*param mode: One of 'mean', 'median', 'min', 'max'. Default: 'mean'.
-    :u*param pattern: One of 'PROJECTION', 'SINOGRAM', or 'VOLUME_XZ'. \
-        Default: 'PROJECTION'.
-    :u*param num_bit: Bit depth of the rescaled data (8, 16 or 32). \
-        Default: 32.
-    :u*param flip_updown: Flip images up-down. Default: True.
-    :param flip_leftright: Flip images left-right. \
-        Default: False.
-    :param rotate_angle: Rotate images by a given angle (Degree). \
-        Default: 0.0.
-    :param max: Global max for scaling. Default: None.
-    :param min: Global min for scaling. Default: None.
-        
-    """
-
     def __init__(self):
         super(DownsampleFilter, self).__init__("DownsampleFilter")
         self.out_shape = None
@@ -66,12 +46,12 @@ class DownsampleFilter(Plugin, CpuPlugin):
         in_pData, out_pData = self.get_plugin_datasets()
         self.pattern = self.parameters['pattern']
         self.num_bit = self.parameters['num_bit']
-        self.bin_size = int(self.parameters["bin_size"])  
+        self.bin_size = int(self.parameters["bin_size"])
         if self.pattern == "SINOGRAM" or self.pattern == "PROJECTION":
             in_pData[0].plugin_data_setup(self.pattern, 'single')
             self.out_shape = \
                 self.get_new_shape(in_dataset[0].get_shape(), in_dataset[0])
-    
+
             out_dataset[0].create_dataset(patterns=in_dataset[0],
                                           axis_labels=in_dataset[0],
                                           shape=self.out_shape)
@@ -79,11 +59,11 @@ class DownsampleFilter(Plugin, CpuPlugin):
         elif self.pattern == "VOLUME_XZ":
             full_data_shape = list(in_dataset[0].get_shape())
             axis_labels = in_dataset[0].get_axis_labels()
-            voxel_dims = [i for i, e in enumerate(axis_labels) 
+            voxel_dims = [i for i, e in enumerate(axis_labels)
                           if 'voxel' in list(e.keys())[0]]
             in_pData[0].plugin_data_setup('VOLUME_XZ', self.bin_size,
                                           slice_axis='voxel_y')
-            shape = tuple([int(np.ceil(float(x) / self.bin_size)) 
+            shape = tuple([int(np.ceil(float(x) / self.bin_size))
                            if d in voxel_dims
                            else x for d, x in enumerate(full_data_shape)])
             if self.num_bit == 8:
@@ -95,7 +75,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
             out_dataset[0].create_dataset(axis_labels=in_dataset[0],
                                           patterns=in_dataset[0],
                                           shape=shape, dtype = dtype)
-            out_pData[0].plugin_data_setup('VOLUME_XZ', 1, 
+            out_pData[0].plugin_data_setup('VOLUME_XZ', 1,
                                            slice_axis='voxel_y')
         else:
             raise ValueError("\nPlease select one of three options:"
@@ -121,22 +101,22 @@ class DownsampleFilter(Plugin, CpuPlugin):
             sampler = self.mode_dict[self.parameters['mode']]
         else:
             logging.warning("Unknown downsample mode. Using 'mean'.")
-            sampler = numpy.mean
+            sampler = np.mean
         flip_ud = self.parameters['flip_updown']
         flip_lr = self.parameters['flip_leftright']
         rotate_angle = self.parameters['rotate_angle']
-        data_used = data[0]        
-        if self.pattern == 'SINOGRAM' or self.pattern == 'PROJECTION':            
+        data_used = data[0]
+        if self.pattern == 'SINOGRAM' or self.pattern == 'PROJECTION':
             if (rotate_angle != 0.0) and self.pattern == 'PROJECTION':
                 data_used = rotate(data_used, rotate_angle, reshape=False,
                                    mode='nearest')
             if flip_ud is True:
                 data_used = np.flipud(data_used)
             if flip_lr is True:
-                data_used = np.fliplr(data_used)            
+                data_used = np.fliplr(data_used)
             block_size = (self.bin_size, self.bin_size)
             downsample = skim.block_reduce(data_used, block_size, sampler)
-        else:            
+        else:
             num_slice = data_used.shape[1]
             block_size = (self.bin_size, self.bin_size, self.bin_size)
             if flip_ud is True:
@@ -146,21 +126,21 @@ class DownsampleFilter(Plugin, CpuPlugin):
                 data_used = np.moveaxis(np.asarray([np.fliplr(data_used[:, i, :])
                                         for i in range(num_slice)]), 0, 1)
             if rotate_angle != 0.0:
-                data_used = np.moveaxis(np.asarray([rotate(data_used[:, i, :], 
+                data_used = np.moveaxis(np.asarray([rotate(data_used[:, i, :],
                                         rotate_angle, reshape=False,
-                                        mode='nearest') 
+                                        mode='nearest')
                                         for i in range(num_slice)]), 0, 1)
             if self.num_bit == 8 or self.num_bit == 16:
                 data_used = np.clip(data_used, self.global_min, self.global_max)
                 data_used = (data_used - self.global_min) \
                             / (self.global_max - self.global_min)
-                downsample = skim.block_reduce(data_used, block_size, sampler)                        
+                downsample = skim.block_reduce(data_used, block_size, sampler)
                 if self.num_bit == 8:
                     downsample = np.uint8(downsample * 255)
                 else:
                     downsample = np.uint16(downsample * 65535)
             else:
-                downsample = skim.block_reduce(data_used, block_size, sampler)            
+                downsample = skim.block_reduce(data_used, block_size, sampler)
         return downsample
 
     def get_new_shape(self, full_shape, data):
@@ -196,6 +176,6 @@ class DownsampleFilter(Plugin, CpuPlugin):
 
     def nOutput_datasets(self):
         return 1
-    
+
     def fix_transport(self):
         return 'hdf5'

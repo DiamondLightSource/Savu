@@ -1,3 +1,5 @@
+:orphan:
+
 Developing a plugin with minimal effort
 ***************************************
 

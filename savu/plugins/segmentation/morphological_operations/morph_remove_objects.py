@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove objects smaller than the specified size.
+.. module:: morph_remove_objects
    :platform: Unix
-   :synopsis: Wrapper around skimage morphology to remove smaller objects
+   :synopsis: Wrapper around skimage morphology to remove objects smaller than the specified size.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -30,13 +30,6 @@ from skimage.morphology import *
 
 @register_plugin
 class MorphRemoveObjects(Plugin, CpuPlugin):
-    """
-    A Plugin to remove objects smaller than the specified size.
-
-    :param min_size: The smallest allowable object size. Default: 64.
-    :param connectivity: The connectivity defining the neighborhood of a pixel. Default: 1.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
-    """
 
     def __init__(self):
         super(MorphRemoveObjects, self).__init__("MorphRemoveObjects")

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: mm_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
