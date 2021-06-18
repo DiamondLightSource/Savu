@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: ring_artefact_filter
+.. module:: ccpi_ring_artefact_filter
    :platform: Unix
-   :synopsis: A plugin to perform ring artefact removal
+   :synopsis: Regularization-based method for removing ring artifacts.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -25,7 +25,6 @@ from ccpi.reconstruction.parallelbeam import filters as ccpi_filters
 
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.filters.base_filter import BaseFilter
 
 
@@ -59,37 +58,3 @@ class CcpiRingArtefactFilter(BaseFilter, CpuPlugin):
 
     def get_plugin_pattern(self):
         return 'SINOGRAM'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The ring artefact removal algorithm used in this processing\n"
-             "chain is taken from this work.")
-        cite_info.bibtex = \
-            ("@inproceedings{titarenko2010regularization,\n" +
-             "title={Regularization methods for inverse problems in\n" +
-             "X-ray tomography},\n" +
-             "author={Titarenko, Valeriy and Bradley, Robert and Martin,\n" +
-             "Christopher and Withers, Philip J and Titarenko, Sofya},\n" +
-             "booktitle={Developments in X-Ray Tomography VII},\n" +
-             "volume={7804},\n" +
-             "pages={78040Z},\n" +
-             "year={2010},\n" +
-             "organization={International Society for Optics and Photonics}" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Conference Proceedings\n" +
-             "%T Regularization methods for inverse problems in\n" +
-             "X-ray tomography\n" +
-             "%A Titarenko, Valeriy\n" +
-             "%A Bradley, Robert\n" +
-             "%A Martin, Christopher\n" +
-             "%A Withers, Philip J\n" +
-             "%A Titarenko, Sofya\n" +
-             "%B Developments in X-Ray Tomography VII\n" +
-             "%V 7804\n" +
-             "%P 78040Z\n" +
-             "%D 2010\n" +
-             "%I International Society for Optics and Photonics")
-        cite_info.doi = "doi: 10.1117/12.860260" 
-        return cite_info

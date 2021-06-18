@@ -1,3 +1,4 @@
+
 Savu Developer Information
 **************************
 
@@ -13,8 +14,8 @@ Once this is done, Zenodo.org will automatically create and archive an artefact.
 We should then update the pypi stuff.
 
 
-Developing on a feature branch
-==============================
+How to develop on a feature branch
+===================================
 
 Make a new Branch for development and move to it
 	git checkout -b new_branch
@@ -46,61 +47,20 @@ there should be no problems if you have merge master in first, so just push back
 	git push
 
 
-..
-    Developing new Plugins
-    ======================
 
-    The architecture of the savu package is that new plugins can be easily developed
-    without having to take the framework into consideration.  This is mostly true for
-    simple cases, however there are some thigns which cannot be done with such 
-    simple methodologies and the developer may need to take more into consideration.
-
-    Every plugin in Savu needs to be a subclass of the Plugin class, however there 
-    are several convenience subclasses which already exist for doing standard 
-    processes such as filtering, reconstruction and augmentation/passthrough
-
-    Although there are many plugins defined in the core savu code, plugins can be 
-    written anywhere and included easily as shown below without having to be submitted
-    to the core code.
-
-    Median Filter Example
-    ---------------------
-
-    This examples recreates one of the core plugins, a median filter.  The code is 
-    available in the main Savu repository under the plugin_examples folder.
-
-    .. literalinclude:: ../../../plugin_examples/example_median_filter.py
-       :linenos:
-
-    As you can see this is a pretty small implementation, and the key features of
-    which are detailed in the comments associated with the code.
-
-.. 
-    Testing the new plugin
-    ======================
-
-    So now that you have the new plugin written, you can test it using the following
-    command, you will need to make sure that savu is installed or included in your
-    $PYTHON_PATH
-
-    .. code:: bash
-
-       python $SAVU_HOME/savu/test/framework_test.py -p $SAVU_HOME/plugin_examples/example_median_filter /tmp/savu_output/
-
-
-Testing a new plugin using DAWN
-===============================
+How to test a new plugin using DAWN
+=====================================
 
 DAWN can be downloaded from http://www.dawnsci.org/ and general user tutorials 
 are found at https://www.youtube.com/user/DAWNScience
 
-Using the Debug perspective, create a new test, e.g. "plugin_test_recon.py"
+Using the Debug perspective, create a new test, e.g. "tomopy_recon_test.py"
 to test your plugin in "/Savu/savu/test/", in this case the 
 "example_filter_back_projection.py" plugin for reconstructing data, setting the
 self.plugin_name appropriately.  After saving the file, right-click on it in 
 the PyDev Package Explorer window and Run As a Python unit-test
 
-.. literalinclude:: ../../../savu/test/plugin_test_recon.py
+.. literalinclude:: ../../../savu/test/travis/plugin_tests/reconstruction_tests/tomopy_recon_test.py
    :linenos:
 
 This runs a series of tests and produces an output file with the result of the
@@ -136,7 +96,6 @@ http://docs.cython.org/src/tutorial/clibraries.html
    :linenos:
 
 Compile this file, passing appropriate C compiler flags if necessary, to obtain a \*.so file.
-::
 
 e.g.
 export CFLAGS="-I . $CFLAGS" \
@@ -163,10 +122,7 @@ Boost.python aims to expose C++ classes/functions to python, without changing th
 
 The output file for this example is a example.so file.  Transfer this file to \lib and import as a python module, e.g. import example, then simply access a function from within your python code as example.example_function1(...).
 
-The class and header files example.cpp and example.hpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension. 
-
-.. literalinclude:: ../../../extension_examples/example.hpp
-   :linenos:
+The class file example.cpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension.
 
 .. literalinclude:: ../../../extension_examples/example.cpp
    :linenos:

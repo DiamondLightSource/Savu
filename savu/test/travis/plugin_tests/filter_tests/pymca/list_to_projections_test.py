@@ -28,15 +28,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class ListToProjectionsTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = 'fluo_p1_pymca.h5'
-    experiment = None
+    def setUp(self):
+        self.data_file = 'fluo_p1_pymca.h5'
+        self.experiment = None
 
     def test_process(self):
         process_list = 'pymca/interpolation_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
-        
+
 if __name__ == "__main__":
     unittest.main()

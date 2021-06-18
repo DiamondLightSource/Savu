@@ -34,27 +34,7 @@ from savu.data.data_structures.data_types.stitch_data import StitchData
 
 @register_plugin
 class MultiNxtomoLoader(BaseLoader):
-    """
-    A class to load multiple scans in Nexus format into one dataset.
 
-    :param name: The name assigned to the dataset. Default: 'tomo'.
-    :param file_name: The shared part of the name of each file\
-        (not including .nxs). Default: None.
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param dark: Optional path to the dark field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param flat: Optional Path to the flat field data file, nxs path and \
-        scale value. Default: [None, None, 1]. 
-    :param stack_or_cat: Stack or concatenate the data\
-        (4D and 3D respectively). Default: 'stack'.
-    :param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
-    :param axis_label: New axis label, if required, in the form\
-        'name.units'. Default: 'scan.number'.
-    :param range: The start and end of file numbers. Default: [0, 10].
-    :param angles: A python statement to be evaluated or a file. Default: None.
-
-    """
 
     def __init__(self, name='MultiNxtomoLoader'):
         super(MultiNxtomoLoader, self).__init__(name)
@@ -92,8 +72,7 @@ class MultiNxtomoLoader(BaseLoader):
     def _get_nxtomo(self):
         nxtomo = NxtomoLoader()
         nxtomo.exp = self.exp
-        nxtomo._populate_default_parameters()
-        
+    
         # update nxtomo parameters with any common keys
         shared_keys = set(nxtomo.parameters.keys()).intersection(
             set(self.parameters.keys()))

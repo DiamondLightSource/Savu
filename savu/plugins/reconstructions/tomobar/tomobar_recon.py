@@ -15,14 +15,13 @@
 """
 .. module:: tomobar_recon
    :platform: Unix
-   :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction (2D case) using GPU
+   :synopsis: 'A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
+        for advanced iterative image reconstruction (2D case) using GPU'
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
@@ -32,36 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class TomobarRecon(BaseRecon, GpuPlugin):
-    """
-    A GPU plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from \
-    the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit: \
-    https://github.com/vais-ral/CCPi-Regularisation-Toolkit.
-
-    :param output_size: Number of rows and columns in the \
-        reconstruction. Default: 'auto'.
-    :param data_fidelity: Data fidelity, choose LS, PWLS, SWLS or KL. Default: 'LS'.
-    :param data_Huber_thresh: Threshold parameter for __Huber__ data fidelity . Default: None.
-    :param data_beta_SWLS: A parameter for stripe-weighted model. Default: 0.1.
-    :param data_full_ring_GH: Regularisation variable for full constant ring removal (GH model). Default: None.
-    :param data_full_ring_accelerator_GH: Acceleration constant for GH ring removal. Default: 10.0.
-    :param algorithm_iterations: Number of outer iterations for FISTA (default) or ADMM methods. Default: 20.
-    :param algorithm_verbose: print iterations number and other messages ('off' by default). Default: 'off'.
-    :param algorithm_mask: set to 1.0 to enable a circular mask diameter or < 1.0 to shrink the mask. Default: 1.0.
-    :param algorithm_ordersubsets: The number of ordered-subsets to accelerate reconstruction. Default: 6.
-    :param algorithm_nonnegativity: ENABLE or DISABLE nonnegativity constraint. Default: 'ENABLE'.
-    :param regularisation_method: To regularise choose methods ROF_TV, FGP_TV, PD_TV, SB_TV, LLT_ROF,\
-                             NDF, TGV, NLTV, Diff4th. Default: 'FGP_TV'.
-    :param regularisation_parameter: Regularisation (smoothing) value, higher \
-                            the value stronger the smoothing effect. Default: 0.00001.
-    :param regularisation_iterations: The number of regularisation iterations. Default: 80.
-    :param regularisation_PD_lip: Primal-dual parameter for convergence. Default: 8.
-    :param regularisation_methodTV:  0/1 - TV specific isotropic/anisotropic choice. Default: 0.
-    :param regularisation_timestep: Time marching parameter, relevant for \
-                    (ROF_TV, LLT_ROF, NDF, Diff4th) penalties. Default: 0.003.
-    :param regularisation_edge_thresh: Edge (noise) related parameter, relevant for NDF and Diff4th. Default: 0.01.
-    :param regularisation_parameter2:  Regularisation (smoothing) value for LLT_ROF method. Default: 0.005.
-    :param regularisation_NDF_penalty: NDF specific penalty type Huber, Perona, Tukey. Default: 'Huber'.
-    """
 
     def __init__(self):
         super(TomobarRecon, self).__init__("TomobarRecon")
@@ -135,34 +104,3 @@ class TomobarRecon(BaseRecon, GpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info1 = CitationInformation()
-        cite_info1.name = 'citation1'
-        cite_info1.description = \
-            ("First-order optimisation algorithm for linear inverse problems.")
-        cite_info1.bibtex = \
-            ("@article{beck2009,\n" +
-             "title={A fast iterative shrinkage-thresholding algorithm for linear inverse problems},\n" +
-             "author={Amir and Beck, Mark and Teboulle},\n" +
-             "journal={SIAM Journal on Imaging Sciences},\n" +
-             "volume={2},\n" +
-             "number={1},\n" +
-             "pages={183--202},\n" +
-             "year={2009},\n" +
-             "publisher={SIAM}\n" +
-             "}")
-        cite_info1.endnote = \
-            ("%0 Journal Article\n" +
-             "%T A fast iterative shrinkage-thresholding algorithm for linear inverse problems\n" +
-             "%A Beck, Amir\n" +
-             "%A Teboulle, Mark\n" +
-             "%J SIAM Journal on Imaging Sciences\n" +
-             "%V 2\n" +
-             "%N 1\n" +
-             "%P 183--202\n" +
-             "%@ --\n" +
-             "%D 2009\n" +
-             "%I SIAM\n")
-        cite_info1.doi = "doi: "
-        return cite_info1

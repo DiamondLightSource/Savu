@@ -33,13 +33,13 @@ import os
 
 
 class MedianFilterGpuTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_median_gpu_filter(self):
         process_list = 'filters/denoise/median_filter_gpu_test.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

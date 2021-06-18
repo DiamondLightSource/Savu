@@ -28,7 +28,6 @@ from scripts.config_generator.content import Content
 
 
 class RefreshProcessListsTest(unittest.TestCase):
-
     def _refresh_process_file(self, path):
         content = Content()
         # open

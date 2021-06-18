@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: data inpainting method from Larix software
+.. module:: inpainting
    :platform: Unix
-   :synopsis: A plugin to inpaint missing data
+   :synopsis: A plugin to inpaint missing data. Data inpainting method from Larix software
 
 .. moduleauthor::Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 

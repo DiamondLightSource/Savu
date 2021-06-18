@@ -1,44 +1,13 @@
-.. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
-    :target: https://github.com/DiamondLightSource/Savu/actions
+|savu_full_tests| |savu_install| |coverage| |codefactor| |scrutinizer| |zenodo|
 
-.. image:: https://github.com/DiamondLightSource/Savu/workflows/savu_install/badge.svg
-    :target: https://github.com/DiamondLightSource/Savu/actions
-
-.. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
-    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
-
-.. image:: https://www.codefactor.io/repository/github/diamondlightsource/savu/badge
-    :target: https://www.codefactor.io/repository/github/diamondlightsource/savu
-
-.. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
-
-.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
-   :target: https://readthedocs.org/projects/savu/?badge=latest
-   :alt: Documentation Status
-
-.. image:: https://zenodo.org/badge/26539525.svg
-  :target: https://zenodo.org/badge/latestdoi/26539525
-
-|
-.. image:: https://anaconda.org/savu-dep/savu-lite/badges/version.svg
-  :target: https://anaconda.org/savu-dep/savu-lite
-
-.. image:: https://anaconda.org/savu-dep/savu-lite/badges/latest_release_date.svg
-  :target: https://anaconda.org/savu-dep/savu-lite
-
-.. image:: https://anaconda.org/savu-dep/savu-lite/badges/platforms.svg
-  :target: https://anaconda.org/savu-dep/savu-lite
-
-.. image:: https://anaconda.org/savu-dep/savu-lite/badges/downloads.svg
-  :target: https://anaconda.org/savu-dep/savu-lite
-
-
-.. start_of_main_text
+|savu-lite-v| |savu-lite-latest| |platform| |downloads|
 
 .. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
-  :scale: 100%
-  :align: center
+    :scale: 100%
+    :align: center
+    :alt: savu_logo
+
+.. start_of_main_text
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
@@ -70,14 +39,12 @@ Features
 - Easy integration of new functionality
 
 Documentation
-========
+==============
 The full documentation is available at https://savu.readthedocs.org/en/latest/
 
-Installation (Linux only)
-========
-| Install Savu-lite package into an empty `conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ environment with:
-| ``conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev``
-
+Installation (Unix systems only)
+================================
+| See all installation instructions `here <https://github.com/DiamondLightSource/Savu/tree/master/install/README.md>`_
 
 License
 ========
@@ -88,6 +55,44 @@ Contacts
 ========
 Any questions regarding software can be addressed to scientificsoftware@diamond.ac.uk.
 
-.. image:: https://codescene.io/projects/3730/status.svg
+|codescene|
+
+
+.. |savu_full_tests| image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
+.. |savu_install| image:: https://github.com/DiamondLightSource/Savu/workflows/savu_install/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
+.. |coverage| image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
+    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
+
+.. |codefactor| image:: https://www.codefactor.io/repository/github/diamondlightsource/savu/badge
+    :target: https://www.codefactor.io/repository/github/diamondlightsource/savu
+
+.. |scrutinizer| image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
+
+.. |docs| image:: https://readthedocs.org/projects/savu/badge/?version=latest
+    :target: https://readthedocs.org/projects/savu/?badge=latest
+    :alt: Documentation Status
+
+.. |zenodo| image:: https://zenodo.org/badge/26539525.svg
+    :target: https://zenodo.org/badge/latestdoi/26539525
+
+
+.. |savu-lite-v| image:: https://anaconda.org/savu-dep/savu-lite/badges/version.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |savu-lite-latest| image:: https://anaconda.org/savu-dep/savu-lite/badges/latest_release_date.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |platform| image:: https://anaconda.org/savu-dep/savu-lite/badges/platforms.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |downloads| image:: https://anaconda.org/savu-dep/savu-lite/badges/downloads.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |codescene| image:: https://codescene.io/projects/3730/status.svg
     :target: https://codescene.io/projects/3730/jobs/latest-successful/results
     :alt: Get more details at **codescene.io**

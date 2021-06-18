@@ -13,31 +13,22 @@
 # limitations under the License.
 
 """
-.. module:: Convert 360-180 sinogram.
+.. module:: convert_360_180_sinogram
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to convert 0-360 degree\\
-    sinogram to 0-180 sinogram.
+   :synopsis: A plugin working in sinogram space to convert a 360-degree \
+   sinogram to a 180-degree sinogram in a half-acquisition scan.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 import scipy.ndimage as ndi
 
 
 @register_plugin
 class Convert360180Sinogram(Plugin, CpuPlugin):
-    """
-
-    Method to convert the 0-360 degree sinogram to 0-180 sinogram.
-    :param center: Center of rotation. Default: 0.0
-    :param out_datasets: Create a list of the dataset(s) to \
-        create. Default: ['in_datasets[0]', 'cor'].
-
-    """
 
     def __init__(self):
         super(Convert360180Sinogram, self).__init__(

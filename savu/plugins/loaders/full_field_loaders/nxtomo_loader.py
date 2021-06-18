@@ -25,9 +25,9 @@ import h5py
 import logging
 import numpy as np
 
-import savu.core.utils as cu
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
 
@@ -35,26 +35,7 @@ from savu.data.data_structures.data_types.data_plus_darks_and_flats \
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load tomography data from a hdf5 file
-
-    :param name: The name assigned to the dataset. Default: 'tomo'.
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param image_key_path: Path to the image key entry inside the nxs \
-        file. Set this parameter to "None" if use this loader for radiography\
-        . Default: 'entry1/tomo_entry/instrument/detector/image_key'.
-    :param dark: Optional path to the dark field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param flat: Optional Path to the flat field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: If this is 4D data stored in 3D then pass an integer \
-        value equivalent to the number of projections per 180-degree scan\
-        . Default: False.
-    :param ignore_flats: List of batch numbers of flats (start at 1) to \
-        ignore. Default: None.
     """
-
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
         self.warnings = []
@@ -213,12 +194,12 @@ class NxtomoLoader(BaseLoader):
 
     def __set_data(self, data_obj, name, func):
         path, entry, scale = self.parameters[name]
-
-        if path.split('/')[0] == 'test_data':
+            
+        if path.split('/')[0] == 'Savu':
             import os
-            path = \
-                os.path.dirname(os.path.abspath(__file__)) + \
-                '/../../../../' + path
+            savu_base_path = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), '..', '..', '..', '..')
+            path = os.path.join(savu_base_path, path.split('Savu')[1][1:])
 
         ffile = h5py.File(path, 'r')
         try:

@@ -31,9 +31,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class PluginTemplate3(Plugin, CpuPlugin):
-    """
-    A plugin template that reduces the data dimensions, e.g. azimuthal \
-    integration.
+    """A plugin template that reduces the data dimensions, e.g. azimuthal
+integration.
 
     :param num_bins: Length of the new dimension. Default: 10.
     """

@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """
-.. module:: Calculate geodesic distance transform for 3D volume
+.. module:: geo_distance_3D
    :platform: Unix
-   :synopsis: Wraps the code for calculating geodesic distance transforms, can be a \
-   usefull tool for data segmentation with a proper seed initialisation
+   :synopsis: Calculate geodesic distance transforms in 3D. \
+Wraps the code for calculating geodesic distance transforms, can be a \
+usefull tool for data segmentation with a proper seed initialisation.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -45,13 +46,6 @@ import numpy as np
 
 @register_plugin
 class GeoDistance3d(Plugin, MultiThreadedPlugin):
-    """
-    3D geodesic transformation of volumes with mask initialisation.
-
-    :param lambda: weighting betwween 0 and 1 . Default: 0.5.
-    :param iterations: number of iteration for raster scanning . Default: 4.
-    :param out_datasets: The default names . Default: ['GeoDist'].
-    """
 
     def __init__(self):
         super(GeoDistance3d, self).__init__("GeoDistance3d")
@@ -59,7 +53,7 @@ class GeoDistance3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         # If VOLUME_3D pattern doesn't exist then use "VOlUME_XZ" pattern with
         # all of voxel_y dimension as this is equivalent to one VOLUME_3D scan.
         getall = ['VOLUME_XZ', 'voxel_y']

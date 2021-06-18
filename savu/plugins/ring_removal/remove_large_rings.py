@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: remove_large_rings
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove large stripe artefacts
+   :synopsis: Method working in the sinogram space to remove large ring
+    artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -23,7 +24,6 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 from scipy.ndimage import median_filter
 from scipy.ndimage import binary_dilation
@@ -31,20 +31,10 @@ from scipy.ndimage import binary_dilation
 
 @register_plugin
 class RemoveLargeRings(Plugin, CpuPlugin):
-    """
-
-    Method to remove large stripe artefacts in a sinogram (<-> ring artefacts\
-    in a reconstructed image). 
-
-    :param size: Size of the median filter window. Greater is stronger\
-    . Default: 71.
-    :param snr: Ratio used to detect locations of large stripes. Greater is\
-     less sensitive. Default: 3.0.
-    """
 
     def __init__(self):
         super(RemoveLargeRings, self).__init__(
-                "RemoveLargeRings")
+            "RemoveLargeRings")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -54,30 +44,37 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
 
     def detect_stripe(self, listdata, snr):
-        """
-        Algorithm 4 in the paper. Used to locate stripe positions.
-        ---------
-        Parameters: - listdata: 1D normalized array.
-                    - snr: ratio used to discriminate between useful
-                        information and noise.
-        ---------
-        Return:     - 1D binary mask.
+        """Algorithm 4 in the paper. To locate stripe positions.
+
+        Parameters
+        ----------
+        listdata : 1D normalized array.
+        snr : Ratio (>1.0) used to detect stripe locations.
+
+        Returns
+        -------
+        listmask : 1D binary mask.
         """
         numdata = len(listdata)
         listsorted = np.sort(listdata)[::-1]
         xlist = np.arange(0, numdata, 1.0)
         ndrop = np.int16(0.25 * numdata)
         (_slope, _intercept) = np.polyfit(
-            xlist[ndrop:-ndrop-1], listsorted[ndrop:-ndrop - 1], 1)
+            xlist[ndrop:-ndrop - 1], listsorted[ndrop:-ndrop - 1], 1)
         numt1 = _intercept + _slope * xlist[-1]
         noiselevel = np.abs(numt1 - _intercept)
+        if noiselevel == 0.0:
+            raise ValueError(
+                "The method doesn't work on noise-free data. If you " \
+                "apply the method on simulated data, please add" \
+                " noise!")
         val1 = np.abs(listsorted[0] - _intercept) / noiselevel
         val2 = np.abs(listsorted[-1] - numt1) / noiselevel
         listmask = np.zeros_like(listdata)
-        if (val1 >= snr):
+        if val1 >= snr:
             upper_thresh = _intercept + noiselevel * snr * 0.5
             listmask[listdata > upper_thresh] = 1.0
-        if (val2 >= snr):
+        if val2 >= snr:
             lower_thresh = numt1 - noiselevel * snr * 0.5
             listmask[listdata <= lower_thresh] = 1.0
         return listmask
@@ -92,27 +89,25 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         self.width1 = sino_shape[width_dim]
         self.height1 = sino_shape[height_dim]
         listindex = np.arange(0.0, self.height1, 1.0)
-        self.matindex = np.tile(listindex,(self.width1,1))        
-        self.size = np.clip(np.int16(self.parameters['size']), 1, self.width1-1)
+        self.matindex = np.tile(listindex, (self.width1, 1))
+        self.size = np.clip(np.int16(self.parameters['size']), 1,
+                            self.width1 - 1)
         self.snr = np.clip(np.float32(self.parameters['snr']), 1.0, None)
-        
+
     def process_frames(self, data):
-        """
-        Algorithm 5 in the paper. Remove large stripes by: locating stripes,
-        normalizing to remove full stripes, using the sorting technique to
-        remove partial stripes.
-        """
         sinogram = np.copy(data[0])
-        badpixelratio = 0.05 # To avoid false detection        
+        badpixelratio = 0.05  # To avoid false detection
         ndrop = np.int16(badpixelratio * self.height1)
         sinosorted = np.sort(sinogram, axis=0)
         sinosmoothed = median_filter(sinosorted, (1, self.size))
         list1 = np.mean(sinosorted[ndrop:self.height1 - ndrop], axis=0)
         list2 = np.mean(sinosmoothed[ndrop:self.height1 - ndrop], axis=0)
-        listfact = list1 / list2
+        listfact = np.divide(list1, list2,
+                             out=np.ones_like(list1), where=list2 != 0)
         listmask = self.detect_stripe(listfact, self.snr)
-        listmask = binary_dilation(listmask, iterations=1).astype(listmask.dtype)
-        matfact = np.tile(listfact,(self.height1,1))
+        listmask = binary_dilation(listmask, iterations=1).astype(
+            listmask.dtype)
+        matfact = np.tile(listfact, (self.height1, 1))
         sinogram = sinogram / matfact
         sinogram1 = np.transpose(sinogram)
         matcombine = np.asarray(np.dstack((self.matindex, sinogram1)))
@@ -125,24 +120,3 @@ class RemoveLargeRings(Plugin, CpuPlugin):
         listxmiss = np.where(listmask > 0.0)[0]
         sinogram[:, listxmiss] = sino_corrected[:, listxmiss]
         return sinogram
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The code of ring removal is the implementation of the work of \
-            Nghia T. Vo et al. taken from algorithm 4, 5 in this paper.")
-        cite_info.bibtex = \
-            ("@article{Vo:18,\n" +
-             "title={Superior techniques for eliminating ring artifacts in\
-              X-ray micro-tomography},\n" +
-             "author={Nghia T. Vo, Robert C. Atwood,\
-              and Michael Drakopoulos},\n" +
-             "journal={Opt. Express},\n" +
-             "volume={26},\n" +
-             "number={22},\n" +
-             "pages={28396--28412},\n" +
-             "year={2018},\n" +
-             "publisher={OSA}" +
-             "}")
-        cite_info.doi = "doi: DOI: 10.1364/OE.26.028396"
-        return cite_info

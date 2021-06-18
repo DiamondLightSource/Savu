@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I14FluoLoader
+.. module:: i14_fluo_loader
    :platform: Unix
    :synopsis: A class for loading I14s xrf data
 
@@ -29,11 +29,6 @@ import h5py as h5
 
 @register_plugin
 class I14FluoLoader(BaseLoader):
-    """
-    A class to load i14s xrf data
-    :param mono_path: The mono energy. Default: '/entry/instrument/beamline/DCM/dcm_energy'.
-    """
-
     def __init__(self, name='I14FluoLoader'):
         super(I14FluoLoader, self).__init__(name)
 

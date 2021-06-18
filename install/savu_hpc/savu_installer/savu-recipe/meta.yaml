@@ -1,0 +1,20 @@
+package:
+  name: savu
+  version: {{ environ['savu_version'] }}
+
+source:
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ environ['savu_branch'] }}.tar.gz
+
+requirements:
+  build:
+    - python
+
+build:
+  preserve_egg_dir: True
+  script_env:
+    - FACILITY
+
+about:
+  home: https://github.com/diamondlightsource/Savu
+  license: Apache V2 and GPL V3
+  license_file: LICENCE.txt

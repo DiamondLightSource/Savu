@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I13SpeckleLoader
+.. module:: i13_speckle_loader
    :platform: Unix
    :synopsis: A class for loading I13's speckle tracking data
 

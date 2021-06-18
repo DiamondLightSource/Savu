@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: a dezinger filter (based on the median) from the Larix software
+.. module:: dezinger
    :platform: Unix
    :synopsis: A 2D/3D median-based dezinger plugin to apply to any data
 .. moduleauthor::Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
@@ -27,20 +27,6 @@ from larix.methods.misc import MEDIAN_DEZING
 
 @register_plugin
 class Dezinger(Plugin, CpuPlugin):
-    """
-    A plugin to apply 2D/3D median-based dezinger. The 3D capability is enabled\
-    through padding. Note that the kernel_size in 2D will be kernel_size x kernel_size
-    and in 3D case kernel_size x kernel_size x kernel_size.
-    
-    :u*param kernel_size: Kernel size of the median filter. Default: 3.
-    :param outlier_mu: Threshold for detecting outliers, greater is less \
-    sensitive. If very small, dezinger acts like a median filter. Default: 1.0.
-    :u*param dimension: dimensionality of the filter 2D/3D. Default: '3D'.
-    :u*param pattern: pattern to apply this to. Default: "PROJECTION".
-
-    :config_warn: The dezinger plugin should be applied to normalised data \
-    (e.g. AFTER DarkFlatFieldCorrection)
-    """
 
     def __init__(self):
         super(Dezinger, self).__init__("Dezinger")

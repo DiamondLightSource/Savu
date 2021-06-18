@@ -153,7 +153,6 @@ class BaseFitter(Plugin, CpuPlugin):
         rest = fitmatrix
         numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
         npts = len(fitmatrix) // numargsinp
-        #print npts
         weights = rest[:npts]
         #print 'the weights are'+str(weights)
         widths = rest[npts:2*npts]

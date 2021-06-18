@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: ImageInterpolation
+.. module:: image_interpolation
    :platform: Unix
    :synopsis: A plugin to interpolate each frame
 
