@@ -29,8 +29,8 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class McNearAbsorptionCorrectTest(unittest.TestCase):
 
     def test_mcnear(self):
-        data_file = tu.get_test_data_path('i18_test_data.nxs')
-        process_file = tu.get_test_process_path('to_revise/mcnear_absorption_correction.nxs')
+        data_file = tu.get_test_data_path('mm.nxs')
+        process_file = tu.get_test_process_path('under_revision/mcnear_absorption_correction.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

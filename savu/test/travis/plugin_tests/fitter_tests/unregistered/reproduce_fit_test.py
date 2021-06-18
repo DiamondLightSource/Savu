@@ -29,9 +29,10 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class ReproduceFitTest(unittest.TestCase):
 
+    @unittest.skip("A plugin in the process list is unregistered")
     def test_reproduce_fit(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('fitters/reproduce_fit_test.nxs')
+        process_file = tu.get_test_process_path('under_revision/reproduce_fit_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
