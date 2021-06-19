@@ -424,8 +424,12 @@ class Content(object):
         parameters = plugin_entry["data"]
         self.check_param_exists(parameters, "preview")
         current_prev_list = pu._dumps(parameters["preview"])
+        if not isinstance(current_prev_list, list):
+            # Temporarily cover dict instance for preview
+            print("This command is only possible for preview "
+                  "values of the type list")
+            return False
         pu.check_valid_dimension(dim, [])
-
         check_str = (
             f"Are you sure you want to alter the number of "
             f"dimensions to {dim}? [y/N]"
