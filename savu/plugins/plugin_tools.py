@@ -499,16 +499,28 @@ class PluginParameters(object):
         :return: dict
         """
         expand_dict = {}
-        preview_list = pu._dumps(preview)
-        if expand_dim == "all":
-            expand_dict = \
-                self._output_all_dimensions(preview_list,
-                     self._get_dimensions(preview_list))
+        preview_val = pu._dumps(preview)
+        if not preview_val:
+            # In the case that there is an empty dict, display the default
+            preview_val = []
+        if isinstance( preview_val, dict):
+            for key, prev_list in preview_val.items():
+                expand_dict[key] = self._get_expand_dict(prev_list, expand_dim)
+            return expand_dict
+        elif isinstance(preview_val, list):
+            if expand_dim == "all":
+                expand_dict = \
+                    self._output_all_dimensions(preview_val,
+                         self._get_dimensions(preview_val))
+            else:
+                pu.check_valid_dimension(expand_dim, preview_val)
+                dim_key = f"dim{expand_dim}"
+                expand_dict[dim_key] = \
+                    self._dim_slice_output(preview_val, expand_dim)
         else:
-            pu.check_valid_dimension(expand_dim, preview_list)
-            dim_key = f"dim{expand_dim}"
-            expand_dict[dim_key] = \
-                self._dim_slice_output(preview_list, expand_dim)
+            raise ValueError("This preview value was not a recognised list "
+                             "or dictionary. This expand command currenty "
+                             "only works with those two data type.")
         return expand_dict
 
     def _get_dimensions(self, preview_list):
