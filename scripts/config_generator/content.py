@@ -174,6 +174,8 @@ class Content(object):
         :param expand_dim: The dimension number to display, or "all"
         """
         self.expand_dim = None if input == "off" else expand_dim
+        if input == "off":
+            print(f"Expand diplay has been turned off")
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
