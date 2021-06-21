@@ -30,10 +30,6 @@ import numpy as np
 @register_plugin
 class ForwardProjectorCpu(Plugin, CpuPlugin):
     """
-    This plugin uses ToMoBAR software and CPU Astra projector to generate parallel-beam projection data.
-    The plugin will project the given object using the available metadata OR user-provided geometry.
-    In case when angles set to None, the metadata projection geometry will be used.
-
     :param angles_deg: Projection angles in degrees in a format [start, stop, step]. Default: None.
     :param det_horiz: The size of the horizontal detector. Default: None.
     :param centre_of_rotation: The centre of rotation. Default: None.
