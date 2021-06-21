@@ -337,9 +337,9 @@ class Content(object):
         # If dimensions are provided then alter preview param
         if self.preview_dimension_to_modify(dim, param_name):
             # Filter the dimension, dim1 or dim1.start
-            dim, slice = self._separate_dimension_and_slice(dim)
+            dim, _slice = self._separate_dimension_and_slice(dim)
             value = self.modify_preview(parameters, param_name, value, dim,
-                                        slice)
+                                        _slice)
 
         # If found, then the parameter is within the current parameter list
         # displayed to the user
@@ -716,12 +716,12 @@ class Content(object):
         if isinstance(command_str, str) and '.' in command_str:
             # If the slice value is included
             slice_dict = {'start':0, 'stop':1, 'step':2, 'chunk':3}
-            slice = slice_dict[command_str.split('.')[1]]
+            _slice = slice_dict[command_str.split('.')[1]]
             dim = int(command_str.split('.')[0])
         else:
            dim = int(command_str)
-           slice = ''
-        return dim, slice
+           _slice = ''
+        return dim, _slice
 
     def dim_str_to_int(self, dim_str):
         """ Check the additional 1.1.dim keyword
@@ -740,18 +740,18 @@ class Content(object):
                              "specify a dimension '1.1.dim1/1.preview.dim1'")
         return dim
 
-    def modify_preview(self, parameters, param_name, value, dim, slice):
+    def modify_preview(self, parameters, param_name, value, dim, _slice):
         """ Check the entered value is valid and edit preview"""
         slice_list = [0,1,2,3]
         type_check_value = pu._dumps(value)
         current_preview_value = pu._dumps(parameters[param_name])
         pu.check_valid_dimension(dim, current_preview_value)
-        if slice in slice_list:
+        if _slice in slice_list:
             # Modify this dimension and slice only
             if param_u._preview_dimension_singular(type_check_value):
                 value = self._modify_preview_dimension_slice(value,
                                                             current_preview_value,
-                                                            dim, slice)
+                                                            dim, _slice)
             else:
                 raise Exception('Invalid preview dimension slice value. Please '
                                 'enter a float, an integer or a string including '
@@ -769,39 +769,39 @@ class Content(object):
                                 'enter a float, an integer or slice notation.')
         return value
 
-    def _modify_preview_dimension_slice(self, value, current_val, dim, slice):
+    def _modify_preview_dimension_slice(self, value, current_val, dim, _slice):
         """Modify the preview dimension slice value at the dimension (dim)
         provided
 
         :param value: The new value
         :param current_value: The current preview parameter value
         :param dim: The dimension to modify
-        :param slice: The slice value to modify
+        :param _slice: The slice value to modify
         :return: The modified value
         """
         if not current_val:
             current_val = self._set_empty_list(dim,
-                          self._set_empty_dimension_slice(value, slice))
+                          self._set_empty_dimension_slice(value, _slice))
         else:
             current_val[dim - 1] = \
                 self._modified_slice_notation(current_val[dim - 1],
                                                             value,
-                                                            slice)
+                                                            _slice)
         return current_val
 
-    def _modified_slice_notation(self, old_value, value, slice):
+    def _modified_slice_notation(self, old_value, value, _slice):
         """Change the current value at the provided slice
 
         :param old_value: Previous slice notation
         :param value: New value to set
-        :param slice: Slice to modify
+        :param _slice: Slice to modify
         :return: Changed value (str/int)
         """
-        old_value = self._set_incomplete_slices(str(old_value), slice)
+        old_value = self._set_incomplete_slices(str(old_value), _slice)
         if pu.is_slice_notation(old_value):
             start_stop_split = old_value.split(":")
-            return self._get_modified_slice(start_stop_split, value, slice)
-        elif slice == 0:
+            return self._get_modified_slice(start_stop_split, value, _slice)
+        elif _slice == 0:
             # If there is no slice notation, only allow first slice to
             # be modified
             return value
@@ -809,11 +809,11 @@ class Content(object):
             raise Exception("There is no existing slice notation "
                             "to modify.")
 
-    def _get_modified_slice(self, start_stop_split, value, slice):
+    def _get_modified_slice(self, start_stop_split, value, _slice):
         if all(v == "" for v in start_stop_split):
-            return self._set_empty_dimension_slice(value, slice)
+            return self._set_empty_dimension_slice(value, _slice)
         else:
-            start_stop_split[slice] = str(value)
+            start_stop_split[_slice] = str(value)
             start_stop_split = ":".join(start_stop_split)
             return start_stop_split
 
@@ -832,25 +832,25 @@ class Content(object):
             # Save the altered preview value
             return current_preview
 
-    def _set_empty_dimension_slice(self, value, slice):
+    def _set_empty_dimension_slice(self, value, _slice):
         """Set the empty dimension and insert colons to indicate
         the correct slice notation.
 
         :param value: New value to set
-        :param slice: start/stop/step/chunk value
+        :param _slice: start/stop/step/chunk value
         :return: String for the new value
         """
-        return slice * ":" + str(value)
+        return _slice * ":" + str(value)
 
-    def _set_incomplete_slices(self, old_value, slice):
+    def _set_incomplete_slices(self, old_value, _slice):
         """Append default slice values.to the current string value, in order
          to allow later slice values to be set
 
         :param old_value: Current string value with slice notation
-        :param slice: slice notation index to be edited
+        :param _slice: slice notation index to be edited
         :return: String with default slice notation entries set
         """
-        while old_value.count(":")<slice:
+        while old_value.count(":")<_slice:
             old_value += ":"
         return old_value
 
