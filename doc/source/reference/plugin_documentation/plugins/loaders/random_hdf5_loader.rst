@@ -11,18 +11,6 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
             dtype: preview
@@ -42,7 +30,7 @@ Parameter definitions
             default: "[]"
         
         patterns:
-            visibility: intermediate
+            visibility: basic
             dtype: "[list[],list[str]]"
             description: "A list of data access patterns e.g. [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where 'c' and 's' represent core and slice dimensions respectively and every dimension must be specified."
             default: "[]"

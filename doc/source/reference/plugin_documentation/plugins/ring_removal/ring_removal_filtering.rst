@@ -4,7 +4,7 @@ Ring Removal Filtering
 Description
 --------------------------
 
-Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image) using a filtering-based method in the combination with a sorting-based method. Note that it's different to a FFT-based or wavelet-FFT-based method. 
+Method working in the sinogram space to remove ring artifacts by combining a filtering and sorting technique. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_filtering_doc.rst>
@@ -31,13 +31,13 @@ Parameter definitions
             default: "[]"
         
         sigma:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Sigma of the Gaussian window. Used to separate the low-pass and high-pass components of each sinogram column.
             default: "3"
         
         size:
-            visibility: intermediate
+            visibility: basic
             dtype: "[float, list[float]]"
             description: Size of the median filter window. Used to clean stripes.
             default: "31"

@@ -34,25 +34,12 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
-<<<<<<< HEAD
         init_vol:
-            visibility: advanced
+            visibility: hidden
             dtype: "[None,str]"
             description: Not an option.
             default: None
-=======
-        outer_pad:
-            visibility: advanced
-            dtype: "[bool,int,float]"
-            description: Not an option.
-            default: "False"
-        
-        ratio:
-            visibility: basic
-            dtype: float
-            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
-            default: "0.98"
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
+            example: "Type the name of the initialised dataset e.g. ['tomo']"
         
         log:
             visibility: intermediate
@@ -69,43 +56,27 @@ Parameter definitions
             description: A slice list of required frames.
             default: "[]"
         
-        init_vol:
-            visibility: advanced
-            dtype: "[None,str]"
-            description: Not an option.
-            default: None
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not an option.
-            default: "False"
-        
         force_zero:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
-<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
-=======
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
-            description: Override the default log function
+            description: Override the default log function with a numpy statement
             default: np.nan_to_num(-np.log(sino))
-            example: You write a function as default
         
         vol_shape:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -115,39 +86,21 @@ Parameter definitions
         n_iterations:
             visibility: basic
             dtype: int
-            description: Number of rows and columns in the reconstruction.
+            description: Number of iterations to perform.
             default: "5"
         
         resolution:
-            visibility: basic
+            visibility: intermediate
             dtype: float
             description: Number of output voxels (res = n_pixels/n_voxels), set res > 1 for reduced resolution.
             default: "1"
         
         n_frames:
-            visibility: basic
+            visibility: intermediate
             dtype: int
-            description: This algorithm requires a multiple of 8 frames for processing and this number may affect performance depending on your data size (choose from 8, 16, 24, 32)
+            description: This algorithm requires a multiple of 8 frames at a time for processing and this number may affect performance depending on your data size.
             options: "[8, 16, 24, 32]"
             default: "16"
-        
-        outer_pad:
-            visibility: advanced
-            dtype: "[bool,int,float]"
-            description: Not an option.
-            default: "False"
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not an option.
-            default: "False"
-        
-        enforce_position:
-            visibility: advanced
-            dtype: "[bool,int]"
-            description: Not an option.
-            default: "False"
         
 Key
 ^^^^^^^^^^

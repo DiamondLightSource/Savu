@@ -34,26 +34,12 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
-<<<<<<< HEAD
         init_vol:
             visibility: hidden
             dtype: "[None,int]"
             description: Not an option.
             default: None
-=======
-        outer_pad:
-            visibility: basic
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram width. Choose from True (defaults to sqrt(2)), False, or float <= 2.1.
-            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
-            default: "0.1"
-        
-        ratio:
-            visibility: basic
-            dtype: float
-            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
-            default: "0.98"
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
+            example: "Type the name of the initialised dataset e.g. ['tomo']"
         
         log:
             visibility: intermediate
@@ -70,43 +56,27 @@ Parameter definitions
             description: A slice list of required frames.
             default: "[]"
         
-        init_vol:
-            visibility: hidden
-            dtype: "[None,int]"
-            description: Not an option.
-            default: None
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[int,bool]"
-            description: Not an option.
-            default: "False"
-        
         force_zero:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
-<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
-=======
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
-            description: Override the default log function
+            description: Override the default log function with a numpy statement
             default: np.nan_to_num(-np.log(sino))
-            example: You write a function as default
         
         vol_shape:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -150,7 +120,7 @@ Parameter definitions
         
         outer_pad:
             visibility: intermediate
-            dtype: "[bool,int,float]"
+            dtype: "[bool, float]"
             description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
             warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
             default: "False"
@@ -158,12 +128,6 @@ Parameter definitions
                 algorithm: 
                     fbp
                     gridrec
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[int,bool]"
-            description: Not an option.
-            default: "False"
         
 Key
 ^^^^^^^^^^

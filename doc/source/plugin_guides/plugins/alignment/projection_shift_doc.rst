@@ -25,4 +25,3 @@ now you should be able to run up your python interpreter, and call
 
 
 
-.. include:: /../../savu/test/travis/doc_tests/logs/alignment/projection_shift/doc.rst

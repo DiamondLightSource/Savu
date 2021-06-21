@@ -32,10 +32,10 @@ Parameter definitions
             default: "1.0"
         
         method:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: a method to collect statistics from the given mask (mean, median, value).
-            default: method
+            default: mean
         
         iterations:
             visibility: basic
@@ -44,7 +44,7 @@ Parameter definitions
             default: "500"
         
         connectivity:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: the connectivity of the local neighbourhood, choose 4, 6, 8 or 26.
             default: "6"

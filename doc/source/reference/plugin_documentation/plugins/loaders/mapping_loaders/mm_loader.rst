@@ -11,21 +11,9 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
-            dtype: "[preview, dict{str: preview}]"
+            dtype: "[preview, dict{str: preview},dict{}]"
             description: A slice list of required frames to apply to ALL datasets, else a dictionary of slice lists where the key is the dataset name.
             default: "[]"
         

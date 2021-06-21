@@ -4,7 +4,7 @@ Ortho Slice
 Description
 --------------------------
 
-A plugin to calculate the centre of rotation using the Vo Method 
+A plugin to extract slices in each direction of a 3D reconstructed volume. 
 
 Parameter definitions
 --------------------------
@@ -26,34 +26,28 @@ Parameter definitions
             default: "['XY', 'YZ', 'XZ']"
         
         xy_slices:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: which XY slices to render.
-            default: "100"
+            default: "500"
         
         yz_slices:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: which YZ slices to render.
-            default: "100"
+            default: "500"
         
         xz_slices:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: which XZ slices to render.
-            default: "100"
+            default: "500"
         
         file_type:
-            visibility: intermediate
+            visibility: basic
             dtype: str
-            description: File type to save as. rings and streaks
+            description: File type to save as
             default: png
-        
-        colourmap:
-            visibility: hidden
-            dtype: str
-            description: Colour scheme to apply to the image.
-            default: magma
         
 Key
 ^^^^^^^^^^

@@ -25,8 +25,21 @@ Parameter definitions
             description: The default names.
             default: "['the_min', 'the_max']"
         
+        method:
+            visibility: basic
+            dtype: str
+            options: "['extrema', 'percentile']"
+            description: Method to find the global min and the global max.
+            default: percentile
+        
+        p_range:
+            visibility: basic
+            dtype: "list[float,float]"
+            description: "Percentage range if use the 'percentile' method."
+            default: "[0.0, 100.0]"
+        
         pattern:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: How to slice the data.
             default: VOLUME_XZ
@@ -48,19 +61,6 @@ Parameter definitions
             dtype: "[None,float]"
             description: Used to calculate the circular mask. If not provided, it is calculated using the center of rotation.
             default: None
-        
-        method:
-            visibility: intermediate
-            dtype: str
-            options: "['extrema', 'percentile']"
-            description: Method to find the global min and the global max.
-            default: percentile
-        
-        p_range:
-            visibility: intermediate
-            dtype: "list[float,float]"
-            description: "Percentage range if use the 'percentile' method."
-            default: "[0.0, 100.0]"
         
 Key
 ^^^^^^^^^^

@@ -26,7 +26,7 @@ Parameter definitions
             default: "['GeoDist']"
         
         lambda:
-            visibility: basic
+            visibility: intermediate
             dtype: float
             description: Weighting between 0 and 1
             default: "0.5"
