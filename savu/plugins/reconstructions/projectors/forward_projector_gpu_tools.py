@@ -15,13 +15,13 @@ In case when angles set to None, the metadata projection geometry will be used.
 
         det_horiz:
             visibility: advanced
-            dtype: int
+            dtype: [None,int]
             description: The size of the horizontal detector.
             default: None
 
         centre_of_rotation:
             visibility: advanced
-            dtype: float
+            dtype: [None,float]
             description: The centre of rotation.
             default: None
 

@@ -29,12 +29,6 @@ import numpy as np
 
 @register_plugin
 class ForwardProjectorCpu(Plugin, CpuPlugin):
-    """
-    :param angles_deg: Projection angles in degrees in a format [start, stop, step]. Default: None.
-    :param det_horiz: The size of the horizontal detector. Default: None.
-    :param centre_of_rotation: The centre of rotation. Default: None.
-    :param out_datasets: Default out dataset name. Default: ['forw_proj']
-    """
 
     def __init__(self):
         super(ForwardProjectorCpu, self).__init__('ForwardProjectorCpu')
