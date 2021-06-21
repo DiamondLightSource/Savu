@@ -65,10 +65,11 @@ class YamlConverter(BaseLoader):
             return yaml_abs
         
         # try adding the path to savu
-        yaml_savu = os.path.join(os.path.dirname(__file__), "../../../",
-                                 yaml_file.split('Savu/')[1])
-        if os.path.exists(yaml_savu):
-            return yaml_savu
+        if len(yaml_file.split('Savu/')) > 1:
+            yaml_savu = os.path.join(os.path.dirname(__file__), "../../../",
+                                     yaml_file.split('Savu/')[1])
+            if os.path.exists(yaml_savu):
+                return yaml_savu
 
         # try adding the path to the templates folder
         yaml_templ = os.path.join(os.path.dirname(__file__), yaml_file)

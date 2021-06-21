@@ -33,8 +33,7 @@ from savu.plugins.utils import register_plugin, dawn_compatible
 @dawn_compatible
 @register_plugin
 class PaganinFilter(BaseFilter, CpuPlugin):
-    """
-    """
+
     def __init__(self):
         logging.debug("initialising Paganin Filter")
         logging.debug("Calling super to make sure that all superclases are " +
@@ -58,12 +57,12 @@ class PaganinFilter(BaseFilter, CpuPlugin):
         self._setup_paganin(*self.get_plugin_in_datasets()[0].get_shape())
 
     def _setup_paganin(self, height, width):
-        micron = 10**(-6)
+        micron = 10 ** (-6)
         keV = 1000.0
         distance = self.parameters['Distance']
         energy = self.parameters['Energy'] * keV
         resolution = self.parameters['Resolution'] * micron
-        wavelength = (1240.0 / energy) * 10.0**(-9)
+        wavelength = (1240.0 / energy) * 10.0 ** (-9)
         ratio = self.parameters['Ratio']
 
         height1 = height + 2 * self.parameters['Padtopbottom']
@@ -100,24 +99,3 @@ class PaganinFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-        """
-            A plugin to apply Paganin filter (contrast enhancement) on projections.
-
-        :param Energy: Given X-ray energy in keV. Default: 53.0.
-        :param Distance: Distance from sample to detection - Unit is \
-            metre. Default: 1.0.
-        :param Resolution: Pixel size - Unit is micron. Default: 1.28.
-        :u*param Ratio: ratio of delta/beta. Default: 250.0.
-        :param Padtopbottom: Pad to the top and bottom of projection. Default: 10.
-        :param Padleftright: Pad to the left and right of projection. Default: 10.
-        :param Padmethod: Numpy pad method. Default: 'edge'.
-        :param increment: Increment all values by this amount before taking the \
-            log. Default: 0.0.
-
-        :config_warn: The 'log' parameter in the reconstruction should be set to \
-        FALSE.
-        :config_warn: Previewing a subset of sinograms will alter the result, due \
-        to the global nature of this filter. If this is necessary, ensure they \
-        are consecutive.
-
-        """

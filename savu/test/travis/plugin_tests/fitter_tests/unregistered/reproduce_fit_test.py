@@ -13,27 +13,29 @@
 # limitations under the License.
 
 """
-.. module:: diffraction_absoption_te
+.. module:: reproduce_fit_test
    :platform: Unix
-   :synopsis: runner for tests using the MPI framework
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+   :synopsis: Test for the reproduce_fit plugin
+
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
 """
+
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
     run_protected_plugin_runner
 
 
-class DiffractionAbsorptionTest(unittest.TestCase):
-    global data_file, experiment
-    #data_file = 'i18_test_data.nxs'
-    data_file = 'mm.nxs'
+class ReproduceFitTest(unittest.TestCase):
 
-    def test_diffraction_correction(self):
-        process_list = 'under_revision/diffraction_absorption_correction_test.nxs'
-        options = tu.initialise_options(data_file, None, process_list)
-        run_protected_plugin_runner(options)
-        tu.cleanup(options)
+    @unittest.skip("A plugin in the process list is unregistered")
+    def test_reproduce_fit(self):
+        data_file = tu.get_test_data_path('mm.nxs')
+        process_file = tu.get_test_process_path('under_revision/reproduce_fit_test.nxs')
+        run_protected_plugin_runner(tu.set_options(data_file,
+                                                   process_file=process_file))
+
 
 if __name__ == "__main__":
     unittest.main()

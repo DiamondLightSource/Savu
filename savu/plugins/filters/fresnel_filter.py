@@ -15,7 +15,8 @@
 """
 .. module:: fresnel_filter
    :platform: Unix
-   :synopsis: A plugin to improve the contrast of the reconstruction image.
+   :synopsis: A plugin for denoising or improving the contrast of reconstruction
+    images.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,14 +30,6 @@ import pyfftw.interfaces.scipy_fftpack as fft
 
 @register_plugin
 class FresnelFilter(Plugin, CpuPlugin):
-    """
-    Method similar to the Paganin filter working both on sinograms and \
-    projections. Used to improve the contrast of the reconstruction image.
-    :u*param ratio: Control the strength of the filter. Greater is stronger\
-    . Default: 100.0
-    :u*param pattern: Data processing pattern is 'PROJECTION' or \
-        'SINOGRAM'. Default: 'SINOGRAM'.
-    """
 
     def __init__(self):
         super(FresnelFilter, self).__init__("FresnelFilter")
@@ -60,10 +53,10 @@ class FresnelFilter(Plugin, CpuPlugin):
             ulist = (1.0 * np.arange(0, width) - center_wid) // width
             vlist = (1.0 * np.arange(0, height) - center_hei) // height
             u, v = np.meshgrid(ulist, vlist)
-            win2d = 1.0 + ratio * (u**2 + v**2)
+            win2d = 1.0 + ratio * (u ** 2 + v ** 2)
         else:
             ulist = (1.0 * np.arange(0, width) - center_wid) // width
-            win1d = 1.0 + ratio * ulist**2
+            win1d = 1.0 + ratio * ulist ** 2
             win2d = np.tile(win1d, (height, 1))
         return win2d
 
@@ -93,21 +86,15 @@ class FresnelFilter(Plugin, CpuPlugin):
     def pre_process(self):
         inData = self.get_in_datasets()[0]
         self.data_size = inData.get_shape()
-        if len(self.data_size) == 4:
-            (depth1, height1, width1, _) = self.data_size
-        else:
-            (depth1, height1, width1) = self.data_size
+        (depth1, height1, width1) = self.data_size[:3]
         ratio = self.parameters['ratio']
         if self.pattern == "PROJECTION":
-            self.window = self.make_window(
-                height1, width1, ratio, self.pattern)
+            self.window = self.make_window(height1, width1, ratio, self.pattern)
         else:
             self.window = self.make_window(depth1, width1, ratio, self.pattern)
-        self.pad_width = 150
+        self.pad_width = min(150, int(0.1 * width1))
 
     def process_frames(self, data):
         mat_filt = self.apply_filter(
             data[0], self.window, self.pattern, self.pad_width)
         return mat_filt
-
-

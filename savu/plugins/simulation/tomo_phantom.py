@@ -33,8 +33,6 @@ import numpy as np
 
 @register_plugin
 class TomoPhantom(Plugin, CpuPlugin):
-    """
-    """
     def __init__(self):
         super(TomoPhantom, self).__init__('TomoPhantom')
 
@@ -179,23 +177,3 @@ class TomoPhantom(Plugin, CpuPlugin):
                 projdata = _Artifacts_(projdata_clean, **_noise_, **_zingers_, **_stripes_, **_sinoshifts_)
             projdata = np.swapaxes(projdata,0,1)
         return [projdata, model]
-
-        """
-        A plugin for TomoPhantom software which generates synthetic phantoms and \
-        projection data (2D from Phantom2DLibrary.dat and 3D from Phantom3DLibrary.dat)
-    
-        :param geom_model: Select a model (integer) from the library (see TomoPhantom files). Default: 1.
-        :param geom_model_size: Set the size of the phantom. Default: 256.
-        :param geom_projections_total: The total number of projections. Default: 360.
-        :param geom_detectors_horiz: The size of _horizontal_ detectors. Default: 300.
-        :param artifacts_noise_type: Set the noise type, Poisson or Gaussian. Default: 'Poisson'.
-        :param artifacts_noise_sigma: Define noise amplitude. Default: 5000.
-        :param artifacts_misalignment_maxamplitude: Incorporate misalignment into projections (in pixels). Default: None.
-        :param artifacts_zingers_percentage: add broken pixels to projections, e.g. 0.25. Default: None.
-        :param artifacts_stripes_percentage: the amount of stripes in the data, e.g. 1.0. Default: None.
-        :param artifacts_stripes_maxthickness: defines the maximal thickness of a stripe. Default: 3.0.
-        :param artifacts_stripes_intensity: to incorporate the change of intensity in the stripe. Default: 0.3.
-        :param artifacts_stripes_type: set the stripe type between full and partial. Default: 'full'.
-        :param artifacts_stripes_variability: the intensity variability of a stripe. Default:  0.007.
-        :param out_datasets: Default out dataset names. Default: ['tomo', 'model']
-        """

@@ -1,7 +1,7 @@
 from savu.plugins.plugin_tools import PluginTools
 
 class ListToProjectionsTools(PluginTools):
-    """Converts a list of points into a 2D projection
+    """Convert a list of points into a 2D projection
     """
     def define_parameters(self):
         """
@@ -18,7 +18,7 @@ class ListToProjectionsTools(PluginTools):
         fill_value:
               visibility: basic
               dtype: [int, str, float]
-              description: The value to fill with, takes an average if nothing else chosen.
+              description: The value to fill with, takes an average if nothing
+               else chosen.
               default: 'mean'
-
         """

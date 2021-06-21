@@ -7,13 +7,13 @@ class ReproduceFitTools(PluginTools):
         """
         in_datasets:
             visibility: datasets
-            dtype: [list[],list[str]]
+            dtype: list[str]
             description: Create a list of the input dataset(s)
             default: ["FitWeights", "FitWidths", "FitAreas","Backgrounds"]
 
         out_datasets:
             visibility: datasets
-            dtype: [list[],list[str]]
+            dtype: list[str]
             description: Create a list of the output dataset(s)
             default: ["Sum", "Individual_curves"]
 
