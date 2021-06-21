@@ -18,7 +18,9 @@ Submodules
    :maxdepth: 4
 
    plugins.unregistered.monitor_correction_nd
+   plugins.unregistered.reproduce_fit
    plugins.unregistered.timeseries_field_corrections
+   plugins.unregistered.umpa
 
 Module contents
 ---------------

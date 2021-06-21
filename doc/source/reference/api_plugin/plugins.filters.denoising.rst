@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   plugins.filters.denoising.base_median_filter
    plugins.filters.denoising.ccpi_denoising_cpu
    plugins.filters.denoising.ccpi_denoising_cpu_3D
    plugins.filters.denoising.ccpi_denoising_gpu

@@ -47,10 +47,9 @@ Basic Operations
    Get Data Statistics <api_plugin/plugins.basic_operations.get_data_statistics>
    No Process Plugin <api_plugin/plugins.basic_operations.no_process_plugin>
    Data Threshold <api_plugin/plugins.basic_operations.data_threshold>
-   No Process <api_plugin/plugins.basic_operations.no_process>
    Rescale Intensity <api_plugin/plugins.basic_operations.rescale_intensity>
-   Elementwise Arrays Arithmetics <api_plugin/plugins.basic_operations.elementwise_arrays_arithmetics>
    Value Substitution <api_plugin/plugins.basic_operations.value_substitution>
+   Elementwise Arrays Arithmetics <api_plugin/plugins.basic_operations.elementwise_arrays_arithmetics>
 
 
 Centering
@@ -87,16 +86,6 @@ Corrections
    Subpixel Shift <api_plugin/plugins.corrections.subpixel_shift>
    Time Based Correction <api_plugin/plugins.corrections.time_based_correction>
    Time Based Plus Drift Correction <api_plugin/plugins.corrections.time_based_plus_drift_correction>
-   Xrd Absorption Approximation <api_plugin/plugins.corrections.xrd_absorption_approximation>
-
-
-Developing
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Testing Sino Align <api_plugin/plugins.developing.testing_sino_align>
 
 
 Filters
@@ -163,7 +152,6 @@ Fitters
 .. toctree::
    :maxdepth: 1 
 
-   Reproduce Fit <api_plugin/plugins.fitters.reproduce_fit>
    Simple Fit <api_plugin/plugins.fitters.simple_fit>
 
 
@@ -462,16 +450,22 @@ Visualisation
    Ortho Slice <api_plugin/plugins.visualisation.ortho_slice>
 
 
+Under Revision
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Xrd Absorption Approximation <api_plugin/plugins.under_revision.xrd_absorption_approximation>
+
+
 Simulation
 ########################################################
 
 .. toctree::
    :maxdepth: 1 
 
-<<<<<<< HEAD
-=======
    Tomo Phantom <api_plugin/plugins.simulation.tomo_phantom>
    Tomo Phantom Quantification <api_plugin/plugins.simulation.tomo_phantom_quantification>
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
 
 

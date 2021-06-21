@@ -14,7 +14,6 @@ Subpackages
    plugins.centering
    plugins.component_analysis
    plugins.corrections
-   plugins.developing
    plugins.driver
    plugins.filters
    plugins.fitters

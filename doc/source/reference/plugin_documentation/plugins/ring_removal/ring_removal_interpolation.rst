@@ -4,7 +4,7 @@ Ring Removal Interpolation
 Description
 --------------------------
 
-Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image) using a combination of a detection technique and an interpolation technique. 
+Interpolation-based method working in the sinogram space to remove ring artifacts. 
 
 Parameter definitions
 --------------------------

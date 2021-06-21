@@ -38,7 +38,7 @@ Parameter definitions
             default: "1"
         
         smoothing:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: Number of times the smoothing operator is applied per iteration, reasonable values are around 1-4 and larger values lead to smoother segmentations.
             default: "1"
