@@ -15,9 +15,9 @@ class BaseLoaderTools(PluginTools):
               default: []
         in_datasets:
               # inherited but not needed
-              visibility: ignore
+              visibility: hidden
         out_datasets:
               # inherited but not needed
-              visibility: ignore
+              visibility: hidden
 
         """
