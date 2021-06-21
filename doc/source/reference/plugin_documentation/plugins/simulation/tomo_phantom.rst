@@ -28,7 +28,7 @@ Parameter definitions
         geom_model:
             visibility: basic
             dtype: int
-            description: Select a model (integer) from the library (see TomoPhantom files).
+            description: Select a model (integer) from the library (see TomoPhantom dat files).
             default: "1"
         
         geom_model_size:
@@ -38,13 +38,13 @@ Parameter definitions
             default: "256"
         
         geom_projections_total:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: The total number of projections.
             default: "360"
         
         geom_detectors_horiz:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: The size of _horizontal_ detectors.
             default: "300"

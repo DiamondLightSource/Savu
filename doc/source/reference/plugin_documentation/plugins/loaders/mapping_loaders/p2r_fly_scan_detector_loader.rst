@@ -11,18 +11,6 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
             dtype: preview
@@ -31,7 +19,7 @@ Parameter definitions
         
         data_path:
             visibility: intermediate
-            dtype: str
+            dtype: h5path
             description: Path to the data inside the file
             default: entry1/tomo_entry/data/data
         
@@ -54,7 +42,7 @@ Parameter definitions
             default: "[None, None, 1]"
         
         angles:
-            visibility: intermediate
+            visibility: basic
             dtype: "[None,str,int]"
             description: A python statement to be evaluated or a file.
             default: None

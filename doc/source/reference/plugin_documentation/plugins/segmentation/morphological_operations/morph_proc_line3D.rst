@@ -34,7 +34,7 @@ Parameter definitions
             default: "0"
         
         correction_window:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: the size of the correction window.
             default: "7"

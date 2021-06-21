@@ -47,10 +47,9 @@ Basic Operations
    Get Data Statistics <plugin_documentation/plugins/basic_operations/get_data_statistics>
    No Process Plugin <plugin_documentation/plugins/basic_operations/no_process_plugin>
    Data Threshold <plugin_documentation/plugins/basic_operations/data_threshold>
-   No Process <plugin_documentation/plugins/basic_operations/no_process>
    Rescale Intensity <plugin_documentation/plugins/basic_operations/rescale_intensity>
-   Elementwise Arrays Arithmetics <plugin_documentation/plugins/basic_operations/elementwise_arrays_arithmetics>
    Value Substitution <plugin_documentation/plugins/basic_operations/value_substitution>
+   Elementwise Arrays Arithmetics <plugin_documentation/plugins/basic_operations/elementwise_arrays_arithmetics>
 
 
 Centering
@@ -87,16 +86,6 @@ Corrections
    Subpixel Shift <plugin_documentation/plugins/corrections/subpixel_shift>
    Time Based Correction <plugin_documentation/plugins/corrections/time_based_correction>
    Time Based Plus Drift Correction <plugin_documentation/plugins/corrections/time_based_plus_drift_correction>
-   Xrd Absorption Approximation <plugin_documentation/plugins/corrections/xrd_absorption_approximation>
-
-
-Developing
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Testing Sino Align <plugin_documentation/plugins/developing/testing_sino_align>
 
 
 Filters
@@ -163,7 +152,6 @@ Fitters
 .. toctree::
    :maxdepth: 1 
 
-   Reproduce Fit <plugin_documentation/plugins/fitters/reproduce_fit>
    Simple Fit <plugin_documentation/plugins/fitters/simple_fit>
 
 
@@ -462,16 +450,22 @@ Visualisation
    Ortho Slice <plugin_documentation/plugins/visualisation/ortho_slice>
 
 
+Under Revision
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Xrd Absorption Approximation <plugin_documentation/plugins/under_revision/xrd_absorption_approximation>
+
+
 Simulation
 ########################################################
 
 .. toctree::
    :maxdepth: 1 
 
-<<<<<<< HEAD
-=======
    Tomo Phantom <plugin_documentation/plugins/simulation/tomo_phantom>
    Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
 
 

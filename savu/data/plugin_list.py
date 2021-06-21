@@ -33,14 +33,13 @@ from collections import defaultdict
 
 import h5py
 import numpy as np
-import yaml
 
 import savu.data.framework_citations as fc
 import savu.plugins.loaders.utils.yaml_utils as yu
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 
-NX_CLASS = 'NX_class'
+NX_CLASS = "NX_class"
 
 
 class PluginList(object):
@@ -67,41 +66,44 @@ class PluginList(object):
             self._template.creating = True
 
     def _get_plugin_entry_template(self):
-        template = {'active': True,
-                    'name': None,
-                    'id': None,
-                    'data': None}
+        template = {"active": True, "name": None, "id": None, "data": None}
         return template
 
     def __get_json_keys(self):
-        return ['data']
+        return ["data"]
 
-    def _populate_plugin_list(self, filename, active_pass=False, template=False):
+    def _populate_plugin_list(
+        self, filename, active_pass=False, template=False
+    ):
         """ Populate the plugin list from a nexus file. """
-        with h5py.File(filename, 'r') as plugin_file:
-            if 'entry/savu_notes/version' in plugin_file:
-                self.version = plugin_file['entry/savu_notes/version'][()]
+        with h5py.File(filename, "r") as plugin_file:
+            if "entry/savu_notes/version" in plugin_file:
+                self.version = plugin_file["entry/savu_notes/version"][()]
 
-            plugin_group = plugin_file['entry/plugin']
+            plugin_group = plugin_file["entry/plugin"]
             self.plugin_list = []
-            single_val = ['name', 'id', 'pos', 'active']
-            exclude = ['citation']
-            ordered_pl_keys = self._sort_alphanum(list(plugin_group.keys()))
+            single_val = ["name", "id", "pos", "active"]
+            exclude = ["citation"]
+            ordered_pl_keys = pu.sort_alphanum(list(plugin_group.keys()))
             for group in ordered_pl_keys:
                 plugin = self._get_plugin_entry_template()
                 entry_keys = plugin_group[group].keys()
-                parameters = [k for k in entry_keys for e in exclude if k not in
-                              single_val and e not in k]
+                parameters = [
+                    k
+                    for k in entry_keys
+                    for e in exclude
+                    if k not in single_val and e not in k
+                ]
 
-                if 'active' in entry_keys:
-                    plugin['active'] = plugin_group[group]['active'][0]
+                if "active" in entry_keys:
+                    plugin["active"] = plugin_group[group]["active"][0]
 
                 if plugin['active'] or active_pass:
                     plugin['name'] = plugin_group[group]['name'][0].decode("utf-8")
                     plugin['id'] = plugin_group[group]['id'][0].decode("utf-8")
                     plugin_class = None
                     try:
-                        plugin_class = pu.load_class(plugin['id'])()
+                        plugin_class = pu.load_class(plugin["id"])()
                         # Populate the parameters (including those from it's base classes)
                         plugin_tools = plugin_class.get_plugin_tools()
                         plugin_tools._populate_default_parameters()
@@ -121,7 +123,9 @@ class PluginList(object):
                         try:
                             plugin[param] = json.loads(plugin_group[group][param][0])
                         except ValueError as e:
-                            raise ValueError(f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON")
+                            raise ValueError(
+                                f"Error: {e}\n Could not parse key '{param}' from group '{group}' as JSON"
+                            )
                     self.plugin_list.append(plugin)
 
             if template:
@@ -129,9 +133,9 @@ class PluginList(object):
                 self._template.update_process_list(template)
 
     def _save_plugin_list(self, out_filename):
-        with h5py.File(out_filename, 'a') as nxs_file:
+        with h5py.File(out_filename, "a") as nxs_file:
 
-            entry = nxs_file.require_group('entry')
+            entry = nxs_file.require_group("entry")
 
             self._save_framework_citations(self._overwrite_group(
                 entry, 'framework_citations', 'NXcollection'))
@@ -143,11 +147,13 @@ class PluginList(object):
 
             count = 1
             for plugin in self.plugin_list:
-                plugin_group = self._get_plugin_group(plugins_group, plugin, count)
+                plugin_group = self._get_plugin_group(
+                    plugins_group, plugin, count
+                )
                 self.__populate_plugins_group(plugin_group, plugin)
 
         if self._template and self._template.creating:
-            fname = os.path.splitext(out_filename)[0] + '.savu'
+            fname = os.path.splitext(out_filename)[0] + ".savu"
             self._template._output_template(fname, out_filename)
 
     def _overwrite_group(self, entry, name, nxclass):
@@ -159,7 +165,8 @@ class PluginList(object):
 
     def __save_savu_notes(self, notes):
         from savu.version import __version__
-        notes['version'] = __version__
+
+        notes["version"] = __version__
 
     def __populate_plugins_group(self, plugin_group, plugin):
         """Populate the plugin group information which will be saved
@@ -167,7 +174,7 @@ class PluginList(object):
         :param plugin_group: Plugin group to save to
         :param plugin: Plugin to be saved
         """
-        plugin_group.attrs[NX_CLASS] = 'NXnote'.encode('ascii')
+        plugin_group.attrs[NX_CLASS] = "NXnote".encode("ascii")
         required_keys = self._get_plugin_entry_template().keys()
         json_keys = self.__get_json_keys()
 
@@ -175,7 +182,7 @@ class PluginList(object):
 
         for key in required_keys:
             # only need to apply dumps if saving in configurator
-            if key == 'data':
+            if key == "data":
                 data = {}
                 for k, v in plugin[key].items():
                     #  Replace any missing quotes around variables.
@@ -190,7 +197,9 @@ class PluginList(object):
             if isinstance(data, str):
                 data = data.encode("ascii")
             data = np.array([data])
-            plugin_group.create_dataset(key.encode('ascii'), data.shape, data.dtype, data)
+            plugin_group.create_dataset(
+                key.encode("ascii"), data.shape, data.dtype, data
+            )
 
     def _get_plugin_group(self, plugins_group, plugin, count):
         """Return the plugin_group, into which the plugin information
@@ -201,11 +210,11 @@ class PluginList(object):
         :param count: Order number of the plugin in the process list
         :return: plugin group
         """
-        if 'pos' in plugin.keys():
-            num = int(re.findall(r'\d+', str(plugin['pos']))[0])
-            letter = re.findall('[a-z]', str(plugin['pos']))
+        if "pos" in plugin.keys():
+            num = int(re.findall(r"\d+", str(plugin["pos"]))[0])
+            letter = re.findall("[a-z]", str(plugin["pos"]))
             letter = letter[0] if letter else ""
-            group_name = '%i%s' % (num, letter)
+            group_name = "%i%s" % (num, letter)
         else:
             group_name = count
         return plugins_group.create_group(group_name.encode("ascii"))
@@ -224,16 +233,19 @@ class PluginList(object):
         :param plugin: dictionary of plugin information
         :param group: Group to save to
         """
-        if 'tools' in plugin.keys():
+        if "tools" in plugin.keys():
             citation_plugin = plugin.get("tools").get_citations()
             if citation_plugin:
                 count = 1
                 for citation in citation_plugin.values():
                     group_label = f"citation{count}"
-                    if not citation.dependency \
-                            or self._dependent_citation_used(plugin, citation):
-                        self._save_citation_group(citation, citation.__dict__,
-                                                  group, group_label)
+                    if (
+                        not citation.dependency
+                        or self._dependent_citation_used(plugin, citation)
+                    ):
+                        self._save_citation_group(
+                            citation, citation.__dict__, group, group_label
+                        )
                         count += 1
 
     def _dependent_citation_used(self, plugin, citation):
@@ -245,9 +257,11 @@ class PluginList(object):
         :return: bool True if the citation is for a parameter value
             being used inside this plugin
         """
-        parameters = plugin['data']
-        for (citation_dependent_parameter, citation_dependent_value) \
-                in citation.dependency.items():
+        parameters = plugin["data"]
+        for (
+            citation_dependent_parameter,
+            citation_dependent_value,
+        ) in citation.dependency.items():
             current_value = parameters[citation_dependent_parameter]
             if current_value == citation_dependent_value:
                 return True
@@ -258,19 +272,20 @@ class PluginList(object):
         :param cite: citation dictionary
         """
         for key, value in cite.items():
-            exec('citation.' + key + '= value')
+            exec("citation." + key + "= value")
 
     def _save_framework_citations(self, group):
-        """ Save all the citations in dict
+        """Save all the citations in dict
 
         :param group: Group for nxs file
         """
         framework_cites = fc.get_framework_citations()
         for cite in framework_cites:
-            label = cite['short_name_article']
-            del cite['short_name_article']
-            self._save_citation_group(CitationInformation(**cite), cite,
-                                      group, label)
+            label = cite["short_name_article"]
+            del cite["short_name_article"]
+            self._save_citation_group(
+                CitationInformation(**cite), cite, group, label
+            )
 
     def _save_citation_group(self, citation, cite_dict, group, group_label):
         """Save the citations to the provided group label
@@ -344,7 +359,7 @@ class PluginList(object):
         return len(self.plugin_list) - self._get_n_loaders()
 
     def __set_loaders_and_savers(self):
-        """ Get lists of loader and saver positions within the plugin list and
+        """Get lists of loader and saver positions within the plugin list and
         set the number of loaders.
 
         :returns: loader index list and saver index list
@@ -352,12 +367,13 @@ class PluginList(object):
         """
         from savu.plugins.loaders.base_loader import BaseLoader
         from savu.plugins.savers.base_saver import BaseSaver
+
         loader_idx = []
         saver_idx = []
         self.n_plugins = len(self.plugin_list)
 
         for i in range(self.n_plugins):
-            pid = self.plugin_list[i]['id']
+            pid = self.plugin_list[i]["id"]
             bases = inspect.getmro(pu.load_class(pid))
             loader_list = [b for b in bases if b == BaseLoader]
             saver_list = [b for b in bases if b == BaseSaver]
@@ -371,8 +387,7 @@ class PluginList(object):
         self.n_savers = len(saver_idx)
 
     def _check_loaders(self):
-        """ Check plugin list starts with a loader.
-        """
+        """Check plugin list starts with a loader."""
         self.__set_loaders_and_savers()
         loaders = self._get_loaders_index()
 
@@ -386,74 +401,67 @@ class PluginList(object):
 
     def _add_missing_savers(self, exp):
         """ Add savers for missing datasets. """
-        data_names = exp.index['in_data'].keys()
+        data_names = exp.index["in_data"].keys()
         saved_data = []
 
         for i in self._get_savers_index():
-            saved_data.append(self.plugin_list[i]['data']['in_datasets'])
+            saved_data.append(self.plugin_list[i]["data"]["in_datasets"])
         saved_data = set([s for sub_list in saved_data for s in sub_list])
 
         for name in [data for data in data_names if data not in saved_data]:
-            pos = exp.meta_data.get('nPlugin')+1
-            exp.meta_data.set('nPlugin', pos)
+            pos = exp.meta_data.get("nPlugin") + 1
+            exp.meta_data.set("nPlugin", pos)
             process = {}
-            plugin = pu.load_class('savu.plugins.savers.hdf5_saver')()
+            plugin = pu.load_class("savu.plugins.savers.hdf5_saver")()
             ptools = plugin.get_plugin_tools()
-            plugin.parameters['in_datasets'] = [name]
-            process['name'] = plugin.name
-            process['id'] = plugin.__module__
-            process['pos'] = str(pos+1)
-            process['data'] = plugin.parameters
-            process['active'] = True
-            process['param'] = ptools.get_param_definitions()
-            process['doc'] = ptools.docstring_info
-            process['tools'] = ptools
-            self._add(pos+1, process)
+            plugin.parameters["in_datasets"] = [name]
+            process["name"] = plugin.name
+            process["id"] = plugin.__module__
+            process["pos"] = str(pos + 1)
+            process["data"] = plugin.parameters
+            process["active"] = True
+            process["param"] = ptools.get_param_definitions()
+            process["doc"] = ptools.docstring_info
+            process["tools"] = ptools
+            self._add(pos + 1, process)
 
     def _update_datasets(self, plugin_no, data_dict):
         n_loaders = self._get_n_loaders()
         idx = self._get_n_loaders() + plugin_no
-        self.plugin_list[idx]['data'].update(data_dict)
+        self.plugin_list[idx]["data"].update(data_dict)
 
     def _get_dataset_flow(self):
         datasets_idx = []
         n_loaders = self._get_n_loaders()
         n_plugins = self._get_n_processing_plugins()
         for i in range(self.n_loaders, n_loaders + n_plugins):
-            datasets_idx.append(self.plugin_list[i]['data']['out_datasets'])
+            datasets_idx.append(self.plugin_list[i]["data"]["out_datasets"])
         return datasets_idx
 
     def _contains_gpu_processes(self):
         """ Returns True if gpu processes exist in the process list. """
         try:
             from savu.plugins.driver.gpu_plugin import GpuPlugin
+
             for i in range(self.n_plugins):
-                bases = inspect.getmro(pu.load_class(self.plugin_list[i]['id']))
+                bases = inspect.getmro(
+                    pu.load_class(self.plugin_list[i]["id"])
+                )
                 if GpuPlugin in bases:
                     return True
         except ImportError as ex:
             if "pynvml" in ex.message:
-                logging.error('Error while importing GPU dependencies: %s',
-                              ex.message)
+                logging.error(
+                    "Error while importing GPU dependencies: %s", ex.message
+                )
             else:
                 raise
 
         return False
 
-    def _sort_alphanum(self, l):
-        """Sort numerically and alphabetically
-
-        :param l: Input list to be sorted
-        :return: List sorted by number and letter alphabetically
-        """
-        str_to_int = lambda text: int(text) if text.isdigit() else text
-        alphanum_key = lambda key: [str_to_int(c) for c in re.split("([0-9]+)", key)]
-        return sorted(l, key=alphanum_key)
-
 
 class Template(object):
-    """ A class to read and write templates for plugin lists.
-    """
+    """A class to read and write templates for plugin lists."""
 
     def __init__(self, plist):
         super(Template, self).__init__()
@@ -462,36 +470,37 @@ class Template(object):
 
     def _output_template(self, fname, process_fname):
         plist = self.plist.plugin_list
-        index = [i for i in range(len(plist)) if plist[i]['active']]
+        index = [i for i in range(len(plist)) if plist[i]["active"]]
 
         local_dict = MetaData(ordered=True)
         global_dict = MetaData(ordered=True)
-        local_dict.set(['process_list'], os.path.abspath(process_fname))
+        local_dict.set(["process_list"], os.path.abspath(process_fname))
 
         for i in index:
-            params = self.__get_template_params(plist[i]['data'], [])
-            name = plist[i]['name']
+            params = self.__get_template_params(plist[i]["data"], [])
+            name = plist[i]["name"]
             for p in params:
                 ptype, isyaml, key, value = p
                 if isyaml:
-                    data_name = isyaml if ptype == 'local' else 'all'
+                    data_name = isyaml if ptype == "local" else "all"
                     local_dict.set([i + 1, name, data_name, key], value)
-                elif ptype == 'local':
+                elif ptype == "local":
                     local_dict.set([i + 1, name, key], value)
                 else:
-                    global_dict.set(['all', name, key], value)
+                    global_dict.set(["all", name, key], value)
 
-        with open(fname, 'w') as stream:
+        with open(fname, "w") as stream:
             local_dict.get_dictionary().update(global_dict.get_dictionary())
             yu.dump_yaml(local_dict.get_dictionary(), stream)
 
     def __get_template_params(self, params, tlist, yaml=False):
         for key, value in params.items():
-            if key == 'yaml_file':
+            if key == "yaml_file":
                 yaml_dict = self._get_yaml_dict(value)
                 for entry in list(yaml_dict.keys()):
                     self.__get_template_params(
-                        yaml_dict[entry]['params'], tlist, yaml=entry)
+                        yaml_dict[entry]["params"], tlist, yaml=entry
+                    )
             value = pu.is_template_param(value)
             if value is not False:
                 ptype, value = value
@@ -501,15 +510,16 @@ class Template(object):
 
     def _get_yaml_dict(self, yfile):
         from savu.plugins.loaders.yaml_converter import YamlConverter
-        yaml = YamlConverter()
+
+        yaml_c = YamlConverter()
         template_check = pu.is_template_param(yfile)
         yfile = template_check[1] if template_check is not False else yfile
-        yaml.parameters = {'yaml_file': yfile}
-        return yaml.setup(template=True)
+        yaml_c.parameters = {"yaml_file": yfile}
+        return yaml_c.setup(template=True)
 
     def update_process_list(self, template):
         tdict = yu.read_yaml(template)
-        del tdict['process_list']
+        del tdict["process_list"]
 
         for plugin_no, entry in tdict.items():
             plugin = list(entry.keys())[0]
@@ -517,11 +527,13 @@ class Template(object):
                 depth = self.dict_depth(value)
                 if depth == 1:
                     self._set_param_for_template_loader_plugin(
-                        plugin_no, key, value)
+                        plugin_no, key, value
+                    )
                 elif depth == 0:
-                    if plugin_no == 'all':
+                    if plugin_no == "all":
                         self._set_param_for_all_instances_of_a_plugin(
-                            plugin, key, value)
+                            plugin, key, value
+                        )
                     else:
                         data = self._get_plugin_data_dict(str(plugin_no))
                         data[key] = value
@@ -536,21 +548,21 @@ class Template(object):
     def _set_param_for_all_instances_of_a_plugin(self, plugin, param, value):
         # find all plugins with this name and replace the param
         for p in self.plist.plugin_list:
-            if p['name'] == plugin:
-                p['data'][param] = value
+            if p["name"] == plugin:
+                p["data"][param] = value
 
     def _set_param_for_template_loader_plugin(self, plugin_no, data, value):
         param_key = list(value.keys())[0]
         param_val = list(value.values())[0]
-        pdict = self._get_plugin_data_dict(str(plugin_no))['template_param']
+        pdict = self._get_plugin_data_dict(str(plugin_no))["template_param"]
         pdict = defaultdict(dict) if not pdict else pdict
         pdict[data][param_key] = param_val
 
     def _get_plugin_data_dict(self, plugin_no):
         """ input plugin_no as a string """
         plist = self.plist.plugin_list
-        index = [plist[i]['pos'] for i in range(len(plist))]
-        return plist[index.index(plugin_no)]['data']
+        index = [plist[i]["pos"] for i in range(len(plist))]
+        return plist[index.index(plugin_no)]["data"]
 
 
 class CitationInformation(object):
@@ -558,8 +570,15 @@ class CitationInformation(object):
     Descriptor of Citation Information for plugins
     """
 
-    def __init__(self, description, bibtex='', endnote='', doi='',
-                 short_name_article='', dependency=''):
+    def __init__(
+        self,
+        description,
+        bibtex="",
+        endnote="",
+        doi="",
+        short_name_article="",
+        dependency="",
+    ):
         self.description = description
         self.short_name_article = short_name_article
         self.bibtex = bibtex
@@ -570,17 +589,25 @@ class CitationInformation(object):
         self.id = self._set_id()
 
     def _set_citation_name(self):
-        """ Create a short identifier using the short name of the article
+        """Create a short identifier using the short name of the article
         and the first author
         """
         cite_info = True if self.endnote or self.bibtex else False
 
         if cite_info and self.short_name_article:
-            cite_name = self.short_name_article.title() + ' by ' \
-                        + self._get_first_author() + ' et al.'
+            cite_name = (
+                self.short_name_article.title()
+                + " by "
+                + self._get_first_author()
+                + " et al."
+            )
         elif cite_info:
-            cite_name = self._get_title() + ' by ' \
-                        + self._get_first_author() + ' et al.'
+            cite_name = (
+                self._get_title()
+                + " by "
+                + self._get_first_author()
+                + " et al."
+            )
         else:
             # Set the tools class name as the citation name causes overwriting
             # module_name = tool_class.__module__.split('.')[-1].replace('_', ' ')
@@ -589,50 +616,49 @@ class CitationInformation(object):
         return cite_name
 
     def _set_citation_id(self, tool_class):
-        """ Create a short identifier using the bibtex identification
-        """
+        """Create a short identifier using the bibtex identification"""
         # Remove blank space
         if self.bibtex:
             cite_id = self._get_id()
         else:
             # Set the tools class name as the citation name
-            module_name = tool_class.__module__.split('.')[-1]
+            module_name = tool_class.__module__.split(".")[-1]
             cite_id = module_name
         return cite_id
 
     def _set_id(self):
         """ Retrieve the id from the bibtex """
-        cite_id = self.seperate_bibtex('@article{', ',')
+        cite_id = self.seperate_bibtex("@article{", ",")
         return cite_id
 
     def _get_first_author(self):
         """ Retrieve the first author name """
         if self.endnote:
-            first_author = self.seperate_endnote('%A ')
+            first_author = self.seperate_endnote("%A ")
         elif self.bibtex:
-            first_author = self.seperate_bibtex('author={', '}', author=True)
+            first_author = self.seperate_bibtex("author={", "}", author=True)
         return first_author
 
     def _get_title(self):
         """ Retrieve the title """
         if self.endnote:
-            title = self.seperate_endnote('%T ')
+            title = self.seperate_endnote("%T ")
         elif self.bibtex:
-            title = self.seperate_bibtex('title={', '}')
+            title = self.seperate_bibtex("title={", "}")
         return title
 
     def seperate_endnote(self, seperation_char):
-        """ Return the string contained between start characters
+        """Return the string contained between start characters
         and a new line
 
         :param seperation_char: Character to split the string at
         :return: The string contained between start characters and a new line
         """
-        item = self.endnote.partition(seperation_char)[2].split('\n')[0]
+        item = self.endnote.partition(seperation_char)[2].split("\n")[0]
         return item
 
     def seperate_bibtex(self, start_char, end_char, author=False):
-        """ Return the string contained between provided characters
+        """Return the string contained between provided characters
 
         :param start_char: Character to split the string at
         :param end_char: Character to end the split at
@@ -641,14 +667,14 @@ class CitationInformation(object):
         item = self.bibtex.partition(start_char)[2].split(end_char)[0]
         if author:
             # Return one author only
-            if ' and ' in item:
-                item = item.split(' and ')[0]
+            if " and " in item:
+                item = item.split(" and ")[0]
 
         return item
 
     def write(self, citation_group):
         # classes don't have to be encoded to ASCII
-        citation_group.attrs[NX_CLASS] = 'NXcite'
+        citation_group.attrs[NX_CLASS] = "NXcite"
         # Valid ascii sequences will be encoded, invalid ones will be
         # preserved as escape sequences
         description_array = np.array([self.description.encode('ascii','backslashreplace')])

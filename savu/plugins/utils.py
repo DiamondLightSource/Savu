@@ -135,11 +135,10 @@ def plugin_loader(exp, plugin_dict, check=False):
 
 
 def get_tools_class(plugin_tools_id, cls=None):
-    #tool_class = None
     if plugin_tools_id == "savu.plugins.plugin_tools":
         plugin_tools_id = "savu.plugins.base_tools"
 
-    #determine Savu base path
+    # determine Savu base path
     path_name = plugin_tools_id.replace(".", "/")
     file_path = savu.__path__[0] + "/../" + path_name + ".py"
     if os.path.isfile(file_path):
@@ -149,6 +148,7 @@ def get_tools_class(plugin_tools_id, cls=None):
             return load_class(plugin_tools_id)
     else:
         Exception("Tools file %s not found." % path_name)
+
 
 def get_plugins_paths(examples=True):
     """
@@ -181,19 +181,19 @@ def get_plugins_paths(examples=True):
 
 
 def is_template_param(param):
-    """ Identifies if the parameter should be included in an input template
+    """Identifies if the parameter should be included in an input template
     and returns the default value of the parameter if it exists.
     """
     start = 0
-    ptype = 'local'
+    ptype = "local"
     if isinstance(param, str):
         param = param.strip()
-        if not param.split('global')[0]:
-            ptype = 'global'
+        if not param.split("global")[0]:
+            ptype = "global"
             start = 6
         first, last = param[start], param[-1]
-        if first == '<' and last == '>':
-            param = param[start + 1:-1]
+        if first == "<" and last == ">":
+            param = param[start + 1 : -1]
             param = None if not param else param
             try:
                 param = eval(param)
@@ -206,8 +206,9 @@ def is_template_param(param):
 def blockPrint():
     """ Disable printing to stdout """
     import tempfile
-    fname = tempfile.mkdtemp() + '/unwanted_prints.txt'
-    sys.stdout = open(fname, 'w')
+
+    fname = tempfile.mkdtemp() + "/unwanted_prints.txt"
+    sys.stdout = open(fname, "w")
 
 
 def enablePrint():
@@ -337,11 +338,13 @@ def convert_multi_params(param_name, value):
         value = val_list
     return value, error_str
 
+
 def _dumps(val):
-    """ Replace any missing quotes around variables
+    """Replace any missing quotes around variables
     Change the string to an integer, float, tuple, list, str, dict
     """
     import yaml
+
     if isinstance(val, str):
         try:
             # Safely evaluate an expression node or a string containing
@@ -366,7 +369,9 @@ def _dumps(val):
                     value_dict = {}
                     for k, v in val.items():
                         v = v.replace("[", "'[").replace("]", "]'")
-                        value_dict[k] = _dumps(yaml.load(v, Loader=yaml.SafeLoader))
+                        value_dict[k] = _dumps(
+                            yaml.load(v, Loader=yaml.SafeLoader)
+                        )
                     return value_dict
                 else:
                     value = val.replace("[", "'[").replace("]", "]'")
@@ -375,7 +380,7 @@ def _dumps(val):
                 value = parse_config_string(val)
                 return value
         except Exception:
-            if len(val.split(';')) > 1:
+            if len(val.split(";")) > 1:
                 value = val
                 return value
             else:
@@ -384,8 +389,9 @@ def _dumps(val):
         value = val
     return value
 
+
 def _sexagesimal_check(val, isdict, remove=True):
-    """ To avoid sexagesimal values being evaluated, replace colon
+    """To avoid sexagesimal values being evaluated, replace colon
     values temporarily
 
     :param val:
@@ -399,18 +405,23 @@ def _sexagesimal_check(val, isdict, remove=True):
             val = val.replace(":", ":?")
     return val
 
+
 def check_valid_dimension(dim, prev_list):
     """Check the dimension is within the correct range"""
     if not 0 < dim < 21:
-        raise Exception('Please use a dimension between 1 and 20.')
+        raise Exception("Please use a dimension between 1 and 20.")
     if prev_list and (dim > len(prev_list)):
-        raise Exception('You have not specified enough dimensions '
-                        'inside the preview parameter.')
+        raise Exception(
+            "You have not specified enough dimensions "
+            "inside the preview parameter."
+        )
     return True
+
 
 def is_slice_notation(value):
     """Return True if the value is made up of multiple"""
-    return (isinstance(value, str) and (':' in value))
+    return isinstance(value, str) and (":" in value)
+
 
 def create_dir(file_path):
     """Check if directories provided exist at this file path. If they don't
@@ -435,3 +446,32 @@ def indent_multi_line_str(text, indent_level=1, justify=False):
 def indent(text, indent_level=1):
     text = (" " * 4 * indent_level) + text
     return text
+
+
+def sort_alphanum(_list):
+    """Sort list numerically and alphabetically
+    *While maintaining original list value types*
+
+    :param _list: Input list to be sorted
+    :return: List sorted by number and letter alphabetically
+    """
+    return sorted(_list, key=_alphanum)
+
+
+def _str_to_int(_str):
+    """Convert the input str to an int if possible
+
+    :param _str: input string
+    :return: integer if text is a digit, else string
+    """
+    return int(_str) if _str.isdigit() else _str
+
+
+def _alphanum(_str):
+    """Split string into numbers and letters
+
+    :param _str:
+    :return: list of numbers and letters
+    """
+    char_list = re.split("([0-9]+)", _str)
+    return [_str_to_int(c) for c in char_list]

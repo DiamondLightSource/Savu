@@ -4,7 +4,7 @@ Paganin Filter
 Description
 --------------------------
 
-A plugin to apply Paganin filter (contrast enhancement) on projections. 
+A plugin to apply the Paganin filter (for denoising or contrast enhancement) on projections. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/paganin_filter_doc.rst>
@@ -30,41 +30,41 @@ Parameter definitions
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
         
+        Ratio:
+            visibility: basic
+            dtype: float
+            description: Ratio of delta/beta.
+            default: "250.0"
+        
         Energy:
             visibility: basic
             dtype: float
-            description: Given X-ray energy in keV.
+            description: Beam energy in keV.
             default: "53.0"
         
         Distance:
             visibility: basic
             dtype: float
-            description: Distance from sample to detection - Unit is metre.
+            description: Distance from sample to detector. Unit is metre.
             default: "1.0"
         
         Resolution:
-            visibility: intermediate
+            visibility: basic
             dtype: float
-            description: Pixel size - Unit is micron.
+            description: Pixel size. Unit is micron.
             default: "1.28"
-        
-        Ratio:
-            visibility: intermediate
-            dtype: float
-            description: Ratio of delta/beta.
-            default: "250.0"
         
         Padtopbottom:
             visibility: intermediate
-            dtype: float
+            dtype: int
             description: Pad to the top and bottom of projection.
-            default: "10"
+            default: "100"
         
         Padleftright:
             visibility: intermediate
-            dtype: float
+            dtype: int
             description: Pad to the left and right of projection.
-            default: "10"
+            default: "100"
         
         Padmethod:
             visibility: intermediate

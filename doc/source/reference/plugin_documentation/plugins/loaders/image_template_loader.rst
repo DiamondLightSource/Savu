@@ -11,18 +11,6 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
             dtype: preview

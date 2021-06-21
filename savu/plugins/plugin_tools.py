@@ -65,7 +65,7 @@ class PluginParameters(object):
         # Override default parameter values with plugin list entries
         self.set_plugin_list_parameters(copy.deepcopy(params))
         self._get_plugin().set_parameters(self.parameters)
-        
+
     def _populate_default_parameters(self):
         """
         This method should populate all the required parameters with
@@ -123,6 +123,8 @@ class PluginParameters(object):
         :param tool_class: tool_class to use for error message
         """
         pdefs = self.param.get_dictionary()
+        # Remove ignored parameters
+        self._remove_ignored_params(pdefs)
         # Check if the required keys are included
         self._check_required_keys(pdefs, tool_class)
         # Check that option values are valid
@@ -163,16 +165,18 @@ class PluginParameters(object):
 
         return param_info_dict
 
-    def check_for_default(self, value, param_name, parameters):
+    def check_for_default(self, mod_param, mod_value):
         """If the value is changed to be 'default', then set the original
         default value. If the default contains a dictionary, then search
         for the correct value
         """
         param_info_dict = self.param.get_dictionary()
-        if str(value) == "default":
-            default = param_info_dict[param_name]["default"]
-            value = self._set_default(default, parameters, param_name)
-        return value
+        if str(mod_value) == "default":
+            if self.default_dependency_dict_exists(param_info_dict[mod_param]):
+                mod_value = self.get_dependent_default(param_info_dict[mod_param])
+            else:
+                mod_value = param_info_dict[mod_param]["default"]
+        return mod_value
 
     def _check_required_keys(self, param_info_dict, tool_class):
         """Check the four keys ['dtype', 'description', 'visibility',
@@ -239,7 +243,6 @@ class PluginParameters(object):
             "advanced",
             "datasets",
             "hidden",
-            "not",
         ]
         visibility_valid = True
         for p_key, p in param_info_dict.items():
@@ -266,7 +269,7 @@ class PluginParameters(object):
         so that the display order is unchanged.
         """
         datasets = ["in_datasets", "out_datasets"]
-        exceptions = ["not", "hidden"]
+        exceptions = ["hidden"]
         if p_key in datasets:
             if p["visibility"] != "datasets" \
                     and p["visibility"] not in exceptions:
@@ -297,6 +300,14 @@ class PluginParameters(object):
             raise Exception(
                 f"Please check the parameter options for {tool_class.__name__}"
             )
+
+    def _remove_ignored_params(self, param_info_dict):
+        """Remove any parameters with visibility = ignore"""
+        p_dict_copy = param_info_dict.copy()
+        for p_key, p in p_dict_copy.items():
+            visibility = param_info_dict[p_key].get("visibility")
+            if visibility == "ignore":
+                del param_info_dict[p_key]
 
     def _set_display(self, param_info_dict):
         """Initially, set all of the parameters to display 'on'
@@ -386,14 +397,11 @@ class PluginParameters(object):
                             name, desc, parent_name, value)
 
     def make_recommendation(self, child_name, desc, parent_name, value): 
-        desc["range"] = (
-            f"The recommended value with the chosen "
-            f"{str(parent_name)} would be {str(value)}"
-        )
-        recommendation = (
-            f"It's recommended that you update {str(child_name)}"
-            f" to {str(value)}"
-        )
+        if isinstance(desc, dict):
+            desc["range"] = f"The recommended value with the chosen " \
+                            f"{parent_name} would be {value}"
+        recommendation = f"It's recommended that you update {child_name}"\
+                         f" to {value}"
         print(Fore.RED + recommendation + Fore.RESET)
 
         
@@ -482,6 +490,123 @@ class PluginParameters(object):
                 self.append_extra_dims(len(value))
         else:
             parameters[key] = value
+
+    def _get_expand_dict(self, preview, expand_dim):
+        """Create dict for expand syntax
+
+        :param preview: Preview parameter value
+        :param expand_dim: Number of dimensions to return dict for
+        :return: dict
+        """
+        expand_dict = {}
+        preview_val = pu._dumps(preview)
+        if not preview_val:
+            # In the case that there is an empty dict, display the default
+            preview_val = []
+        if isinstance( preview_val, dict):
+            for key, prev_list in preview_val.items():
+                expand_dict[key] = self._get_expand_dict(prev_list, expand_dim)
+            return expand_dict
+        elif isinstance(preview_val, list):
+            if expand_dim == "all":
+                expand_dict = \
+                    self._output_all_dimensions(preview_val,
+                         self._get_dimensions(preview_val))
+            else:
+                pu.check_valid_dimension(expand_dim, preview_val)
+                dim_key = f"dim{expand_dim}"
+                expand_dict[dim_key] = \
+                    self._dim_slice_output(preview_val, expand_dim)
+        else:
+            raise ValueError("This preview value was not a recognised list "
+                             "or dictionary. This expand command currenty "
+                             "only works with those two data type.")
+        return expand_dict
+
+    def _get_dimensions(self, preview_list):
+        """
+        :param preview_list: The preview parameter list
+        :return: Dimensions to display
+        """
+        return 1 if not preview_list else len(preview_list)
+
+    def _output_all_dimensions(self, preview_list, dims):
+        """Compile output string lines for all dimensions
+
+        :param preview_list: The preview parameter list
+        :param dims: Number of dimensions to display
+        :return: dict
+        """
+        prev_dict = {}
+        for dim in range(1, dims + 1):
+            dim_key = f"dim{dim}"
+            prev_dict[dim_key] = self._dim_slice_output(preview_list, dim)
+        return prev_dict
+
+    def _dim_slice_output(self, preview_list, dim):
+        """If there are multiple values in list format
+        Only save the values for the dimensions chosen
+
+        :param preview_list: The preview parameter list
+        :param dim: dimension to return the slice notation dictionary for
+        :return slice notation dictionary
+        """
+        if not preview_list:
+            # If empty
+            preview_display_value = ":"
+        else:
+            preview_display_value = preview_list[dim - 1]
+        prev_val = self._set_all_syntax(preview_display_value)
+        return self._get_slice_notation_dict(prev_val)
+
+    def _get_slice_notation_dict(self, val):
+        """Create a dict for slice notation information,
+        start:stop:step (and chunk if provided)
+
+        :param val: The list value in slice notation
+        :return: dictionary of slice notation
+        """
+        import itertools
+
+        basic_slice_keys = ["start", "stop", "step"]
+        all_slice_keys = [*basic_slice_keys, "chunk"]
+        slice_dict = {}
+
+        if pu.is_slice_notation(val):
+            val_list = val.split(":")
+            if len(val_list) < 3:
+                # Make sure the start stop step slice keys are always shown,
+                # even when blank
+                val_list.append("")
+            for slice_name, v in zip(all_slice_keys, val_list):
+                # Only print up to the shortest list.
+                # (Only show the chunk value if it is in val_list)
+                slice_dict[slice_name] = v
+        else:
+            val_list = [val]
+            for slice_name, v in itertools.zip_longest(
+                    basic_slice_keys, val_list, fillvalue=""
+            ):
+                slice_dict[slice_name] = v
+        return slice_dict
+
+    def _set_all_syntax(self, val, replacement_str=""):
+        """Remove additional spaces from val, replace colon when 'all'
+        data is selected
+
+        :param val: Slice notation value
+        :param replacement_str: String to replace ':' with
+        :return:
+        """
+        if isinstance(val, str):
+            if pu.is_slice_notation(val):
+                if val == ":":
+                    val = replacement_str
+                else:
+                    val = val.strip()
+            else:
+                val = val.strip()
+        return val
 
     def get_multi_params_dict(self):
         """ Get the multi parameter dictionary. """

@@ -34,26 +34,12 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
-<<<<<<< HEAD
         init_vol:
             visibility: intermediate
             dtype: "[None, str]"
             description: Dataset to use as volume initialiser (does not currently work with preview)
             default: None
             example: "Type the name of the initialised dataset e.g. ['tomo']"
-=======
-        outer_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
-        
-        ratio:
-            visibility: basic
-            dtype: float
-            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
-            default: "0.98"
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         
         log:
             visibility: intermediate
@@ -70,44 +56,27 @@ Parameter definitions
             description: A slice list of required frames.
             default: "[]"
         
-        init_vol:
-            visibility: advanced
-            dtype: "[None,str]"
-            description: Dataset to use as volume initialiser (does not currently work with preview)
-            default: None
-            example: "Type the name of the initialised dataset e.g. ['tomo']"
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
-        
         force_zero:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
-<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
-=======
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
-            description: Override the default log function
+            description: Override the default log function with a numpy statement
             default: np.nan_to_num(-np.log(sino))
-            example: You write a function as default
         
         vol_shape:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -121,7 +90,7 @@ Parameter definitions
             default: "1"
         
         output_size:
-            visibility: basic
+            visibility: intermediate
             dtype: "[None, int, list[int,int]]"
             description: Number of rows and columns in the reconstruction.
             default: None
@@ -134,32 +103,32 @@ Parameter definitions
             default: ramp
         
         interpolation:
-            visibility: advanced
+            visibility: intermediate
             dtype: int
             description: Interpolation method used in reconstruction. Methods available: linear, nearest, and cubic (cubic is slow).
             options: "['linear', 'nearest', 'cubic']"
             default: linear
         
         circle:
-            visibility: advanced
+            visibility: intermediate
             dtype: bool
             description: Assume the reconstructed image is zero outside the inscribed circle. Also changes the default output_size to match the behaviour of radon called with circle=True.
             default: "False"
         
         image:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[None,list]"
             description: "2D array, dtype=float, optional.  Image containing an initial reconstruction estimate. Shape of this array should be (radon_image.shape[0], radon_image.shape[0]). The default is a filter backprojection using scikit.image.iradon as 'result'."
             default: None
         
         projection_shifts:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list, None]"
             description: 1D array dtype = float Shift the projections contained in radon_image (the sinogram) by this many pixels before reconstructing the image. The ith value defines the shift of the ith column of radon_image.
             default: None
         
         clip:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list,None]"
             description: "length-2 sequence of floats. Force all values in the reconstructed tomogram to lie in the range [clip[0], clip[1]]."
             default: None
@@ -169,18 +138,6 @@ Parameter definitions
             dtype: "[float,None]"
             description: Float. Relaxation parameter for the update step. A higher value can improve the convergence rate, but one runs the risk of instabilities. Values close to or higher than 1 are not recommended.
             default: None
-        
-        outer_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
         
 Key
 ^^^^^^^^^^

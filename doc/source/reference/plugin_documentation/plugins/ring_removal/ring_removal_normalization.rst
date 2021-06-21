@@ -4,7 +4,7 @@ Ring Removal Normalization
 Description
 --------------------------
 
-Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image) using a normalization-based method. A simple improvement to handle partial stripes is included. 
+Normalization-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_normalization_doc.rst>
@@ -31,13 +31,13 @@ Parameter definitions
             default: "[]"
         
         radius:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Radius of the Gaussian kernel.
             default: "11"
         
         number_of_chunks:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Divide the sinogram to many chunks of rows
             default: "1"
