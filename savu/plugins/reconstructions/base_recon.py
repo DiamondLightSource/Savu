@@ -122,12 +122,10 @@ class BaseRecon(Plugin):
         # writing  rotation angles into the metadata associated with the output (reconstruction)
         self.angles = mData.get('rotation_angle')
         outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
-        if 'detector_x' in list(mData.get_dictionary().keys()):
-            detector_x_dim = mData.get('detector_x')
-        else:
-            xDim = inData.get_data_dimension_by_axis_label('detector_x')
-            detector_x_dim = inData.get_shape()[xDim]
-        outData.meta_data.set("detector_x_length", copy.deepcopy(detector_x_dim))
+
+        xDim = inData.get_data_dimension_by_axis_label('x', contains=True)
+        det_length = inData.get_shape()[xDim]
+        outData.meta_data.set("detector_x_length", copy.deepcopy(det_length))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')
