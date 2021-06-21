@@ -4,7 +4,7 @@ Fresnel Filter
 Description
 --------------------------
 
-Method similar to the Paganin filter working both on sinograms and projections. Used to improve the contrast of the reconstruction image. 
+A low-pass filter to improve the contrast of reconstructed images which is similar to the Paganin filter but can work on both sinograms and projections. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/fresnel_filter_doc.rst>

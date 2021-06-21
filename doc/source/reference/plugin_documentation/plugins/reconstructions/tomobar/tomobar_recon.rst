@@ -4,7 +4,7 @@ Tomobar Recon
 Description
 --------------------------
 
-A GPU plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit. https://github.com/vais-ral/CCPi-Regularisation-Toolkit. 
+A GPU plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit. 
 
 Parameter definitions
 --------------------------
@@ -34,35 +34,6 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
-        outer_pad:
-            visibility: basic
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram width. Choose from True (defaults to sqrt(2)), False, or float <= 2.1.
-            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
-            default: "0.1"
-        
-        ratio:
-            visibility: basic
-            dtype: float
-            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
-            default: "0.98"
-        
-        log:
-            visibility: intermediate
-            dtype: bool
-            description: 
-                summary: Take the log of the data before reconstruction (true or false).
-                verbose: Should be set to false if PaganinFilter is set beforehand
-            default: "True"
-            example: Set to True to take the log of the data before reconstruction
-        
-        preview:
-            visibility: intermediate
-            dtype: preview
-            description: A slice list of required frames.
-            default: "[]"
-            example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
-        
         init_vol:
             visibility: intermediate
             dtype: "[None, str]"
@@ -70,7 +41,6 @@ Parameter definitions
             default: None
             example: "Type the name of the initialised dataset e.g. ['tomo']"
         
-<<<<<<< HEAD
         log:
             visibility: intermediate
             dtype: bool
@@ -85,49 +55,28 @@ Parameter definitions
             dtype: preview
             description: A slice list of required frames.
             default: "[]"
-=======
-        centre_pad:
-            visibility: advanced
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram to centre it in order to fill the reconstructed volume ROI for asthetic purposes.
-            warning: This will significantly increase the size of the data and the time to compute the reconstruction) Only available for selected algorithms and will be ignored otherwise.
-            default: "False"
-            dependency: 
-                algorithm: 
-                    FP_CUDA
-                    FBP_CUDA
-                    BP_CUDA
-                    FP
-                    FBP
-                    BP
-            example: "Is it a scalar or a list?"
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         
         force_zero:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
-<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
-=======
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
-            description: Override the default log function
+            description: Override the default log function with a numpy statement
             default: np.nan_to_num(-np.log(sino))
-            example: You write a function as default
         
         vol_shape:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -183,7 +132,7 @@ Parameter definitions
             description: 
                 summary: Number of outer iterations for FISTA (default) or ADMM methods.
                 verbose: Less than 10 iterations for the ordered-subsets iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
-            default: "20"
+            default: "15"
         
         algorithm_verbose:
             visibility: advanced
@@ -217,11 +166,11 @@ Parameter definitions
             default: ENABLE
         
         regularisation_method:
-            visibility: advanced
+            visibility: intermediate
             dtype: str
             options: "['ROF_TV', 'FGP_TV', 'PD_TV', 'SB_TV', 'LLT_ROF', 'NDF', 'TGV', 'NLTV', 'Diff4th', 'None']"
             description: 
-                summary: The regularisation (denoising) method to stabilise the iterative method
+                summary: The regularisation (denoising) method to stabilise the iterative recovery
                 verbose: The regularised iterative methods can help to reduce noise and artefacts in undersampled and noisy data conditions
                 options: 
                     ROF_TV: Rudin-Osher-Fatemi Total Variation model (piecewise-constant recovery)
@@ -241,28 +190,28 @@ Parameter definitions
             description: 
                 summary: Regularisation parameter could control the level of smoothing or denoising.
                 verbose: Higher regularisation values lead to stronger smoothing effect. If the value is too high, you will obtain a very blurry reconstructed image.
-                range: Recommended between 0.0001 and 0.1
+                range: Recommended between 1e-06 and 1e-04
             example: A good value to start with is {default}, {range}
-            default: "0.0001"
+            default: "5e-06"
             dependency: regularisation_method
         
         regularisation_iterations:
-            visibility: basic
+            visibility: intermediate
             dtype: int
             description: 
                 summary: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
                 range: Recommended value dependent upon method.
             default: 
                 regularisation_method: 
-                    ROF_TV: "1000"
-                    FGP_TV: "500"
+                    ROF_TV: "300"
+                    FGP_TV: "100"
                     PD_TV: "100"
                     SB_TV: "100"
-                    LLT_ROF: "1000"
-                    NDF: "1000"
-                    Diff4th: "1000"
-                    TGV: "80"
-                    NLTV: "80"
+                    LLT_ROF: "300"
+                    NDF: "300"
+                    Diff4th: "300"
+                    TGV: "150"
+                    NLTV: "30"
             dependency: regularisation_method
         
         regularisation_PD_lip:

@@ -217,12 +217,8 @@ class ParameterFormatter(DisplayFormatter):
         temp = "\n   %2i)   %20s : %s"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
-            val = pu._dumps(val)
-            if expand_dim == "all":
-                val = self._preview_output(val, width, self._get_dimensions(val))
-            else:
-                pu.check_valid_dimension(expand_dim, val)
-                val = self._dim_slice_output(val, width, expand_dim)
+            expand_dict = p_dict["tools"]._get_expand_dict(val, expand_dim)
+            val = self._dict_to_str(expand_dict, "")
         params += temp % (keycount, key, val)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
@@ -251,101 +247,20 @@ class ParameterFormatter(DisplayFormatter):
             temp_length -= 1
         return new_space * " "
 
-    def _get_dimensions(self, preview_list):
-        """Check how many dimensions to display
+    def _dict_to_str(self, _dict, indent):
+        """Change the dictionary to a formatted string
 
-        :param preview_list: The preview parameter
-        :return: Dimensions to display
+        :param _dict:
+        :param indent: number of space to indent by
+        :return: String containing the formatted dict
         """
-        return 1 if not preview_list else len(preview_list)
-
-    def _preview_output(self, preview, width, dims):
-        """ Compile output string lines for preview syntax"""
-        temp_str = ""
-        for dim in range(1, dims + 1):
-            temp_str += self._dim_slice_output(preview, width, dim)
-        return temp_str
-
-    def _dim_slice_output(self, preview_list, width, dims):
-        """Compile the string lines for dimension and slice notation syntax"""
-        temp_str = ""
-        # If there are multiple values in list format
-        # Only show the values for the dimensions chosen
-        if not preview_list:
-            # If empty
-            preview_display_value = ":"
-        else:
-            preview_display_value = preview_list[dims - 1]
-
-        prev_val = self._set_syntax(preview_display_value)
-        temp_str += f"\n   {'dim' + str(dims): >28} : "
-        temp_str += self._get_slice_notation_info(prev_val, width)
-
-        return temp_str
-
-    def _get_slice_notation_info(self, val, width):
-        """Create a string for certain slice notation information,
-        start:stop:step (and chunk if provided)
-
-        :param val: The value to be displayed
-        :param width: The console text width
-        :return: String containing split notation to display
-        """
-        import itertools
-
-        basic_split_keys = ["start", "stop", "step"]
-        all_split_keys = [*basic_split_keys, "chunk"]
-        split_str = ""
-
-        if pu.is_slice_notation(val):
-            val_list = val.split(":")
-            if len(val_list) < 3:
-                # Make sure the start stop step split keys are always shown,
-                # even when blank
-                val_list.append("")
-            for slice_name, v in zip(all_split_keys, val_list):
-                # Only print up to the shortest list.
-                # (Only show the chunk value if it is in val_list)
-                split_str += self._get_slice_str(slice_name, v, width)
-        else:
-            # Display the first value as 'start', keep stop and step blank
-            val_list = [val]
-            for slice_name, v in itertools.zip_longest(
-                basic_split_keys, val_list, fillvalue=""
-            ):
-                split_str += self._get_slice_str(slice_name, v, width)
-
-        return split_str
-
-    def _get_slice_str(self, label, value, width):
-        """Create a string to display information
-
-        :param label: The label to describe the value
-        :param val: The value to be displayed
-        :param width: The console text width
-        :return: A string with a "label: value" format
-        """
-        margin = 6
-        str_margin = " " * margin
-        style_off = Style.RESET_ALL
-
-        split_line_str = f"{label: >30} : {value}"
-        split_text = self._get_equal_lines(
-            split_line_str, width, style_off, style_off, str_margin
-        )
-        return "\n" + split_text
-
-    def _set_syntax(self, val):
-        """ Remove additional spaces, replace colon for 'all' """
-        if isinstance(val, str):
-            if pu.is_slice_notation(val):
-                if val == ":":
-                    val = ""
-                else:
-                    val = val.strip()
-            else:
-                val = val.strip()
-        return val
+        dict_str = ""
+        indent += (3 * " ")
+        for k,v in _dict.items():
+            if isinstance(v, dict):
+                v = self._dict_to_str(v, indent+"  ")
+            dict_str += f"\n{indent}{k: >28} : {v}"
+        return dict_str
 
 
 class DispDisplay(ParameterFormatter):

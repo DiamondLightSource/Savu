@@ -4,7 +4,7 @@ Ring Removal Waveletfft
 Description
 --------------------------
 
-Ring artefact removal method 
+Wavelet-FFt-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_waveletfft_doc.rst>
@@ -30,23 +30,23 @@ Parameter definitions
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
         
-        nvalue:
-            visibility: intermediate
-            dtype: int
-            description: Order of the the Daubechies (DB) wavelets.
-            default: "5"
-        
         sigma:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Damping parameter. Larger is stronger.
             default: "1"
         
         level:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Wavelet decomposition level.
-            default: "3"
+            default: "4"
+        
+        nvalue:
+            visibility: intermediate
+            dtype: int
+            description: Order of the the Daubechies (DB) wavelets.
+            default: "8"
         
         padFT:
             visibility: intermediate

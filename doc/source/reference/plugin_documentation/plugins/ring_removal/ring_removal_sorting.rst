@@ -4,7 +4,7 @@ Ring Removal Sorting
 Description
 --------------------------
 
-Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image) using a sorting-based method. It works particularly well for removing partial rings. 
+Sorting-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_sorting_doc.rst>
@@ -31,8 +31,8 @@ Parameter definitions
             default: "[]"
         
         size:
-            visibility: intermediate
-            dtype: "[float, list[float]]"
+            visibility: basic
+            dtype: int
             description: Size of the median filter window. Greater is stronger.
             default: "31"
         

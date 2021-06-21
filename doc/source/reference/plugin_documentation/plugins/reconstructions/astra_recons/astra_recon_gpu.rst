@@ -34,35 +34,6 @@ Parameter definitions
             default: "0.0"
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
-        outer_pad:
-            visibility: basic
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram width. Choose from True (defaults to sqrt(2)), False, or float <= 2.1.
-            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
-            default: "0.1"
-        
-        ratio:
-            visibility: basic
-            dtype: float
-            description: Ratio of a circular mask diameter in pixels to the smallest edge size along given axis.
-            default: "0.98"
-        
-        log:
-            visibility: intermediate
-            dtype: bool
-            description: 
-                summary: Take the log of the data before reconstruction (true or false).
-                verbose: Should be set to false if PaganinFilter is set beforehand
-            default: "True"
-            example: Set to True to take the log of the data before reconstruction
-        
-        preview:
-            visibility: intermediate
-            dtype: preview
-            description: A slice list of required frames.
-            default: "[]"
-            example: "[angle, detectorZ, detectorY], where detectorZ is the vertical coordinate, detectorY is the horizontal coordinate."
-        
         init_vol:
             visibility: intermediate
             dtype: "[None, str]"
@@ -70,7 +41,6 @@ Parameter definitions
             default: None
             example: "Type the name of the initialised dataset e.g. ['tomo']"
         
-<<<<<<< HEAD
         log:
             visibility: intermediate
             dtype: bool
@@ -85,49 +55,28 @@ Parameter definitions
             dtype: preview
             description: A slice list of required frames.
             default: "[]"
-=======
-        centre_pad:
-            visibility: advanced
-            dtype: "[bool,int,float]"
-            description: Pad the sinogram to centre it in order to fill the reconstructed volume ROI for asthetic purposes.
-            warning: This will significantly increase the size of the data and the time to compute the reconstruction) Only available for selected algorithms and will be ignored otherwise.
-            default: "False"
-            dependency: 
-                algorithm: 
-                    FP_CUDA
-                    FBP_CUDA
-                    BP_CUDA
-                    FP
-                    FBP
-                    BP
-            example: "Is it a scalar or a list?"
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         
         force_zero:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[list[float,float],list[None,None]]"
             description: Set any values in the reconstructed image outside of this range to zero.
             default: "['None', 'None']"
             example: "[0, 1]"
         
-<<<<<<< HEAD
         ratio:
             visibility: intermediate
             dtype: float
             description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
             default: "0.95"
         
-=======
->>>>>>> b5e19778bce26552409649cab5cbf3d5b07a9c38
         log_func:
             visibility: advanced
             dtype: str
-            description: Override the default log function
+            description: Override the default log function with a numpy statement
             default: np.nan_to_num(-np.log(sino))
-            example: You write a function as default
         
         vol_shape:
-            visibility: advanced
+            visibility: intermediate
             dtype: "[str, int]"
             description: 
                 summary: Override the size of the reconstruction volume with an integer value.
@@ -137,13 +86,35 @@ Parameter definitions
         n_iterations:
             visibility: basic
             dtype: int
-            description: Number of Iterations is only valid for iterative algorithms
+            description: Number of iterations to perform
             default: "1"
             dependency: 
                 algorithm: 
                     SIRT_CUDA
                     SART_CUDA
                     CGLS_CUDA
+        
+        outer_pad:
+            visibility: intermediate
+            dtype: "[bool, float]"
+            description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
+            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
+            default: "False"
+            dependency: 
+                algorithm: 
+                    FBP_CUDA
+                    BP_CUDA
+        
+        centre_pad:
+            visibility: intermediate
+            dtype: "[bool, float]"
+            description: Pad the sinogram to centre it in order to fill the reconstructed volume ROI for asthetic purposes.
+            warning: This will significantly increase the size of the data and the time to compute the reconstruction)
+            default: "False"
+            dependency: 
+                algorithm: 
+                    FBP_CUDA
+                    BP_CUDA
         
         res_norm:
             visibility: basic
@@ -159,7 +130,7 @@ Parameter definitions
         algorithm:
             visibility: basic
             dtype: str
-            options: "['FBP_CUDA', 'SIRT_CUDA', 'SART_CUDA', 'CGLS_CUDA', 'FP_CUDA', 'BP_CUDA', 'SIRT3D_CUDA', 'CGLS3D_CUDA']"
+            options: "['FBP_CUDA', 'SIRT_CUDA', 'SART_CUDA', 'CGLS_CUDA', 'BP_CUDA', 'SIRT3D_CUDA', 'CGLS3D_CUDA']"
             description: 
                 summary: Reconstruction type
                 options: 
@@ -167,14 +138,13 @@ Parameter definitions
                     SIRT_CUDA: Simultaneous Iterative Reconstruction Technique
                     SART_CUDA: Simultaneous Algebraic Reconstruction Technique
                     CGLS_CUDA: Conjugate Gradient Least Squares
-                    FP_CUDA: Forward Projection
                     BP_CUDA: Backward Projection
                     SIRT3D_CUDA: Simultaneous Iterative Reconstruction Technique 3D
                     CGLS3D_CUDA: Conjugate Gradient Least Squares 3D
             default: FBP_CUDA
         
         FBP_filter:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             options: "['none', 'ram-lak', 'shepp-logan', 'cosine', 'hamming', 'hann', 'tukey', 'lanczos', 'triangular', 'gaussian', 'barlett-hann', 'blackman', 'nuttall', 'blackman-harris', 'blackman-nuttall', 'flat-top', 'kaiser', 'parzen']"
             description: 
@@ -200,30 +170,6 @@ Parameter definitions
                     parzen: None
             default: ram-lak
         
-        outer_pad:
-            visibility: intermediate
-            dtype: "[bool, float]"
-            description: Pad the sinogram width to fill the reconstructed volume for asthetic purposes. Choose from True (defaults to sqrt(2)), False or float <= 2.1.
-            warning: This will increase the size of the data and the time to compute the reconstruction. Only available for selected algorithms and will be ignored otherwise.
-            default: "False"
-            dependency: 
-                algorithm: 
-                    FP_CUDA
-                    FBP_CUDA
-                    BP_CUDA
-        
-        centre_pad:
-            visibility: intermediate
-            dtype: "[bool, float]"
-            description: Pad the sinogram to centre it in order to fill the reconstructed volume ROI for asthetic purposes.
-            warning: This will significantly increase the size of the data and the time to compute the reconstruction)
-            default: "False"
-            dependency: 
-                algorithm: 
-                    FP
-                    FBP
-                    BP
-        
 Key
 ^^^^^^^^^^
 
@@ -232,6 +178,90 @@ Key
 
 Citations
 --------------------------
+
+Fast and flexible X-ray tomography using the ASTRA toolbox by Van Aarle, Wim et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{van2016fast,
+    title={Fast and flexible X-ray tomography using the ASTRA toolbox},
+    author={Van Aarle, Wim and Palenstijn, Willem Jan and Cant, Jeroen and Janssens, Eline and Bleichrodt, Folkert and Dabravolski, Andrei and De Beenhouwer, Jan and Batenburg, K Joost and Sijbers, Jan},
+    journal={Optics express},
+    volume={24},
+    number={22},
+    pages={25129--25147},
+    year={2016},
+    publisher={Optical Society of America}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T Fast and flexible X-ray tomography using the ASTRA toolbox
+    %A Van Aarle, Wim
+    %A Palenstijn, Willem Jan
+    %A Cant, Jeroen
+    %A Janssens, Eline
+    %A Bleichrodt, Folkert
+    %A Dabravolski, Andrei
+    %A De Beenhouwer, Jan
+    %A Batenburg, K Joost
+    %A Sijbers, Jan
+    %J Optics express
+    %V 24
+    %N 22
+    %P 25129-25147
+    %@ 1094-4087
+    %D 2016
+    %I Optical Society of America
+    
+
+The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography by Van Aarle, Wim et al.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bibtex
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    @article{van2015astra,
+    title={The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography},
+    author={Van Aarle, Wim and Palenstijn, Willem Jan and De Beenhouwer, Jan and Altantzis, Thomas and Bals, Sara and Batenburg, K Joost and Sijbers, Jan},
+    journal={Ultramicroscopy},
+    volume={157},
+    pages={35--47},
+    year={2015},
+    publisher={Elsevier}
+    }
+    
+
+Endnote
+""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: none
+
+    %0 Journal Article
+    %T The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography
+    %A Van Aarle, Wim
+    %A Palenstijn, Willem Jan
+    %A De Beenhouwer, Jan
+    %A Altantzis, Thomas
+    %A Bals, Sara
+    %A Batenburg, K Joost
+    %A Sijbers, Jan
+    %J Ultramicroscopy
+    %V 157
+    %P 35-47
+    %@ 0304-3991
+    %D 2015
+    %I Elsevier
+    
 
 Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs) by Palenstijn, WJ et al.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

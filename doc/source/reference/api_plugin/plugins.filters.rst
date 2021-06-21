@@ -32,7 +32,6 @@ Submodules
    plugins.filters.spectrum_crop
    plugins.filters.strip_background
    plugins.filters.threshold_filter
-   plugins.filters.umpa
 
 Module contents
 ---------------

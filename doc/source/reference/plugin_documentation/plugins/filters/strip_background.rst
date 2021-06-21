@@ -26,13 +26,13 @@ Parameter definitions
             default: "['in_datasets[0]', 'background']"
         
         iterations:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Number of iterations.
             default: "100"
         
         window:
-            visibility: intermediate
+            visibility: basic
             dtype: int
             description: Half width of the rolling window.
             default: "10"

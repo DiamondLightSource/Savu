@@ -30,12 +30,13 @@ Parameter definitions
         method:
             visibility: advanced
             dtype: str
-            options: "['ROF_TV', 'FGP_TV', 'SB_TV', 'NLTV', 'TGV', 'LLT_ROF', 'NDF', 'Diff4th']"
+            options: "['ROF_TV', 'PD_TV', 'FGP_TV', 'SB_TV', 'NLTV', 'TGV', 'LLT_ROF', 'NDF', 'Diff4th']"
             description: 
                 summary: The denoising method
-                verbose: Iterative methods can help to solve ill-posed inverse problems by choosing a suitable noise model for the measurement
+                verbose: Variational denoising algorithms can be used to filter the data while preserving the important features
                 options: 
-                    ROF_TV: Rudin-Osher-Fatemi Total Variation model. It is a good model for piecewise-constant images with sharp abrupt boundaries.
+                    ROF_TV: Rudin-Osher-Fatemi Total Variation model
+                    PD_TV: Primal-Dual Total variation model
                     FGP_TV: Fast Gradient Projection Total Variation model
                     SB_TV: Split Bregman Total Variation model
                     LLT_ROF: Lysaker, Lundervold and Tai model combined with Rudin-Osher-Fatemi
@@ -45,15 +46,13 @@ Parameter definitions
                     Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
         
-        reg_par:
+        reg_parameter:
             visibility: basic
             dtype: float
             description: 
-                summary: Regularisation parameter could control the level of smoothing or denoising.
-                verbose: Higher regularisation values lead to stronger smoothing effect. If the value is too high, you will obtain a very blurry reconstructed image.
-                range: Recommended between 0.0001 and 0.1
-            example: A good value to start with is {default}, {range}
-            default: "0.0001"
+                summary: The regularisation (smoothing) parameter. The higher the value, the stronger the smoothing effect
+                range: Recommended between 0 and 0.001
+            default: "1e-05"
         
         max_iterations:
             visibility: basic

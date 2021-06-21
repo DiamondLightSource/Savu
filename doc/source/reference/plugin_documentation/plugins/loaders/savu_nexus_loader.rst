@@ -11,18 +11,6 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
             dtype: "[preview, dict{str:preview}, dict{}]"
@@ -32,11 +20,11 @@ Parameter definitions
         datasets:
             visibility: basic
             dtype: "[list[],list[str]]"
-            description: Overuuride the default by choosing specific dataset(s) to load, by stating the NXdata name.
+            description: Override the default by choosing specific dataset(s) to load, by stating the NXdata name.
             default: "[]"
         
         names:
-            visibility: basic
+            visibility: intermediate
             dtype: "[list[],list[str]]"
             description: Override the dataset names associated with the datasets parameter above.
             default: "[]"

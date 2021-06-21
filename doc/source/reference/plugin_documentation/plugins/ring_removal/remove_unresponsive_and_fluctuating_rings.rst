@@ -4,7 +4,7 @@ Remove Unresponsive And Fluctuating Rings
 Description
 --------------------------
 
-Method to remove large stripe artefacts in a sinogram (<-> ring artefacts in a reconstructed image). 
+Method working in the sinogram space to remove ring artifacts caused by dead pixels. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_unresponsive_and_fluctuating_rings_doc.rst>
@@ -31,16 +31,22 @@ Parameter definitions
             default: "[]"
         
         size:
-            visibility: intermediate
-            dtype: "[float, list[float]]"
+            visibility: basic
+            dtype: int
             description: Size of the median filter window. Greater is stronger.
-            default: "71"
+            default: "51"
         
         snr:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: Ratio used to detect locations of large stripes. Greater is less sensitive.
             default: "3.0"
+        
+        residual:
+            visibility: intermediate
+            dtype: bool
+            description: Removing residual stripes if True.
+            default: "True"
         
 Key
 ^^^^^^^^^^
