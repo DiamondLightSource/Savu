@@ -15,8 +15,8 @@
 """
 .. module:: image_loader
    :platform: Unix
-   :synopsis: A class for loading standard tomography data in a variety of
-    formats.
+   :synopsis: A plugin for loading standard tomography data in image formats
+   (e.g. tiff).
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -25,6 +25,7 @@
 import os
 import tempfile
 import warnings
+import glob
 
 import h5py
 import numpy as np
@@ -73,10 +74,12 @@ class ImageLoader(BaseLoader):
                              slice_dims=(detY,))
 
         path = os.path.abspath(exp.meta_data.get("data_file"))
+        list_file = glob.glob(path + "/*")
+        if len(list_file) == 0:
+            raise ValueError("\n\n!!!ERROR!!! The given folder is empty, please"
+                             " check the input path:\n->'{}'\n".format(path))
         data_obj.data = self._get_data_type(data_obj, path)
-
         self.set_rotation_angles(data_obj)
-
         # dummy file
         filename = path.split(os.sep)[-1] + '.h5'
         data_obj.backing_file = \
@@ -87,23 +90,21 @@ class ImageLoader(BaseLoader):
         self._set_darks_and_flats(data_obj, path)
 
     def _set_darks_and_flats(self, dObj, path):
-        if not self.parameters['flat_prefix']:
-            return
-
         dObj.data = NoImageKey(dObj, None, 0)
         fdim = self.parameters['frame_dim']
-
         # read dark and flat images
-        fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
-        flat = ImageData(fpath, dObj, [fdim], None, ffix)
-
-        if self.parameters['dark_prefix']:
+        if self.parameters['flat_prefix'] is not None:
+            fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
+            flat = ImageData(fpath, dObj, [fdim], None, ffix)
+        else:
+            shape = dObj.get_shape()
+            flat = np.ones([1] + [shape[i] for i in [1, 2]], dtype=np.float32)
+        if self.parameters['dark_prefix'] is not None:
             dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
             dark = ImageData(dpath, dObj, [fdim], None, dfix)
         else:
             shape = dObj.get_shape()
             dark = np.zeros([1] + [shape[i] for i in [1, 2]], dtype=flat.dtype)
-
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()
