@@ -21,6 +21,7 @@
 
 """
 import math
+import copy
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -59,7 +60,7 @@ class BaseRecon(Plugin):
 
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
+        self.set_centre_of_rotation(in_data[0], out_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
@@ -94,7 +95,7 @@ class BaseRecon(Plugin):
     def get_vol_shape(self):
         return self.br_vol_shape
 
-    def set_centre_of_rotation(self, inData, mData, pData):
+    def set_centre_of_rotation(self, inData, outData, mData):
         # if cor has been passed as a dataset then do nothing
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
@@ -114,7 +115,17 @@ class BaseRecon(Plugin):
                 cor *= val
                 # mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
+        outData.meta_data.set("centre_of_rotation", copy.deepcopy(self.cor))
         self.centre = self.cor[0]
+
+    def populate_metadata_to_output(self, inData, outData, mData):
+        # writing  rotation angles into the metadata associated with the output (reconstruction)
+        self.angles = mData.get('rotation_angle')
+        outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
+
+        xDim = inData.get_data_dimension_by_axis_label('x', contains=True)
+        det_length = inData.get_shape()[xDim]
+        outData.meta_data.set("detector_x_length", copy.deepcopy(det_length))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')
@@ -373,6 +384,9 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        # metadata output populator
+        in_meta_data = self.get_in_meta_data()[0]
+        self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data)
 
     def _get_axis_labels(self, in_dataset):
         """
