@@ -217,7 +217,7 @@ class ParameterFormatter(DisplayFormatter):
         temp = "\n   %2i)   %20s : %s"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
-            expand_dict = p_dict["tools"]._get_expand_dict(val, expand_dim)
+            expand_dict = p_dict["tools"].get_expand_dict(val, expand_dim)
             val = self._dict_to_str(expand_dict, "")
         params += temp % (keycount, key, val)
         if desc:

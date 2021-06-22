@@ -491,7 +491,7 @@ class PluginParameters(object):
         else:
             parameters[key] = value
 
-    def _get_expand_dict(self, preview, expand_dim):
+    def get_expand_dict(self, preview, expand_dim):
         """Create dict for expand syntax
 
         :param preview: Preview parameter value
@@ -505,7 +505,7 @@ class PluginParameters(object):
             preview_val = []
         if isinstance( preview_val, dict):
             for key, prev_list in preview_val.items():
-                expand_dict[key] = self._get_expand_dict(prev_list, expand_dim)
+                expand_dict[key] = self.get_expand_dict(prev_list, expand_dim)
             return expand_dict
         elif isinstance(preview_val, list):
             if expand_dim == "all":
