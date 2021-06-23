@@ -1,6 +1,6 @@
 inherit: 
-    - savu/plugins/loaders/templates/nexus_templates/fluo.yml
-    - savu/plugins/loaders/templates/nexus_templates/stxm.yml
-    - savu/plugins/loaders/templates/nexus_templates/monitor.yml
-    - savu/plugins/loaders/templates/nexus_templates/xrd.yml
+    - Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml
+    - Savu/savu/plugins/loaders/templates/nexus_templates/stxm.yml
+    - Savu/savu/plugins/loaders/templates/nexus_templates/monitor.yml
+    - Savu/savu/plugins/loaders/templates/nexus_templates/xrd.yml
 
