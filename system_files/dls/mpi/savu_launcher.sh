@@ -9,8 +9,10 @@ function is_gpfs03 ()
   check=$3
   pathtofile=`readlink -f $file`
   if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+	if [ ! -d $pathtofile ]; then
 		echo $file": No such file or directory"
 		return 1
+	fi
   fi
 
   gpfs03="$(df $pathtofile | grep gpfs03)"
@@ -140,7 +142,8 @@ else
 	fi
 
 	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true 
+    is_gpfs03 $data_file gpfs03 true # ***********************Error here for folders
+
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
