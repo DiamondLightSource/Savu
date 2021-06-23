@@ -62,9 +62,10 @@ toolbox and the CCPi RGL toolkit.
 
         algorithm_verbose:
              visibility: advanced
-             dtype: bool
+             dtype: str
              description: Print iterations number and other messages
                (off by default).
+             options: [on,off]
              default: 'off'
 
         algorithm_mask:
