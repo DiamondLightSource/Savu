@@ -55,7 +55,9 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def setup(self):
         in_dataset = self.get_in_datasets()[0]
-        self.parameters['vol_shape'] = tuple(self.parameters['output_size'])
+        output_size = self.parameters['output_size']
+        self.parameters['vol_shape'] = tuple(output_size) \
+            if isinstance(output_size, list) else output_size
         procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset.get_data_dimension_by_axis_label('detector_y')

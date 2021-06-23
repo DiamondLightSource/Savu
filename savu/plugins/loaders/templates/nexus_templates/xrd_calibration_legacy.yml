@@ -7,7 +7,7 @@ import:
 
 xrd:
     params:
-        cfile: $h5py.File('test_data/data/LaB6_calibration_output.nxs', 'r')
+        cfile: $h5py.File('Savu/test_data/data/LaB6_calibration_output.nxs', 'r')
         dorient: $cfile['entry/instrument/detector/detector_orientation'][...].reshape((3, 3))
         det_str: entry/instrument/detector
         xps: $cfile[det_str + '/x_pixel_size'].value*1e-3

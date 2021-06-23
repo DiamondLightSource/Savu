@@ -29,8 +29,10 @@ from yamllint import linter
 from collections import OrderedDict
 from yamllint.config import YamlLintConfig
 
+from savu.plugins.loaders.utils.my_safe_constructor import MySafeConstructor
+
 def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
-    class OrderedLoader(Loader):
+    class OrderedLoader(Loader, MySafeConstructor):
         pass
 
     def construct_mapping(loader, node):
@@ -39,7 +41,6 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     OrderedLoader.add_constructor(
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
         construct_mapping)
-    # 'Load all' is used so that multiple yaml documents may be appended with --- and read in also
     return yaml.load(stream, OrderedLoader)
 
 

@@ -126,6 +126,8 @@ class NxxrdLoader(BaseMultiModalLoader):
 
     def get_cal_path(self):
         path = self.parameters['calibration_path']
+        if path is None:
+            raise Exception("Please add the path to the xrd calibration file.")
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path
