@@ -4,7 +4,7 @@ List To Projections
 Description
 --------------------------
 
-Converts a list of points into a 2D projection 
+Convert a list of points into a 2D projection 
 
 Parameter definitions
 --------------------------

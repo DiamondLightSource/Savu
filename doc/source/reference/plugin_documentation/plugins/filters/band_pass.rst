@@ -4,7 +4,7 @@ Band Pass
 Description
 --------------------------
 
-A plugin to filter each frame with a BandPass T 
+A plugin to filter each frame with a gaussian 
 
 Parameter definitions
 --------------------------
@@ -29,14 +29,14 @@ Parameter definitions
         
         blur_width:
             visibility: basic
-            dtype: list
+            dtype: "list[int]"
             description: Kernel size
             default: "[0, 3, 3]"
         
         type:
             visibility: basic
             dtype: str
-            description: Filter type (High|Low).
+            description: Filter type.
             options: "['High', 'Low']"
             default: High
         

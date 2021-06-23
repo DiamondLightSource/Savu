@@ -4,7 +4,7 @@ Ccpi Ring Artefact Filter
 Description
 --------------------------
 
-This plugin applies the same ring removal method as the DLS tomo_recon reconstruction software. 
+Regularization-based method for removing ring artifacts. 
 
 Parameter definitions
 --------------------------

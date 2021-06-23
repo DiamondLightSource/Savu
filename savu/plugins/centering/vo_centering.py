@@ -170,7 +170,7 @@ class VoCentering(BaseFilter, CpuPlugin):
                 or (self.broadcast_method == 'median')
                 or (self.broadcast_method == 'linear_fit')
                 or (self.broadcast_method == 'nearest')):
-            self.error_msg_3 = "!!! WARNING !!! Selected broadcasting method" \
+            self.error_msg_3 = "!!!WARNING!!! Selected broadcasting method" \
                                " is out of the list. Use the default option:" \
                                " 'median'"
             logging.warning(self.error_msg_3)
@@ -188,6 +188,15 @@ class VoCentering(BaseFilter, CpuPlugin):
         pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]
         self.origin_prev = np.arange(pre_start, pre_stop, pre_step)
         self.plugin_prev = self.origin_prev[start_ind:stop_ind:step_ind]
+        num_sino = len(self.plugin_prev)
+        if num_sino > 20:
+            warning_msg = "\n!!!WARNING!!! You selected to calculate the " \
+                          "center-of-rotation using '{}' sinograms.\n" \
+                          "This is computationally expensive. Considering to " \
+                          "adjust the preview parameter to use\na smaller " \
+                          "number of sinograms (< 20).\n".format(num_sino)
+            logging.warning(warning_msg)
+            cu.user_message(warning_msg)
 
     def process_frames(self, data):
         if len(data[0].shape) > 2:

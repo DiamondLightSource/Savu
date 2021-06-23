@@ -11,18 +11,6 @@ Parameter definitions
 
 .. code-block:: yaml
 
-        in_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to process
-            default: "[]"
-        
-        out_datasets:
-            visibility: not
-            dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s) to create
-            default: "[]"
-        
         preview:
             visibility: basic
             dtype: preview
@@ -37,13 +25,13 @@ Parameter definitions
         
         axis_labels:
             visibility: basic
-            dtype: list
+            dtype: "list[str]"
             description: A list of axis labels.
             default: "['rotation_angle.degrees', 'detector_y.angles', 'detector_x.angles']"
         
         patterns:
             visibility: hidden
-            dtype: list
+            dtype: "list[str]"
             description: Patterns.
             default: "['SINOGRAM.0c.1s.2c', 'PROJECTION.0s.1c.2c']"
         

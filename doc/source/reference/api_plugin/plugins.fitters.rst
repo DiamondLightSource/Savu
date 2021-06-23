@@ -9,7 +9,6 @@ Submodules
 
    plugins.fitters.base_fitter
    plugins.fitters.ral_fit
-   plugins.fitters.reproduce_fit
    plugins.fitters.simple_fit
 
 Module contents

@@ -4,7 +4,7 @@ Raven Filter
 Description
 --------------------------
 
-Ring artefact removal method 
+FFT-based method for removing ring artifacts. 
 
 Parameter definitions
 --------------------------

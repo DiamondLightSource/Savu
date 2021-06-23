@@ -17,7 +17,6 @@ Submodules
    plugins.corrections.subpixel_shift
    plugins.corrections.time_based_correction
    plugins.corrections.time_based_plus_drift_correction
-   plugins.corrections.xrd_absorption_approximation
 
 Module contents
 ---------------

@@ -4,7 +4,7 @@ Remove Large Rings
 Description
 --------------------------
 
-Methods working on a sinogram-image to remove large ring artifacts. 
+Method working in the sinogram space to remove large ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_large_rings_doc.rst>
