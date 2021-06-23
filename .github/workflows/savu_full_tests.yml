@@ -54,4 +54,5 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu
+        python ./scripts/configurator_tests/refresh_process_lists_test.py
         savu_full_tests

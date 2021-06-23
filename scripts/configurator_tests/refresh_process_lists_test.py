@@ -51,7 +51,7 @@ if __name__ == "__main__":
     path = os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
 
     nxs_in_tests, plugins_in_tests = \
-        tplu.get_process_list(path + '/savu/test/travis')
+        tplu.get_process_list(path + '/savu/test')
 
     lists = tplu.get_test_process_list(path + 'test_data/process_lists') \
         + tplu.get_test_process_list(path+'test_data/test_process_lists')
@@ -59,7 +59,8 @@ if __name__ == "__main__":
 
     test_path = path + '/test_data/test_process_lists'
     test_path2 = path + '/test_data/process_lists'
-    exclude = ['multimodal/simple_fit_test_XRF.nxs']
+    exclude = ['under_revision/diffraction_absorption_correction_test.nxs',\
+    'multimodal/simple_fit_test_XRF.nxs']
     for f in [n for n in nxs_used if n not in exclude]:
         print("Refreshing process list", f, "...")
         if os.path.exists(os.path.join(test_path, f)):

@@ -33,6 +33,8 @@ import itertools
 from collections import OrderedDict
 import numpy as np
 
+from savu.plugins.loaders.utils.my_safe_loader import MySafeLoader
+
 # can I remove these from here?
 
 load_tools = {}
@@ -356,7 +358,7 @@ def _dumps(val):
         try:
             isdict = re.findall(r"[\{\}]+", val)
             val = _sexagesimal_check(val, isdict, remove=False)
-            value = yaml.load(val, Loader=yaml.SafeLoader)
+            value = yaml.load(val, Loader=MySafeLoader)
             return _sexagesimal_check(value, isdict)
         except Exception:
             val = _sexagesimal_check(val, isdict)
@@ -370,12 +372,12 @@ def _dumps(val):
                     for k, v in val.items():
                         v = v.replace("[", "'[").replace("]", "]'")
                         value_dict[k] = _dumps(
-                            yaml.load(v, Loader=yaml.SafeLoader)
+                            yaml.load(v, Loader=MySafeLoader)
                         )
                     return value_dict
                 else:
                     value = val.replace("[", "'[").replace("]", "]'")
-                    return _dumps(yaml.load(value, Loader=yaml.SafeLoader))
+                    return _dumps(yaml.load(value, Loader=MySafeLoader))
             else:
                 value = parse_config_string(val)
                 return value
