@@ -32,7 +32,7 @@ from dials.array_family import flex
 from dials.algorithms.image.threshold import DispersionThreshold
 
 
-@register_plugin
+#@register_plugin
 class DialsFindSpots(BaseFilter, CpuPlugin):
     """
     finding the single crystal peaks with dials
