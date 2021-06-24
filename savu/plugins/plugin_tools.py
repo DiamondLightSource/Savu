@@ -517,11 +517,11 @@ class PluginParameters(object):
                 dim_key = f"dim{expand_dim}"
                 expand_dict[dim_key] = \
                     self._dim_slice_output(preview_val, expand_dim)
+            return expand_dict
         else:
             raise ValueError("This preview value was not a recognised list "
                              "or dictionary. This expand command currenty "
-                             "only works with those two data type.")
-        return expand_dict
+                             "only works with those two data types.")
 
     def _get_dimensions(self, preview_list):
         """
