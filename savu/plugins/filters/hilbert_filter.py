@@ -16,13 +16,12 @@
 .. module:: hilbert_filter
    :platform: Unix
    :synopsis: A plugin to apply Hilbert filter horizontally for tomographic
-   reconstruction of phase gradient images. Note to use it before Vocentering,
-   set "log" to "False" and "FBP_filter" to "None" in a reconstruction plugin.
+   reconstruction of phase gradient images.
 
 .. moduleauthor:: Tunhe Zhou <tunhe.zhou@diamond.ac.uk>
 
 """
-import logging
+
 import numpy as np
 import pyfftw.interfaces.scipy_fftpack as fft
 
@@ -35,9 +34,6 @@ from savu.plugins.utils import register_plugin
 class HilbertFilter(BaseFilter, CpuPlugin):
 
     def __init__(self):
-        logging.debug("initialising Hilbert filter")
-        logging.debug("Calling super to make sure that all superclases are " +
-                      " initialised")
         super(HilbertFilter, self).__init__('HilbertFilter')
         self.filter1 = None
 
