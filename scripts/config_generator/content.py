@@ -582,7 +582,7 @@ class Content(object):
         pos_list = self.get_positions()
         if not pos_list:
             print("There are no items to access in your list.")
-            raise ValueError("Please add an item to the process list.")
+            raise Exception("Please add an item to the process list.")
         else:
             if pos not in pos_list:
                 raise ValueError("Incorrect plugin position.")

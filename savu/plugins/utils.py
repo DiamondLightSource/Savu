@@ -250,7 +250,7 @@ def param_to_str(param_name, keys):
         if param_name <= len(keys):
             param_name = keys[param_name - 1]
         else:
-            raise Exception(
+            raise ValueError(
                 "This parameter number is not valid for this plugin"
             )
     elif param_name not in keys:
