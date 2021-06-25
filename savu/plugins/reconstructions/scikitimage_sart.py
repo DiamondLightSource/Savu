@@ -40,7 +40,8 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         super(ScikitimageSart, self).__init__("ScikitimageSart")
 
     def _shift(self, sinogram, centre_of_rotation):
-        centre_of_rotation_shift = (sinogram.shape[0] // 2) - float(centre_of_rotation)
+        centre_of_rotation_shift = \
+            (sinogram.shape[0] // 2) - float(centre_of_rotation)
         return ndimage.interpolation.shift(sinogram, centre_of_rotation_shift)
 
     def process_frames(self, data):
@@ -51,26 +52,26 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = sinogram.astype(np.float64)
         theta = np.linspace(0, 180, sinogram.shape[1])
+        
+        dim_detX = in_pData.get_data_dimension_by_axis_label('x', contains=True)
+        size = self.parameters['output_size']
+        size = in_pData.get_shape()[dim_detX] if size == 'auto' or \
+            size is None else size
+        
         result = \
             transform.iradon(sino, theta=theta,
-                             output_size=(in_pData.get_shape()[1]),
-                             # self.parameters['output_size'],
-                             filter_name='ramp',  # self.parameters['filter'],
-                             interpolation='linear',
-                             # self.parameters['linear'],
-                             circle=False)  # self.parameters[False])
+                             output_size=size,
+                             filter_name=self.parameters['filter'],
+                             interpolation=self.parameters['interpolation'],
+                             circle=self.parameters['circle'])
 
         for i in range(self.parameters["iterations"]):
             print("Iteration %i" % i)
             result = transform.iradon_sart(sino, theta=theta, image=result,
-                                           # self.parameters['result'],
                                            projection_shifts=None,
-                                           # self.parameters['None'],
-                                           clip=None,
-                                           # self.parameters[None],
-                                           relaxation=0.15
-                                           # self.parameters[0.15])
-                                           )
+                                           clip=self.parameters['clip'],
+                                           relaxation=\
+                                               self.parameters['relaxation'])
         return result
 
     def get_max_frames(self):
