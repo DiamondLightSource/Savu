@@ -161,9 +161,9 @@ class Experiment(object):
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
         # clear out dataset dictionaries
-        # for data_dict in self.collection['datasets']:
-        #     for data in data_dict.values():
-        #         data.meta_data._set_dictionary({})
+        for data_dict in self.collection['datasets']:
+            for data in data_dict.values():
+                data.meta_data._set_dictionary({})
 
     def _get_collection(self):
         return self.collection
