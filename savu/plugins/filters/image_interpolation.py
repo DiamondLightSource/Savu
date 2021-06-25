@@ -32,21 +32,12 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin, dawn_compatible
 
 
-def imresize(data, size, interp, mode):
-    """
-    Provides an imresize implementation, as it is removed from scipy 1.3.0
-    Uses PIL.Image, following docs advice from
-    https://docs.scipy.org/doc/scipy-1.2.1/reference/generated/scipy.misc.imresize.html
-    """
-    return np.array(Image.fromarray(data, mode).resize(size, interp))
-
-
 @register_plugin
 @dawn_compatible
 class ImageInterpolation(BaseFilter, CpuPlugin):
     """
     A plugin to interpolate an image by a factor
-    a wrapper on scipy.misc.imresize.
+    
     :param size: int, float or tuple. Default: 2.0.
     :param interp: nearest lanczos bilinear bicubic cubic. Default:'bicubic'.
     """
@@ -58,7 +49,8 @@ class ImageInterpolation(BaseFilter, CpuPlugin):
 
     def process_frames(self, data):
         data = data[0]
-        return imresize(data, self.parameters['size'], self.parameters['interp'], mode=None)
+        return self.imresize(data, self.parameters['size'],
+                        self.parameters['interp'], mode=None)
 
     def setup(self):
         # get all in and out datasets required by the plugin
@@ -66,17 +58,28 @@ class ImageInterpolation(BaseFilter, CpuPlugin):
         # get plugin specific instances of these datasets
         in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
+        in_pData[0].plugin_data_setup(self.get_plugin_pattern(),
+                                      self.get_max_frames())
         inshape = in_dataset[0].get_shape()
         imshape = inshape[-2:]
         restshape = inshape[:-2]
-        outshape = imresize(np.ones(imshape), self.parameters['size'], self.parameters['interp'], None).shape
+        outshape = self.imresize(np.ones(imshape), self.parameters['size'],
+                                 self.parameters['interp'], None).shape
         outshape = restshape + outshape
         out_dataset[0].create_dataset(patterns=in_dataset[0],
                                       axis_labels=in_dataset[0],
                                       shape=outshape)
 
-        out_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
+        out_pData[0].plugin_data_setup(self.get_plugin_pattern(),
+                                       self.get_max_frames())
+
+    def imresize(self, data, size, interp, mode):
+        """
+        Provides an imresize implementation, as it is removed from scipy 1.3.0
+        Uses PIL.Image, following docs advice from
+        https://docs.scipy.org/doc/scipy-1.2.1/reference/generated/scipy.misc.imresize.html
+        """
+        return np.array(Image.fromarray(data, mode).resize(size, interp))
 
     def get_max_frames(self):
         return 1

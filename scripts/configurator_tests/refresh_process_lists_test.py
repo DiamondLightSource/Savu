@@ -59,8 +59,10 @@ if __name__ == "__main__":
 
     test_path = path + '/test_data/test_process_lists'
     test_path2 = path + '/test_data/process_lists'
+
     exclude = ['under_revision/diffraction_absorption_correction_test.nxs',\
     'multimodal/simple_fit_test_XRF.nxs']
+
     for f in [n for n in nxs_used if n not in exclude]:
         print("Refreshing process list", f, "...")
         if os.path.exists(os.path.join(test_path, f)):
