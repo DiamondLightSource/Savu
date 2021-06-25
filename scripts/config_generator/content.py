@@ -163,19 +163,27 @@ class Content(object):
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 
-    def set_preview_display(self, input, expand_dim):
+    def set_preview_display(self, expand_off, expand_dim, dim_view,
+                            plugin_pos):
         """Set the dimensions_to_display value to "off" to prevent the
         preview parameter being shown in it's expanded form.
 
         If dimensions_to_display = "all", then all dimension slices are shown.
         If a number is provided to dim_view, that dimension is shown.
 
-        :param input: The input string
+        :param expand_off: True if expand display should be turned off
         :param expand_dim: The dimension number to display, or "all"
+        :param dim_view: True if only a certain dimension should be shown
+        :param plugin_pos: Plugin position
         """
-        self.expand_dim = None if input == "off" else expand_dim
-        if input == "off":
+        if expand_off is True:
+            self.expand_dim = None
             print(f"Expand diplay has been turned off")
+        else:
+            # check the plugin position number is valid
+            self.find_position(plugin_pos)
+            dims_to_display = expand_dim if dim_view else "all"
+            self.expand_dim = dims_to_display
 
     def _update_parameters(self, plugin, name, keep, str_pos):
         union_params = set(keep).intersection(set(plugin.parameters))
