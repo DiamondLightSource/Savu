@@ -222,11 +222,11 @@ class NxtomoLoader(BaseLoader):
             try:
                 angles = eval(angles)
             except Exception as e:
-                logging.warning(e.message)
+                logging.warning(e)
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:
-                    logging.debug(e.message)
+                    logging.debug(e)
                     self.log_warning("No angles found so evenly distributing them "
                                      "between 0 and 180 degrees")
                     angles = np.linspace(0, 180, data_obj.get_shape()[0])
