@@ -15,8 +15,8 @@
 """
 .. module:: lfov_loader
    :platform: Unix
-   :synopsis: Large field of view loader. A class for loading multiple
-     standard tomography scans.
+   :synopsis: Large field-of-view loader. A class for loading 2 standard
+    tomography scans.
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
@@ -32,8 +32,6 @@ from savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader import \
 
 @register_plugin
 class LfovLoader(MultiNxtomoLoader):
-    """
-    """
 
     def __init__(self, name='LfovLoader'):
         super(LfovLoader, self).__init__(name)
@@ -95,7 +93,7 @@ class LfovLoader(MultiNxtomoLoader):
         if len(order_list) != len(file_list):
             raise ValueError(
                 "Number of files found in the folder is not the same as the"
-                +" requested number")
+                " requested number")
         return file_list
     
     def _find_files(self, base, name):
@@ -109,7 +107,6 @@ class LfovLoader(MultiNxtomoLoader):
         dark_list = self._find_files(dark_folder, "/*dark*")
         flat_list = self._find_files(flat_folder, "/*flat*")
         offset = self.parameters['row_offset']
-       
         data_obj_list = []
         for i in order_list:
             self.exp.meta_data.set('data_file', file_list[i])
@@ -120,6 +117,7 @@ class LfovLoader(MultiNxtomoLoader):
             if flat_folder is not None:
                 nxtomo.parameters['flat'] = [
                     flat_list[i], flat_key, flat_scale]
+
             nxtomo.setup()
             # update preview
             if offset[i] != 0:
