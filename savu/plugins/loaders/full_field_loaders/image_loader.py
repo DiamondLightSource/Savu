@@ -39,19 +39,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class ImageLoader(BaseLoader):
-    """
-    Load any FabIO compatible formats (e.g. tiffs)
-
-    :param dataset_name: The name assigned to the dataset. Default: 'tomo'.
-    :param angles: A python statement to be evaluated \
-    (e.g np.linspace(0, 180, nAngles)) or a file. Default: None.
-    :param frame_dim: Which dimension requires stitching? Default: 0.
-    :param data_prefix: A file prefix for the data file. Default: None.
-    :param dark_prefix: A file prefix for the dark field files, including the\
-    folder path if different from the data. Default: None.
-    :param flat_prefix: A file prefix for the flat field files, including the\
-    folder path if different from the data. Default: None.
-    """
 
     def __init__(self, name='ImageLoader'):
         super(ImageLoader, self).__init__(name)
@@ -117,24 +104,25 @@ class ImageLoader(BaseLoader):
 
     def _get_data_type(self, obj, path):
         prefix = self.parameters['data_prefix']
-        return ImageData(path, obj, [self.parameters['frame_dim']], None, prefix)
+        return ImageData(path, obj, [self.parameters['frame_dim']], None,
+                         prefix)
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
-
         if angles is None:
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
                 ldict = {}
-                exec("angles = " + angles,globals(),ldict)
+                exec("angles = " + angles, globals(), ldict)
                 angles = ldict['angles']
             except Exception as e:
                 warnings.warn("Could not execute statement: {}".format(e))
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:
-                    raise Exception('Cannot set angles in loader. Error: {}'.format(e))
+                    raise Exception(
+                        'Cannot set angles in loader. Error: {}'.format(e))
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[self.parameters['frame_dim']]
