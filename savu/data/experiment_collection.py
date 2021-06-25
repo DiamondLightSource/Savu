@@ -217,7 +217,6 @@ class Experiment(object):
 
     def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
-        import h5py
         if self.meta_data.get('process') == len(
                 self.meta_data.get('processes')) - 1 and not self.checkpoint:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
