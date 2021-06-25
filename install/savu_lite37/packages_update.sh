@@ -22,6 +22,7 @@
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 label="$1"
+savu_version="4_0"
 filename='packages_to_update.txt'
 current_date=$(date '+%Y-%m-%d')
 n=1
@@ -44,10 +45,10 @@ while IFS="|" read -r package_name channel_name stable_version failed_version in
           echo "--> Installing a NEW version of the package"
           conda install --yes -c $channel_name $package_name --force-reinstall --no-deps
           # Generate an explicit list file with installed conda packages
-          conda list --explicit > spec-savu3_0_lite_"$label".txt
-          sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_"$label".txt
+          conda list --explicit > spec-savu"$savu_version"_lite_"$label".txt
+          sed -i 's/\.conda/.tar.bz2/g' spec-savu"$savu_version"_lite_"$label".txt
           echo "--> Check that the package is _actually_ updated"
-          checkpack_var=$(grep $package_name spec-savu3_0_lite_"$label".txt)
+          checkpack_var=$(grep $package_name spec-savu"$savu_version"_lite_"$label".txt)
           if [[ $checkpack_var == *"$new_version_package"* ]]; then
             echo "--> The package $package_name is truly updated to version $new_version_package continue with savu_full_tests" | xargs
             savu_full_tests  2>&1 | tee savu_full_tests_log.txt
@@ -90,7 +91,7 @@ n=$((n+1))
 echo "**********************************************************************"
 done < $filename
 #
-conda list --explicit > spec-savu3_0_lite_"$label".txt
-sed -i 's/\.conda/.tar.bz2/g' spec-savu3_0_lite_"$label".txt
+conda list --explicit > spec-savu"$savu_version"_lite_"$label".txt
+sed -i 's/\.conda/.tar.bz2/g' spec-savu"$savu_version"_lite_"$label".txt
 #clean up
 rm -rf 0* 1* 2*
