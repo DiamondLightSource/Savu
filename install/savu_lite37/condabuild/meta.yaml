@@ -60,6 +60,7 @@ requirements:
     - linecache2
     - traceback2
     - pynvml
+    - yamllint
 
 test:
   imports:
