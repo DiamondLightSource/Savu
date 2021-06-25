@@ -163,6 +163,20 @@ class Content(object):
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 
+    def check_preview_param(self, plugin_pos):
+        """ Check that the plugin position number is valid and it contains
+        a preview parameter
+
+        :param plugin_pos:
+        :return:
+        """
+        pos = self.find_position(plugin_pos)
+        plugin_entry = self.plugin_list.plugin_list[pos]
+        parameters = plugin_entry["data"]
+        if "preview" not in parameters:
+            raise Exception("You can only use this command with "
+                            "plugins containing the preview parameter")
+
     def set_preview_display(self, expand_off, expand_dim, dim_view,
                             plugin_pos):
         """Set the dimensions_to_display value to "off" to prevent the
@@ -180,8 +194,7 @@ class Content(object):
             self.expand_dim = None
             print(f"Expand diplay has been turned off")
         else:
-            # check the plugin position number is valid
-            self.find_position(plugin_pos)
+            self.check_preview_param(plugin_pos)
             dims_to_display = expand_dim if dim_view else "all"
             self.expand_dim = dims_to_display
 
