@@ -586,7 +586,7 @@ if __name__ == "__main__":
         "yaml_utils.py",
         "hdf5_utils.py",
     ]
-    exclude_dir = ["driver", "unregistered"]
+    exclude_dir = ["driver", "unregistered", "utils"]
 
     # Create template download page
     create_plugin_template_downloads(savu_base_path)
