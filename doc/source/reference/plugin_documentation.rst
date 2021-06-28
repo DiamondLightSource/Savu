@@ -96,8 +96,8 @@ Filters
 
    Band Pass <plugin_documentation/plugins/filters/band_pass>
    Pymca <plugin_documentation/plugins/filters/pymca>
-   Fresnel Filter <plugin_documentation/plugins/filters/fresnel_filter>
    Find Peaks <plugin_documentation/plugins/filters/find_peaks>
+   Fresnel Filter <plugin_documentation/plugins/filters/fresnel_filter>
    Image Interpolation <plugin_documentation/plugins/filters/image_interpolation>
    Hilbert Filter <plugin_documentation/plugins/filters/hilbert_filter>
    List To Projections <plugin_documentation/plugins/filters/list_to_projections>
@@ -274,14 +274,6 @@ Nexus Templates
 
 
 
-Utils
-********************************************************
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
 Ptychography
 ########################################################
 
@@ -313,6 +305,16 @@ Astra Recons
 
    Astra Recon Cpu <plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_cpu>
    Astra Recon Gpu <plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_gpu>
+
+
+Projectors
+********************************************************
+
+.. toctree::
+   :maxdepth: 1 
+
+   Forward Projector Cpu <plugin_documentation/plugins/reconstructions/projectors/forward_projector_cpu>
+   Forward Projector Gpu <plugin_documentation/plugins/reconstructions/projectors/forward_projector_gpu>
 
 
 Tomobar
