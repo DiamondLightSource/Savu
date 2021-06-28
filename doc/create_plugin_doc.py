@@ -567,8 +567,9 @@ if __name__ == "__main__":
     out_folder, rst_file, api_type = sys.argv[1:]
 
     # determine Savu base path
-    savu_base_path = \
-        os.path.dirname(os.path.realpath(__file__)).split("doc")[0]
+    main_dir = \
+        os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
+    savu_base_path = f"{main_dir}/Savu/"
 
     base_path = savu_base_path + "savu/plugins"
     # create entries in the autosummary for each package
