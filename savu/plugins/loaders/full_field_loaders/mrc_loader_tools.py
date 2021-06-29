@@ -9,10 +9,10 @@ class MrcLoaderTools(PluginTools):
             visibility: basic
             dtype: [str, int, None]
             description: A python statement to be evaluated
-              (e.g np.linspace(0, 180, nAngles)) or a file.
+              (e.g np.linspace(0, 180, nAngles)) or a txt file.
             default: None
         name:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: The name assigned to the dataset
             default: tomo
