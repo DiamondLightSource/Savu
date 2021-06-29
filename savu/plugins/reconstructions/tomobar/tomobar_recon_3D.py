@@ -36,14 +36,6 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
-    def _get_output_size(self, in_data):
-        sizeX = tuple(self.parameters['output_size'])
-        shape = in_data.get_shape()
-        if sizeX == 'auto':
-            detX = in_data.get_data_dimension_by_axis_label('detector_x')
-            sizeX = shape[detX]
-        return sizeX
-
     def set_filter_padding(self, in_pData, out_pData):
         self.pad = self.parameters['padding']
         in_data = self.get_in_datasets()[0]
@@ -55,9 +47,6 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def setup(self):
         in_dataset = self.get_in_datasets()[0]
-        output_size = self.parameters['output_size']
-        self.parameters['vol_shape'] = tuple(output_size) \
-            if isinstance(output_size, list) else output_size
         procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
         dim = in_dataset.get_data_dimension_by_axis_label('detector_y')
@@ -69,13 +58,12 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         in_pData = self.get_plugin_in_datasets()[0]
         out_pData = self.get_plugin_out_datasets()[0]
         detY = in_pData.get_data_dimension_by_axis_label('detector_y')
-        # ! padding vertical detector !
+        # ! padding the vertical detector !
         self.Vert_det = in_pData.get_shape()[detY] + 2*self.pad
 
         in_pData = self.get_plugin_in_datasets()
         self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
-        self.output_size = out_pData.get_shape()[self.det_dimX_ind]
 
             # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number' : self.parameters['algorithm_ordersubsets'],
@@ -101,7 +89,6 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def process_frames(self, data):
         cor, angles, self.vol_shape, init = self.get_frame_params()
-
         self.anglesRAD = np.deg2rad(angles.astype(np.float32))
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
@@ -127,7 +114,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
                     CenterRotOffset = cor_astra.item() - 0.5, # The center of rotation (CoR) scalar or a vector
                     AnglesVec = self.anglesRAD, # the vector of angles in radians
-                    ObjSize = self.output_size, # a scalar to define the reconstructed object dimensions
+                    ObjSize = self.vol_shape[0], # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
                     device_projector='gpu')
 

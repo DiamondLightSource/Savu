@@ -8,17 +8,11 @@ toolbox and the CCPi RGL toolkit.
     """
     def define_parameters(self):
         """
-        output_size:
-            visibility: advanced
-            dtype: [None, int, list[int,int],str]
-            description:  "The dimension of the reconstructed volume (only X-Y dimension)."
-            default: auto
-
         padding:
             visibility: advanced
             dtype: int
             description: The amount of pixels to pad each slab of the cropped projection data.
-            default: 13
+            default: 5
 
         data_fidelity:
             visibility: advanced
@@ -60,7 +54,7 @@ toolbox and the CCPi RGL toolkit.
                   suggested value is 15 iterations, however the
                   algorithm can stop prematurely based on the tolerance
                   value."
-             default: 15
+             default: 17
 
         algorithm_verbose:
              visibility: advanced

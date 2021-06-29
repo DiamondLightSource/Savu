@@ -9,13 +9,6 @@ toolbox and the CCPi RGL toolkit.
 
     def define_parameters(self):
         """
-        output_size:
-            visibility: advanced
-            dtype: [None, int, list[int,int],str]
-            description:  The dimension of the reconstructed volume
-              (only X-Y dimension).
-            default: auto
-
         data_fidelity:
             visibility: advanced
             dtype: str
