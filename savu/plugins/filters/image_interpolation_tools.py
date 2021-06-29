@@ -3,6 +3,7 @@ from savu.plugins.plugin_tools import PluginTools
 class ImageInterpolationTools(PluginTools):
     """A plugin to interpolate an image by a factor
     """
+
     def define_parameters(self):
         """
         size:
@@ -13,7 +14,7 @@ class ImageInterpolationTools(PluginTools):
         interp:
               visibility: basic
               dtype: str
-              description: nearest lanczos bilinear bicubic cubic.
+              description: The method of interpolation.
               options: [nearest, lanczos, bilinear, bicubic, cubic]
               default: 'bicubic'
 
