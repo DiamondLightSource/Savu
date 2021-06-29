@@ -28,7 +28,7 @@ import logging
 import h5py
 
 
-@register_plugin
+#@register_plugin
 class I13PtychoLoader(BaseMultiModalLoader):
     """
     A class to load tomography data from an NXstxm file

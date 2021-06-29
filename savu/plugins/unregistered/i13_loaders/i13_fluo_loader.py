@@ -28,7 +28,7 @@ import logging
 import h5py
 
 
-@register_plugin
+#@register_plugin
 class I13FluoLoader(BaseLoader):
     def __init__(self, name='I13FluoLoader'):
         super(I13FluoLoader, self).__init__(name)
