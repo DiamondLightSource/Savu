@@ -28,9 +28,13 @@ import numpy as np
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 import savu.core.utils as cu
+from savu.data.data_structures.data_types.map_3dto4d_h5 import Map3dto4dh5
+from savu.data.data_structures.data_types.data_plus_darks_and_flats \
+    import ImageKey, NoImageKey
 
 
-@register_plugin
+
+#@register_plugin
 class P2rFlyScanDetectorLoader(BaseLoader):
     def __init__(self, name='P2rFlyScanDetectorLoader'):
         super(P2rFlyScanDetectorLoader, self).__init__(name)
@@ -89,8 +93,8 @@ class P2rFlyScanDetectorLoader(BaseLoader):
 
     def __setup_3d_to_4d(self, data_obj, n_angles):
         logging.debug("setting up 4d tomography data from 3d input.")
-        from savu.data.data_structures.data_type import Map_3dto4d_h5
-        data_obj.data = Map_3dto4d_h5(data_obj.data, n_angles)
+
+        data_obj.data = Map3dto4dh5(data_obj.data, n_angles)
         return data_obj.data.get_shape()
 
     def __setup_4d(self, data_obj):
@@ -125,14 +129,13 @@ class P2rFlyScanDetectorLoader(BaseLoader):
             image_key = \
                 data_obj.backing_file[self.parameters['image_key_path']][...]
 
-            from savu.data.data_structures.data_type import ImageKey
+
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
             #data_obj.set_shape(data_obj.data.get_shape())
         except KeyError:
             cu.user_message("An image key was not found.")
             try:
-                from savu.data.data_structures.data_type import NoImageKey
                 data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
                 data_obj.data._set_flat_path(entry + 'flatfield')
@@ -141,7 +144,6 @@ class P2rFlyScanDetectorLoader(BaseLoader):
                 cu.user_message("Dark/flat data was not found in input file.")
 
     def __set_separate_dark_and_flat(self, data_obj):
-        from savu.data.data_structures.data_type import NoImageKey
         try:
             image_key = \
                 data_obj.backing_file[self.parameters['image_key_path']][...]

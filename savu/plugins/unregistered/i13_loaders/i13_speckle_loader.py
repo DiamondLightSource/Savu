@@ -25,7 +25,7 @@ from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
 import h5py
 
-@register_plugin
+#@register_plugin
 class I13SpeckleLoader(BaseLoader):
     """
     A class to load tomography data from an NXstxm file

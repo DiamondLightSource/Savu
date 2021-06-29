@@ -26,7 +26,7 @@ from savu.plugins.utils import register_plugin
 import h5py
 
 
-@register_plugin
+#@register_plugin
 class I13StxmXrfLoader(BaseLoader):
     """
     :param is_map: is it. Default: True.
