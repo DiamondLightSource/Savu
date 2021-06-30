@@ -491,7 +491,7 @@ class PluginParameters(object):
         else:
             parameters[key] = value
 
-    def _get_expand_dict(self, preview, expand_dim):
+    def get_expand_dict(self, preview, expand_dim):
         """Create dict for expand syntax
 
         :param preview: Preview parameter value
@@ -505,7 +505,7 @@ class PluginParameters(object):
             preview_val = []
         if isinstance( preview_val, dict):
             for key, prev_list in preview_val.items():
-                expand_dict[key] = self._get_expand_dict(prev_list, expand_dim)
+                expand_dict[key] = self.get_expand_dict(prev_list, expand_dim)
             return expand_dict
         elif isinstance(preview_val, list):
             if expand_dim == "all":
@@ -517,11 +517,11 @@ class PluginParameters(object):
                 dim_key = f"dim{expand_dim}"
                 expand_dict[dim_key] = \
                     self._dim_slice_output(preview_val, expand_dim)
+            return expand_dict
         else:
             raise ValueError("This preview value was not a recognised list "
                              "or dictionary. This expand command currenty "
-                             "only works with those two data type.")
-        return expand_dict
+                             "only works with those two data types.")
 
     def _get_dimensions(self, preview_list):
         """

@@ -29,10 +29,8 @@ from yamllint import linter
 from collections import OrderedDict
 from yamllint.config import YamlLintConfig
 
-from savu.plugins.loaders.utils.my_safe_constructor import MySafeConstructor
-
-def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
-    class OrderedLoader(Loader, MySafeConstructor):
+def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
         pass
 
     def construct_mapping(loader, node):
@@ -70,7 +68,7 @@ def check_yaml_errors(data):
 
 def read_yaml(path):
     with open(path, 'r') as stream:
-        data_dict = ordered_load(stream, yaml.SafeLoader)
+        data_dict = ordered_load(stream)
     return data_dict
 
 def read_yaml_from_doc(docstring):
@@ -91,7 +89,7 @@ def read_yaml_from_doc(docstring):
     try:
         # SafeLoader loads a subset of the YAML language, safely.
         # This is recommended for loading untrusted input
-        data_dict = ordered_load(docstring, yaml.SafeLoader)
+        data_dict = ordered_load(docstring)
         return data_dict
     except (yaml.scanner.ScannerError, yaml.parser.ParserError) as se:
         print('')

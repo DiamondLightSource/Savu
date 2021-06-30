@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    plugins.reconstructions.astra_recons
+   plugins.reconstructions.projectors
    plugins.reconstructions.tomobar
 
 Submodules
