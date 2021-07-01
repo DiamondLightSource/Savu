@@ -344,6 +344,20 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
+    def test_string_4(self):
+        # Check that off as a string is not converted to boolean
+        pdefs = self.initial_setup()
+        key = "pattern"
+        value = "off"
+
+        value_check = pu._dumps(value)
+        self.assertEqual(value, "off")
+
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
     def test_list(self):
         # Check that list is accepted
         pdefs = self.initial_setup()

@@ -5,27 +5,47 @@ class LfovLoaderTools(PluginTools):
     """
     def define_parameters(self):
         """
-        file_name:
+        order:
             visibility: basic
+            dtype: list[int]
+            description: Order of datasets used for stitching.
+            default: [1,0]
+        row_offset:
+            visibility: basic
+            dtype: list[int]
+            description: Offsets of row indices between datasets.
+            default: [0,-1]
+        dark:
+            visibility: basic
+            dtype: [list[dir, h5path, float], list[None, None, float]]
+            description: Optional path to the dark field data file, nxs path
+                and scale value.
+            default: [None, None, 1]
+        flat:
+            visibility: basic
+            dtype: [list[dir, h5path, float], list[None, None, float]]
+            description: Optional path to the flat field data file, nxs path
+                and scale value.
+            default: [None, None, 1]
+        angles:
+            visibility: basic
+            dtype: [str, int, None]
+            description: If this is 4D data stored in 3D then pass an integer
+              value equivalent to the number of projections per 180 degree
+              scan. If the angles parameter is set to None, then values from
+              default dataset used.
+            default: None
+        file_name:
+            visibility: intermediate
             dtype: str
             description: The shared part of the name of each file
              (not including .nxs)
             default: 'projection'
         data_path:
-            visibility: basic
+            visibility: intermediate
             dtype: h5path
             description: Path to the data inside the file.
             default: 'entry/data/data'
-        order:
-            visibility: intermediate
-            dtype: list[int]
-            description: Order of datasets used for stitching.
-            default: [1,0]
-        row_offset:
-            visibility: intermediate
-            dtype: list[int]
-            description: Offsets of row indices between datasets.
-            default: [0,-1]
         stack_or_cat:
             visibility: intermediate
             dtype: str
@@ -48,16 +68,9 @@ class LfovLoaderTools(PluginTools):
             dtype: [None,str]
             description: No need
             default: None
-        dark:
-            visibility: intermediate
-            dtype: [list[dir, h5path, float], list[None, None, float]]
-            description: Optional path to the dark field data file, nxs path 
-                and scale value.
-            default: [None, None, 1]
-        flat:
-            visibility: intermediate
-            dtype: [list[dir, h5path, float], list[None, None, float]]
-            description: Optional path to the flat field data file, nxs path 
-                and scale value.
-            default: [None, None, 1]            
+        name:
+            visibility: hidden
+            dtype: str
+            description: The name assigned to the dataset.
+            default: 'tomo'
         """

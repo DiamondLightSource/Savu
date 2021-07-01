@@ -11,12 +11,6 @@ toolbox and the CCPi RGL toolkit.
     """
     def define_parameters(self):
         """
-        output_size:
-            visibility: advanced
-            dtype: [None, int, list[int,int],str]
-            description: Number of rows and columns in the reconstruction.
-            default: auto
-
         data_fidelity:
             visibility: advanced
             dtype: str
