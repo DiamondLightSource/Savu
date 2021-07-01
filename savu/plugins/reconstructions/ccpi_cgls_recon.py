@@ -49,7 +49,6 @@ class CcpiCglsRecon(BaseRecon, CpuPlugin):
 
     def process_frames(self, data):
         sino = data[0]
-        print("in ccpi plugin", sino.shape)
         cors, angles, vol_shape, init = self.get_frame_params()
 
         voxels = ccpi_alg.cgls(sino.astype(np.float32),
