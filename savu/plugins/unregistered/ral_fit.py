@@ -29,7 +29,7 @@ import time
 import math
 import ral_nlls
 
-@register_plugin
+#@register_plugin
 class RalFit(BaseFitter):
     """
     This plugin fits peaks.
