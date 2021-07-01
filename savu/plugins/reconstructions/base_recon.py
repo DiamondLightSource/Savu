@@ -219,10 +219,11 @@ class BaseRecon(Plugin):
 
     def base_process_frames_after(self, data):
         lower_range, upper_range = self.range
+        data = np.nan_to_num(data)
         if lower_range is not None:
-            data[data < lower_range] = 0
+            data[data < lower_range] = 0.0
         if upper_range is not None:
-            data[data > upper_range] = 0
+            data[data > upper_range] = 0.0
         return data
 
     def pad_sino(self, sino, cor):

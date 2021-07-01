@@ -28,7 +28,7 @@ from ptypy.core import Ptycho
 from ptypy import utils as u
 
 
-@register_plugin
+#@register_plugin
 class PtypyCompact(BasePtycho):
     def __init__(self):
         super(PtypyCompact, self).__init__("PtypyCompact")
@@ -37,7 +37,7 @@ class PtypyCompact(BasePtycho):
         in_dataset, out_datasets = self.get_datasets()
         in_d1 = in_dataset[0]
         sh = in_d1.get_shape()[-1]
-        
+
         p, r = self.parse_params()
         ###
         self.get
@@ -162,7 +162,7 @@ class PtypyCompact(BasePtycho):
         p.scan.illumination.propagation.parallel = 2.3e-3
         r.mask = np.ones((p.scans.savu.data.shape, p.scans.savu.data.shape))
 #         probe_size = tuple(u.expect2(p.scan.geometry.shape)) + (p.scan.coherence.num_probe_modes, )
-        
+
 #         self.set_size_probe(probe_size)
         return p, r
 
@@ -179,10 +179,9 @@ class PtypyCompact(BasePtycho):
         object_shape = P.obj.storages['S00G00'].data[0].shape
         self.obj_shape = object_shape + (self.get_num_object_modes(),)
         #print "object shape is" + str(self.obj_shape)
-    
+
     def set_size_probe(self, probe_shape):
         self.p, self.r = self.parse_params()
         sh = self.p.scans.savu.data.shape
         self.probe_size = (1,)+tuple(u.expect2(sh)) + (self.get_num_probe_modes(),)
         #print "probe size is" + str(self.probe_size)
-
