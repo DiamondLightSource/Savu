@@ -141,17 +141,16 @@ def _mod(content, args):
 @error_catcher
 def _expand(content, args):
     """ Expand the plugin preview parameter. """
-    dims_to_display = args.dim if args.dim_view else "all"
-    content.set_preview_display(args.plugin_pos, dims_to_display)
+    content.set_preview_display(args.off, args.dim, args.dim_view,
+                                args.plugin_pos)
     if content.expand_dim is not None:
-        content.find_position(args.plugin_pos)
-        if dims_to_display == "all" and args.dim is not None:
+        if content.expand_dim == "all" and args.dim is not None:
             is_modified = content.modify_dimensions(args.plugin_pos, args.dim)
             if is_modified:
                 _disp(content, f"{args.plugin_pos}.preview")
         else:
             _disp(content, f"{args.plugin_pos}.preview")
-            content.set_preview_display(args.plugin_pos, "all")
+            #content.set_preview_display(args.off, "all")
     return content
 
 

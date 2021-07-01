@@ -10,7 +10,6 @@ Subpackages
    plugins.loaders.full_field_loaders
    plugins.loaders.mapping_loaders
    plugins.loaders.templates
-   plugins.loaders.utils
 
 Submodules
 ----------

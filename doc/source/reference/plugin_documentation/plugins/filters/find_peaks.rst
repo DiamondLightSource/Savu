@@ -4,7 +4,7 @@ Find Peaks
 Description
 --------------------------
 
-This plugin uses peakutils to find peaks in spectra. This is then metadata. 
+This plugin uses peakutils to find peaks in spectra and add them to the metadata. 
 
 Parameter definitions
 --------------------------
@@ -22,7 +22,9 @@ Parameter definitions
         out_datasets:
             visibility: datasets
             dtype: "[list[],list[str]]"
-            description: Create a list of the dataset(s).
+            description: 
+                summary: A list of the dataset(s) to create.
+                verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "['Peaks']"
         
         thresh:

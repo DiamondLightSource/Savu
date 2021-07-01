@@ -33,7 +33,7 @@ import itertools
 from collections import OrderedDict
 import numpy as np
 
-from savu.plugins.loaders.utils.my_safe_loader import MySafeLoader
+from savu.plugins.loaders.utils.my_safe_constructor import MySafeConstructor
 
 # can I remove these from here?
 
@@ -250,7 +250,7 @@ def param_to_str(param_name, keys):
         if param_name <= len(keys):
             param_name = keys[param_name - 1]
         else:
-            raise Exception(
+            raise ValueError(
                 "This parameter number is not valid for this plugin"
             )
     elif param_name not in keys:
@@ -346,7 +346,10 @@ def _dumps(val):
     Change the string to an integer, float, tuple, list, str, dict
     """
     import yaml
-
+    # Prevent conversion from on/off to boolean
+    yaml.SafeLoader.add_constructor(
+        "tag:yaml.org,2002:bool", MySafeConstructor.add_bool
+    )
     if isinstance(val, str):
         try:
             # Safely evaluate an expression node or a string containing
@@ -358,7 +361,7 @@ def _dumps(val):
         try:
             isdict = re.findall(r"[\{\}]+", val)
             val = _sexagesimal_check(val, isdict, remove=False)
-            value = yaml.load(val, Loader=MySafeLoader)
+            value = yaml.safe_load(val)
             return _sexagesimal_check(value, isdict)
         except Exception:
             val = _sexagesimal_check(val, isdict)
@@ -372,12 +375,12 @@ def _dumps(val):
                     for k, v in val.items():
                         v = v.replace("[", "'[").replace("]", "]'")
                         value_dict[k] = _dumps(
-                            yaml.load(v, Loader=MySafeLoader)
+                            yaml.safe_load(v)
                         )
                     return value_dict
                 else:
                     value = val.replace("[", "'[").replace("]", "]'")
-                    return _dumps(yaml.load(value, Loader=MySafeLoader))
+                    return _dumps(yaml.safe_load(value))
             else:
                 value = parse_config_string(val)
                 return value
