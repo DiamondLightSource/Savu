@@ -12,7 +12,7 @@
             description: "Describe your parameter"
             default: A default value
             options: [A default value, option1, option2, option3]
-            dependencies:
+            dependency:
                 parameter_name_1: [3, 9]
         """
 
