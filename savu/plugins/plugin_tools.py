@@ -125,6 +125,8 @@ class PluginParameters(object):
         pdefs = self.param.get_dictionary()
         # Remove ignored parameters
         self._remove_ignored_params(pdefs)
+        # Check that unknown keys aren't present
+        self._check_all_keys(pdefs, tool_class)
         # Check if the required keys are included
         self._check_required_keys(pdefs, tool_class)
         # Check that option values are valid
@@ -200,15 +202,42 @@ class PluginParameters(object):
                 missing_keys = True
 
         if missing_keys:
-            print(
-                f"{tool_class.__name__} doesn't contain all of the "
-                f"required keys."
-            )
-            for param, missing_values in missing_key_dict.items():
-                print(f"The missing required keys for '{param}' are:")
-                print(*missing_values, sep=", ")
-            logger.error(f"ERROR: Missing keys inside {tool_class.__name__}")
-            raise Exception(f"Please edit {tool_class.__name__}")
+            self._print_incorrect_key_str(missing_key_dict, "missing required", tool_class)
+
+    def _check_all_keys(self, param_info_dict, tool_class):
+        allowed_keys = ["dtype", "description", "visibility", "default",
+                        "options", "display", "example", "dependency",
+                        "warning"]
+        unknown_keys = False
+        unknown_keys_dict = {}
+
+        for p_key, p in param_info_dict.items():
+            all_keys = p.keys()
+            if any(d not in allowed_keys for d in all_keys):
+                unknown_keys_dict[p_key] = set(all_keys) - set(allowed_keys)
+                unknown_keys = True
+
+        if unknown_keys:
+            self._print_incorrect_key_str(unknown_keys_dict, "unknown",
+                                        tool_class)
+
+    def _print_incorrect_key_str(self, incorrect_key_dict, key_str, tool_class):
+        """Create and print an error message and log message when certain keys are
+        invalid or missing
+
+        :param missing_key_dict: Dictionary of parameter option keys which are invalid/missing
+        :param key_str: Error message string for this
+        :param tool_class:
+        :return:
+        """
+        print(
+            f"{tool_class.__name__} has {key_str} keys."
+        )
+        for param, incorrect_values in incorrect_key_dict.items():
+            print(f"The {key_str} keys for '{param}' are:")
+            print(*incorrect_values, sep=", ")
+        logger.error(f"ERROR: {key_str} keys inside {tool_class.__name__}")
+        raise Exception(f"Please edit {tool_class.__name__}")
 
     def _check_dtype(self, param_info_dict, tool_class):
         """
