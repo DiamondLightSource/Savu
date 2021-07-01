@@ -30,28 +30,28 @@ Parameter definitions
             default: exchange/data
         
         image_key_path:
-            visibility: advanced
-            dtype: "[None,h5path]"
+            visibility: hidden
+            dtype: None
             description: Not required.
             default: None
         
         dark:
-            visibility: intermediate
-            dtype: "list[[h5path, None], float]"
-            description: Dark data path and scale
-            default: "['exchange/data_dark', 1]"
+            visibility: basic
+            dtype: "list[h5path, float]"
+            description: Hdf path to the dark-field data and scale.
+            default: "['exchange/data_dark', 1.0]"
         
         flat:
-            visibility: intermediate
-            dtype: "list[[h5path, None], float]"
-            description: Flat data path and scale value.
-            default: "['exchange/data_white', 1]"
+            visibility: basic
+            dtype: "list[h5path, float]"
+            description: Hdf path to the flat-field data and scale.
+            default: "['exchange/data_white', 1.0]"
         
         angles:
-            visibility: hidden
-            dtype: list
-            description: Angles list
-            default: "[1, 2, 3]"
+            visibility: basic
+            dtype: h5path
+            description: Hdf path to the angle data.
+            default: exchange/theta
         
         3d_to_4d:
             visibility: intermediate
@@ -63,12 +63,6 @@ Parameter definitions
             visibility: intermediate
             dtype: "[list[int], None]"
             description: List of batch numbers of flats to ignore (starting at 1). Useful for excluding comprimised flats in combined data sets containing multiple batches of interspaced flats. The batch indexing begins at 1.
-            default: None
-        
-        logfile:
-            visibility: intermediate
-            dtype: "[None,filepath]"
-            description: Path to the log file.
             default: None
         
 Key

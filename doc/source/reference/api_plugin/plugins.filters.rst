@@ -19,7 +19,6 @@ Submodules
 
    plugins.filters.band_pass
    plugins.filters.base_filter
-   plugins.filters.dials_find_spots
    plugins.filters.find_peaks
    plugins.filters.fresnel_filter
    plugins.filters.hilbert_filter
