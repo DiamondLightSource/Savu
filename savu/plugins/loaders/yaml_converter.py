@@ -212,7 +212,6 @@ class YamlConverter(BaseLoader):
                         value = eval(value, globals(), locals())
                         value = self._convert_bytes(value)
                     except:
-                        value = eval(value, globals(), locals())
                         raise Exception(msg)
         return value
 

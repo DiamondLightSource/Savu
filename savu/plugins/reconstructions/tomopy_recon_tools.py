@@ -9,7 +9,7 @@ required for the chosen algorithm will be ignored.
     def define_parameters(self):
         """
         algorithm:
-            visibility: intermediate
+            visibility: basic
             dtype: str
             description: "The reconstruction algorithm (art|bart|fbp|gridrec|
               mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad|sirt)."
@@ -32,14 +32,16 @@ required for the chosen algorithm will be ignored.
               ospml_hybrid|ospml_quad|pml_hybrid|pml_quad."
             default: 0.0
             dependencies:
-                algortihm: [ospml_hybrid, ospml_quad, pml_hybrid, pml_quad]
+                algorithm: [ospml_hybrid, ospml_quad, pml_hybrid, pml_quad]
 
         n_iterations:
-            visibility: intermediate
+            visibility: basic
             dtype: int
-            description: "Number of iterations - only valid for iterative
-              algorithms."
+            description: Number of iterations.
             default: 1
+            dependencies:
+                algorithm: [art, bart, mlem, osem, ospml_hybrid,
+                            ospml_quad, pml_hybrid, pml_quad, sirt]
 
         outer_pad:
              visibility: intermediate

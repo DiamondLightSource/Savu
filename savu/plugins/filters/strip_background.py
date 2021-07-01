@@ -47,9 +47,8 @@ class StripBackground(BaseFilter, CpuPlugin):
 
         npts = len(data)
         x = np.arange(npts)  # set up some x indices
-        #print data.shape
         filtered = savgol_filter(data, 35, 5) # make the start a bit a bit smoother
-        # lets do it the crap, slow way first
+
         aved = np.zeros_like(filtered)
         bottomedgemain = x < w
         bottomedgerest = (x >= w) & (x < 2*w)
@@ -71,21 +70,19 @@ class StripBackground(BaseFilter, CpuPlugin):
 
         t2 = time.time()
         logging.debug("Strip iteration took: %s ms", str((t2-t1)*1e3))
-#         print (data - filtered).shape
         return [data - filtered, filtered]
 
     def setup(self):
         logging.debug('setting up the background subtraction')
         in_dataset, out_datasets = self.get_datasets()
-        #print in_dataset, out_datasets
 
         in_meta = in_dataset[0].meta_data
         in_dictionary = in_meta.get_dictionary()
-        #print in_dictionary
+
         stripped = out_datasets[0]
         stripped.create_dataset(in_dataset[0])
         stripped.meta_data.dict = deepcopy(in_dictionary)
-        #print stripped.meta_data.dict
+
         background = out_datasets[1]
         background.create_dataset(in_dataset[0])
         background.meta_data.dict = deepcopy(in_dictionary)
@@ -94,9 +91,6 @@ class StripBackground(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SPECTRUM', self.get_max_frames())
         out_pData[1].plugin_data_setup('SPECTRUM', self.get_max_frames())
-
-        logging.debug("****STRIP_BACKGROUND AXIS LABELS*** %s",
-                      stripped.get_axis_labels())
 
     def get_max_frames(self):
         return 'single'

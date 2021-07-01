@@ -16,9 +16,9 @@ inverse radon transform from scikit-image.
 
         output_size:
             visibility: intermediate
-            dtype: [None, int, list[int,int]]
+            dtype: [None, int, list[int,int], str]
             description: Number of rows and columns in the reconstruction.
-            default: None
+            default: 'auto'
 
         filter:
             visibility: intermediate
@@ -53,15 +53,6 @@ inverse radon transform from scikit-image.
              a filter backprojection using scikit.image.iradon as 'result'."
            default: None
 
-        projection_shifts:
-            visibility: intermediate
-            dtype: [list, None]
-            description: "1D array dtype = float Shift the projections
-              contained in radon_image (the sinogram) by this many pixels
-              before reconstructing the image. The ith value defines the
-              shift of the ith column of radon_image."
-            default: None
-
         clip:
             visibility: intermediate
             dtype: [list,None]
@@ -72,11 +63,15 @@ inverse radon transform from scikit-image.
 
         relaxation:
             visibility: advanced
-            dtype: [float,None]
+            dtype: float
             description: Float. Relaxation parameter for the update step. A
-              higher value can improve the convergence rate, but one runs the risk
-              of instabilities. Values close to or higher than 1 are not recommended.
-            default: None
+              higher value can improve the convergence rate, but one runs the 
+              risk of instabilities. Values close to or higher than 1 are not
+              recommended.
+            default: 0.15
+
+        vol_shape:
+             visibility: hidden            
 
         """
 
