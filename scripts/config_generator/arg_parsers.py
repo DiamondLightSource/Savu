@@ -156,6 +156,8 @@ def _mod_arg_parser(args=None, doc=True):
     parser.add_argument("param", help=param_str)
     val_str = "The plugin parameter value."
     parser.add_argument("value", nargs='*', help=val_str)
+    parser.add_argument("-d", "--default", action="store_true", default=False,
+                        help="Revert to default value.")
     return __arg_parser(parser, args, 'mod', doc)
 
 

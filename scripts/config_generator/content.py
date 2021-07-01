@@ -305,7 +305,7 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
 
-    def modify(self, pos_str, param_name, value, ref=False, dim=False):
+    def modify(self, pos_str, param_name, value, default, ref=False, dim=False):
         """Modify the plugin at pos_str and the parameter at param_name
         The new value will be set if it is valid.
 
@@ -324,9 +324,15 @@ class Content(object):
         parameters = plugin_entry["data"]
         params = plugin_entry["param"]
         param_name, value = self.setup_modify(params, param_name, value, ref)
-        valid_modification = self.modify_main(
-            param_name, value, tools, parameters, dim
-        )
+        default_str = ["-d", "--default"]
+        if default or value in default_str:
+            value = tools.get_default_value(param_name)
+            self._change_value(param_name, value, tools, parameters)
+            valid_modification = True
+        else:
+            valid_modification = self.modify_main(
+                param_name, value, tools, parameters, dim
+            )
         return valid_modification
 
     def setup_modify(self, params, param_name, value, ref):
@@ -386,19 +392,28 @@ class Content(object):
                 param_name, value_check, current_parameter_details
             )
             if parameter_valid:
-                # If default choice is requested, then find the default value and set it
-                value = tools.check_for_default(param_name, value)
-                # Save the value
-                parameters[param_name] = value
-                tools.warn_dependents(param_name, value)
-                # Update the list of parameters to hide those dependent on others
-                tools.check_dependencies(parameters)
+                self._change_value(param_name, value, tools, parameters)
             else:
                 print(error_str)
                 print("ERROR: This value has not been saved.")
         else:
             print("Not in parameter keys.")
         return parameter_valid
+
+    def _change_value(self, param_name, value, tools, parameters):
+        """ Change the parameter "param_name" value inside the parrameters list
+        Update feedback messages for various dependant parameters
+
+        :param param_name: The parameter position/name
+        :param value: The new parameter value
+        :param tools: The plugin tools
+        :param parameters: The plugin parameters
+        """
+        # Save the value
+        parameters[param_name] = value
+        tools.warn_dependents(param_name, value)
+        # Update the list of parameters to hide those dependent on others
+        tools.check_dependencies(parameters)
 
     def check_required_args(self, value, required):
         """Check required argument 'value' is present

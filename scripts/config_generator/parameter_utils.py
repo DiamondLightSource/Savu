@@ -524,14 +524,11 @@ def is_multi_param(param_name, value):
 
 
 def _check_default(value, default_value):
-    """Return true if the new value is either a match for the default
-    parameter value or the string 'default'
+    """Return true if the new value is a match for the default
+    parameter value
     """
     default_present = False
-    if (
-        str(default_value) == str(value)
-        or value == "default"
-    ):
+    if str(default_value) == str(value):
         default_present = True
     return default_present
 
