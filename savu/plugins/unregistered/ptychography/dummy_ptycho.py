@@ -26,7 +26,7 @@ from savu.plugins.ptychography.base_ptycho import BasePtycho
 import numpy as np
 
 
-@register_plugin
+#@register_plugin
 class DummyPtycho(BasePtycho):
     def __init__(self):
         super(DummyPtycho, self).__init__("DummyPtycho")
