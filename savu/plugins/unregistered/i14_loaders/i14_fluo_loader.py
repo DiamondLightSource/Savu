@@ -27,7 +27,7 @@ from savu.plugins.utils import register_plugin
 import logging
 import h5py as h5
 
-@register_plugin
+#@register_plugin
 class I14FluoLoader(BaseLoader):
     def __init__(self, name='I14FluoLoader'):
         super(I14FluoLoader, self).__init__(name)
