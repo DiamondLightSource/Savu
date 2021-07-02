@@ -305,13 +305,15 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
 
-    def modify(self, pos_str, param_name, value, default, ref=False, dim=False):
+    def modify(self, pos_str, param_name, value, default=False, ref=False,
+               dim=False):
         """Modify the plugin at pos_str and the parameter at param_name
         The new value will be set if it is valid.
 
         :param pos_str: The plugin position
         :param param_name: The parameter position/name
         :param value: The new parameter value
+        :param default: True if value should be reverted to the default
         :param ref: boolean Refresh the plugin
         :param dim: The dimension to be modified
 
