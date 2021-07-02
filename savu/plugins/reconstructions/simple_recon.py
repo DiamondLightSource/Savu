@@ -31,9 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class SimpleRecon(BaseRecon, CpuPlugin):
-    """
-    A Plugin to apply a simple reconstruction with no dependancies
-    """
 
     def __init__(self):
         super(SimpleRecon, self).__init__("SimpleRecon")
