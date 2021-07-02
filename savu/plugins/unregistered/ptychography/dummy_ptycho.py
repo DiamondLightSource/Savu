@@ -13,29 +13,28 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: dummy_ptycho
    :platform: Unix
-   :synopsis: testing the nx_xrd loader
+   :synopsis: A plugin to fit peaks
 
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
 """
-import unittest
-from savu.test import test_utils as tu
-from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
+
+from savu.plugins.utils import register_plugin
+from savu.plugins.ptychography.base_ptycho import BasePtycho
+import numpy as np
 
 
-class I22TomoTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = 'i22_test_data.nxs'
-    experiment = None
+#@register_plugin
+class DummyPtycho(BasePtycho):
+    def __init__(self):
+        super(DummyPtycho, self).__init__("DummyPtycho")
 
-    def test_i22_mm(self):
-        process_list = 'loaders/i22_Savu_process.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
-        run_protected_plugin_runner(options)
-        tu.cleanup(options)
-        
-if __name__ == "__main__":
-    unittest.main()
+    def process_frames(self, data):
+        data = data[0]
+        probe = data[0]
+        #print "probe is "+str(probe.shape)
+        object_transmission = np.random.random(self.obj_shape).squeeze()
+        positions = self.get_positions()
+        return [probe, object_transmission, positions]#] add fourier error, realspace error

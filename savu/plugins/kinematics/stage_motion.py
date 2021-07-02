@@ -39,20 +39,6 @@ from pmacparser.pmac_parser import PMACParser
 
 @register_plugin
 class StageMotion(Plugin, CpuPlugin):
-    """
-    A Plugin to calculate stage motion from motion positions.
-    :param in_datasets: Create a list of the \
-        dataset(s). Default: ["pmean"].
-    :param out_datasets: Create a list of the \
-        dataset(s). Default: ["qmean"].
-    :param use_min_max: Also use the min and max datasets \
-        including all combinations of min, mean and max. Default: False.
-    :param extra_in_datasets: The extra datasets \
-        to use as input for min and max. Default: ["pmin", "pmax"].
-    :param extra_out_datasets: The extra datasets \
-        to use as output for min and max. Default: ["qmin", "qmax"].
-    """
-
     NUM_OUTPUT_Q_VARS = 9
     MEAN_INDEX = 0
     NUM_DATASETS = 1

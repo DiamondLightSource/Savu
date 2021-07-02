@@ -28,7 +28,7 @@ import logging
 import numpy as np
 
 
-@register_plugin
+#@register_plugin
 class I22TomoLoader(BaseLoader):
     def __init__(self, name='I22TomoLoader'):
         super(I22TomoLoader, self).__init__(name)

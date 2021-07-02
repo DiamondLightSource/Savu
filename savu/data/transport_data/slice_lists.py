@@ -407,42 +407,14 @@ class GlobalData(SliceLists):
         sdir = self.data.get_slice_dimensions()
         return prod, sdir[nDims-1]
 
-    def _get_padded_shape(self, mft, orig_shape):
+    def _get_padded_shape(self, orig_shape):
         """
         Get the (fake) shape of the data if it was exactly divisible by mft.
         """
-        remaining = self.pData.meta_data.get('total_frames')%mft
-        if not remaining:
-            return [0]*len(orig_shape)
-        trans_shape = self._get_sdim_shape(orig_shape, mft)
-        final_trans_shape = self._get_sdim_shape(orig_shape, remaining)
-        diff = np.array(trans_shape) - np.array(final_trans_shape)
-        return list(diff)
-
-    def _get_sdim_shape(self, orig_shape, nframes):
-        """
-        Get the shape of the slice dimensions given a fixed number of frames
-        """
-        sdims = self.data.get_slice_dimensions()
-        shape = list(orig_shape)
-        sdims_shape = [orig_shape[i] for i in sdims]
-        for s in sdims:
-            shape[s] = 1
-
-        i = 0
-        while(nframes-1 > 0 and i < len(sdims)):
-            dim = sdims[i]
-            shape[dim] += 1
-            nframes -= np.prod(sdims_shape[0:i-1])
-            if shape[dim] == sdims_shape[i]:
-                i += 1
-                
-        # case where mft > shape[dim] e.g. integer nframes and previewing
-        if nframes-1 > 0:
-            shape[sdims[0]] += int(nframes)-1
-            self.pData.meta_data.set('transfer_shape', shape)
-        
-        return shape
+        trans_shape = self.pData.meta_data.get("transfer_shape")
+        mod = [orig_shape[i] % trans_shape[i] for i in range(len(orig_shape))]
+        diff = [trans_shape[i] - orig_shape[i] for i in range(len(orig_shape))]
+        return list(max(diff, mod))
 
     def _get_global_single_slice_list(self, shape):
         slice_dirs = self.data.get_slice_dimensions()
@@ -476,7 +448,7 @@ class GlobalData(SliceLists):
 
     def _get_slice_list(self, shape, current_sl=None, pad=False):
         mft = self.pData._get_max_frames_transfer()
-        pad = self._get_padded_shape(mft, shape) if pad else False
+        pad = self._get_padded_shape(shape) if pad else False
         transfer_ssl = self._get_global_single_slice_list(shape)
 
         if transfer_ssl is None:

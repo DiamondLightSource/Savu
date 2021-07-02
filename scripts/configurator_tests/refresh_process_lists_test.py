@@ -38,6 +38,7 @@ class RefreshProcessListsTest(unittest.TestCase):
             content.refresh(pos_str)
         # save
         content.save(content.filename)
+        print("content has been saved")
 
 
 def generate_test(path):
@@ -45,6 +46,12 @@ def generate_test(path):
         self._refresh_process_file(path)
     return test
 
+
+def _under_revision():
+    files = tplu.get_test_process_list(
+        path + 'test_data/test_process_lists/under_revision')
+    return ['under_revision/' + f for f in files]
+    
 
 if __name__ == "__main__":
     cu.populate_plugins()
@@ -60,8 +67,7 @@ if __name__ == "__main__":
     test_path = path + '/test_data/test_process_lists'
     test_path2 = path + '/test_data/process_lists'
 
-    exclude = ['under_revision/diffraction_absorption_correction_test.nxs',\
-    'multimodal/simple_fit_test_XRF.nxs']
+    exclude = ['multimodal/simple_fit_test_XRF.nxs'] + _under_revision()
 
     for f in [n for n in nxs_used if n not in exclude]:
         print("Refreshing process list", f, "...")

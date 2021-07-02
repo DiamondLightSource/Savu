@@ -37,7 +37,7 @@ class SimpleFit(BaseFitter):
     def pre_process(self):
         in_meta_data = self.get_in_meta_data()[0]
         out_meta_data = self.get_out_meta_data()[0]
-        in_meta_data.set("PeakIndex", self.parameters["PeakIndex"])        
+        in_meta_data.set("PeakIndex", self.parameters["PeakIndex"])
         self.axis = in_meta_data.get("Q")
         self.peakindex = in_meta_data.get("PeakIndex")
         self.positions = self.axis[self.peakindex]
@@ -85,6 +85,10 @@ class SimpleFit(BaseFitter):
         fitHeights = out_datasets[1]
         fitWidths = out_datasets[2]
         peakindex = self.parameters['PeakIndex']
+
+        if len(peakindex) == 0:
+            raise Exception("Please specify the PeakIndex")
+        
         new_shape = shape[:-1] + (len(peakindex),)
 
         fitAreas.create_dataset(patterns={in_dataset[0]: pattern_list},
