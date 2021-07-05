@@ -10,6 +10,7 @@
 import unittest
 from mock import patch
 from io import StringIO
+import subprocess
 
 from scripts.config_generator import savu_config
 
@@ -70,8 +71,15 @@ class SavuConfigTest(unittest.TestCase):
                       'exit',
                       'y']
         output_checks = ['Exception']
-        sctu.savu_config_runner(input_list, output_checks)
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
 
+    def testrunconfig(self):
+        result = subprocess.run(['savu_config', '-h'], stdout=subprocess.PIPE)
+        str_stdout=str(result.stdout)
+        if "Create" not in str_stdout:
+            # Savu_config has failed to load
+            assert False
 
 
 if __name__ == "__main__":

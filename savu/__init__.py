@@ -31,20 +31,31 @@ import sys
 from . import test
 from unittest import defaultTestLoader, TestLoader, TextTestRunner
 import subprocess
+import pytest
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 os.environ['savu_mode'] = 'hdf5'
+
+def run_refresh_lists():
+    print("This function will refresh all process lists")
+    result = subprocess.run(["python", savuPath+'/../scripts/configurator_tests/refresh_process_lists_test.py'])
+    if (result.returncode == 1):
+        print("Tests FAILED, please see the report")
+        exit(1)
+    else:
+        print("Tests PASSED")
+        exit(0)
 
 def run_full_tests():
 
     print("Tests may take some time to complete...")
     print("The tests may raise errors, please don't worry about these as "
           "they may be raised deliberately.")
-
     path = os.path.split(test.travis.__file__)[0]
+    result2 = subprocess.run(["pytest", path+'/../../../scripts/configurator_tests/savu_config_test.py'])
     result = subprocess.run(["python", path+'/tests.py'])
-    if (result.returncode == 1):
+    if ((result.returncode == 1) or (result2.returncode == 1)):
         print("Tests FAILED, please see the report")
         exit(1)
     else:
