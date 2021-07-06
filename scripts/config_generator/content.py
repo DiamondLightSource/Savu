@@ -448,7 +448,7 @@ class Content(object):
                 )
         return False
 
-    def modify_dimensions(self, pos_str, dim):
+    def modify_dimensions(self, pos_str, dim, check="y"):
         """Modify the plugin preview value. Remove or add dimensions
         to the preview parameter until the provided dimension number
         is reached.
@@ -468,12 +468,6 @@ class Content(object):
                   "values of the type list")
             return False
         pu.check_valid_dimension(dim, [])
-        check_str = (
-            f"Are you sure you want to alter the number of "
-            f"dimensions to {dim}? [y/N]"
-        )
-        check = input(check_str) if current_prev_list else "y"
-
         if check.lower() == "y":
             while len(current_prev_list) > dim:
                 current_prev_list.pop()
