@@ -13,5 +13,5 @@ sphinx:
 # formats:
 #   - pdf
 
-conda:
-  environment: install/savu_hpc/savu_installer/environment.yml
+# conda:
+#  environment: install/savu_hpc/savu_installer/environment.yml
