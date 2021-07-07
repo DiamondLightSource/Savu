@@ -14,20 +14,22 @@
 import os
 import sys
 
-autodoc_mock_imports = [
-    "numpy",
-    "mpi4py",
-    "astra",
-    "scipy",
-    "h5py",
-    "pyfftw",
-    "PyQt4",
-    "yamllint",
-    "pytest"
-#    "plugins",
-#    "savu",
-#    "setup"
-]
+from unittest import mock
+
+# Mock imports instead of full environment in readthedocs
+MOCK_MODULES = ["numpy",
+                "mpi4py",
+                "astra",
+                "scipy",
+                "h5py",
+                "pyfftw",
+                "PyQt4",
+                "yamllint",
+                "pytest"]
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
