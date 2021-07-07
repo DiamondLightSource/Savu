@@ -28,7 +28,7 @@ from savu.plugins.utils import register_plugin
 import logging
 
 
-@register_plugin
+#@register_plugin
 class NxptychoLoader(BaseMultiModalLoader):
     def __init__(self, name='NxptychoLoader'):
         super(NxptychoLoader, self).__init__(name)

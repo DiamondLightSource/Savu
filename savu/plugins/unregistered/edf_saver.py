@@ -31,7 +31,7 @@ from fabio.edfimage import EdfImage
 import collections
 
 
-@register_plugin
+#@register_plugin
 class EdfSaver(BaseSaver, CpuPlugin):
     def __init__(self, name='EdfSaver'):
         super(EdfSaver, self).__init__(name)

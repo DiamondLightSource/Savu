@@ -27,7 +27,7 @@ from savu.plugins.utils import register_plugin
 import logging
 import h5py
 
-@register_plugin
+#@register_plugin
 class TxmLoader(BaseLoader):
     def __init__(self, name='TxmLoader'):
         super(TxmLoader, self).__init__(name)
