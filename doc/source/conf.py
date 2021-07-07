@@ -23,6 +23,7 @@ autodoc_mock_imports = [
     "pyfftw",
     "PyQt4",
     "yamllint",
+    "pytest"
 #    "plugins",
 #    "savu",
 #    "setup"
@@ -330,3 +331,4 @@ def setup(app):
     # Style for plugin template pages
     app.add_css_file("css/plugin_template.css")
     app.add_css_file("css/plugin_template_download.css")
+
