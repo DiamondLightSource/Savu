@@ -32,8 +32,7 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class VisualHullsRecon(BaseRecon, CpuPlugin):
-    """
-    """
+
     def __init__(self):
         logging.debug("initialising Scikitimage Filter Back Projection")
         logging.debug("Calling super to make sure that all superclasses are " +
@@ -78,13 +77,3 @@ class VisualHullsRecon(BaseRecon, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-        """
-        A Plugin to reconstruct an image by filter back projection
-        using the inverse radon transform from scikit-image.
-
-        :param threshold: threshold to binarize the input sinogram. Default: 0.5.
-
-        :~param outer_pad: Not required. Default: False.
-        :~param centre_pad: Not required. Default: False.
-        """
