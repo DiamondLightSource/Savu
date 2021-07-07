@@ -1,7 +1,7 @@
-/* Change restricted content width */
+/* Change restricted content width
 .wy-nav-content {
     max-width: none;
-}
+}*/
 /* Colour wy menu headings */
 .wy-menu-vertical header, .wy-menu-vertical p.caption{
     color: #3a7ca8;

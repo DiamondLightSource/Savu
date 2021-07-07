@@ -145,7 +145,10 @@ def _expand(content, args):
                                 args.plugin_pos)
     if content.expand_dim is not None:
         if content.expand_dim == "all" and args.dim is not None:
-            is_modified = content.modify_dimensions(args.plugin_pos, args.dim)
+            check_str = f"Are you sure you want to alter the number of "\
+                        f"dimensions to {args.dim}? [y/N]"
+            is_modified = content.modify_dimensions(args.plugin_pos, args.dim,
+                                                    check=input(check_str))
             if is_modified:
                 _disp(content, f"{args.plugin_pos}.preview")
         else:

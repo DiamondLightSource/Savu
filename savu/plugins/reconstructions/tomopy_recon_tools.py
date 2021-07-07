@@ -22,7 +22,7 @@ required for the chosen algorithm will be ignored.
               hann|hamming|ramlak|parzen|butterworth)."
             default: ramlak
             options: [None,shepp,cosine,hann,hamming,ramlak,parzen,butterworth]
-            dependencies:
+            dependency:
                 algorithm: [fbp, gridrec]
 
         reg_par:
@@ -31,7 +31,7 @@ required for the chosen algorithm will be ignored.
             description: "Regularization parameter for smoothing, valid for
               ospml_hybrid|ospml_quad|pml_hybrid|pml_quad."
             default: 0.0
-            dependencies:
+            dependency:
                 algorithm: [ospml_hybrid, ospml_quad, pml_hybrid, pml_quad]
 
         n_iterations:
@@ -39,7 +39,7 @@ required for the chosen algorithm will be ignored.
             dtype: int
             description: Number of iterations.
             default: 1
-            dependencies:
+            dependency:
                 algorithm: [art, bart, mlem, osem, ospml_hybrid,
                             ospml_quad, pml_hybrid, pml_quad, sirt]
 
