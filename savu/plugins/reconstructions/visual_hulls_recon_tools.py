@@ -7,23 +7,13 @@ using the inverse radon transform from scikit-image.
     def define_parameters(self):
         """
         threshold:
-            visibility: advanced
+            visibility: basic
             dtype: float
             description: Threshold to binarize the input sinogram.
             default: 0.5
 
-        outer_pad:
+        init_vol:
             visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
-
-        centre_pad:
-            visibility: hidden
-            dtype: [bool,int,float]
-            description: Not required.
-            default: False
-
         """
 
     def citation(self):

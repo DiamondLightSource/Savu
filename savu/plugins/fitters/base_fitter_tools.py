@@ -5,20 +5,12 @@ class BaseFitterTools(PluginTools):
     """
     def define_parameters(self):
         """
-        in_datasets:
-            visibility: datasets
-            dtype: [list[],list[str]]
-            description: Create a list of the dataset(s)
-            default: []
 
         out_datasets:
-            visibility: datasets
-            dtype: [list[],list[str]]
-            description: Create a list of the dataset(s)
             default: ["FitWeights", "FitWidths", "FitAreas", "residuals"]
 
         width_guess:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: An initial guess at the width.
             default: 0.02
@@ -30,7 +22,7 @@ class BaseFitterTools(PluginTools):
             default: 'gaussian'
 
         PeakIndex:
-           visibility: intermediate
+           visibility: basic
            dtype: [list[],list]
            description: The peak index.
            default: []
