@@ -17,23 +17,33 @@ import sys
 from unittest import mock
 
 # Mock imports instead of full environment in readthedocs
-MOCK_MODULES = ["numpy",
+MOCK_MODULES = ["pytest",
+                "numpy",
                 "mpi4py",
                 "astra",
-                "scipy",
                 "h5py",
-                "pyfftw",
-                "PyQt4",
-                "yamllint",
-                "pytest"]
+                "pandas",]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
+autodoc_mock_imports = [
+    "ccpi",
+    "larix",
+    "fabio",
+    "peakutils",
+    "skimage",
+    "scipy",
+    "tomobar",
+    "pynvml",
+    "tomophantom",
+]
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../'))
+
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../savu'))
 
 import savu
@@ -91,7 +101,7 @@ extensions = [
     # Add links to highlighted source code
     "sphinx.ext.viewcode",
     # Documents command line tools with argparser library
-#    "sphinxarg.ext",
+    "sphinxarg.ext",
 ]
 autosummary_generate = True
 
@@ -333,4 +343,5 @@ def setup(app):
     # Style for plugin template pages
     app.add_css_file("css/plugin_template.css")
     app.add_css_file("css/plugin_template_download.css")
+
 
