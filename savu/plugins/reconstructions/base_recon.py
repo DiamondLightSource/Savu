@@ -20,6 +20,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+import ast
 import math
 import copy
 import numpy as np
@@ -151,13 +152,15 @@ class BaseRecon(Plugin):
         centre_pad = self.parameters['centre_pad'] if 'centre_pad' in \
             self.parameters else False
         if not centre_pad:
-            def cor_func(cor): return cor
+            def cor_func(cor):
+                return cor
             if self.parameters['log']:
                 sino_func = self.__make_lambda()
             else:
                 sino_func = self.__make_lambda(log=False)
         else:
-            def cor_func(cor): return cor + self.sino_pad
+            def cor_func(cor):
+                return cor + self.sino_pad
             if self.parameters['log']:
                 sino_func = self.__make_lambda(pad=pad_shape)
             else:
@@ -170,7 +173,7 @@ class BaseRecon(Plugin):
             pad_tuples, mode = self.__get_pad_values(pad)
             log_func = log_func.replace(
                     'sino', 'np.pad(sino, %s, "%s")' % (pad_tuples, mode))
-        return eval("lambda sino: " + log_func)
+        return ast.literal.eval("lambda sino: " + log_func)
 
     def __get_pad_values(self, pad_shape):
         mode = 'edge'

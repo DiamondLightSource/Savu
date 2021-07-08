@@ -413,10 +413,10 @@ class GlobalData(SliceLists):
         """
         trans_shape = self.pData.meta_data.get("transfer_shape")
         pad = []
-        for i in range(len(orig_shape)):
-            mod = orig_shape[i] % trans_shape[i]
+        for i, shape in enumerate(orig_shape):
+            mod = shape % trans_shape[i]
             mod = (trans_shape[i] - mod) % trans_shape[i]
-            diff = trans_shape[i] - orig_shape[i]
+            diff = trans_shape[i] - shape
             pad.append(max(diff, mod))
         return pad
 
