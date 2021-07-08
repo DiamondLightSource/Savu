@@ -217,7 +217,6 @@ class NxtomoLoader(BaseLoader):
             angles = 'entry1/tomo_entry/data/rotation_angle'
 
         nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
-
         if nxs_angles is None:
             try:
                 angles = eval(angles)
@@ -249,13 +248,13 @@ class NxtomoLoader(BaseLoader):
         return h5py.File(data, 'r')
 
     def __check_angles(self, data_obj, n_angles):
-        data_angles = data_obj.data.get_shape()[0]
+        rot_dim = data_obj.get_data_dimension_by_axis_label("rotation_angle")
+        data_angles = data_obj.data.get_shape()[rot_dim]
         if data_angles != n_angles:
-            # FIXME problem with this
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
-                    full_rotations = n_angles / data_angles
+                    full_rotations = n_angles // data_angles
                     cleaned_size = full_rotations * data_angles
                     if cleaned_size != n_angles:
                         rot_angles = rot_angles[0:cleaned_size]
