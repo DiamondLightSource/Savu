@@ -20,7 +20,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
-import ast
+
 import math
 import copy
 import numpy as np
@@ -173,7 +173,7 @@ class BaseRecon(Plugin):
             pad_tuples, mode = self.__get_pad_values(pad)
             log_func = log_func.replace(
                     'sino', 'np.pad(sino, %s, "%s")' % (pad_tuples, mode))
-        return ast.literal.eval("lambda sino: " + log_func)
+        return eval("lambda sino: " + log_func)
 
     def __get_pad_values(self, pad_shape):
         mode = 'edge'
