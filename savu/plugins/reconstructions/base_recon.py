@@ -187,6 +187,7 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+        angles = np.squeeze(angles)
 
         self.frame_angles = angles
 
