@@ -46,8 +46,6 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.dark = inData.data.dark_mean()
         logging.debug('getting the flat data')
         self.flat = inData.data.flat_mean()
-        #np.save('avflats.npy', self.flat)
-        # print(np.shape(self.flat))
 
         pData_shape = in_pData.get_shape()
         tile = [1] * len(pData_shape)
