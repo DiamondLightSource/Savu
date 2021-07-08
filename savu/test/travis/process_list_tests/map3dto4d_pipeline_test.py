@@ -40,6 +40,12 @@ class Map3dto4dPipelineTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)               
 
+    def test_process_preview_2d_angles(self):
+        process_list = 'map3dto4d_pipeline_preview_test_2d_angles.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)  
+
 #    def test_process(self):
 #        data_file = tu.get_test_data_path('/i12_test_data/i12_test_data.nxs')
 #        process_file = tu.get_test_process_path('i12_tomo_pipeline_test.nxs')

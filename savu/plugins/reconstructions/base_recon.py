@@ -20,6 +20,7 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import math
 import copy
 import numpy as np
@@ -151,13 +152,15 @@ class BaseRecon(Plugin):
         centre_pad = self.parameters['centre_pad'] if 'centre_pad' in \
             self.parameters else False
         if not centre_pad:
-            def cor_func(cor): return cor
+            def cor_func(cor):
+                return cor
             if self.parameters['log']:
                 sino_func = self.__make_lambda()
             else:
                 sino_func = self.__make_lambda(log=False)
         else:
-            def cor_func(cor): return cor + self.sino_pad
+            def cor_func(cor):
+                return cor + self.sino_pad
             if self.parameters['log']:
                 sino_func = self.__make_lambda(pad=pad_shape)
             else:
@@ -187,6 +190,7 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+        angles = np.squeeze(angles)
 
         self.frame_angles = angles
 
