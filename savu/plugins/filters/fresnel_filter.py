@@ -25,8 +25,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-# import pyfftw.interfaces.scipy_fftpack as fft
-import numpy.fft as fft
+import pyfftw.interfaces.scipy_fftpack as fft
+
 
 
 @register_plugin
