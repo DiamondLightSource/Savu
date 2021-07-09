@@ -65,8 +65,8 @@ Parameter definitions
         
         ratio:
             visibility: intermediate
-            dtype: float
-            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
+            dtype: "[float, list[float, float]]"
+            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis. If a list of two floats is given, the second value is used to fill up the area outside the mask.
             default: "0.95"
         
         log_func:
