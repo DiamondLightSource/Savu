@@ -412,9 +412,13 @@ class GlobalData(SliceLists):
         Get the (fake) shape of the data if it was exactly divisible by mft.
         """
         trans_shape = self.pData.meta_data.get("transfer_shape")
-        mod = [orig_shape[i] % trans_shape[i] for i in range(len(orig_shape))]
-        diff = [trans_shape[i] - orig_shape[i] for i in range(len(orig_shape))]
-        return list(max(diff, mod))
+        pad = []
+        for i, shape in enumerate(orig_shape):
+            mod = shape % trans_shape[i]
+            mod = (trans_shape[i] - mod) % trans_shape[i]
+            diff = trans_shape[i] - shape
+            pad.append(max(diff, mod))
+        return pad
 
     def _get_global_single_slice_list(self, shape):
         slice_dirs = self.data.get_slice_dimensions()

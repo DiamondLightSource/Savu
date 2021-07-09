@@ -184,8 +184,9 @@ class YamlParameterTest(unittest.TestCase):
         with self.assertRaises(Exception):
             pdefs = self.initial_setup(self.test_parameter_missing)
 
-        self.assertTrue('doesn\'t contain all of the required keys'
-                        in str(printOutput.getvalue()))
+        output_str = str(printOutput.getvalue())
+        self.assertTrue("has missing required keys"
+                        in output_str)
 
     def test_parameter_blank(self):
         """
@@ -216,9 +217,9 @@ class YamlParameterTest(unittest.TestCase):
 
         with self.assertRaises(Exception):
             pdefs = self.initial_setup(self.test_parameter_mispelt)
-
-        self.assertTrue('doesn\'t contain all of the required keys'
-                        in str(printOutput.getvalue()))
+        output_str = str(printOutput.getvalue())
+        self.assertTrue("has unknown keys"
+                        in output_str)
 
     def test_parameter_indent(self):
         """
