@@ -4,7 +4,7 @@ Tomopy Recon
 Description
 --------------------------
 
-A wrapper to the tomopy reconstruction library. Extra keywords not required for the chosen algorithm will be ignored. 
+A wrapper to the tomopy reconstruction library. 
 
 Parameter definitions
 --------------------------
@@ -84,18 +84,19 @@ Parameter definitions
             default: fixed
         
         algorithm:
-            visibility: intermediate
+            visibility: basic
             dtype: str
-            description: The reconstruction algorithm (art|bart|fbp|gridrec| mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad|sirt).
+            description: The reconstruction algorithm
             default: gridrec
+            options: "['art', 'bart', 'fbp', 'gridrec', 'mlem', 'osem', 'ospml_hybrid', 'ospml_quat', 'pml_hybrid', 'pml_quad', 'sirt']"
         
         filter_name:
             visibility: intermediate
             dtype: "[None, str]"
-            description: Valid for fbp|gridrec, options - None|shepp|cosine| hann|hamming|ramlak|parzen|butterworth).
+            description: Name of the filter for analytic reconstruction
             default: ramlak
             options: "['None', 'shepp', 'cosine', 'hann', 'hamming', 'ramlak', 'parzen', 'butterworth']"
-            dependencies: 
+            dependency: 
                 algorithm: 
                     fbp
                     gridrec
@@ -103,20 +104,31 @@ Parameter definitions
         reg_par:
             visibility: intermediate
             dtype: float
-            description: Regularization parameter for smoothing, valid for ospml_hybrid|ospml_quad|pml_hybrid|pml_quad.
+            description: Regularization parameter for smoothing
             default: "0.0"
-            dependencies: 
-                algortihm: 
+            dependency: 
+                algorithm: 
                     ospml_hybrid
                     ospml_quad
                     pml_hybrid
                     pml_quad
         
         n_iterations:
-            visibility: intermediate
+            visibility: basic
             dtype: int
-            description: Number of iterations - only valid for iterative algorithms.
+            description: Number of iterations.
             default: "1"
+            dependency: 
+                algorithm: 
+                    art
+                    bart
+                    mlem
+                    osem
+                    ospml_hybrid
+                    ospml_quad
+                    pml_hybrid
+                    pml_quad
+                    sirt
         
         outer_pad:
             visibility: intermediate

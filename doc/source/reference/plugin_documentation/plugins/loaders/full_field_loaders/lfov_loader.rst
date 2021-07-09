@@ -17,35 +17,47 @@ Parameter definitions
             description: A slice list of required frames.
             default: "[]"
         
-        name:
-            visibility: basic
-            dtype: str
-            description: The name assigned to the dataset.
-            default: tomo
-        
         file_name:
-            visibility: basic
+            visibility: intermediate
             dtype: str
             description: The shared part of the name of each file (not including .nxs)
             default: projection
         
-        data_path:
-            visibility: basic
-            dtype: h5path
-            description: Path to the data inside the file.
-            default: entry/data/data
-        
         dark:
-            visibility: intermediate
+            visibility: basic
             dtype: "[list[dir, h5path, float], list[None, None, float]]"
             description: Optional path to the dark field data file, nxs path and scale value.
             default: "['None', 'None', 1]"
         
         flat:
-            visibility: intermediate
+            visibility: basic
             dtype: "[list[dir, h5path, float], list[None, None, float]]"
             description: Optional path to the flat field data file, nxs path and scale value.
             default: "['None', 'None', 1]"
+        
+        range:
+            visibility: hidden
+            dtype: "[None,str]"
+            description: No need
+            default: None
+        
+        angles:
+            visibility: basic
+            dtype: "[str, int, None]"
+            description: If this is 4D data stored in 3D then pass an integer value equivalent to the number of projections per 180 degree scan. If the angles parameter is set to None, then values from default dataset used.
+            default: None
+        
+        name:
+            visibility: hidden
+            dtype: str
+            description: The name assigned to the dataset.
+            default: tomo
+        
+        data_path:
+            visibility: intermediate
+            dtype: h5path
+            description: Path to the data inside the file.
+            default: entry/data/data
         
         stack_or_cat:
             visibility: intermediate
@@ -65,26 +77,14 @@ Parameter definitions
             description: "New axis label, if required, in the form 'name.units'."
             default: scan.number
         
-        range:
-            visibility: hidden
-            dtype: "[None,str]"
-            description: No need
-            default: None
-        
-        angles:
-            visibility: intermediate
-            dtype: "[str, int, None]"
-            description: If this is 4D data stored in 3D then pass an integer value equivalent to the number of projections per 180 degree scan. If the angles parameter is set to None, then values from default dataset used.
-            default: None
-        
         order:
-            visibility: intermediate
+            visibility: basic
             dtype: "list[int]"
             description: Order of datasets used for stitching.
             default: "[1, 0]"
         
         row_offset:
-            visibility: intermediate
+            visibility: basic
             dtype: "list[int]"
             description: Offsets of row indices between datasets.
             default: "[0, -1]"

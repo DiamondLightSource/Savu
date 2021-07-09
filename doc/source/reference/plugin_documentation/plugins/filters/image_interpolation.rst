@@ -36,7 +36,7 @@ Parameter definitions
         interp:
             visibility: basic
             dtype: str
-            description: nearest lanczos bilinear bicubic cubic.
+            description: The method of interpolation.
             options: "['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']"
             default: bicubic
         

@@ -35,7 +35,7 @@ Parameter definitions
             example: It could be a fixed value, a dictionary of (sinogram number, value) pairs for a polynomial fit of degree 1, or a dataset name.
         
         init_vol:
-            visibility: intermediate
+            visibility: hidden
             dtype: "[None, str]"
             description: Dataset to use as volume initialiser (does not currently work with preview)
             default: None
@@ -84,22 +84,10 @@ Parameter definitions
             default: fixed
         
         threshold:
-            visibility: advanced
+            visibility: basic
             dtype: float
             description: Threshold to binarize the input sinogram.
             default: "0.5"
-        
-        outer_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
-        
-        centre_pad:
-            visibility: hidden
-            dtype: "[bool,int,float]"
-            description: Not required.
-            default: "False"
         
 Key
 ^^^^^^^^^^

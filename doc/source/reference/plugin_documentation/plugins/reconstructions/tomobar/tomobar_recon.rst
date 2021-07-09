@@ -83,12 +83,6 @@ Parameter definitions
                 verbose: When fixed, you get the dimension of the horizontal detector or you can specify any reconstruction size you like with an integer.
             default: fixed
         
-        output_size:
-            visibility: advanced
-            dtype: "[None, int, list[int,int],str]"
-            description: Number of rows and columns in the reconstruction.
-            default: auto
-        
         data_fidelity:
             visibility: advanced
             dtype: str
