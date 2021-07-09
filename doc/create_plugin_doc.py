@@ -611,6 +611,7 @@ if __name__ == "__main__":
 
         for root, dirs, files in os.walk(base_path, topdown=True):
             tools_files = [fi for fi in files if "tools" in fi]
+            template_files = [fi for fi in files if "template" in fi]
             base_files = [fi for fi in files if fi.startswith("base")]
             driver_files = [fi for fi in files if "driver" in fi]
             exclude_files = [
@@ -618,6 +619,7 @@ if __name__ == "__main__":
                 tools_files,
                 base_files,
                 driver_files,
+                template_files
             ]
             dirs[:] = [d for d in dirs if d not in exclude_dir]
             files[:] = [fi for fi in files if fi not in chain(*exclude_files)]

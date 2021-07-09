@@ -170,8 +170,6 @@ Loaders
 .. toctree::
    :maxdepth: 1 
 
-   Hdf5 Template Loader <api_plugin/plugins.loaders.hdf5_template_loader>
-   Image Template Loader <api_plugin/plugins.loaders.image_template_loader>
    Multi Savu Loader <api_plugin/plugins.loaders.multi_savu_loader>
    Random Hdf5 Loader <api_plugin/plugins.loaders.random_hdf5_loader>
    Savu Nexus Loader <api_plugin/plugins.loaders.savu_nexus_loader>
