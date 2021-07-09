@@ -32,6 +32,7 @@ from . import test
 from unittest import defaultTestLoader, TestLoader, TextTestRunner
 import subprocess
 
+
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 os.environ['savu_mode'] = 'hdf5'
