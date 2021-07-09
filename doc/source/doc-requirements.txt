@@ -7,6 +7,7 @@ recommonmark==0.5.0
 sphinx==3.5.3
 sphinx-rtd-theme==0.5.2
 readthedocs-sphinx-ext<2.2
+numpy==1.18.5
 # For code drop down
 sphinx-panels==0.5.2
 # For sphinx arg_parse documentation
