@@ -576,17 +576,19 @@ if __name__ == "__main__":
 
     exclude_file = [
         "__init__.py",
-        "parameter_utils.py",
         "docstring_parser.py",
         "plugin.py",
         "plugin_datasets.py",
         "plugin_datasets_notes.py",
         "utils.py",
         "plugin_tools.py",
-        "yaml_utils.py",
-        "hdf5_utils.py",
     ]
-    exclude_dir = ["driver", "unregistered", "utils"]
+    exclude_dir = ["driver",
+                   "utils",
+                   "unregistered",
+                   "under_revision",
+                   "templates",
+                   ]
 
     # Create template download page
     create_plugin_template_downloads(savu_base_path)

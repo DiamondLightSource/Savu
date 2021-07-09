@@ -98,8 +98,8 @@ Filters
    Pymca <plugin_documentation/plugins/filters/pymca>
    Find Peaks <plugin_documentation/plugins/filters/find_peaks>
    Fresnel Filter <plugin_documentation/plugins/filters/fresnel_filter>
-   Image Interpolation <plugin_documentation/plugins/filters/image_interpolation>
    Hilbert Filter <plugin_documentation/plugins/filters/hilbert_filter>
+   Image Interpolation <plugin_documentation/plugins/filters/image_interpolation>
    List To Projections <plugin_documentation/plugins/filters/list_to_projections>
    Paganin Filter <plugin_documentation/plugins/filters/paganin_filter>
    Poly Background Estimator <plugin_documentation/plugins/filters/poly_background_estimator>
@@ -200,87 +200,10 @@ Mapping Loaders
    :maxdepth: 1 
 
    Mm Loader <plugin_documentation/plugins/loaders/mapping_loaders/mm_loader>
-   Nxptycho Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxptycho_loader>
    Nxfluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxfluo_loader>
    Nxmonitor Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxmonitor_loader>
-   Txm Loader <plugin_documentation/plugins/loaders/mapping_loaders/txm_loader>
    Nxstxm Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxstxm_loader>
    Nxxrd Loader <plugin_documentation/plugins/loaders/mapping_loaders/nxxrd_loader>
-   P2R Fly Scan Detector Loader <plugin_documentation/plugins/loaders/mapping_loaders/p2r_fly_scan_detector_loader>
-
-
-I08 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I08 Fluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i08_loaders/i08_fluo_loader>
-
-
-I13 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I13 Fluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_fluo_loader>
-   I13 Ptycho Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_ptycho_loader>
-   I13 Speckle Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_speckle_loader>
-   I13 Stxm Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_stxm_loader>
-   I13 Stxm Monitor Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_stxm_monitor_loader>
-   I13 Stxm Xrf Loader <plugin_documentation/plugins/loaders/mapping_loaders/i13_loaders/i13_stxm_xrf_loader>
-
-
-I14 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I14 Fluo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i14_loaders/i14_fluo_loader>
-
-
-I22 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I22 Tomo Loader <plugin_documentation/plugins/loaders/mapping_loaders/i22_loaders/i22_tomo_loader>
-
-
-I18 Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Malcolm Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Nexus Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Ptychography
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Dummy Ptycho <plugin_documentation/plugins/ptychography/dummy_ptycho>
 
 
 Reconstructions
@@ -366,7 +289,6 @@ Savers
 .. toctree::
    :maxdepth: 1 
 
-   Edf Saver <plugin_documentation/plugins/savers/edf_saver>
    Hdf5 Saver <plugin_documentation/plugins/savers/hdf5_saver>
    Image Saver <plugin_documentation/plugins/savers/image_saver>
    Tiff Saver <plugin_documentation/plugins/savers/tiff_saver>
@@ -450,15 +372,6 @@ Visualisation
    :maxdepth: 1 
 
    Ortho Slice <plugin_documentation/plugins/visualisation/ortho_slice>
-
-
-Under Revision
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Xrd Absorption Approximation <plugin_documentation/plugins/under_revision/xrd_absorption_approximation>
 
 
 Simulation
