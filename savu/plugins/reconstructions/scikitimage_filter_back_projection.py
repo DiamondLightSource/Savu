@@ -50,10 +50,8 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
         sino = data[0]
         centre_of_rotations, angles, vol_shape, init = self.get_frame_params()
         in_pData = self.get_plugin_in_datasets()[0]
-        in_meta_data = self.get_in_meta_data()[0]
         sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
-        theta = in_meta_data.get('rotation_angle')
 
         dim_detX = in_pData.get_data_dimension_by_axis_label('detector_x')
         size = self.parameters['output_size']
@@ -61,7 +59,7 @@ class ScikitimageFilterBackProjection(BaseRecon, CpuPlugin):
             size is None else size
 
         result = \
-            transform.iradon(sinogram, theta=theta,
+            transform.iradon(sinogram, theta=angles,
                              output_size=(size),
                              filter_name=self.parameters['filter'],
                              interpolation=self.parameters['interpolation'],

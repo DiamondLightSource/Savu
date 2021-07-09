@@ -6,7 +6,7 @@ class SimpleFitXrfTools(PluginTools):
     def define_parameters(self):
         """
         width_guess:
-            visibility: intermediate
+            visibility: basic
             dtype: float
             description: An initial guess at the width.
             default: 0.02

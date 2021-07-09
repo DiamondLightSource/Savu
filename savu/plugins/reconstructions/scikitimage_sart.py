@@ -51,7 +51,6 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
         sinogram = np.swapaxes(sino, 0, 1)
         sinogram = self._shift(sinogram, centre_of_rotations)
         sino = sinogram.astype(np.float64)
-        theta = np.linspace(0, 180, sinogram.shape[1])
         
         dim_detX = in_pData.get_data_dimension_by_axis_label('x', contains=True)
         size = self.parameters['output_size']
@@ -59,7 +58,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
             size is None else size
         
         result = \
-            transform.iradon(sino, theta=theta,
+            transform.iradon(sino, theta=angles,
                              output_size=size,
                              filter_name=self.parameters['filter'],
                              interpolation=self.parameters['interpolation'],
@@ -67,7 +66,7 @@ class ScikitimageSart(BaseRecon, CpuPlugin):
 
         for i in range(self.parameters["iterations"]):
             print("Iteration %i" % i)
-            result = transform.iradon_sart(sino, theta=theta, image=result,
+            result = transform.iradon_sart(sino, theta=angles, image=result,
                                            projection_shifts=None,
                                            clip=self.parameters['clip'],
                                            relaxation=\
