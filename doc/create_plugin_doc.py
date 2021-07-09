@@ -351,8 +351,6 @@ def create_plugin_template_downloads(savu_base_path):
                 inner_file_str = (
                     "../../../" + "plugin_examples/plugin_templates/general"
                 )
-                doc_text = detailed_template["docstring"].split(":param")[0]
-                doc_text = " ".join(doc_text.splitlines())
                 doc_template.write(f"{title}{set_underline(3,66)}")
                 doc_template.write(
                     "\nA template to create a simple plugin "
@@ -386,14 +384,12 @@ def create_plugin_template_downloads(savu_base_path):
             for doc_name, doc_str in docstring_text.items():
                 title = convert_title(doc_name)
                 title, number = filter_template_numbers(title)
-                # Remove the parameter information from the docstring
-                doc_text = doc_str["docstring"].split(":param")[0]
-                doc_text = " ".join(doc_text.splitlines())
+                desc_str = doc_str["desc"]
                 # Create a link to the restructured text page view of the python
                 # code for the template
                 doc_template.write("\n   * - :ref:`" + doc_name + "`")
                 # The template description from the docstring
-                doc_template.write("\n     - " + doc_text)
+                doc_template.write("\n     - " + desc_str)
                 doc_template.write("\n")
                 # Create the restructured text page for the plugin template
                 # python code
@@ -427,11 +423,13 @@ def generate_template_files(doc_name, title):
         template_file.write(f"{title}{set_underline(4, 39)}")
         template_file.write("\n")
         template_file.write(
-            ":download:`Download <"
-            + inner_file_str
-            + "/"
-            + doc_name
-            + ".py>`\n\n"
+            f":download:`Download {title}<{inner_file_str}"
+            f"/{doc_name}.py>`\n\n"
+        )
+        template_file.write("\n")
+        template_file.write(
+            f":download:`Download {title} Tools<{inner_file_str}"
+            f"/{doc_name}_tools.py>`\n\n"
         )
         template_file.write("\n")
         template_file.write(
@@ -439,6 +437,14 @@ def generate_template_files(doc_name, title):
             "/../../plugin_examples/plugin_templates/general/"
             + doc_name
             + ".py"
+        )
+        template_file.write("\n    :language: python\n")
+        template_file.write("\n")
+        template_file.write(
+            ".. literalinclude:: "
+            "/../../plugin_examples/plugin_templates/general/"
+            + doc_name
+            + "_tools.py"
         )
         template_file.write("\n    :language: python\n")
 
@@ -471,7 +477,8 @@ def create_template_class_dict(savu_base_path):
     for t_root, t_dirs, template_files \
             in os.walk(plugin_ex_path, topdown=True):
         template_files[:] = [fi for fi in template_files
-                             if fi.split(".")[-1] == "py"]
+                             if fi.split(".")[-1] == "py"
+                             and "tools" not in fi]
         if "__" not in t_root:
             pkg_path = t_root.split("Savu/")[1]
             module_name = pkg_path.replace("/", ".")
@@ -480,15 +487,18 @@ def create_template_class_dict(savu_base_path):
             file_name = fi.split(".py")[0]
             cls_module = module_name + "." + file_name
             try:
-                cls_loaded = pu.load_class(cls_module)
-            except:
+                cls_loaded = pu.load_class(cls_module)()
+            except AttributeError as e:
                 cls_loaded = None
 
             if cls_loaded:
+                tools = cls_loaded.get_plugin_tools()
+                doc = tools.get_doc() if tools else ""
+                desc = doc.get("verbose") if isinstance(doc,dict) else ""
                 title = convert_title(file_name)
                 name, number = filter_template_numbers(title)
                 docstring_text[file_name] = {
-                    "docstring": cls_loaded.__doc__,
+                    "desc": desc,
                     "number": int(number),
                 }
 
