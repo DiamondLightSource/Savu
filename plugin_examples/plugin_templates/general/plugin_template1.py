@@ -22,8 +22,6 @@
 
 """
 
-import sys
-
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
@@ -31,11 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate1(Plugin, CpuPlugin):
-    """A simple plugin template with one in_dataset and one out_dataset with
-similar characteristics, e.g. median filter.
-
-    :param example: Example of a plugin parameter. Default: None.
-    """
 
     def __init__(self):
         super(PluginTemplate1, self).__init__('PluginTemplate1')
@@ -58,7 +51,9 @@ similar characteristics, e.g. median filter.
 
     def process_frames(self, data):
         # do some processing here
-        return data[0]
+        # here is how to access a parameter defined in the tools file
+        example = self.parameters['example']
+        return data[0]*example
 
     def post_process(self):
         pass

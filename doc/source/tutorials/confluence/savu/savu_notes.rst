@@ -3,6 +3,11 @@
 Savu - notes on basic use
 -----------------------------
 
+**Note**: The following tutorial for I13 users is out-of-date. There're more robust ring removal methods
+(RemoveAllRings, RingRemovalSorting,...) than the selected methods below. There is no need to add Hdf5Saver
+to save the output.
+
+
 .. raw:: html
 
     <!DOCTYPE html>
