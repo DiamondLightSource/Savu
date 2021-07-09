@@ -17,7 +17,8 @@ import sys
 from unittest import mock
 
 # Mock imports instead of full environment in readthedocs
-MOCK_MODULES = ["pytest",
+MOCK_MODULES = ["numpy",
+                "pytest",
                 "mpi4py",
                 "astra",
                 "h5py",
