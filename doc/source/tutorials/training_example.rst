@@ -135,9 +135,9 @@ Full pipeline with auto-centering
     >>> savu_config                 # open the configurator
     >>> add NxtomoLoader            # add the loader plugin (use tab completion)
     >>> add DarkFlatFieldCorrection # add the correction plugin
-    >>> add RavenFilter             # add the ring artefact removal plugin
-    >>> add PaganinFilter           # add contrast enhancement plugin
+    >>> add RemoveAllRings          # add the ring artefact removal plugin
     >>> add VoCentering             # add auto-centering plugin
+    >>> add PaganinFilter           # add contrast enhancement plugin
     >>> add AstraReconGpu           # add reconstruction plugin
     >>> mod 6.3 False               # don't take the log of the data in recon (required by paganin)
     >>> mod 5.1 [:, mid-5:mid+6, :] # apply centering to mid 10 sinograms only

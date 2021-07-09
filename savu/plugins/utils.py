@@ -142,7 +142,13 @@ def get_tools_class(plugin_tools_id, cls=None):
 
     # determine Savu base path
     path_name = plugin_tools_id.replace(".", "/")
-    file_path = savu.__path__[0] + "/../" + path_name + ".py"
+    savu_path = os.path.join(savu.__path__[0], "..")
+    if len(path_name.split("plugin_templates")) > 1:
+        file_path = os.path.join(
+            savu_path, "plugin_examples", path_name + ".py")
+    else:
+        file_path = os.path.join(savu_path, path_name + ".py")
+
     if os.path.isfile(file_path):
         if cls:
             return load_class(plugin_tools_id)(cls)
