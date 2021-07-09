@@ -31,7 +31,7 @@ import sys
 from . import test
 from unittest import defaultTestLoader, TestLoader, TextTestRunner
 import subprocess
-import pytest
+
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
