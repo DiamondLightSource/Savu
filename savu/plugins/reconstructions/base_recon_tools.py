@@ -47,9 +47,11 @@ class BaseReconTools(PluginTools):
              example: [0,1]
         ratio:
              visibility: intermediate
-             dtype: float
+             dtype: [float, list[float, float]]
              description: Ratio of the masks diameter in pixels to
-               the smallest edge size along given axis.
+               the smallest edge size along given axis. If a list of two floats
+               is given, the second value is used to fill up the area outside
+               the mask.
              default: 0.95
         log_func:
              visibility: advanced
