@@ -4,12 +4,11 @@ How to cite Savu software
 
 .. start_of_main_text
 
-All citations are contained in both the Savu process list and output Savu nexus file.  These include:
-
+The relevant citations for your Savu job are contained in the "citations.txt" file in the Savu output folder, in BibTeX and EndNote formats.  These include:
 * Savu framework citations
 * Plugin citations - specific to your process list
 
-You can extract these citations into BibTeX and EndNote formats using the savu_citations tool.  From the command line run:
+All citations are also contained in both the Savu process list and output Savu nexus file and can be extracted into BibTeX and EndNote formats using the savu_citations tool.  From the command line run:
 
 >>> savu_citations <your_nxs_file> <out_file_name>
 
