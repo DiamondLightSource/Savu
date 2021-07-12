@@ -11,6 +11,13 @@ Savu
    confluence/savu/savu_tutorial.rst
    confluence/savu/savu_notes.rst
 
+Reconstruction
+----------------------------------------
+.. toctree::
+   :glob:
+
+   confluence/reconstruction/*
+
 I12
 ----------------------------------------
 .. toctree::
