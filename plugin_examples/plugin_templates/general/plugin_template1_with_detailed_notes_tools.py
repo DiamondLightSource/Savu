@@ -10,9 +10,9 @@ from savu.plugins.plugin_tools import PluginTools
 
 class PluginTemplate1WithDetailedNotesTools(PluginTools):
     """
-    A description of the plugin - the synopsis above appears as the
-    short plugin description in the configurator and anything
-    written here appears as the longer description (-vv flag).
+    A description of the plugin - the synopsis from the main plugin
+    file appears as the short plugin description in the configurator
+    and anything written here appears as the longer description (-vv flag).
     """
 
     def define_parameters(self):

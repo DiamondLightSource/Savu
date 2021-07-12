@@ -40,7 +40,7 @@ class PtypyCompact(BasePtycho):
 
         p, r = self.parse_params()
         ###
-        self.get
+        #self.get
         self.p = p
         self.r = r
 

@@ -43,7 +43,7 @@ class PluginTemplate10(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         for i in range(len(in_dataset)):
             in_pData[i].plugin_data_setup('SINOGRAM', 'single')
 
@@ -61,4 +61,3 @@ class PluginTemplate10(Plugin, CpuPlugin):
 
     def post_process(self):
         pass
-
