@@ -5,6 +5,7 @@ How to cite Savu software
 .. start_of_main_text
 
 The relevant citations for your Savu job are contained in the "citations.txt" file in the Savu output folder, in BibTeX and EndNote formats.  These include:
+
 * Savu framework citations
 * Plugin citations - specific to your process list
 
