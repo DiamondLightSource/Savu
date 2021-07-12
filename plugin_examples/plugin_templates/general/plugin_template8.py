@@ -29,11 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate8(Plugin, CpuPlugin):
-    """A plugin template that dynamically determines the number of output
-datasets based on the number of entries in the out_datasets parameter list.
-
-    :param example: Example of a plugin parameter. Default: None.
-    """
 
     def __init__(self, name="PluginTemplate8"):
         super(PluginTemplate8, self).__init__(name)
@@ -63,4 +58,3 @@ datasets based on the number of entries in the out_datasets parameter list.
 
     def post_process(self):
         pass
-

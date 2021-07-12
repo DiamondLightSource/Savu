@@ -22,7 +22,7 @@
 """
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.plugins.analysis.base_analysis import BaseAnalysis
+from savu.plugins.unregistered.analysis.base_analysis import BaseAnalysis
 import numpy as np
 
 

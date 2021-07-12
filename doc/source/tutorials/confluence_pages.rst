@@ -3,12 +3,6 @@ Savu Confluence Pages
 
 Documentation from confluence.
 
-Savu
-----------------------------------------
-.. toctree::
-   :glob:
-
-   confluence/savu/*
 
 Reconstruction
 ----------------------------------------

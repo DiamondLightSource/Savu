@@ -33,16 +33,8 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class PluginTemplate1WithDetailedNotes(Plugin, CpuPlugin):
 # Each class must inherit from the Plugin class and a driver
-    """A description of the plugin - the synopsis above appears as the short
-plugin description in the configurator and anything written here
-appears as the longer description (-vv flag).
-
-    :param example: Example of a plugin parameter. Default: None.
-
-    """
-
     def __init__(self):
-        super(PluginTemplate1, self).__init__('PluginTemplate1')
+        super(PluginTemplate1WithDetailedNotes, self).__init__('PluginTemplate1WithDetailedNotes')
 
     def nInput_datasets(self):
         # Called immediately after the plugin is loaded in to the framework

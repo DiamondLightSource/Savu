@@ -29,15 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate6(Plugin, CpuPlugin):
-    """A template to create a plugin that changes the shape of the data,
-e.g. downsample_filter.
-
-    :param example: Example of a plugin parameter. Default: None.
-    :u*param bin_size: Bin Size for the downsample. Default: 2.
-    :u*param pattern: The pattern the plugin should be applied
-     to. Default: "PROJECTION".
-
-    """
 
     def __init__(self):
         super(PluginTemplate6, self).__init__('PluginTemplate6')

@@ -22,7 +22,7 @@
 """
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.ptychography.base_ptycho import BasePtycho
+from savu.plugins.unregistered.ptychography.base_ptycho import BasePtycho
 import numpy as np
 from ptypy.core import Ptycho
 from ptypy import utils as u
@@ -40,7 +40,7 @@ class PtypyCompact(BasePtycho):
 
         p, r = self.parse_params()
         ###
-        self.get
+        #self.get
         self.p = p
         self.r = r
 
