@@ -8,14 +8,8 @@ Savu
 .. toctree::
    :glob:
 
-   confluence/savu/*
-
-Reconstruction
-----------------------------------------
-.. toctree::
-   :glob:
-
-   confluence/reconstruction/*
+   confluence/savu/savu_tutorial.rst
+   confluence/savu/savu_notes.rst
 
 I12
 ----------------------------------------
@@ -30,6 +24,3 @@ b16
    :glob:
 
    confluence/b16/*
-
-
-
