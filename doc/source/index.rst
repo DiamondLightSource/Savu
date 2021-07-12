@@ -68,7 +68,7 @@ Table of Contents
 
 .. _citations_content:
 
-.. toctree:
+.. toctree::
 	: caption Citations
 	: maxdepth: 2
 
