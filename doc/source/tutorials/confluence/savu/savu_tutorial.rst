@@ -1,3 +1,5 @@
+:orphan:
+
 .. _savu_tutorial:
 
 Savu - tutorial on basic use
