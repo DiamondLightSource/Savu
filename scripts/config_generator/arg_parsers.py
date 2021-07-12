@@ -258,7 +258,7 @@ def _expand_arg_parser(args=None, doc=True):
     parser.add_argument('dim_view', nargs="?", default=False,
                         help=argparse.SUPPRESS)
     expand_off_str = "Turn off the expand view"
-    parser.add_argument("-o", "--off", action="store_true",
+    parser.add_argument("--off", action="store_true",
                         dest="off", help=expand_off_str, default=False)
     return __arg_parser(parser, args, "expand", doc)
 
