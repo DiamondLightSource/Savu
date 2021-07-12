@@ -65,8 +65,8 @@ Parameter definitions
         
         ratio:
             visibility: intermediate
-            dtype: float
-            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
+            dtype: "[float, list[float, float]]"
+            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis. If a list of two floats is given, the second value is used to fill up the area outside the mask.
             default: "0.95"
         
         log_func:
@@ -83,17 +83,11 @@ Parameter definitions
                 verbose: When fixed, you get the dimension of the horizontal detector or you can specify any reconstruction size you like with an integer.
             default: fixed
         
-        output_size:
-            visibility: advanced
-            dtype: "[None, int, list[int,int],str]"
-            description: The dimension of the reconstructed volume (only X-Y dimension).
-            default: auto
-        
         padding:
             visibility: advanced
             dtype: int
             description: The amount of pixels to pad each slab of the cropped projection data.
-            default: "13"
+            default: "5"
         
         data_fidelity:
             visibility: advanced
@@ -131,7 +125,7 @@ Parameter definitions
             description: 
                 summary: Number of outer iterations for FISTA (default)or ADMM methods.
                 verbose: Less than 10 iterations for the iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
-            default: "15"
+            default: "17"
         
         algorithm_verbose:
             visibility: advanced

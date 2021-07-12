@@ -22,7 +22,7 @@
 """
 
 from savu.plugins.utils import register_plugin
-from savu.plugins.ptychography.base_ptycho import BasePtycho
+from savu.plugins.unregistered.ptychography.base_ptycho import BasePtycho
 import numpy as np
 
 

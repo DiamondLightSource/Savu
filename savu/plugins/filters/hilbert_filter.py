@@ -16,7 +16,7 @@
 .. module:: hilbert_filter
    :platform: Unix
    :synopsis: A plugin to apply Hilbert filter horizontally for tomographic
-   reconstruction of phase gradient images.
+     reconstruction of phase gradient images.
 
 .. moduleauthor:: Tunhe Zhou <tunhe.zhou@diamond.ac.uk>
 

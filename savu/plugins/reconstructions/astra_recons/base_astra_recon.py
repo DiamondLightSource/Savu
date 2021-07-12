@@ -25,8 +25,6 @@ import numpy as np
 from savu.plugins.reconstructions.base_recon import BaseRecon
 
 class BaseAstraRecon(BaseRecon):
-    """
-    """
 
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
