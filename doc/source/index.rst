@@ -69,7 +69,7 @@ Table of Contents
 .. _citations_content:
 
 .. toctree::
-	:caption Citations
+	:caption: Citations
 	:maxdepth: 2
 
 	reference/savu_citations
