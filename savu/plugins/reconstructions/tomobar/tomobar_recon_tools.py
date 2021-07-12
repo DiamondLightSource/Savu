@@ -19,7 +19,7 @@ toolbox and the CCPi RGL toolkit.
 
         data_Huber_thresh:
             visibility: advanced
-            dtype: [None,int]
+            dtype: [None,float]
             description:
                 summary: Threshold parameter for Huber data fidelity.
                 verbose: Parameter which controls the level of suppression

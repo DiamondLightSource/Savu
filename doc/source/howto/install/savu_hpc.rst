@@ -19,7 +19,7 @@ Requirements:
 2. Download |savu_installer| and extract
 3. Set the desired Github branch of Savu to install. E.g. if you need to install the latests changes in Savu, you can select the "master" branch as >>> export savu_branch="master" or if you need the latest Savu `release <https://github.com/DiamondLightSource/Savu/releases>`_ to be installed do >>> export savu_branch="savu_version"
 4. Set the name of the facility, e.g. *export facility='facility_name'*
-5. >>> `bash savu_installer/savu_installer.sh`
+5. >>> bash savu_installer/savu_installer.sh
 6. Check the log file /tmp/<tmpfolder>/savu_error_log.txt for installation errors (correct log file path printed to screen during installation process).
 
 **Installation of *Savu* HPC at Diamond Light Source (DLS) systems (fastest)**
@@ -28,7 +28,7 @@ Requirements:
 
 1. Do 1-3 steps as above.
 2. >>> export explicit_file='savu_list_openmpi4_1_1.txt'
-3. >>> `bash savu_installer/savu_installer.sh`
+3. >>>`bash savu_installer/savu_installer.sh
 
 **Installation of *Savu* HPC at Diamond Light Source (DLS) systems**
 
@@ -37,5 +37,4 @@ Requirements:
 **Installation for Diamond Light Source (DLS) systems:**
 
 1. Get |savu_installer|
-2. >>> `bash savu_installer/savu_installer.sh`
-
+2. >>> bash savu_installer/savu_installer.sh

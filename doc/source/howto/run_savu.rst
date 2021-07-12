@@ -1,7 +1,7 @@
 How to run Savu
 ---------------
 
-To run Savu you require a data file and a process list (link to process list).
+To run Savu you require a data file and a process list (a link to process list). If Savu has been installed into the module system:
 
     >>> module load savu
 
@@ -46,4 +46,3 @@ Optional arguments:
 .. note:: Savu produces a hdf5 file for each plugin in the process list.  It is recommended, if you are running
           Savu on a full dataset, to pass the optional argument `-d <tmp_dir>` where `tmp_dir` is the temporary
           directory for a visit.
-
