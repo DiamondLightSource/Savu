@@ -8,8 +8,8 @@ from savu.version import __version__
 
 class NXcitation(object):
     def __init__(self, description, doi, endnote, bibtex):
-        self.description = description
-        self.doi = doi
+        self.description = description.decode('UTF-8')
+        self.doi = doi.decode('UTF-8')
         self.endnote = endnote.decode('UTF-8')
         self.bibtex = bibtex.decode('UTF-8')
 
@@ -104,14 +104,23 @@ def __option_parser(doc=True):
     return parser if doc==True else parser.parse_args()
 
 
-def main():
-    args = __option_parser(doc=False)
-    infile = h5py.File(args.in_file, 'r')
+def main(in_file=None, quiet=False):
+    # when calling directly from tomo_recon.py
+    if in_file:
+        out_file = os.path.join(os.path.dirname(in_file), 'citations.txt')
+    else:
+        args = __option_parser(doc=False)
+        in_file = args.in_file
+        out_file = args.out_file
+        
+    infile = h5py.File(in_file, 'r')
     citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
     if citation_manager is not None:
-        with open(args.out_file, 'w') as outfile:
+        with open(out_file, 'w') as outfile:
             outfile.write(citation_manager.__str__())
-    print("Extraction complete")
+    
+    if not quiet:
+        print("Extraction complete")
 
 if __name__ == '__main__':
     main()
