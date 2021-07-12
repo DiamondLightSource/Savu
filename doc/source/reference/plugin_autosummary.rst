@@ -98,8 +98,8 @@ Filters
    Pymca <api_plugin/plugins.filters.pymca>
    Find Peaks <api_plugin/plugins.filters.find_peaks>
    Fresnel Filter <api_plugin/plugins.filters.fresnel_filter>
-   Image Interpolation <api_plugin/plugins.filters.image_interpolation>
    Hilbert Filter <api_plugin/plugins.filters.hilbert_filter>
+   Image Interpolation <api_plugin/plugins.filters.image_interpolation>
    List To Projections <api_plugin/plugins.filters.list_to_projections>
    Paganin Filter <api_plugin/plugins.filters.paganin_filter>
    Poly Background Estimator <api_plugin/plugins.filters.poly_background_estimator>
@@ -170,8 +170,6 @@ Loaders
 .. toctree::
    :maxdepth: 1 
 
-   Hdf5 Template Loader <api_plugin/plugins.loaders.hdf5_template_loader>
-   Image Template Loader <api_plugin/plugins.loaders.image_template_loader>
    Multi Savu Loader <api_plugin/plugins.loaders.multi_savu_loader>
    Random Hdf5 Loader <api_plugin/plugins.loaders.random_hdf5_loader>
    Savu Nexus Loader <api_plugin/plugins.loaders.savu_nexus_loader>
@@ -200,87 +198,10 @@ Mapping Loaders
    :maxdepth: 1 
 
    Mm Loader <api_plugin/plugins.loaders.mapping_loaders.mm_loader>
-   Nxptycho Loader <api_plugin/plugins.loaders.mapping_loaders.nxptycho_loader>
    Nxfluo Loader <api_plugin/plugins.loaders.mapping_loaders.nxfluo_loader>
    Nxmonitor Loader <api_plugin/plugins.loaders.mapping_loaders.nxmonitor_loader>
-   Txm Loader <api_plugin/plugins.loaders.mapping_loaders.txm_loader>
    Nxstxm Loader <api_plugin/plugins.loaders.mapping_loaders.nxstxm_loader>
    Nxxrd Loader <api_plugin/plugins.loaders.mapping_loaders.nxxrd_loader>
-   P2R Fly Scan Detector Loader <api_plugin/plugins.loaders.mapping_loaders.p2r_fly_scan_detector_loader>
-
-
-I08 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I08 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i08_loaders.i08_fluo_loader>
-
-
-I13 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I13 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_fluo_loader>
-   I13 Ptycho Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_ptycho_loader>
-   I13 Speckle Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_speckle_loader>
-   I13 Stxm Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_loader>
-   I13 Stxm Monitor Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_monitor_loader>
-   I13 Stxm Xrf Loader <api_plugin/plugins.loaders.mapping_loaders.i13_loaders.i13_stxm_xrf_loader>
-
-
-I14 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I14 Fluo Loader <api_plugin/plugins.loaders.mapping_loaders.i14_loaders.i14_fluo_loader>
-
-
-I22 Loaders
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-   I22 Tomo Loader <api_plugin/plugins.loaders.mapping_loaders.i22_loaders.i22_tomo_loader>
-
-
-I18 Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Malcolm Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Nexus Templates
---------------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1 
-
-
-
-Ptychography
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Dummy Ptycho <api_plugin/plugins.ptychography.dummy_ptycho>
 
 
 Reconstructions
@@ -366,7 +287,6 @@ Savers
 .. toctree::
    :maxdepth: 1 
 
-   Edf Saver <api_plugin/plugins.savers.edf_saver>
    Hdf5 Saver <api_plugin/plugins.savers.hdf5_saver>
    Image Saver <api_plugin/plugins.savers.image_saver>
    Tiff Saver <api_plugin/plugins.savers.tiff_saver>
@@ -450,15 +370,6 @@ Visualisation
    :maxdepth: 1 
 
    Ortho Slice <api_plugin/plugins.visualisation.ortho_slice>
-
-
-Under Revision
-########################################################
-
-.. toctree::
-   :maxdepth: 1 
-
-   Xrd Absorption Approximation <api_plugin/plugins.under_revision.xrd_absorption_approximation>
 
 
 Simulation

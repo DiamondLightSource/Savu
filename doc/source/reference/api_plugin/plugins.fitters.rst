@@ -8,7 +8,6 @@ Submodules
    :maxdepth: 4
 
    plugins.fitters.base_fitter
-   plugins.fitters.ral_fit
    plugins.fitters.simple_fit
 
 Module contents

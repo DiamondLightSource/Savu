@@ -16,7 +16,7 @@
 .. module:: image_loader
    :platform: Unix
    :synopsis: A plugin for loading standard tomography data in image formats
-   (e.g. tiff).
+     (e.g. tiff).
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 

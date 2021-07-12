@@ -20,7 +20,6 @@ Subpackages
    plugins.kinematics
    plugins.loaders
    plugins.missing_data
-   plugins.ptychography
    plugins.reconstructions
    plugins.reshape
    plugins.ring_removal
@@ -28,7 +27,6 @@ Subpackages
    plugins.segmentation
    plugins.simulation
    plugins.stats
-   plugins.unregistered
    plugins.visualisation
 
 Submodules

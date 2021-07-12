@@ -1,7 +1,0 @@
-I13 Stxm Loader
-########################################################
-
-Description
---------------------------
-
-A class to load tomography data from the txm 
