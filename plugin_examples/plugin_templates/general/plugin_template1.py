@@ -57,4 +57,3 @@ class PluginTemplate1(Plugin, CpuPlugin):
 
     def post_process(self):
         pass
-

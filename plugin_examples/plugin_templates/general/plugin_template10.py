@@ -29,10 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate10(Plugin, CpuPlugin):
-    """A plugin template that dynamically determines the number of input
-datasets based on the number of entries in the in_datasets parameter list.
-
-    """
 
     def __init__(self, name="PluginTemplate10"):
         super(PluginTemplate10, self).__init__(name)
@@ -47,7 +43,7 @@ datasets based on the number of entries in the in_datasets parameter list.
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         for i in range(len(in_dataset)):
             in_pData[i].plugin_data_setup('SINOGRAM', 'single')
 
@@ -65,4 +61,3 @@ datasets based on the number of entries in the in_datasets parameter list.
 
     def post_process(self):
         pass
-

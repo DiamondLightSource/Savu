@@ -17,27 +17,46 @@ import sys
 from unittest import mock
 
 # Mock imports instead of full environment in readthedocs
-MOCK_MODULES = ["pytest",
-                "numpy",
+MOCK_MODULES = ["numpy",
+                "pytest",
                 "mpi4py",
                 "astra",
                 "h5py",
-                "pandas",]
+                "pandas"
+                ]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
 autodoc_mock_imports = [
     "ccpi",
-    "larix",
+    "dezing", # Dezinger Deprecated
     "fabio",
+    "flupy",
+    "GeodisTK",
+    "larix",
+    "morphsnakes", # MaskInitialiser MorphSnakes
+    "mrcfile",
+    "pmacparser", # StageMotion
     "peakutils",
-    "skimage",
-    "scipy",
-    "tomobar",
+    "pyfftw",
     "pynvml",
+    "PyMca5",
+    "ptypy",
+    "pywt",
+    "pyFAI",
+    "ral_nlls",
+    "scipy",
+    "skimage",
+    "sklearn",
+    "speckle_matching",
+    "setup",
+    "tifffile",
+    "tomopy",
+    "tomobar",
     "tomophantom",
-]
+    "xraylib",
+    ]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

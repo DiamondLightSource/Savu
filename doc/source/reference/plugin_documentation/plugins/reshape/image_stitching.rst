@@ -51,16 +51,16 @@ Parameter definitions
             description: "Data processing pattern is 'PROJECTION' or 'SINOGRAM'."
             default: PROJECTION
         
+        flat_use:
+            visibility: basic
+            dtype: bool
+            description: Apply flat-field correction.
+            default: "True"
+        
         norm:
             visibility: intermediate
             dtype: bool
             description: Apply normalization before stitching.
-            default: "True"
-        
-        flat_use:
-            visibility: intermediate
-            dtype: bool
-            description: Apply flat-field correction.
             default: "True"
         
 Key

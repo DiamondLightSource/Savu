@@ -65,8 +65,8 @@ Parameter definitions
         
         ratio:
             visibility: intermediate
-            dtype: float
-            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis.
+            dtype: "[float, list[float, float]]"
+            description: Ratio of the masks diameter in pixels to the smallest edge size along given axis. If a list of two floats is given, the second value is used to fill up the area outside the mask.
             default: "0.95"
         
         log_func:
@@ -82,12 +82,6 @@ Parameter definitions
                 summary: Override the size of the reconstruction volume with an integer value.
                 verbose: When fixed, you get the dimension of the horizontal detector or you can specify any reconstruction size you like with an integer.
             default: fixed
-        
-        output_size:
-            visibility: advanced
-            dtype: "[None, int, list[int,int],str]"
-            description: Number of rows and columns in the reconstruction.
-            default: auto
         
         data_fidelity:
             visibility: advanced
