@@ -66,6 +66,15 @@ Table of Contents
 
     reference/plugin_autosummary
 
+.. _citations_content:
+
+.. toctree::
+	:caption: Citations
+	:maxdepth: 2
+
+	reference/savu_citations
+
+
 Indices and tables
 ==================
 * :ref:`genindex`
