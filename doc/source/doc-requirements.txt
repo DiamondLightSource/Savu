@@ -10,7 +10,7 @@
 # For code drop down
 sphinx-panels==0.5.2
 # For sphinx arg_parse documentation
-pyyaml==5.3.1
+pyyaml==5.4
 sphinx-argparse==0.2.5
 yamllint==1.26.1
 colorama==0.4.4
