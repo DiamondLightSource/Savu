@@ -29,11 +29,6 @@ import scipy.signal.signaltools as sig
 
 
 class ExampleMedianFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to filter each frame with a 3x3 median filter
-
-    :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
-    """
 
     def __init__(self):
         logging.debug("Starting Median Filter")

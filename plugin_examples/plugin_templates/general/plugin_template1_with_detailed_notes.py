@@ -111,4 +111,3 @@ class PluginTemplate1WithDetailedNotes(Plugin, CpuPlugin):
         # This method is called once after all processing has completed
         # (after an MPI barrier).
         pass
-
