@@ -30,6 +30,7 @@ from mpi4py import MPI
 from savu.version import __version__
 
 import savu.core.utils as cu
+from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
 
@@ -217,6 +218,9 @@ def main(input_args=None):
     try:
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
+        if options['process'] == 0:
+            in_file = plugin_runner.exp.meta_data['nxs_filename']
+            citation_extractor.main(in_file=in_file, quiet=True)
     except Exception:
         # raise the error in the user log
         trace = traceback.format_exc()
