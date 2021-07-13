@@ -26,10 +26,8 @@ import re
 import sys
 
 from itertools import chain
-from collections import OrderedDict
 
 import savu.plugins.utils as pu
-import scripts.config_generator.savu_config as sc
 
 
 def add_package_entry(f, files_present, output, module_name):
@@ -52,8 +50,6 @@ def add_package_entry(f, files_present, output, module_name):
         f.write("   :maxdepth: 1 \n\n")
 
         for fi in files_present:
-            # TODO At the moment if a directory contains files, and none of
-            #  their classes load correctly, the content will be blank
             mod_path = module_name + "." + fi.split(".py")[0]
             file_path = get_path_format(mod_path, output)
             py_module_name = "savu." + str(mod_path)
@@ -321,236 +317,6 @@ def write_citations_to_file(new_rst_file, plugin_citations):
     new_rst_file.write("\n")
 
 
-def create_plugin_template_downloads(savu_base_path):
-    """Inside plugin_examples/plugin_templates/general
-    If the file begins with 'plugin_template' then select it
-    Read the lines of the files docstring and set as a descriptor
-    """
-    doc_template_file = (
-        savu_base_path + "doc/source/dev_guides/dev_plugin_templates.rst"
-    )
-    # Populate dictionary with template class and template class docstring
-    docstring_text = create_template_class_dict(savu_base_path)
-    if docstring_text:
-        with open(doc_template_file, "w") as doc_template:
-            doc_template.write(".. _plugin_templates:\n")
-            doc_template.write("\n")
-            doc_template.write(f"Plugin templates {set_underline(6,23)}")
-            doc_template.write("\n")
-
-            doc_name = "plugin_template1_with_detailed_notes"
-            detailed_template = docstring_text.get(doc_name)
-
-            if detailed_template:
-                docstring_text.pop(doc_name)
-                title = convert_title(doc_name)
-                title, number = filter_template_numbers(title)
-                # Create the restructured text page for the plugin template
-                # python code
-                generate_template_files(doc_name, title)
-                inner_file_str = (
-                    "../../../" + "plugin_examples/plugin_templates/general"
-                )
-                doc_template.write(f"{title}{set_underline(3,66)}")
-                doc_template.write(
-                    "\nA template to create a simple plugin "
-                    "that takes one dataset as input and returns "
-                    "a similar dataset as output"
-                )
-                doc_template.write("\n")
-                doc_template.write(
-                    """
-.. list-table::  
-   :widths: 10
-   
-   * - :ref:`"""
-                    + doc_name
-                    + """`
-
-"""
-                )
-            doc_template.write(f"Further Examples{set_underline(3,66)}")
-            # Begin the table layout
-            doc_template.write(
-                """
-.. list-table::  
-   :widths: 10 90
-   :header-rows: 1
-
-   * - Link
-     - Description"""
-            )
-
-            for doc_name, doc_str in docstring_text.items():
-                title = convert_title(doc_name)
-                title, number = filter_template_numbers(title)
-                desc_str = doc_str["desc"]
-                # Create a link to the restructured text page view of the python
-                # code for the template
-                doc_template.write("\n   * - :ref:`" + doc_name + "`")
-                # The template description from the docstring
-                doc_template.write("\n     - " + desc_str)
-                doc_template.write("\n")
-                # Create the restructured text page for the plugin template
-                # python code
-                generate_template_files(doc_name, title)
-
-            doc_template.write("\n")
-
-
-def generate_template_files(doc_name, title):
-    """Create a restructured text file which will include the python
-     code for the plugin template 'doc_name'
-
-    :param doc_name: The name of the template file
-    :param title:
-    :return:
-    """
-    inner_file_str = (
-        "../../../../" + "plugin_examples/plugin_templates/general"
-    )
-    template_file_path = (
-        savu_base_path
-        + "doc/source/dev_guides/templates/"
-        + doc_name
-        + ".rst"
-    )
-    with open(template_file_path, "w") as template_file:
-        # Add the orphan instruction as this file is not inside a toctree
-        template_file.write(":orphan:\n")
-        template_file.write("\n.. _" + doc_name + ":\n")
-        template_file.write("\n")
-        template_file.write(f"{title}{set_underline(4, 39)}")
-        template_file.write("\n")
-        template_file.write(
-            f":download:`Download {title}<{inner_file_str}"
-            f"/{doc_name}.py>`\n\n"
-        )
-        template_file.write("\n")
-        template_file.write(
-            f":download:`Download {title} Tools<{inner_file_str}"
-            f"/{doc_name}_tools.py>`\n\n"
-        )
-        template_file.write("\n")
-        template_file.write(
-            ".. literalinclude:: "
-            "/../../plugin_examples/plugin_templates/general/"
-            + doc_name
-            + ".py"
-        )
-        template_file.write("\n    :language: python\n")
-        template_file.write("\n")
-        template_file.write(
-            ".. literalinclude:: "
-            "/../../plugin_examples/plugin_templates/general/"
-            + doc_name
-            + "_tools.py"
-        )
-        template_file.write("\n    :language: python\n")
-
-
-def filter_template_numbers(name_string):
-    """
-    :param name_string: The name of the template
-    :return: A string with the template number seperated by a space
-    """
-    number = "".join(l for l in name_string if l.isdigit())
-    letters = "".join(l for l in name_string if l.isalpha())
-    split_uppercase = [l for l in re.split("([A-Z][^A-Z]*)", letters) if l]
-    title = " ".join(split_uppercase)
-    name = title + " " + number
-    return name, number
-
-
-def create_template_class_dict(savu_base_path):
-    """Iterate through the plugin example folder and store the class
-    and it's class docstring into a dictionary docstring_text
-
-    :param savu_base_path:
-    :return: docstring_text dictionary of class and docstring
-    """
-    docstring_text = {}
-    plugin_ex_path = (
-        savu_base_path + "plugin_examples/plugin_templates/general"
-    )
-
-    for t_root, t_dirs, template_files \
-            in os.walk(plugin_ex_path, topdown=True):
-        template_files[:] = [fi for fi in template_files
-                             if fi.split(".")[-1] == "py"
-                             and "tools" not in fi]
-        if "__" not in t_root:
-            pkg_path = t_root.split("Savu/")[1]
-            module_name = pkg_path.replace("/", ".")
-
-        for fi in template_files:
-            file_name = fi.split(".py")[0]
-            cls_module = module_name + "." + file_name
-            try:
-                cls_loaded = pu.load_class(cls_module)()
-            except AttributeError as e:
-                cls_loaded = None
-
-            if cls_loaded:
-                tools = cls_loaded.get_plugin_tools()
-                doc = tools.get_doc() if tools else ""
-                desc = doc.get("verbose") if isinstance(doc,dict) else ""
-                title = convert_title(file_name)
-                name, number = filter_template_numbers(title)
-                docstring_text[file_name] = {
-                    "desc": desc,
-                    "number": int(number),
-                }
-
-    # Order templates by number
-    docstring_text = OrderedDict(
-        sorted(docstring_text.items(), key=lambda i: i[1]["number"])
-    )
-
-    return docstring_text
-
-
-def create_savu_config_documentation(savu_base_path):
-    """Look at the available commands inside savu_config
-    Create a rst text file for each.
-    """
-    command_file_path = (savu_base_path
-                         + "doc/source/reference/savu_config_commands.rst")
-    with open(command_file_path, "w") as command_file:
-        savu_command_test_start = """
-Savu Config Commands
-**********************
-
-The links on this page provide help for each command.
-If you are using the command line please type ``-h`` or ``--help``.
-
-.. code-block:: bash
-
-   savu_config --help
-
-"""
-        # Write contents
-        command_file.write(savu_command_test_start)
-        for command in sc.commands:
-            command_file.write("\n")
-            command_file.write("* :ref:`" + command + "`")
-            command_file.write("\n")
-
-        # Document commands
-        for command in sc.commands:
-            command_file.write("\n")
-            command_file.write(".. _" + command + ":")
-            command_file.write("\n\n" + command)
-            command_file.write(set_underline(3,16))
-            command_file.write("\n.. cssclass:: argstyle\n")
-            command_file.write("\n    .. argparse::")
-            command_file.write("\n            :module: scripts.config_generator.arg_parsers")
-            command_file.write("\n            :func: _" + command + "_arg_parser")
-            command_file.write("\n            :prog: " + command)
-            command_file.write("\n")
-            command_file.write("\n")
-
-
 def create_documentation_directory(savu_base_path,
                                    plugin_guide_path,
                                    plugin_file):
@@ -599,14 +365,6 @@ if __name__ == "__main__":
                    "under_revision",
                    "templates",
                    ]
-
-    # Create template download page
-    create_plugin_template_downloads(savu_base_path)
-
-    # Create savu_config command rst files
-    # create_config_documentation(savu_base_path)
-    create_savu_config_documentation(savu_base_path)
-
     # Only document the plugin python files
     # Create the directory if it does not exist
     pu.create_dir(f"{savu_base_path}doc/source/reference/{out_folder}")
