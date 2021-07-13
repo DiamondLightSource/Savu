@@ -3,6 +3,13 @@ Savu Confluence Pages
 
 Documentation from confluence.
 
+Savu
+----------------------------------------
+.. toctree::
+   :glob:
+
+   confluence/savu/savu_tutorial.rst
+   confluence/savu/savu_notes.rst
 
 Reconstruction
 ----------------------------------------
@@ -24,6 +31,3 @@ b16
    :glob:
 
    confluence/b16/*
-
-
-
