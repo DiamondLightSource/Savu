@@ -1,3 +1,5 @@
+:orphan:
+
 .. _savu_notes:
 
 Savu - notes on basic use
