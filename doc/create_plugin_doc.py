@@ -324,13 +324,9 @@ def create_documentation_directory(savu_base_path,
     documentation file and image folders
     """
     # Create directory inside
-    doc_path = savu_base_path + "doc/source/"
-    doc_image_path = (
-        savu_base_path
-        + "doc/source/files_and_images/"
-        + plugin_guide_path
-        + "plugins/"
-    )
+    doc_path = f"{savu_base_path}doc/source/"
+    doc_image_path = f"{savu_base_path}doc/source/files_and_images/" \
+                     f"{plugin_guide_path}plugins/"
 
     # find the directories to create
     doc_dir = doc_path + plugin_guide_path + plugin_file
@@ -340,7 +336,7 @@ def create_documentation_directory(savu_base_path,
 
 
 if __name__ == "__main__":
-    out_folder, rst_file, api_type = sys.argv[1:]
+    out_folder, rst_file = sys.argv[1:]
 
     # determine Savu base path
     main_dir = \
