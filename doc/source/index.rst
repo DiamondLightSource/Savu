@@ -55,7 +55,6 @@ Table of Contents
 
     reference/savu_commands
     reference/savu_config_commands
-    reference/confluence_pages
     reference/plugin_documentation
 
 .. _api_content:
