@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $DIR
 
-# Load relevant modules
+# Add the relevant savu libraries into your path
 module load savu/4.0
 
 # Create pages for savu_config commands and plugin template documentation
