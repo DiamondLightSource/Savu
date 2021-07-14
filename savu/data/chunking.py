@@ -21,7 +21,7 @@
 
 import copy
 import logging
-from fractions import gcd
+from math import gcd
 import numpy as np
 
 
@@ -32,16 +32,16 @@ class Chunking(object):
 
     def __init__(self, exp, patternDict):
         self.pattern_dict = patternDict
-        self.current = patternDict['current'][patternDict['current'].keys()[0]]
+        self.current = patternDict['current'][list(patternDict['current'].keys())[0]]
         if patternDict['next']:
-            self.next = patternDict['next'][patternDict['next'].keys()[0]]
+            self.next = patternDict['next'][list(patternDict['next'].keys())[0]]
         else:
             self.next = self.current
 
         try:
-            self.next_pattern = patternDict['next'].keys()[0]
+            self.next_pattern = list(patternDict['next'].keys())[0]
         except AttributeError:
-            self.next_pattern = patternDict['current'].keys()[0]
+            self.next_pattern = list(patternDict['current'].keys())[0]
 
         self.exp = exp
         self.core = None
@@ -53,14 +53,14 @@ class Chunking(object):
         nChunks_to_create_file = \
             np.ceil(np.prod(np.array(shape)/np.array(chunks, dtype=np.float)))
         nProcesses = self.exp.meta_data.get('processes')
-        dims = range(len(shape))
+        dims = list(range(len(shape)))
         chunks = list(chunks)
         if nChunks_to_create_file < nProcesses:
             idx = [i for i in dims if shape[i] - chunks[i] > 0 and
                    chunks[i] > 1]
             idx = idx if idx else [i for i in dims if chunks[i] > 1]
             if idx:
-                chunks[idx[0]] = int(np.ceil(chunks[idx[0]]/2.0))
+                chunks[idx[0]] = int(np.ceil(chunks[idx[0]] / 2.0))
                 return tuple(chunks)
             else:
                 raise Exception('There is an error in the lustre workaround')
@@ -100,7 +100,7 @@ class Chunking(object):
 
         for i in range(array_len):
             adjust_max[i] = shape[adjust_dim[i]]
-        
+
         inc_dict = {'up': [1]*array_len, 'down': [1]*array_len}
         bounds = {'min': [1]*array_len, 'max': adjust_max}
         return {'dim': adjust_dim, 'inc': inc_dict, 'bounds': bounds}
@@ -149,11 +149,10 @@ class Chunking(object):
     def __core_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '/2'  # '-' + str(max_frames)
 
         # which is the slice dimension: current or next?
-        ddict = self.current if dim in self.current['slice_dims'] \
-            else self.next
+        ddict = self.current if dim in self.current['slice_dims'] else self.next
         shape, allslices = self.__get_shape(shape, ddict)
 
         adjust['bounds']['max'][adj_idx] = self.__max_frames_per_process(
@@ -169,7 +168,7 @@ class Chunking(object):
     def __slice_slice(self, dim, adj_idx, adjust, shape):
         max_frames = self.__get_max_frames_dict()[dim]
         adjust['inc']['up'][adj_idx] = '+' + str(max_frames)
-        adjust['inc']['down'][adj_idx] = '/2' # '-' + str(max_frames)
+        adjust['inc']['down'][adj_idx] = '/2'
 
         shape1 = np.prod([shape[s] for s in self.current['slice_dims']])
         shape2 = np.prod([shape[s] for s in self.next['slice_dims']])
@@ -192,7 +191,7 @@ class Chunking(object):
         if current_sdir == next_sdir:
             c_max = self.current[mft]
             n_max = self.next[mft]
-            least_common_multiple = (c_max*n_max)/gcd(c_max, n_max)
+            least_common_multiple = (c_max*n_max) // gcd(c_max, n_max)
             ddict = {current_sdir: least_common_multiple}
         else:
             ddict = {self.current['slice_dims'][0]: self.current[mft],
@@ -202,7 +201,7 @@ class Chunking(object):
     def __get_shape(self, shape, ddict):
         """ Get shape taking into account padding. """
         shape = [shape[s] for s in ddict['slice_dims']]
-        if 'transfer_shape' not in ddict.keys():
+        if 'transfer_shape' not in list(ddict.keys()):
             return shape[0], np.prod(shape)
         size_list = [ddict['transfer_shape'][s] for s in ddict['slice_dims']]
         trans_per_dim = np.ceil(np.array(shape)/np.array(
@@ -215,7 +214,7 @@ class Chunking(object):
         Calculate the max possible frames per process
         """
         nSlices = allslices if allslices else shape
-        total_plugin_runs = np.ceil(float(nSlices)/nFrames)
+        total_plugin_runs = np.ceil(float(nSlices) / nFrames)
         frame_list = np.arange(total_plugin_runs)
         nProcs = len(self.exp.meta_data.get('processes'))
         frame_list_per_proc = np.array_split(frame_list, nProcs)
@@ -284,8 +283,8 @@ class Chunking(object):
 
     def __get_idx_order(self, adjust, chunks, direction):
         process_order = [self.slice1, self.core]
-        sl = slice(None, None, -1) 
-        if direction is 'up':
+        sl = slice(None, None, -1)
+        if direction == 'up':
             sl = slice(None, None, 1)
             process_order = process_order[::-1]
 

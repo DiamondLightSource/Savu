@@ -26,7 +26,7 @@ import re
 
 from savu.plugins import utils as pu
 if os.name == 'nt':
-    import win_readline as readline
+    from . import win_readline as readline
 else:
     import readline
 
@@ -92,9 +92,14 @@ class Completer(object):
     def complete_add(self, args):
         "Completions for the add commands."
         list_args = self.plugin_list
-        if not args[0] or len(args) is 2:
+        if not args[0] or len(args) == 2:
             return list_args
         return [x for x in list_args if x.lower().startswith(args[0].lower())]
+
+    def complete_level(self, args):
+        "Completions for the level command."
+        levels = ['basic', 'intermediate', 'advanced']
+        return [l for l in levels if l.lower().startswith(args[0].lower())]
 
     def _get_collections(self):
         """ Get plugin collection names. """
@@ -102,7 +107,7 @@ class Completer(object):
         import copy
 
         path = plugins.__path__[0]
-        exclude_dir = ['driver', 'utils']
+        exclude_dir = ['driver', 'utils', '__pycache__']
         arrow = ' ==> '
         for root, dirs, files in os.walk(path):
             depth = root.count(os.path.sep) - path.count(os.path.sep)
@@ -121,8 +126,8 @@ class Completer(object):
 
     def complete_params(self, args):
         if not args[0]:
-            return pu.plugins.keys()
-        return [x for x in pu.plugins.keys() if x.startswith(args[0])]
+            return list(pu.plugins.keys())
+        return [x for x in list(pu.plugins.keys()) if x.startswith(args[0])]
 
     def complete(self, text, state):
         "Generic readline completion entry point."
@@ -134,7 +139,7 @@ class Completer(object):
         # show all commands
         line = readline.get_line_buffer().split()
         if not line:
-            return [c + ' ' for c in self.commands.keys()]
+            return [c + ' ' for c in list(self.commands.keys())]
         else:
             # account for last argument ending in a space
             if RE_SPACE.match(read_buffer):
@@ -142,11 +147,11 @@ class Completer(object):
 
             # resolve command to the implementation function
             cmd = line[0].strip()
-            if cmd in self.commands.keys():
+            if cmd in list(self.commands.keys()):
                 impl = getattr(self, 'complete_%s' % cmd)
                 args = line[1:]
                 if args:
                     return (impl(args) + [None])
                 return [cmd + ' ']
-            return [c + ' ' for c in self.commands.keys() if
+            return [c + ' ' for c in list(self.commands.keys()) if
                     c.startswith(cmd)] + [None]

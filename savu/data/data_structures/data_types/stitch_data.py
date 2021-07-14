@@ -35,6 +35,8 @@ class StitchData(BaseType):
         self.stack_or_cat = stack_or_cat
         self.dim = dim
         self.remove = remove
+        self.dark_updated = False
+        self.flat_updated = False
         super(StitchData, self).__init__()
 
         self.shape = None
@@ -91,7 +93,7 @@ class StitchData(BaseType):
             [slice(0, len(np.arange(s.start, s.stop, s.step))) for s in idx]
         out_slice_list = np.tile(out_slice_list, (len(init_vals), 1))
 
-        new_slices = [slice(i, i+1) for i in range(len(init_vals))]
+        new_slices = [slice(i, i + 1) for i in range(len(init_vals))]
         out_slice_list[:, self.dim] = new_slices
         return obj_list, in_slice_list, out_slice_list
 
@@ -103,7 +105,7 @@ class StitchData(BaseType):
         index = np.where(np.diff(array) < 0)[0] + 1
 
         val_list = np.array_split(array, index)
-        obj_vals = init_vals[np.append(0, index)]/inc
+        obj_vals = init_vals[np.append(0, index)] / inc
         active_obj_list = []
         for i in obj_vals:
             active_obj_list.append(self.obj_list[i])
@@ -114,7 +116,7 @@ class StitchData(BaseType):
 
     def _set_in_slice_list(self, idx, val_list, entry):
         in_slice_list = np.tile(idx, (len(val_list), 1))
-        new_slices = [slice(e[0], e[-1]+1, entry.step) for e in val_list]
+        new_slices = [slice(e[0], e[-1] + 1, entry.step) for e in val_list]
         in_slice_list[:, self.dim] = new_slices
         return in_slice_list
 
@@ -125,9 +127,10 @@ class StitchData(BaseType):
         length = np.append(0, np.cumsum([len(v) for v in val_list]))
         if self.stack_or_cat == 'cat':
             new_slices = \
-                [slice(length[i-1], length[i]) for i in range(1, len(length))]
+                [slice(length[i - 1], length[i])
+                 for i in range(1, len(length))]
         else:
-            new_slices = [slice(i, i+1) for i in range(len(val_list))]
+            new_slices = [slice(i, i + 1) for i in range(len(val_list))]
         out_slice_list[:, self.dim] = new_slices
         return out_slice_list
 
@@ -147,10 +150,38 @@ class StitchData(BaseType):
             shape.insert(self.dim, nObjs)
         self.shape = tuple(shape)
 
+    def update_dark(self, data):
+        self.dark_updated = data
+
+    def update_flat(self, data):
+        self.flat_updated = data
+
+    def dark(self):
+        if self.dark_updated:
+            return self.dark_updated
+        if self.stack_or_cat == 'stack':
+            return np.vstack(tuple(np.asarray([d.data.dark() for d in self.obj_list])))
+        else:
+            return np.hstack(tuple(np.asarray([d.data.dark() for d in self.obj_list])))
+
+    def flat(self):
+        if self.flat_updated:
+            return self.flat_updated
+        if self.stack_or_cat == 'stack':
+            return np.vstack(tuple(np.asarray([d.data.flat() for d in self.obj_list])))
+        else:
+            return np.hstack(tuple(np.asarray([d.data.flat() for d in self.obj_list])))
+
     def dark_mean(self):
         """ Get the averaged dark projection data. """
-        return self.obj_list[0].data.dark_mean()
+        if self.stack_or_cat == 'stack':
+            return np.vstack(tuple(np.asarray([d.data.dark_mean() for d in self.obj_list])))
+        else:
+            return np.hstack(tuple(np.asarray([d.data.dark_mean() for d in self.obj_list])))
 
     def flat_mean(self):
         """ Get the averaged flat projection data. """
-        return self.obj_list[0].data.flat_mean()
+        if self.stack_or_cat == 'stack':
+            return np.vstack(tuple(np.asarray([d.data.flat_mean() for d in self.obj_list])))
+        else:
+            return np.hstack(tuple(np.asarray([d.data.flat_mean() for d in self.obj_list])))

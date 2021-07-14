@@ -15,7 +15,7 @@
 """
 .. module:: monitor_correction
    :platform: Unix
-   :synopsis: A plugin to crop a spectra
+   :synopsis: A plugin to apply a monitor correction.
 
 .. moduleauthor:: Aaron D. Parsons <scientificsoftware@diamond.ac.uk>
 """
@@ -28,19 +28,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class MonitorCorrection(Plugin, CpuPlugin):
-    """
-     corrects the data to the monitor counts.
-     This plugin corrects data[0] from data[1] by dividing. We allow a scale \
-     and offset due to I18's uncalibrated ic
-
-    :param in_datasets: A list of the dataset(s) to \
-        process. Default: ['to_be_corrected','monitor'].
-    :param nominator_scale: a. Default: 1.0.
-    :param nominator_offset: b. Default: 0.0.
-    :param denominator_scale: c. Default: 1.0.
-    :param denominator_offset: d. Default: 0.0.
-    :param pattern: the pattern to apply it to. Default:"PROJECTION".
-    """
 
     def __init__(self):
         logging.debug("correcting data")

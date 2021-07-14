@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tiff_saver
+.. module:: xrf_saver
    :platform: Unix
    :synopsis: A class to save output in tiff format
 
@@ -33,10 +33,6 @@ import collections
 
 @register_plugin
 class XrfSaver(BaseSaver, CpuPlugin):
-    """
-    A class to save xrf data to Diamond Mapping .nxs format. It can also save to edf and rgb for pymca visualisation.
-    """
-
     def __init__(self, name='XrfSaver'):
         super(XrfSaver, self).__init__(name)
         self.folder = None
@@ -60,21 +56,21 @@ class XrfSaver(BaseSaver, CpuPlugin):
         self.axis_info = []
         k = 0
         for ix in self.axes:
-            axis_name = ix.keys()[0]
+            axis_name = list(ix.keys())[0]
             try:
                 foo = in_datasets[0].meta_data.get(axis_name)# take the first key
             except KeyError:
-                foo = np.array(range(in_datasets[0].get_shape()[sd[k]])) # if it doesn't exis then replace it with a range
+                foo = np.array(list(range(in_datasets[0].get_shape()[sd[k]]))) # if it doesn't exis then replace it with a range
             k+=1
             self.axis_info.append(foo)
         #self.axis_info = [in_datasets[0].meta_data.get(ix) for ix in self.axes]
 
     def process_frames(self, data):
         d=data[0] # first dataset in the list
-        print "################################"
-        print "number of datasets in list",len(data)
-        print "shape of data[0]", data[0].shape
-        print "################################"
+        print("################################")
+        print("number of datasets in list",len(data))
+        print("shape of data[0]", data[0].shape)
+        print("################################")
 #         frame = self.get_current_slice_list()[0] # slice list for the first dataset
 #         frame = [ix.start for ix in frame] #  convert to just numbers
 #         channel = self.axis_info[0][frame[-2]]
@@ -101,7 +97,7 @@ class XrfSaver(BaseSaver, CpuPlugin):
     def get_max_frames(self):
         in_datasets, __out_datasets = self.get_datasets()
         sh = in_datasets[0].get_shape()
-        print "full dataset shape:",sh
+        print("full dataset shape:",sh)
         nframes = np.prod(sh[-2:])# product of the channel and the number of elements in the fit
-        print "max frames requested:",nframes, type(nframes)
+        print("max frames requested:",nframes, type(nframes))
         return nframes

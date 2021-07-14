@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove objects smaller than the specified size.
+.. module:: morph_remove_objects
    :platform: Unix
-   :synopsis: Wrapper around skimage morphology to remove smaller objects
+   :synopsis: Wrapper around skimage morphology to remove objects smaller than the specified size.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -30,13 +30,6 @@ from skimage.morphology import *
 
 @register_plugin
 class MorphRemoveObjects(Plugin, CpuPlugin):
-    """
-    A Plugin to remove objects smaller than the specified size.
-
-    :param min_size: The smallest allowable object size. Default: 64.
-    :param connectivity: The connectivity defining the neighborhood of a pixel. Default: 1.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
-    """
 
     def __init__(self):
         super(MorphRemoveObjects, self).__init__("MorphRemoveObjects")
@@ -58,13 +51,12 @@ class MorphRemoveObjects(Plugin, CpuPlugin):
     def process_frames(self, data):
         # run morphological operations here:
         #integerMax = np.max(data[0])
-        #if (np.sum(data[0]) > 0):
-
-        morph_result = remove_small_objects(data[0].astype(bool), self.min_size, self.connectivity, in_place=False)
-        morph_result = morph_result*1
-        #else:
-        #    morph_result = np.uint8(np.zeros(np.shape(data[0])))
-        return [morph_result]
+        if (np.sum(data[0]) > 0):
+            morph_result = remove_small_objects(data[0].astype(bool), self.min_size, self.connectivity, in_place=False)
+            #morph_result = morph_result*1
+        else:
+            morph_result = np.uint8(np.zeros(np.shape(data[0])))
+        return morph_result
 
     def nInput_datasets(self):
         return 1

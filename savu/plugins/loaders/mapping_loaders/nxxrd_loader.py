@@ -32,13 +32,6 @@ import savu.test.test_utils as tu
 
 @register_plugin
 class NxxrdLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXxrd file
-
-    :param calibration_path: path to the calibration file. Default: None.
-    :param name: The name assigned to the dataset. Default: 'xrd'.
-    """
-
     def __init__(self):
         super(NxxrdLoader, self).__init__("NxxrdLoader")
         # converting lengths to metres
@@ -51,7 +44,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         data_obj, xrd_entry = \
             self.multi_modal_setup('NXxrd', path, self.parameters['name'])
         mono_energy = data_obj.backing_file[
-            xrd_entry.name + '/instrument/monochromator/energy'].value
+            xrd_entry.name + '/instrument/monochromator/energy'][()]
         self.exp.meta_data.set("mono_energy", mono_energy)
 
         self._get_calibration_info(data_obj)
@@ -62,7 +55,7 @@ class NxxrdLoader(BaseMultiModalLoader):
         detX = dObj.get_data_dimension_by_axis_label('detector_x')
         detY = dObj.get_data_dimension_by_axis_label('detector_y')
         cdims = (detX, detY)
-        all_dims = range(len(dObj.get_shape()))
+        all_dims = list(range(len(dObj.get_shape())))
         sdims = tuple(set(all_dims).difference(cdims))
         dObj.add_pattern("DIFFRACTION", core_dims=cdims, slice_dims=sdims)
 
@@ -80,48 +73,48 @@ class NxxrdLoader(BaseMultiModalLoader):
                 logging.debug('.... its the legacy version pre-DAWN 2.0')
             except KeyError:
                 emsg = "We don't know what type of calibration file this is"
-                logging.warn(emsg)
+                logging.warning(emsg)
         cfile.close()
 
     def _set_calibration_new(self, mData, det_str, cfile):
         xpix_entry = det_str + '/detector_module/fast_pixel_direction'
-        xpix = cfile[xpix_entry].value*self.mm
+        xpix = cfile[xpix_entry][()]*self.mm
         mData.set("x_pixel_size", xpix)
 
-        beam_center_x = cfile[det_str + '/beam_center_x'].value*self.mm
+        beam_center_x = cfile[det_str + '/beam_center_x'][()]*self.mm
         mData.set("beam_center_x", beam_center_x)
 
-        beam_center_y = cfile[det_str + '/beam_center_y'].value*self.mm
+        beam_center_y = cfile[det_str + '/beam_center_y'][()]*self.mm
         mData.set("beam_center_y", beam_center_y)
 
-        distance = cfile[det_str + '/distance'].value*self.mm
+        distance = cfile[det_str + '/distance'][()]*self.mm
         mData.set("distance", distance)
 
         wentry = '/entry1/calibration_sample/beam/incident_wavelength'
-        wlength = cfile[wentry].value*self.angstrom
+        wlength = cfile[wentry][()]*self.angstrom
         mData.set("incident_wavelength", wlength)
 
-        yaw = -cfile[det_str + '/transformations/euler_b'].value
+        yaw = -cfile[det_str + '/transformations/euler_b'][()]
         mData.set("yaw", yaw)
 
-        roll = cfile[det_str + '/transformations/euler_c'].value-180.0
+        roll = cfile[det_str + '/transformations/euler_c'][()]-180.0
         mData.set("roll", roll)
 
     def _set_calibration_legacy(self, mData, det_str, cfile):
-        xpix = cfile[det_str + '/x_pixel_size'].value*self.mm
+        xpix = cfile[det_str + '/x_pixel_size'][()]*self.mm
         mData.set("x_pixel_size", xpix)
 
-        beam_center_x = cfile[det_str + '/beam_center_x'].value*xpix
+        beam_center_x = cfile[det_str + '/beam_center_x'][()]*xpix
         mData.set("beam_center_x", beam_center_x)
 
-        beam_center_y = cfile[det_str + '/beam_center_y'].value*xpix
+        beam_center_y = cfile[det_str + '/beam_center_y'][()]*xpix
         mData.set("beam_center_y", beam_center_y)
 
-        distance = cfile[det_str + '/distance'].value*self.mm
+        distance = cfile[det_str + '/distance'][()]*self.mm
         mData.set("distance", distance)
 
         wl_entry = '/entry/calibration_sample/beam/incident_wavelength'
-        wavelength = cfile[wl_entry].value*self.angstrom
+        wavelength = cfile[wl_entry][()]*self.angstrom
         mData.set("incident_wavelength", wavelength)
 
         orien = cfile[det_str + '/detector_orientation'][...].reshape((3, 3))
@@ -133,6 +126,8 @@ class NxxrdLoader(BaseMultiModalLoader):
 
     def get_cal_path(self):
         path = self.parameters['calibration_path']
+        if path is None:
+            raise Exception("Please add the path to the xrd calibration file.")
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path

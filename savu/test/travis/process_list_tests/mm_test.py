@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: mm_test
    :platform: Unix
    :synopsis: runner for tests using the MPI framework
 
@@ -28,12 +28,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class MMTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = 'mm.nxs'
+    experiment = None
 
     def test_process(self):
-        data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('MMtest.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+        process_list = 'loaders/MMtest.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

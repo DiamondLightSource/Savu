@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: random_3d_tomo_loader
    :platform: Unix
    :synopsis: A full-field tomography loader that creates a NeXus file in \
    NXtomo format and contains a random number generated hdf5 dataset of a \
@@ -33,22 +33,6 @@ from savu.data.data_structures.data_types.data_plus_darks_and_flats \
 
 @register_plugin
 class Random3dTomoLoader(RandomHdf5Loader):
-    """
-    A hdf5 dataset of a specified size is created at runtime using numpy\
-    random sampling (numpy.random), saved with relevant meta_data to a NeXus \
-    file, and used as input. It recreates the behaviour of the nxtomo loader \
-    but with random data.  The input file path passed to Savu will be ignored \
-    (use a dummy).
-    Note: Further extensions planned to allow the generated data to be \
-    re-loaded with the nxtomo_loader.
-
-    :param axis_labels: A list of axis labels. Default: ['rotation_angle.degrees', 'detector_y.angles', 'detector_x.angles'].
-    :*param patterns: Patterns. Default: ['SINOGRAM.0c.1s.2c', 'PROJECTION.0s.1c.2c'].
-    :*param dataset_name: The name assigned to the dataset. Default: 'tomo'.
-    :u*param image_key: Specify position of darks and flats (in that order) \
-    in the data. Default: [[0, 1], [2, 3]]
-    """
-
     def __init__(self, name='Random3dTomoLoader'):
         super(Random3dTomoLoader, self).__init__(name)
 

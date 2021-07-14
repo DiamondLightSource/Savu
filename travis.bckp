@@ -1,0 +1,24 @@
+dist: bionic
+cache: apt
+language: python
+python:
+  - 3.7
+
+before_install:
+  - cd $TRAVIS_BUILD_DIR/install/savu_hpc/savu_installer
+  - ls -lah
+#  - touch ~/.condarc
+#  - "echo channel_priority: strict >> ~/.condarc"
+
+install:
+  - PREFIX=$HOME bash savu_installer.sh --local --no_prompts
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - export FACILITY=dls
+  - cd $TRAVIS_BUILD_DIR
+  - python setup.py install
+
+script:
+  - pip install coverage pytest-cov
+  - cd $TRAVIS_BUILD_DIR
+  - pytest scripts/configurator_tests/ --cov=scripts
+  - pytest savu/test/travis --cov=savu --cov-report term-missing

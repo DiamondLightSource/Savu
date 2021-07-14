@@ -15,7 +15,7 @@
 """
 .. module:: denoise_bregman_filter
    :platform: Unix
-   :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman
+   :synopsis: A plugin to denoise 2D slices of data by using the Split Bregman \
               to solve the Total Variation ROF model
 
 .. moduleauthor:: Imanol Luengo <scientificsoftware@diamond.ac.uk>
@@ -33,14 +33,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class DenoiseBregmanFilter(BaseFilter, CpuPlugin):
-    """
-    Split Bregman method for solving the denoising Total Variation ROF model.
-
-    :param weight: Denoising factor. Default: 2.0
-    :param max_iterations: Total number of iterations. Default: 100.
-    :param error_threshold: Convergence threshold. Default: 0.001.
-    :param isotropic: Isotropic or Anisotropic filtering. Default: False.
-    """
 
     def __init__(self):
         logging.debug("Starting Denoise Bregman Filter")

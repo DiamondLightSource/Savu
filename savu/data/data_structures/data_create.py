@@ -57,7 +57,7 @@ class DataCreate(object):
         {0} \n {1} \n {2} \n {3}
 
         """
-        #self.dtype = 
+        #self.dtype =
         self.set_dtype(kwargs.get('dtype', np.float32))
         self.remove = kwargs.get('remove', False)
         self.raw = kwargs.get('raw', False)
@@ -66,7 +66,7 @@ class DataCreate(object):
             self.exp.meta_data.set('transport', self.transport)
             self._set_transport_data(self.transport)
 
-        if len(args) is 1:
+        if len(args) == 1:
             self.__create_dataset_from_object(args[0])
         else:
             self.__create_dataset_from_kwargs(kwargs)
@@ -122,7 +122,7 @@ class DataCreate(object):
         if isinstance(copy_data, DataCreate):
             patterns = copy.deepcopy(copy_data.get_data_patterns())
         else:
-            data = copy_data.keys()[0]
+            data = list(copy_data.keys())[0]
             pattern_list = copy_data[data]
 
             all_patterns = copy.deepcopy(data.get_data_patterns())
@@ -141,7 +141,7 @@ class DataCreate(object):
         copy_patterns = {}
         for new_pattern in pattern_list:
             name, all_dims = new_pattern.split('.')
-            if name is '*':
+            if name == '*':
                 copy_patterns = all_patterns
             else:
                 copy_patterns[name] = all_patterns[name]
@@ -150,7 +150,7 @@ class DataCreate(object):
 
         dim_map = [a for a in range(nDims) if a not in dims]
         patterns = {}
-        for name, pattern_dict in copy_patterns.iteritems():
+        for name, pattern_dict in copy_patterns.items():
             empty_flag = False
             for ddir in ['slice_dims', 'core_dims']:
                 s_dims = self._non_negative_directions(
@@ -169,7 +169,7 @@ class DataCreate(object):
         if isinstance(axis_labels, DataCreate):
             self.__copy_labels(axis_labels)
         elif isinstance(axis_labels, dict):
-            data = axis_labels.keys()[0]
+            data = list(axis_labels.keys())[0]
             self.__copy_labels(data)
             self.__amend_axis_labels(axis_labels[data])
         else:
@@ -197,8 +197,8 @@ class DataCreate(object):
         nDims = self.data_info.get('nDims')
         axis_labels = self.data_info.get('axis_labels')
         axis_labels.extend([0]*len(params_dict))
-        for key, value in params_dict.iteritems():
-            title = value['label'].encode('ascii', 'ignore')
+        for key, value in params_dict.items():
+            title = value['label']
             name, unit = title.split('.')
             axis_labels[nDims + key] = {name: unit}
             # add parameter values to the meta_data
@@ -212,11 +212,11 @@ class DataCreate(object):
         """
         removed_dims = 0
         for arg in args[0]:
-            if len(arg.split('.')) is 1:
+            if len(arg.split('.')) == 1:
                 self.__remove_axis_labels(arg, removed_dims)
                 removed_dims += 1
             else:
-                if len(arg.split('~')) is 1:
+                if len(arg.split('~')) == 1:
                     self.__replace_axis_labels(arg)
                 else:
                     self.__insert_axis_labels(arg)
@@ -246,7 +246,7 @@ class DataCreate(object):
 
     def _set_data_patterns(self, patterns):
         """ Add missing dimensions to patterns and populate data info dict. """
-        all_dims = range(len(self.get_shape()))
+        all_dims = list(range(len(self.get_shape())))
         for p in patterns:
             pDims = patterns[p]['core_dims'] + patterns[p]['slice_dims']
             for dim in all_dims:

@@ -48,7 +48,7 @@ if __name__ == '__main__':
              f.write("\n\n    def get_max_frames(self):\n       return 'multiple'")
 
         f.close    
-        print 'done, go to :  '+ os.path.dirname(os.path.realpath(__file__)) + '/' + modname
+        print('done, go to :  '+ os.path.dirname(os.path.realpath(__file__)) + '/' + modname)
              
     QGuiApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     myApp = QApplication(sys.argv)

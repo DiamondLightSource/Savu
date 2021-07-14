@@ -38,7 +38,7 @@ class MPI_setup(object):
         """
         processes = options["process_names"].split(',')
 
-        if len(processes) is 1:
+        if len(processes) == 1:
             options["mpi"] = False
             options["process"] = 0
             options["processes"] = processes
@@ -62,12 +62,12 @@ class MPI_setup(object):
 
         rank_map = [i for s in uniq_hosts for i in range(n_cores)
                     if s == hosts[i]]
-        index = sorted(range(len(rank_map)), key=lambda k: rank_map[k])
+        index = sorted(list(range(len(rank_map))), key=lambda k: rank_map[k])
         all_processes = [(names*n_nodes)[index[i]] for i in range(n_cores)]
         options['processes'] = all_processes
         rank = MPI.COMM_WORLD.rank
         options['process'] = rank
-        node_number = rank_map.index(rank)/n_cores_per_node
+        node_number = rank_map.index(rank) // n_cores_per_node
         local_name = all_processes[rank]
 
         self.__set_logger_parallel("%03i" % node_number, local_name, options)
@@ -103,7 +103,7 @@ class MPI_setup(object):
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
         """
-        machine = 'M%-5s%-6s' % (number, rank)        
+        machine = 'M%-5s%-6s' % (number, rank)
         log_format = 'L %(relativeCreated)12d ' + machine +\
                      ' %(levelname)-6s %(message)s'
         level = cu._get_log_level(options)
@@ -138,7 +138,7 @@ class MPI_setup(object):
         logger = logging.getLogger()
         filename = os.path.join(options['out_path'], 'user.log')
         cu.add_user_log_handler(logger, filename)
-        if 'syslog_server' in options.keys():
+        if 'syslog_server' in list(options.keys()):
             try:
                 cu.add_syslog_log_handler(logger, options['syslog_server'],
                                           options['syslog_port'])

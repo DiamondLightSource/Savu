@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
-Created on 24 Nov 2017
+"""
+.. module:: update_template
+   :platform: Unix
+   :synopsis: Update template
 
-@author: qmm55171
-'''
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
+"""
 
 import argparse
 
@@ -38,7 +41,7 @@ def update_template(filename, entry, key, val):
     template = yu.read_yaml(filename)
     entry = _string_to_val(entry)
     val = _string_to_val(val)
-    template[entry][template[entry].keys()[0]][key] = val
+    template[entry][list(template[entry].keys())[0]][key] = val
 
     with open(filename, 'w') as stream:
         yu.dump_yaml(template, stream)

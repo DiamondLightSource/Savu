@@ -1,52 +1,18 @@
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/DiamondLightSource/Savu
-   :target: https://gitter.im/DiamondLightSource/Savu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+|savu_full_tests| |savu_install| |coverage| |codefactor| |scrutinizer| |zenodo|
 
-.. image:: https://readthedocs.org/projects/savu/badge/?version=latest
-   :target: https://readthedocs.org/projects/savu/?badge=latest
-   :alt: Documentation Status
+|savu-lite-v| |savu-lite-latest| |platform| |downloads|
 
-.. image:: https://travis-ci.org/DiamondLightSource/Savu.svg?branch=master
-    :target: https://travis-ci.org/DiamondLightSource/Savu
-
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.32840.svg
-    :target: https://doi.org/10.5281/zenodo.32840
-
-.. image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
-    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
-
-.. image:: https://badge.waffle.io/diamondlightsource/savu.png?label=ready&title=Ready
-    :target: https://waffle.io/diamondlightsource/savu
-    :alt: 'Stories in Ready'
-
-.. image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
-
-.. image:: https://badge.fury.io/py/savu.svg
-    :target: http://badge.fury.io/py/savu
-
-.. image:: https://landscape.io/github/DiamondLightSource/Savu/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/DiamondLightSource/Savu/master
-    :alt: Code Health
-
-:Date: 2014-11-14
-:Version: 0.1
-:Authors: Mark Basham - *Diamond Light Source*
-:Authors: Nicola Wadeson - *Diamond Light Source*
-
-This documentation in full is available at https://savu.readthedocs.org/en/latest/
+.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans2.png
+    :scale: 100%
+    :align: center
+    :alt: savu_logo
 
 .. start_of_main_text
-
-.. image:: doc/source/files_and_images/Savu_logo_2_L_Res_trans.png
-   :scale: 40 %
-   :align: right
-
 
 Tomography Reconstruction and Processing Pipeline
 =================================================
 
-Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the Diamond Light Source (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
+Savu is a Python package to assist with the processing and reconstruction of parallel-beam tomography data.  The project originated in the Data Analysis Group at the `Diamond Light Source <https://www.diamond.ac.uk/>`_ (UK synchrotron) to address the growing, and increasingly complex, needs of the tomography community.
 
 Designed to allow greater flexibility in tomography data processing, Savu is capable of processing N-dimensional full-field tomography and mapping tomography data, along with concurrent processing of multiple datasets such as those collected as part of a multi-modal setup.  Savu process lists, tailored to a specific experiment and passed to the framework at runtime along with the data, detail the processing steps that are required.
 
@@ -59,7 +25,6 @@ Savu is currently in use across the tomography beamlines at Diamond to reconstru
 
 Features
 ========
-
 - Full-field and mapping tomography data processing
 - multi-modal data processing
 - Absorption, fluorescence, diffraction and ptychography data processing
@@ -73,7 +38,61 @@ Features
 - Processing tailored to a specific experimental setup
 - Easy integration of new functionality
 
+Documentation
+==============
+The full documentation is available at https://savu.readthedocs.org/en/latest/
 
-.. image:: https://codescene.io/projects/3730/status.svg
+Installation (Unix systems only)
+================================
+| See all installation instructions `here <https://github.com/DiamondLightSource/Savu/tree/master/install/README.md>`_
+
+License
+========
+| The project is licensed under the Apache License, Version 2.0.
+| Copyright 2014 Diamond Light Source Ltd.
+
+Contacts
+========
+Any questions regarding software can be addressed to scientificsoftware@diamond.ac.uk.
+
+|codescene|
+
+
+.. |savu_full_tests| image:: https://github.com/DiamondLightSource/Savu/workflows/savu_full_tests/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
+.. |savu_install| image:: https://github.com/DiamondLightSource/Savu/workflows/savu_install/badge.svg
+    :target: https://github.com/DiamondLightSource/Savu/actions
+
+.. |coverage| image:: https://coveralls.io/repos/DiamondLightSource/Savu/badge.svg?branch=master
+    :target: https://coveralls.io/r/DiamondLightSource/Savu?branch=master
+
+.. |codefactor| image:: https://www.codefactor.io/repository/github/diamondlightsource/savu/badge
+    :target: https://www.codefactor.io/repository/github/diamondlightsource/savu
+
+.. |scrutinizer| image:: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/badges/quality-score.png?b=master
+    :target: https://scrutinizer-ci.com/g/DiamondLightSource/Savu/?branch=master
+
+.. |docs| image:: https://readthedocs.org/projects/savu/badge/?version=latest
+    :target: https://readthedocs.org/projects/savu/?badge=latest
+    :alt: Documentation Status
+
+.. |zenodo| image:: https://zenodo.org/badge/26539525.svg
+    :target: https://zenodo.org/badge/latestdoi/26539525
+
+
+.. |savu-lite-v| image:: https://anaconda.org/savu-dep/savu-lite/badges/version.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |savu-lite-latest| image:: https://anaconda.org/savu-dep/savu-lite/badges/latest_release_date.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |platform| image:: https://anaconda.org/savu-dep/savu-lite/badges/platforms.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |downloads| image:: https://anaconda.org/savu-dep/savu-lite/badges/downloads.svg
+    :target: https://anaconda.org/savu-dep/savu-lite
+
+.. |codescene| image:: https://codescene.io/projects/3730/status.svg
     :target: https://codescene.io/projects/3730/jobs/latest-successful/results
     :alt: Get more details at **codescene.io**

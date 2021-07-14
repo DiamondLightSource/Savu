@@ -26,11 +26,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class NoProcessPlugin(Plugin, CpuPlugin):
-    """
-    The base class from which all plugins should inherit.
-    :u*param pattern: Explicitly state the slicing pattern. Default: None.
-    :param dummy: Dummy parameter for testing. Default: 10.
-    """
 
     def __init__(self):
         super(NoProcessPlugin, self).__init__("NoProcessPlugin")
@@ -51,7 +46,7 @@ class NoProcessPlugin(Plugin, CpuPlugin):
         if self.parameters['pattern']:
             pattern = self.parameters['pattern']
         else:
-            pattern = in_dataset[0].get_data_patterns().keys()[0]
+            pattern = list(in_dataset[0].get_data_patterns().keys())[0]
 
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())

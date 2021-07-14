@@ -1,0 +1,33 @@
+
+xrd:
+    data:
+        path: processed/result/data
+
+    axis_labels:
+        0:
+            dim     : 0
+            name    : rotation_angle
+            value   : $dfile['/processed/result/gts_theta'].value
+            units   : degrees
+        1:
+            dim     : 1
+            name    : x
+            value   : $dfile['/processed/result/kb_cs_x'].value
+            units   : None
+        2:
+            dim     : 2
+            name    : Q
+            value   : $dfile['/processed/result/q'].value
+            units   : None
+            #units   : $dfile['/processed/result/q'].attrs['units'] - yaml convertor doesn't like the Angstroms symbol 
+
+    patterns:
+        SINOGRAM:
+            core_dims   : (0, 1)
+            slice_dims  : (2,)
+        PROJECTION:
+            core_dims   : (1,)
+            slice_dims  : (0, 2)
+        SPECTRUM:
+            core_dims   : (2,)
+            slice_dims  : (0, 1)

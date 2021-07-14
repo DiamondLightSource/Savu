@@ -84,14 +84,14 @@ class DataWithDarksAndFlats(BaseType):
             idx = np.arange(0, len(slice_list))
             detX = self.data_obj.get_data_dimension_by_axis_label('detector_x')
             detY = self.data_obj.get_data_dimension_by_axis_label('detector_y')
-            remove = set(idx).difference(set([remove_dim, detX, detY]))
+            remove = set(idx).difference({remove_dim, detX, detY})
             for dim in sorted(list(remove), reverse=True):
                 del slice_list[dim]
 
         return slice_list
 
     def _set_scale(self, name, scale):
-        self.set_flat_scale(scale) if name is 'flat' else\
+        self.set_flat_scale(scale) if name == 'flat' else \
             self.set_dark_scale(scale)
 
     def set_flat_scale(self, fscale):
@@ -112,7 +112,7 @@ class DataWithDarksAndFlats(BaseType):
         return self._calc_mean(self.flat())
 
     def _calc_mean(self, data):
-        return data if len(data.shape) is 2 else\
+        return data if len(data.shape) == 2 else \
             data.mean(self.proj_dim).astype(np.float32)
 
     def get_index(self, key, full=False):
@@ -137,11 +137,11 @@ class DataWithDarksAndFlats(BaseType):
         # all data entries
         data_idx = np.where(self.image_key == 0)[0]
         preview_idx = np.arange(len(data_idx))[slice_list]
-        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]        
-        if (len(data_idx) == len(preview_idx)):
-	        remove_idx = np.delete(data_idx, preview_idx[::-1])
-	else: 
-		remove_idx = []
+        # check the inconsistency regarding the preview of angles, e.g [0:10,:,:]
+        if len(data_idx) == len(preview_idx):
+            remove_idx = np.delete(data_idx, preview_idx[::-1])
+        else:
+            remove_idx = []
         return np.delete(self.image_key, remove_idx)
 
     def __get_reduced_index(self, key, slice_list):
@@ -151,9 +151,9 @@ class DataWithDarksAndFlats(BaseType):
         return np.where(preview_image_key == key)[0]
 
     def __get_data(self, key):
-        index = [slice(None)]*self.nDims
+        index = [slice(None)] * self.nDims
         rot_dim = self.data_obj.get_data_dimension_by_axis_label(
-                'rotation_angle')
+            'rotation_angle')
 
         # separate the transfer of data for slice lists with entries far \
         # apart, as this significantly improves hdf5 performance.
@@ -162,7 +162,7 @@ class DataWithDarksAndFlats(BaseType):
         if not k_idx.size:
             return np.array([])
 
-        k_idx = np.split(k_idx, np.where(np.diff(k_idx) > split_diff)[0]+1)
+        k_idx = np.split(k_idx, np.where(np.diff(k_idx) > split_diff)[0] + 1)
 
         index[self.proj_dim] = k_idx[0]
         data = self.data[tuple(index)]
@@ -175,17 +175,17 @@ class DataWithDarksAndFlats(BaseType):
             return data
 
         sl = list(copy.deepcopy(self.dark_flat_slice_list[key]))
-        if len(data.shape) is 2:
+        if len(data.shape) == 2:
             del sl[rot_dim]
         return data[tuple(sl)]
 
     def dark_image_key_data(self):
         """ Get the dark data. """
-        return self.__get_data(2)*self.dscale
+        return self.__get_data(2) * self.dscale
 
     def flat_image_key_data(self):
         """ Get the flat data. """
-        return self.__get_data(1)*self.fscale
+        return self.__get_data(1) * self.fscale
 
     def update_dark(self, data):
         self.dark_updated = data
@@ -203,7 +203,7 @@ class DataWithDarksAndFlats(BaseType):
         slice_list = self.data_obj._preview._get_preview_slice_list()
         if slice_list:
             self.dark_flat_slice_list = \
-                [tuple(self.get_dark_flat_slice_list())]*3
+                [tuple(self.get_dark_flat_slice_list())] * 3
 
 
 class ImageKey(DataWithDarksAndFlats):
@@ -251,16 +251,16 @@ class ImageKey(DataWithDarksAndFlats):
         if not isinstance(ignore, list):
             ignore = [ignore]
         for batch in ignore:
-            self.image_key[start[batch-1]:end[batch-1]+1] = 3
+            self.image_key[start[batch - 1]:end[batch - 1] + 1] = 3
 
     def dark(self):
         """ Get the dark data. """
-        return self.dark_updated if self.dark_updated is not False else\
+        return self.dark_updated if self.dark_updated is not False else \
             self.dark_image_key_data()
 
     def flat(self):
         """ Get the flat data. """
-        return self.flat_updated if self.flat_updated is not False else\
+        return self.flat_updated if self.flat_updated is not False else \
             self.flat_image_key_data()
 
 
@@ -331,7 +331,7 @@ class NoImageKey(DataWithDarksAndFlats):
             dark = self.dark_image_key_data()
             self.image_key = self.orig_image_key
             return dark
-        return self.dark_path[self.dark_flat_slice_list[2]]*self.dscale
+        return self.dark_path[self.dark_flat_slice_list[2]] * self.dscale
 
     def flat(self):
         """ Get the flat data. """
@@ -342,4 +342,4 @@ class NoImageKey(DataWithDarksAndFlats):
             flat = self.flat_image_key_data()
             self.image_key = self.orig_image_key
             return flat
-        return self.flat_path[self.dark_flat_slice_list[1]]*self.fscale
+        return self.flat_path[self.dark_flat_slice_list[1]] * self.fscale

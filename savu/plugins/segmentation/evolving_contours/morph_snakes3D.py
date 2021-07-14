@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: 3D segmentation using Morphological Level Sets or active countours
+.. module:: morph_snakes3D
    :platform: Unix
-   :synopsis: Wrapper around Morphsnakes for Morphological countours segmentation
+   :synopsis: 3D segmentation using Morphological Level Sets or active countours.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -32,20 +32,7 @@ from morphsnakes import morphological_chan_vese
 
 @register_plugin
 class MorphSnakes3d(Plugin, MultiThreadedPlugin):
-    """
-    A Plugin to 3D segment reconstructed data using Morphsnakes module. When initialised
-    with a mask, the active contour propagates to find the minimum of energy (a possible edge countour).
 
-    :param lambda1:  Weight parameter for the outer region, if lambda1 is larger than \
-        lambda2, the outer region will contain a larger range of values than \
-        the inner region. Default: 1.
-    :param lambda2:  Weight parameter for the inner region, if lambda2 is larger than \
-        lambda1, the inner region will contain a larger range of values than \
-        the outer region. Default: 1.
-    :param smoothing: Number of times the smoothing operator is applied per iteration, \
-        reasonable values are around 1-4 and larger values lead to smoother segmentations. Default: 1.
-    :param iterations: The number of iterations. Default: 350.
-    """
 
     def __init__(self):
         super(MorphSnakes3d, self).__init__("MorphSnakes3d")
@@ -53,11 +40,13 @@ class MorphSnakes3d(Plugin, MultiThreadedPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_3D', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_3D', 'single') # the initialisation (mask)
+
+        getall = ["VOLUME_XZ", "voxel_y"]
+        in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
+        in_pData[1].plugin_data_setup('VOLUME_3D', 'single', getall=getall) # the initialisation (mask)
 
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
-        out_pData[0].plugin_data_setup('VOLUME_3D', 'single')
+        out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
 
     def pre_process(self):
         # extract given parameters

@@ -1,5 +1,5 @@
-import GraphicalThreadProfiler as GTP
-import GraphicalThreadProfiler_multi as GTP_m
+from . import GraphicalThreadProfiler as GTP
+from . import GraphicalThreadProfiler_multi as GTP_m
 import fnmatch
 import os
 
@@ -42,7 +42,7 @@ def get_files(dir_path):
 def render_template(frame, outfilename, title, size, params, header_shift,
                     max_std):
     from jinja2 import Template
-    import template_strings as ts
+    from . import template_strings as ts
 
     nVals = len(frame)
 
@@ -51,8 +51,8 @@ def render_template(frame, outfilename, title, size, params, header_shift,
                                                    header_shift))
 
     style = os.path.dirname(__file__) + '/style_sheet.css'
-    print outfilename
-    f_out.write(template.render(frame=[map(list, f) for f in frame],
+    print(outfilename)
+    f_out.write(template.render(frame=[list(map(list, f)) for f in frame],
                                 style_sheet=style, max_bubble=max_std))
     f_out.close()
 
@@ -61,7 +61,7 @@ def render_template(frame, outfilename, title, size, params, header_shift,
 
 def convert_all_files():
     all_files = get_files(os.getcwd())
-    single_files = [f for f in all_files if f.split('.')[-1][0] is 'o']
+    single_files = [f for f in all_files if f.split('.')[-1][0] == 'o']
     GTP.convert(single_files)
 
     wildcard_files = [(os.path.dirname(f) + '/' +
@@ -102,9 +102,8 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
-    if len(args) is 1:
-        filename = (os.getcwd() if args[0] is '.' else args[0])
+    if len(args) == 1:
+        filename = (os.getcwd() if args[0] == '.' else args[0])
         create_bubble_chart(get_files(filename))
     else:
         convert_all_files()
-

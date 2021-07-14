@@ -41,7 +41,7 @@ class Map3dto4dh5(BaseType):
         if inspect.isclass(type(self.data)):
             self.add_base_class_with_instance(type(self.data), self.data)
 
-        new_shape = (n_angles, shape[1], shape[2], shape[0]/n_angles)
+        new_shape = (n_angles, shape[1], shape[2], shape[0] // n_angles)
         self.shape = new_shape
 
     def clone_data_args(self, args, kwargs, extras):
@@ -59,14 +59,14 @@ class Map3dto4dh5(BaseType):
         size = [len(np.arange(i.start, i.stop, i.step)) for i in idx]
         data = np.empty(size)
 
-        change = np.where(idx_dim0[:-1]/n_angles != idx_dim0[1:]/n_angles)[0]
+        change = np.where(idx_dim0[:-1] // n_angles != idx_dim0[1:] // n_angles)[0]
         start = idx_dim0[np.append(0, change+1)]
         stop = idx_dim0[np.append(change, len(idx_dim0)-1)] + 1
         length = stop - start
 
         for i in range(len(start)):
-            new_slice = [slice(start[i], stop[i], idx[0].step), idx[1], idx[2]]
-            data[0:length[i], :, :, i] = self.data[tuple(new_slice)]
+            new_slice = (slice(start[i], stop[i], idx[0].step), idx[1], idx[2])
+            data[0:length[i], :, :, i] = self.data[new_slice]
         return data
 
     def get_shape(self):

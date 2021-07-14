@@ -29,15 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PyfaiAzimuthalIntegratorSeparate(BaseAzimuthalIntegrator):
-    """
-    1D azimuthal integrator by pyFAI
-    :param use_mask: Should we mask. Default: False.
-    :param out_datasets: A. Default: ["powder","spots"]
-    :param percentile: Percentile to threshold. Default:50.
-    :param num_bins: number of bins. Default: 1005.
-    :param num_bins_azim: number of azimuthal bins. Default:20.
-
-    """
 
     def __init__(self):
         logging.debug("Starting 1D azimuthal integrationr")

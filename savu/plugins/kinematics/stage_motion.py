@@ -27,29 +27,18 @@ import itertools
 import time
 import logging
 
+from typing import Union
+
 from savu.plugins.plugin import Plugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.core.utils import ensure_string
 
 from pmacparser.pmac_parser import PMACParser
 
 
 @register_plugin
 class StageMotion(Plugin, CpuPlugin):
-    """
-    A Plugin to calculate stage motion from motion positions.
-    :param in_datasets: Create a list of the \
-        dataset(s). Default: ["pmean"].
-    :param out_datasets: Create a list of the \
-        dataset(s). Default: ["qmean"].
-    :param use_min_max: Also use the min and max datasets \
-        including all combinations of min, mean and max. Default: False.
-    :param extra_in_datasets: The extra datasets \
-        to use as input for min and max. Default: ["pmin", "pmax"].
-    :param extra_out_datasets: The extra datasets \
-        to use as output for min and max. Default: ["qmin", "qmax"].
-    """
-
     NUM_OUTPUT_Q_VARS = 9
     MEAN_INDEX = 0
     NUM_DATASETS = 1
@@ -61,7 +50,7 @@ class StageMotion(Plugin, CpuPlugin):
         self.pvals = None
         self.num_datasets = self.NUM_DATASETS
         self.use_min_max = False
-        
+
     def _check_parameters(self):
         use_min_max = self.parameters['use_min_max']
         logging.debug("Config use min max: " + str(use_min_max))
@@ -93,20 +82,18 @@ class StageMotion(Plugin, CpuPlugin):
         self.out_pshape = out_pdata.get_shape()
 
         # Get the kinematic program to run and the static variables
-        program_from_data = \
-            self.get_in_meta_data()[0].get_dictionary()['program']
-        variables_from_data = \
-            self.get_in_meta_data()[0].get_dictionary()['variables']
+        program_from_data = self.get_in_meta_data()[0].get_dictionary()['program']
+        variables_from_data = self.get_in_meta_data()[0].get_dictionary()['variables']
 
         # Create the list of code lines from the kinematic program input
         code_lines = []
-        for i in range(len(program_from_data)):
-            code_lines.append(str(program_from_data[i]))
+        for line in program_from_data:
+            code_lines.append(ensure_string(line))
 
         # Set the static variables from the meta input
         for i in range(len(variables_from_data)):
-            self.variables[variables_from_data['Name'][i]] = \
-                variables_from_data['Value'][i]
+            name = ensure_string(variables_from_data['Name'][i])
+            self.variables[name] = variables_from_data['Value'][i]
 
         # Create the PMACParser instance
         self.parser = PMACParser(code_lines)
@@ -161,7 +148,7 @@ class StageMotion(Plugin, CpuPlugin):
             for i in range(1, self.NUM_OUTPUT_Q_VARS + 1):
                 if 'Q' + str(i) in parse_result:
                     q_result = parse_result['Q' + str(i)]
-                    
+
                     if not hasattr(q_result, 'size'):
                         size = 1
                     else:
@@ -270,5 +257,5 @@ class StageMotion(Plugin, CpuPlugin):
     def nOutput_datasets(self):
         if self.use_min_max:
             self.parameters['out_datasets'].extend(
-                    self.parameters['extra_out_datasets'])        
+                    self.parameters['extra_out_datasets'])
         return self.num_datasets

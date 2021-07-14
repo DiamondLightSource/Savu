@@ -28,13 +28,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class BasicOperations(Plugin, CpuPlugin):
-    """ A class that performs basic mathematical operations on datasets.
-    How should the information be passed to the plugin?
-
-    :param operations: Operations to perform. Default: [].
-    :param pattern: Pattern associated with the \
-        datasets. Default: 'PROJECTION'.
-    """
 
     def __init__(self):
         super(BasicOperations, self).__init__("BasicOperations")
@@ -44,9 +37,20 @@ class BasicOperations(Plugin, CpuPlugin):
         self.out_data = self._set_out_data_names()
 
     def process_frames(self, data):
+        # creates an 'environment' that will store the variables created
+        # inside the exec statement
+        exec_environment = {'data': data}
+
         for i in range(len(self.operations)):
-            exec(self.out_data[i] + "=" + self.operations[i])
-        return [eval(out) for out in self.out_data]
+            # runs the exec with no builtins, and only 'data' available as a
+            #variable initially
+            exec(f"{self.out_data[i]} = {self.operations[i]}",
+                 {"builtins": None}, exec_environment)
+
+        # Find the result from each exec. Does list comprehension on the
+        # results instead of just exec_environment.items to keep the order the
+        # same as in out_data
+        return [exec_environment[out] for out in self.out_data]
 
     def setup(self):
         """
@@ -69,7 +73,7 @@ class BasicOperations(Plugin, CpuPlugin):
             out_datasets[i].create_dataset(in_datasets[copy_datasets[i]])
             out_pData[i].plugin_data_setup(pattern, self.get_max_frames())
 
-    def nInput_datasets(self):
+    def nInput_datasets(self): # needs updating as 'var' is no longer valid
         return 'var'
 
     def nOutput_datasets(self):
@@ -79,6 +83,10 @@ class BasicOperations(Plugin, CpuPlugin):
         return 'multiple'
 
     def _set_data_mappings(self):
+        """
+        Maps the input datasets names to the data array passed to process
+        frames.
+        """
         mapping_dict = {}
         in_datasets = self.get_in_datasets()
         for i in range(len(in_datasets)):
@@ -90,10 +98,13 @@ class BasicOperations(Plugin, CpuPlugin):
         return [out_datasets[i].get_name() for i in range(len(out_datasets))]
 
     def _amend_ops(self, mappings_dict):
+        """
+        Replaces the dataset names in the operations with the data array.
+        """
         operations = self.parameters['operations']
         new_ops = []
         for op in operations:
-            for key, value in mappings_dict.iteritems():
+            for key, value in mappings_dict.items():
                 op = op.replace(key, value)
             new_ops.append(op)
         return new_ops

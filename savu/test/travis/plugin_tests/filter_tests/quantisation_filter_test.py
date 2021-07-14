@@ -31,12 +31,14 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class QuantisationFilterTest(unittest.TestCase):
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = None
 
     def test_quantisation_filter(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('quantisation_filter_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
+        process_list = 'quantisation_filter_test.nxs'
+        options = tu.initialise_options(self.data_file , self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 if __name__ == "__main__":
     unittest.main()

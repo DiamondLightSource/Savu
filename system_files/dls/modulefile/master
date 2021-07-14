@@ -1,0 +1,127 @@
+#%Module1.0#####################################################################
+##
+## Savu modulefile
+##
+
+proc ModulesHelp { } {
+	global savu_version
+
+        puts stderr "\tLoads version $savu_version of Savu"
+        puts stderr "\n\tSavu is a pipeline for running tomography "
+        puts stderr "\treconstruction routines on the cluster at diamond.\n"
+}
+
+module load global/directories
+
+if { [info exists env(SAVUHOME)] } {
+	set gitrepo $env(SAVUHOME)
+}
+
+# Set RHEL 6 or 7
+# set redhatrelease [eval exec "cat /etc/redhat-release"]
+# if { [regexp -nocase {release 6} $redhatrelease] } {
+# 	set OS rhel6
+# } elseif { [regexp -nocase {release 7} $redhatrelease] } {
+# 	set OS rhel7
+# } else {
+# 	puts stderr "Incompatible operating system."
+# }
+
+# # switch OS
+# if { [info exists env(SWITCH_SAVU_OS)] } {
+# 	if { [string equal $OS rhel7] } {
+# 		set OS rhel6
+# 	} else {
+# 		set OS rhel7
+# 	}
+# }
+
+#============================================================================
+# When creating a new module, update these variables.
+set savu_version 3.0
+
+set mpi_version 3.1.4
+# if { [string equal $OS rhel6] } {
+# 	set PYTHON_HOME $env(softwaredir)/savu/2.4_RHEL6/miniconda
+#     setenv SAVU_PLUGINS_PATH /dls_sw/apps/savu/2.4_RHEL6/savu_plugins
+# 	#puts stderr "\tLoading Savu for RHEL 6"
+# } else {
+	set PYTHON_HOME $env(softwaredir)/savu/3.0_RHEL7/savu
+	# set PYTHON_HOME $env(softwaredir)/savu/3.0_RHEL7/miniconda
+    setenv SAVU_PLUGINS_PATH /dls_sw/apps/savu/3.0_RHEL7/savu_plugins
+	#puts stderr "\tLoading Savu for RHEL 7"
+# }
+
+#============================================================================
+
+set mach $tcl_platform(machine)
+module-whatis "loads Savu version $savu_version"
+set mach $tcl_platform(machine)
+if { [string compare $mach "x86_64"] != 0} {
+    puts stderr "Cannot load/unload: this is for 64-bit machines only!"
+    return 1
+}
+set arch 64
+
+
+if { [module-info mode load] } {
+
+  # load openmpi shared libraries
+  if { ! [is-loaded openmpi/$mpi_version] } {
+    if { [is-loaded openmpi] } {
+        module unload openmpi
+    }
+    module load openmpi/$mpi_version
+  }
+
+  if { ! [info exists env(SAVU_PRERELEASE)] } {
+  	puts stderr "\n\t\t    ********************************************"
+  	puts stderr "\t\t    *         Loading Savu version $savu_version         *"
+  	puts stderr "\t\t    ********************************************\n"
+  }
+  puts stderr "  ************************* IMPORTANT NOTICES *************************"
+  puts stderr "  (1) Please ensure savu is the only module loaded in a fresh terminal."
+  puts stderr "  (2) When using savu_mpi, please output to a visit directory.\n"
+
+} else {
+  puts stderr "\n\tUnloading Savu version $savu_version"
+
+  # unload openmpi shared libraries
+  if { [is-loaded openmpi/$mpi_version] } {
+    module unload openmpi/$mpi_version
+  }
+
+  # TODO is this necessary? SAVUHOME seems like a user-set environment
+  # so we shouldn't automatically delete it
+  # if { [info exists env(SAVUHOME)] } {
+	# unsetenv SAVUHOME
+	# puts stderr "Cleaning up SAVUHOME"
+  # }
+
+  # if { [info exists env(SWITCH_SAVU_OS)] } {
+	# unsetenv SWITCH_SAVU_OS
+	# puts stderr "Cleaning up SWITCH_SAVU_OS"
+  # }
+}
+
+setenv PYTHONNOUSERSITE True
+prepend-path PATH $PYTHON_HOME/bin
+
+module add fastxrf
+
+set-alias "savu_mpi" "savu_launcher.sh -s $savu_version"
+set-alias "savu_mpi_auto" "savu_launcher.sh -s $savu_version -t AUTO"
+set-alias "savu_mpi_preview" "savu_launcher.sh -s $savu_version -t PREVIEW"
+
+if { [info exists gitrepo] } {
+  prepend-path PATH $gitrepo
+  prepend-path PYTHONPATH $gitrepo
+  set-alias "savu_mpi_dev" "$gitrepo/system_files/dls/mpi/savu_launcher.sh -s $savu_version -i"
+  set-alias "savu_mpi_local" "$gitrepo/system_files/dls/mpi/savu_mpijob_local.sh"
+  set-alias "savu_config" "python $gitrepo/scripts/config_generator/savu_config.py"
+  set-alias "savu" "python $gitrepo/savu/tomo_recon.py"
+  set-alias "savu_citations" "python $gitrepo/scripts/citation_extractor/citation_extractor.py"
+} else {
+  set-alias "savu" "savu -s cs04r-sc-serv-14"
+  set-alias "savu_mpi_local" "savu_mpijob_local.sh"
+}

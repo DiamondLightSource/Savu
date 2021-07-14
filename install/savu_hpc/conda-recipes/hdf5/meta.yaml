@@ -1,0 +1,15 @@
+package:
+  name: hdf5
+  version: {{ environ['VERSION_BUILD_HDF5'] }}
+
+source:
+  fn: {{ environ['PATCH_HDF'] }}.tar.bz2
+  url: https://www.hdfgroup.org/ftp/HDF5/releases/{{ environ['RELEASE_HDF'] }}/{{ environ['PATCH_HDF'] }}/src/{{ environ['PATCH_HDF'] }}.tar.bz2
+
+build:
+  number: 1
+
+about:
+  home: http://www.hdfgroup.org/HDF5/
+  license: BSD-style (http://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING)
+  summary: High-performance data management and storage suite

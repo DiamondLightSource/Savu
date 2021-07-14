@@ -13,31 +13,22 @@
 # limitations under the License.
 
 """
-.. module:: Convert 360-180 sinogram.
+.. module:: convert_360_180_sinogram
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to convert 0-360 degree\\
-    sinogram to 0-180 sinogram.
+   :synopsis: A plugin working in sinogram space to convert a 360-degree \
+   sinogram to a 180-degree sinogram in a half-acquisition scan.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-from savu.data.plugin_list import CitationInformation
 import numpy as np
 import scipy.ndimage as ndi
 
 
 @register_plugin
 class Convert360180Sinogram(Plugin, CpuPlugin):
-    """
-
-    Method to convert the 0-360 degree sinogram to 0-180 sinogram.
-    :param center: Center of rotation. Default: 0
-    :param out_datasets: Create a list of the dataset(s) to \
-        create. Default: ['in_datasets[0]', 'cor'].
-
-    """
 
     def __init__(self):
         super(Convert360180Sinogram, self).__init__(
@@ -47,9 +38,9 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
 
-        self.center = 0
+        self.center = 0.0
         key = "centre_of_rotation"
-        if key in in_dataset[0].meta_data.get_dictionary().keys():
+        if key in list(in_dataset[0].meta_data.get_dictionary().keys()):
             self.center = in_dataset[0].meta_data.get(key)
 
         old_shape = in_dataset[0].get_shape()
@@ -57,7 +48,6 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             'detector_x')
         self.height1_dim = in_dataset[0].get_data_dimension_by_axis_label(
             'detector_y')
-
         height_dim = in_dataset[0].get_data_dimension_by_axis_label(
             'rotation_angle')
         new_shape = list(old_shape)
@@ -83,6 +73,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
 
     def pre_process(self):
         out_dataset = self.get_out_datasets()[0]
+        in_dataset = self.get_in_datasets()[0]
         in_pData = self.get_plugin_in_datasets()
         width_dim = in_pData[0].get_data_dimension_by_axis_label('detector_x')
         height_dim = in_pData[0].get_data_dimension_by_axis_label(
@@ -90,8 +81,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sino_shape = list(in_pData[0].get_shape())
         self.width = sino_shape[width_dim]
         self.height = sino_shape[height_dim]
-        center_manu = self.parameters['center']
-        if center_manu != 0:
+        center_manu = float(self.parameters['center'])
+        if center_manu != 0.0:
             self.center = center_manu
         self.mid_width = self.width / 2.0
         if (self.center <= 0) or (self.center > self.width):
@@ -106,7 +97,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             self.cor = center_int
 
         self.new_height = np.int16(np.ceil(self.height / 2.0))
-        list_angle = out_dataset.meta_data.get("rotation_angle")
+        list_angle = in_dataset.meta_data.get("rotation_angle")
         list_angle = list_angle[0:self.new_height]
 
         out_dataset.meta_data.set("rotation_angle", list_angle)
@@ -125,8 +116,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sinocombine = np.zeros((self.new_height, 2 * self.width),
                                dtype=np.float32)
         if self.center < self.mid_width:
-            num1 = np.mean(np.abs(sinogram1[:,:self.overlap]))
-            num2 = np.mean(np.abs(sinogram2[:,-self.overlap:]))
+            num1 = np.mean(np.abs(sinogram1[:, :self.overlap]))
+            num2 = np.mean(np.abs(sinogram2[:, -self.overlap:]))
             sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_right
             sinogram2 = sinogram2 * self.mat_wedge_left
@@ -134,8 +125,8 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             sinocombine[:, self.overlap:self.overlap + self.width] = sinogram2
             sinocombine[:, -self.width:] += sinogram1
         else:
-            num1 = np.mean(np.abs(sinogram1[:,-self.overlap:]))
-            num2 = np.mean(np.abs(sinogram2[:,:self.overlap]))
+            num1 = np.mean(np.abs(sinogram1[:, -self.overlap:]))
+            num2 = np.mean(np.abs(sinogram2[:, :self.overlap]))
             sinogram2 = sinogram2 * num1 / num2
             sinogram1 = sinogram1 * self.mat_wedge_left
             sinogram2 = sinogram2 * self.mat_wedge_right

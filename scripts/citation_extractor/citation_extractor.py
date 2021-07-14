@@ -8,13 +8,14 @@ from savu.version import __version__
 
 class NXcitation(object):
     def __init__(self, description, doi, endnote, bibtex):
-        self.description = description
-        self.doi = doi
-        self.endnote = endnote
-        self.bibtex = bibtex
+        self.description = description.decode('UTF-8')
+        self.doi = doi.decode('UTF-8')
+        self.endnote = endnote.decode('UTF-8')
+        self.bibtex = bibtex.decode('UTF-8')
 
     def get_bibtex_ref(self):
-        return self.bibtex.split(',')[0].split('{')[1]
+        return self.bibtex.split(',')[0].split('{')[1] \
+            if self.bibtex else ""
 
     def get_first_author(self):
         parts = self.endnote.split('\n')
@@ -64,7 +65,7 @@ class NXciteVisitor(object):
         self.citation_manager = NXcitation_manager()
 
     def _visit_NXcite(self, name, obj):
-        if "NX_class" in obj.attrs.keys():
+        if "NX_class" in list(obj.attrs.keys()):
             if obj.attrs["NX_class"] in ["NXcite"]:
                 citation = NXcitation(obj['description'][0],
                                       obj['doi'][0],
@@ -80,18 +81,18 @@ class NXciteVisitor(object):
 def __check_input_params(args):
     """ Check for required input arguments.
     """
-    if len(args) is not 2:
+    if len(args) != 2:
         print("Input and output filename need to be specified")
         print("Exiting with error code 1 - incorrect number of inputs")
         sys.exit(1)
 
     if not os.path.exists(args[0]):
-        print("Input file '%s' does not exist" % args[0])
+        print(("Input file '%s' does not exist" % args[0]))
         print("Exiting with error code 2 - Input file missing")
         sys.exit(2)
 
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments.
     """
     version = "%(prog)s " + __version__
@@ -100,17 +101,26 @@ def __option_parser():
     parser.add_argument('out_file', help='Output file to extract citation \
                         information to.')
     parser.add_argument('--version', action='version', version=version)
-    return parser.parse_args()
+    return parser if doc==True else parser.parse_args()
 
 
-def main():
-    args = __option_parser()
-    infile = h5py.File(args.in_file, 'r')
+def main(in_file=None, quiet=False):
+    # when calling directly from tomo_recon.py
+    if in_file:
+        out_file = os.path.join(os.path.dirname(in_file), 'citations.txt')
+    else:
+        args = __option_parser(doc=False)
+        in_file = args.in_file
+        out_file = args.out_file
+        
+    infile = h5py.File(in_file, 'r')
     citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
     if citation_manager is not None:
-        with open(args.out_file, 'a') as outfile:
+        with open(out_file, 'w') as outfile:
             outfile.write(citation_manager.__str__())
-    print("Extraction complete")
+    
+    if not quiet:
+        print("Extraction complete")
 
 if __name__ == '__main__':
     main()

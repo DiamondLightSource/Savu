@@ -22,7 +22,6 @@
 """
 
 import numpy as np
-
 from savu.data.data_structures.data_types.data_plus_darks_and_flats import \
     NoImageKey
 from savu.plugins.loaders.full_field_loaders.nxtomo_loader import NxtomoLoader
@@ -31,19 +30,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class DxchangeLoader(NxtomoLoader):
-    """
-    A class to load tomography data from a hdf5 file
-
-    :param data_path: Path to the data. Default: 'exchange/data'.
-    :param dark: dark data path and scale \
-        value. Default: ['exchange/data_dark', 1].
-    :param flat: flat data path and scale \
-        value. Default: ['exchange/data_white', 1].
-    :u*param logfile: path to the log file. Default: None.
-
-    :*param angles: Hidden. Default: [1, 2, 3].
-    :~param image_key_path: Not required Default: None.
-    """
 
     def __init__(self, name='DxchangeLoader'):
         super(DxchangeLoader, self).__init__(name)
@@ -60,11 +46,7 @@ class DxchangeLoader(NxtomoLoader):
         data_obj.data._set_scale(name, scale)
 
     def _set_rotation_angles(self, data_obj):
-        # set parameters here
-        with open(self.parameters['logfile'], 'r') as fp:
-            for i, line in enumerate(fp):
-                if i == 23:
-                    n_proj = int(line.split(':')[1].strip())
-        angles = np.linspace(0, 180, n_proj)
+        ffile = data_obj.backing_file
+        angles = np.squeeze(ffile[self.parameters["angles"]][:])
         data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)

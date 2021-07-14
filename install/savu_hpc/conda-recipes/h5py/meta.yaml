@@ -1,0 +1,24 @@
+package:
+  name: h5py
+  version: {{ environ['VERSION_BUILD_H5PY'] }}
+
+source:
+  fn: h5py-{{ environ['VERSION_H5PY'] }}.tar.gz
+  url: https://github.com/h5py/h5py/archive/{{ environ['VERSION_H5PY'] }}.tar.gz
+
+requirements:
+  build:
+    - python
+    - numpy
+    - hdf5 {{ environ['VERSION_BUILD_HDF5'] }}
+    - cython
+    - pkgconfig
+    - six
+
+build:
+  number: 1
+
+about:
+  home: http://www.h5py.org/
+  license: New BSD (http://opensource.org/licenses/bsd-license.php)
+  summary: Pythonic interface to the HDF5 binary data format

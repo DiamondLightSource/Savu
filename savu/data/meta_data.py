@@ -53,7 +53,7 @@ class MetaData(object):
             >>> MetaDataObj.get_dictionary()
             {'name1': {'name2': 3}}
         """
-        maplist = (name if type(name) is list else [name])
+        maplist = name if isinstance(name, list) else [name]
         self.get(maplist[:-1], True)[maplist[-1]] = value
 
     def get(self, maplist, setFlag=False, value=True, units=False):
@@ -91,7 +91,7 @@ class MetaData(object):
         if isinstance(accum_value, dict) and accum_value:
             options = OrderedDict([('value', value), ('units', units)])
             if not set(accum_value.keys()).difference(set(options.keys())):
-                accum_value = [accum_value[k] for k, v in options.iteritems()
+                accum_value = [accum_value[k] for k, v in options.items()
                                if v is True]
         return accum_value
 
@@ -103,7 +103,7 @@ class MetaData(object):
         try:
             del self.get_dictionary()[entry]
         except KeyError:
-            logging.warn("Trying to delete a dictionary entry that doesn't "
+            logging.warning("Trying to delete a dictionary entry that doesn't "
                          "exist.")
 
     def get_dictionary(self):
@@ -117,3 +117,6 @@ class MetaData(object):
     def _set_dictionary(self, ddict):
         """ Set the meta data dictionary """
         self.dict = copy.deepcopy(ddict)
+
+    def __getitem__(self, key):
+        return self.dict[key]

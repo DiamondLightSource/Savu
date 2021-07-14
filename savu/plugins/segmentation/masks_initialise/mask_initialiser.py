@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: A plugin to initialise a binary mask for level sets and distance transform segmentations
+.. module:: mask_initialise
    :platform: Unix
    :synopsis: A plugin to initialise a binary mask for level sets and distance transform segmentations
 
@@ -99,7 +99,7 @@ class MaskInitialiser(Plugin, CpuPlugin):
         [dimX,dimY] = np.shape(data[0])
         mask = np.uint8(np.zeros(np.shape(data[0])))
         mask = mask_gen(mask, self.coordX, self.coordY, self.coordZ, self.mask1_radius, dimX, dimY, index_current)
-        if (self.mask2_coordinates is not None):
+        if ((self.mask2_coordinates is not None) and (self.mask2_radius is not None)):
             mask2 = np.uint8(np.zeros(np.shape(data[0])))
             mask2 = mask_gen(mask2, self.coord2X, self.coord2Y, self.coord2Z, self.mask2_radius, dimX, dimY, index_current)
             mask = np.add(mask, mask2)

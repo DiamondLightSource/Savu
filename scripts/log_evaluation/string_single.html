@@ -1,0 +1,69 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ style_sheet }}">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script>
+    <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/StackBlur.js"></script>
+    <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['timeline']});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({type: 'string', id: 'Core'});
+            dataTable.addColumn({type: 'string', id: 'Message'});
+            dataTable.addColumn({type: 'number', id: 'Start'});
+            dataTable.addColumn({type: 'number', id: 'End'});
+            dataTable.addRows([
+                {% for val in vals %}
+                    ['{{val[0]}}', '{{val[1]}}', {{val[2]}}, {{val[3]}}],
+                {% endfor %}
+            ]);
+
+            const options = {
+                timeline: {colorByRowLabel: false},
+                backgroundColor: '#ffd',
+                avoidOverlappingGridLines: true
+            };
+
+            const chart = new google.visualization.Timeline(document.getElementById('gantt_div'));
+            chart.draw(dataTable, options);
+
+            const memoryTable = new google.visualization.DataTable();
+            memoryTable.addColumn({type: 'string', id: 'Core'})
+            memoryTable.addColumn({type: 'string', id: 'Plugin'})
+            memoryTable.addColumn({type: 'string', role: 'tooltip'})
+            memoryTable.addColumn({type: 'number', id: 'Start'})
+            memoryTable.addColumn({type: 'number', id: 'End'})
+            memoryTable.addRows([
+                {% for mem in memory %}
+                    {#
+                    Follows the data format from
+                    https://developers.google.com/chart/interactive/docs/gallery/timeline#data-format
+                    [row label, bar label, tooltip, start, end]
+                    #}
+                    ['{{ mem[0] }}', '{{ mem[1][0] }}', " Memory before {{ mem[1][0] }}: {{ mem[1][1] }} MB, after: {{ mem[1][2] }} MB, change: {{ mem[1][3] }} MB", {{ mem[1][1] }}, {{ mem[1][2] }}],
+                {% endfor %}
+            ]);
+
+            const memory_chart = new google.visualization.Timeline(document.getElementById('memory_chart'));
+            memory_chart.draw(memoryTable, options);
+        }
+    </script>
+</head>
+<body>
+<h1> Savu MPI performance tests </h1>
+<div class="boxedMachines">
+    {% for m in machines %}
+        <br>
+        {{ m[1] }} : {{ m[0] }}
+        <br>
+    {% endfor %}
+    <div id="gantt_div" style="position:absolute; left: {{ position[0] }}%; top:{{ position[1] }}%;
+            width: {{ chart_width }}px; height: 1000px;"></div>
+    <div id="memory_chart" style="position:absolute; left: {{ position[0] }}%; top: 500px;
+            display:block; width: 1300px; height: 1000px;"></div>
+</div>
+</body>
+</html>

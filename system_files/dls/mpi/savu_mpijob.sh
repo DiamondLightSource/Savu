@@ -17,9 +17,10 @@ export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
 
 UNIQHOSTS=${TMPDIR}/machines-u
+#echo $HOSTNAME
 awk '{print $1 }' ${PE_HOSTFILE} | uniq > ${UNIQHOSTS}
 uniqslots=$(wc -l <${UNIQHOSTS})
-echo "number of uniq hosts: ${uniqslots}"
+echo "number of unique hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
@@ -45,14 +46,25 @@ if [ ! $delete == false ]; then
 fi
        #-mca btl sm,self,openib \
 
-mpirun -np ${processes} \
+if [[ $HOSTNAME =~ .*com10.* ]]
+then
+   mpirun -np ${processes} \
+       -mca pml ucx -x UCX_NET_DEVICES=mlx4_0:1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
+else
+   mpirun -np ${processes} \
+       -mca pml ucx -x UCX_NET_DEVICES=mlx5_0:1 \
+       -x LD_LIBRARY_PATH \
+       --hostfile ${TMP_FILE} \
+       python $filename $datafile $processfile $outfile -n $CPUs -v $@
+fi
+
+
 
 if [ ! $delete == false ]; then
   cd /dls/tmp/savu
   cp $delete/savu.o* $delete/../
   rm -rf $delete
 fi
-

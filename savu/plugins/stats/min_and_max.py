@@ -26,23 +26,9 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 import savu.core.utils as cu
 
+
 @register_plugin
 class MinAndMax(Plugin, CpuPlugin):
-    """
-    A plugin to calculate the min and max values of each slice (as determined \
-    by the pattern parameter)
-
-    :u*param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param smoothing: Apply a smoothing filter or not. Default: True.
-    :u*param masking: Apply a circular mask or not. Default: True.
-    :u*param ratio: Used to calculate the circular mask. If not provided, \
-        it is calculated using the center of rotation. Default: None.
-    :u*param method: Method to find the global min and the global max. \
-        Available options: 'extrema', 'percentile'. Default: 'percentile'.
-    :u*param p_range: Percentage range if use the 'percentile' method. \
-        Default: [0.0, 100.0].
-    :param out_datasets: The default names. Default: ['the_min','the_max'].
-    """
 
     def __init__(self):
         super(MinAndMax, self).__init__("MinAndMax")
@@ -62,9 +48,11 @@ class MinAndMax(Plugin, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         data = self.get_in_datasets()[0]
         data_shape = data.get_shape()
-        width = data_shape[-1]
-        use_mask = self.parameters['masking']
-        if use_mask is True:
+        width = data_shape[0]
+        self.use_mask = self.parameters['masking']
+        self.data_pattern = self.parameters['pattern']
+        self.mask = np.ones((width, width), dtype=np.float32)
+        if self.use_mask is True:
             ratio = self.parameters['ratio']
             if ratio is None:
                 try:
@@ -73,15 +61,13 @@ class MinAndMax(Plugin, CpuPlugin):
                 except KeyError:
                     ratio = 1.0
             self.mask = self.circle_mask(width, ratio)
-        else:
-            self.mask = np.ones((width,width), dtype=np.float32)
         self.method = self.parameters['method']
-        if not (self.method=='percentile' or self.method=='extrema'):
-            msg = "\n***********************************************\n"\
-                "!!! ERROR !!! -> Wrong method. Please use only one of "\
-                "the provided options \n"\
-                "***********************************************\n"
-            logging.warn(msg)
+        if not (self.method == 'percentile' or self.method == 'extrema'):
+            msg = "\n***********************************************\n" \
+                  "!!! ERROR !!! -> Wrong method. Please use only one of " \
+                  "the provided options \n" \
+                  "***********************************************\n"
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
         self.p_min, self.p_max = np.sort(np.clip(np.asarray(
@@ -89,17 +75,19 @@ class MinAndMax(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         use_filter = self.parameters['smoothing']
+        frame = np.nan_to_num(data[0])
         if use_filter is True:
-            frame = gaussian_filter(data[0],(3,3))*self.mask
-        else:
-            frame = data[0]*self.mask
+            frame = gaussian_filter(frame, (3, 3))
+        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ') \
+                and (self.mask.shape == frame.shape):
+            frame = frame * self.mask
         if self.method == 'percentile':
             list_out = [np.array(
-                [np.percentile(frame, self.p_min)], dtype=np.float32), \
-                np.array([np.percentile(frame, self.p_max)],dtype=np.float32)]
+                [np.percentile(frame, self.p_min)], dtype=np.float32),
+                np.array([np.percentile(frame, self.p_max)], dtype=np.float32)]
         else:
-            list_out =[np.array([np.min(frame)], dtype=np.float32),\
-                       np.array([np.max(frame)], dtype=np.float32)]
+            list_out = [np.array([np.min(frame)], dtype=np.float32),
+                        np.array([np.max(frame)], dtype=np.float32)]
         return list_out
 
     def post_process(self):
@@ -113,7 +101,17 @@ class MinAndMax(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_datasets = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self._get_pattern(), 'single')
+        try:
+            in_pData[0].plugin_data_setup(self._get_pattern(), 'single')
+        except:
+            msg = "\n***************************************************" \
+                  "**********\nCan't find the data pattern: {}.\nThe pattern " \
+                  "parameter of this plugin must be relevant to its \n" \
+                  "previous plugin\n****************************************" \
+                  "*********************\n".format(self._get_pattern())
+            logging.warning(msg)
+            cu.user_message(msg)
+            raise ValueError(msg)
 
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
         orig_shape = in_dataset[0].get_shape()
@@ -122,9 +120,9 @@ class MinAndMax(Plugin, CpuPlugin):
         labels = ['x.pixels', 'y.pixels']
         for i in range(len(out_datasets)):
             out_datasets[i].create_dataset(shape=new_shape, axis_labels=labels,
-                        remove=True, transport='hdf5')
+                                           remove=True, transport='hdf5')
             out_datasets[i].add_pattern(
-                    "METADATA", core_dims=(1,), slice_dims=(0,))
+                "METADATA", core_dims=(1,), slice_dims=(0,))
             out_pData[i].plugin_data_setup('METADATA', 'single')
 
     def _get_pattern(self):

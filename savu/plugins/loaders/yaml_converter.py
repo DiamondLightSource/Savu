@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: yaml_loader
+.. module:: yaml_converter
    :platform: Unix
-   :synopsis: A class to load data from a non-standard nexus/hdf5 file using \
-   descriptions loaded from a yaml file.
+   :synopsis: 'A class to load data from a non-standard nexus/hdf5 file using \
+               descriptions loaded from a yaml file.'
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -26,7 +26,8 @@ import os
 import h5py
 import yaml
 import copy
-import collections
+import logging
+import collections.abc as collections
 import numpy as np  # used in exec so do not delete
 from ast import literal_eval
 
@@ -37,16 +38,6 @@ from savu.data.experiment_collection import Experiment
 
 
 class YamlConverter(BaseLoader):
-    """
-    A class to load data from a non-standard nexus/hdf5 file using \
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    :*param template_param: A hidden parameter to hold parameters passed in \
-        via a savu template file. Default: {}.
-    """
-
     def __init__(self, name='YamlConverter'):
         super(YamlConverter, self).__init__(name)
 
@@ -67,20 +58,31 @@ class YamlConverter(BaseLoader):
     def _get_yaml_file(self, yaml_file):
         if yaml_file is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
+            
+        # try the absolute path
+        yaml_abs = os.path.abspath(yaml_file)
+        if os.path.exists(yaml_abs):
+            return yaml_abs
+        
+        # try adding the path to savu
+        if len(yaml_file.split('Savu/')) > 1:
+            yaml_savu = os.path.join(os.path.dirname(__file__), "../../../",
+                                     yaml_file.split('Savu/')[1])
+            if os.path.exists(yaml_savu):
+                return yaml_savu
 
-        if not os.path.exists(yaml_file):
-            path = os.path.dirname(
-                __file__.split(os.path.join('savu', 'plugins'))[0])
-            yaml_file = os.path.join(path, yaml_file)
-            if not os.path.exists(yaml_file):
-                raise Exception('The yaml file does not exist %s' % yaml_file)
-        return yaml_file
+        # try adding the path to the templates folder
+        yaml_templ = os.path.join(os.path.dirname(__file__), yaml_file)
+        if os.path.exists(yaml_templ):
+            return yaml_templ
+
+        raise Exception('The yaml file does not exist %s' % yaml_file)
 
     def _add_template_updates(self, ddict):
         all_entries = ddict.pop('all', {})
         for key, value in all_entries:
             for entry in ddict:
-                if key in entry.keys():
+                if key in list(entry.keys()):
                     entry[key] = value
 
         for entry in self.parameters['template_param']:
@@ -89,7 +91,7 @@ class YamlConverter(BaseLoader):
         return ddict
 
     def _check_for_imports(self, ddict):
-        if 'import' in ddict.keys():
+        if 'import' in list(ddict.keys()):
             for imp in ddict['import']:
                 name = False
                 if len(imp.split()) > 1:
@@ -98,7 +100,7 @@ class YamlConverter(BaseLoader):
                 globals()[mod.__name__ if not name else name] = mod
 
     def _check_for_inheritance(self, ddict, inherit, override=False):
-        if 'inherit' in ddict.keys():
+        if 'inherit' in list(ddict.keys()):
             idict = ddict['inherit']
             idict = idict if isinstance(idict, list) else [idict]
             for i in idict:
@@ -117,14 +119,14 @@ class YamlConverter(BaseLoader):
         if 'override' in ddict:
             isoverride = ddict.pop('override')
         if override:
-            for old, new in override.iteritems():
+            for old, new in override.items():
                 ddict[new] = ddict.pop(old)
-                if new in inherit.keys():
+                if new in list(inherit.keys()):
                     self._update(ddict[new], inherit[new])
         return ddict, isoverride
 
     def _update(self, d, u):
-        for k, v in u.iteritems():
+        for k, v in u.items():
             if isinstance(v, collections.Mapping):
                 d[k] = self._update(d.get(k, {}), v)
             else:
@@ -132,7 +134,7 @@ class YamlConverter(BaseLoader):
         return d
 
     def _set_entries(self, ddict):
-        entries = ddict.keys()
+        entries = list(ddict.keys())
         for name in entries:
             self.get_description(ddict[name], name)
 
@@ -140,11 +142,11 @@ class YamlConverter(BaseLoader):
         # set params first as we may need them subsequently
         if 'params' in entry:
             self._set_params(entry['params'])
-
         # --------------- check for data entry -----------------------------
-        if 'data' in entry.keys():
+        if 'data' in list(entry.keys()):
             data_obj = self.exp.create_data_object("in_data", name)
             data_obj = self.set_data(data_obj, entry['data'])
+            
         else:
             emsg = 'Please specify the data information in the yaml file.'
             raise Exception(emsg)
@@ -154,13 +156,13 @@ class YamlConverter(BaseLoader):
 
     def _get_meta_data_descriptions(self, entry, data_obj):
         # --------------- check for axis label information -----------------
-        if 'axis_labels' in entry.keys():
+        if 'axis_labels' in list(entry.keys()):
             self._set_axis_labels(data_obj, entry['axis_labels'])
         else:
             raise Exception('Please specify the axis labels in the yaml file.')
 
         # --------------- check for data access patterns -------------------
-        if 'patterns' in entry.keys():
+        if 'patterns' in list(entry.keys()):
             self._set_patterns(data_obj, entry['patterns'])
         else:
             raise Exception('Please specify the patterns in the yaml file.')
@@ -169,7 +171,7 @@ class YamlConverter(BaseLoader):
         if 'metadata' in entry:
             self._set_metadata(data_obj, entry['metadata'])
         self.set_data_reduction_params(data_obj)
-        
+
         if 'exp_metadata' in entry:
             self._set_metadata(data_obj, entry['exp_metadata'], exp=True)
 
@@ -183,15 +185,17 @@ class YamlConverter(BaseLoader):
         return {'dfile': filepath, 'dshape': shape}
 
     def __get_wildcard_values(self, dObj):
-        if 'wildcard_values' in dObj.data_info.get_dictionary().keys():
+        if 'wildcard_values' in list(dObj.data_info.get_dictionary().keys()):
             return dObj.data_info.get('wildcard_values')
         return None
 
-    def update_value(self, dObj, value):
+    def update_value(self, dObj, value, itr=0):
+        import pdb
         # setting the keywords
         if dObj is not None:
             dshape = dObj.get_shape()
             dfile = dObj.backing_file
+            globals()['dfile'] = dfile
             wildcard = self.__get_wildcard_values(dObj)
 
         if isinstance(value, str):
@@ -199,30 +203,45 @@ class YamlConverter(BaseLoader):
             if len(split) > 1:
                 value = self._convert_string(dObj, split[1])
                 try:
-                    exec('value = ' + value)
-                except:
-                    raise Exception("\nError converting value %s\n" % value)
+                    value = eval(value, globals(), locals())
+                    value = self._convert_bytes(value)
+                except Exception as e:
+                    msg = (f"Error evaluating value: '{value}' \n %s" % e)
+                    try:
+                        value = value.replace("index(", "index(b")
+                        value = eval(value, globals(), locals())
+                        value = self._convert_bytes(value)
+                    except:
+                        raise Exception(msg)
         return value
 
     def _convert_string(self, dObj, string):
-        for old, new in self.parameters.iteritems():
+        for old, new in self.parameters.items():
             if old in string:
                 if isinstance(new, str):
                     split = new.split('$')
                     if len(split) > 1:
                         new = split[1]
-                    elif isinstance(new, str):
+                    elif isinstance(new, str): # nothing left to split
                         new = "'%s'" % new
                 string = self._convert_string(
                         dObj, string.replace(old, str(new)))
         return string
+
+    def _convert_bytes(self, value):
+        # convert bytes to str - for back compatability
+        if isinstance(value, bytes):
+            return value.decode("ascii")
+        if isinstance(value, np.ndarray) and isinstance(value[0], bytes):
+            return value.astype(str)
+        return value
 
     def _set_params(self, params):
         # Update variable parameters that are revealed in the template
         params = self._update_template_params(params)
         self.parameters.update(params)
         # find files, open and add to the namespace then delete file params
-        files = [k for k in params.keys() if k.endswith('file')]
+        files = [k for k in list(params.keys()) if k.endswith('file')]
         for f in files:
             param = params[f]
             try:
@@ -246,20 +265,20 @@ class YamlConverter(BaseLoader):
         del self.parameters[f]
 
     def _update_template_params(self, params):
-        for k, v in params.iteritems():
+        for k, v in params.items():
             v = pu.is_template_param(v)
             if v is not False:
                 params[k] = \
-                    self.parameters[k] if k in self.parameters.keys() else v[1]
+                    self.parameters[k] if k in list(self.parameters.keys()) else v[1]
         return params
 
     def _set_axis_labels(self, dObj, labels):
-        dims = range(len(labels.keys()))
-        axis_labels = [None]*len(labels.keys())
+        dims = list(range(len(list(labels.keys()))))
+        axis_labels = [None]*len(list(labels.keys()))
         for d in dims:
             self._check_label_entry(labels[d])
             l = labels[d]
-            for key in l.keys():
+            for key in list(l.keys()):
                 l[key] = self.update_value(dObj, l[key])
             axis_labels[l['dim']] = (l['name'] + '.' + l['units'])
             if l['value'] is not None:
@@ -275,7 +294,7 @@ class YamlConverter(BaseLoader):
                             axis labels")
 
     def _set_patterns(self, dObj, patterns):
-        for key, dims in patterns.iteritems():
+        for key, dims in patterns.items():
             core_dims = self.__get_tuple(
                     self.update_value(dObj, dims['core_dims']))
             slice_dims = self.__get_tuple(
@@ -287,6 +306,6 @@ class YamlConverter(BaseLoader):
 
     def _set_metadata(self, dObj, mdata, exp=False):
         populate = dObj.exp if exp else dObj
-        for key, value in mdata.iteritems():
+        for key, value in mdata.items():
             value = self.update_value(dObj, value['value'])
             populate.meta_data.set(key, value)

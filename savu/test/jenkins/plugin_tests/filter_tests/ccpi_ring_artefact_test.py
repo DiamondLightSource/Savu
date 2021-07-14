@@ -14,7 +14,7 @@
 
 
 """
-.. module:: plugins_test
+.. module:: ccpi_ring_artefact_test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 
@@ -30,12 +30,14 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class CcpiRingArtefactTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = 'tomo'
 
     def test_ring_removal(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('ccpi_ring_artefact_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
+        process_list = 'filters/ccpi/ccpi_ring_artefact_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 if __name__ == "__main__":
     unittest.main()

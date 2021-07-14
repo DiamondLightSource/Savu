@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         exp = plugin_runner._run_plugin_list()
 
         self.assertEqual(exp.index['in_data'][out_data_name].get_shape(),
-                         (91, 68, 80))
+                         (91, 45, 54))
 
 if __name__ == "__main__":
     unittest.main()

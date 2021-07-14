@@ -13,51 +13,43 @@
 # limitations under the License.
 
 """
-.. module:: median_3x3_filter
+.. module:: median_filter
    :platform: Unix
-   :synopsis: A plugin to filter each frame with a 3x3 median filter
+   :synopsis: A plugin to apply 2D/3D median filter (CPU)
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor::Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-import logging
 
-from savu.plugins.filters.base_filter import BaseFilter
+from savu.plugins.filters.denoising.base_median_filter import BaseMedianFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-
-import scipy.signal.signaltools as sig
-
 from savu.plugins.utils import register_plugin
 
+import numpy as np
+from larix.methods.misc import MEDIAN_FILT
 
 @register_plugin
-class MedianFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to filter each frame with a 3x3 median filter
-
-    :u*param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
-    :u*param pattern: pattern to apply this to. Default: "PROJECTION".
-    """
+class MedianFilter(BaseMedianFilter, CpuPlugin):
 
     def __init__(self):
-        logging.debug("Starting Median Filter")
         super(MedianFilter, self).__init__("MedianFilter")
 
     def process_frames(self, data):
-        result = sig.medfilt(data[0], self.parameters['kernel_size'])
+        input_temp = np.float32(data[0])
+        indices = np.where(np.isnan(input_temp))
+        input_temp[indices] = 0.0
+        if (self.parameters['dimension'] == '3D'):
+            if (self.parameters['pattern'] == 'VOLUME_XY'):
+                input_temp =np.swapaxes(input_temp,0,2)
+            if ((self.parameters['pattern'] == 'VOLUME_XZ') or (self.parameters['pattern'] == 'SINOGRAM')):
+                input_temp =np.swapaxes(input_temp,0,1)
+        result = MEDIAN_FILT(input_temp.copy(order='C'), self.parameters['kernel_size'])
+        if (self.parameters['dimension'] == '3D'):
+            if (self.parameters['pattern'] == 'VOLUME_XY'):
+                result =np.swapaxes(result,0,2)
+            if ((self.parameters['pattern'] == 'VOLUME_XZ') or (self.parameters['pattern'] == 'SINOGRAM')):
+                result =np.swapaxes(result,0,1)
         return result
 
-    def set_filter_padding(self, in_data, out_data):
-        padding = (self.parameters['kernel_size'][0]-1)/2
-        in_data[0].padding = {'pad_multi_frames': padding}
-        out_data[0].padding = {'pad_multi_frames': padding}
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        return 1
-
-    def get_plugin_pattern(self):
-        return self.parameters['pattern']
-
+    def set_options(self, cfg):
+        return cfg

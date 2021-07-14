@@ -25,11 +25,14 @@ import inspect
 import tempfile
 import os
 import copy
+import glob
+import shutil
 
 from savu.core.plugin_runner import PluginRunner
 from savu.data.experiment_collection import Experiment
 from savu.data.data_structures.plugin_data import PluginData
 import savu.plugins.utils as pu
+import savu.test.base_checkpoint_test
 
 
 def get_test_data_path(name):
@@ -112,7 +115,7 @@ def set_3dto4d_experiment(filename, **kwargs):
 def get_output_datasets(plugin):
     n_out = plugin.nOutput_datasets()
     out_data = []
-    if n_out is 'var':
+    if n_out == 'var':
         return None
     for n in range(n_out):
         out_data.append('test' + str(n))
@@ -174,6 +177,7 @@ def set_options(path, **kwargs):
     options['template'] = None
     options['checkpoint'] = None
     options['system_params'] = None
+    options['nPlugin'] = 0
     return options
 
 
@@ -206,7 +210,7 @@ def load_test_data(exp_type):
 
 
 def get_data_object(exp):
-    data = exp.index['in_data'][exp.index['in_data'].keys()[0]]
+    data = exp.index['in_data'][list(exp.index['in_data'].keys())[0]]
     data._set_plugin_data(PluginData(data))
     pData = data._get_plugin_data()
     return data, pData
@@ -221,6 +225,7 @@ def plugin_runner(options):
     # the real plugin runner runs a full plugin list
     plugin_runner = PluginRunner(options)
     return plugin_runner._run_plugin_list()
+
 
 def fake_plugin_runner(options):
     # Stripped down version of the plugin runner
@@ -255,7 +260,7 @@ def plugin_runner_real_plugin_run(options):
     pu.plugin_loader(exp, plugin_list[0])
 
     start_in_data = copy.deepcopy(exp.index['in_data'])
-    in_data = exp.index["in_data"][exp.index["in_data"].keys()[0]]
+    in_data = exp.index["in_data"][list(exp.index["in_data"].keys())[0]]
     out_data_objs, stop = in_data._load_data(1)
     exp._clear_data_objects()
     exp.index['in_data'] = copy.deepcopy(start_in_data)
@@ -267,108 +272,56 @@ def plugin_runner_real_plugin_run(options):
     plugin._run_plugin(exp, plugin_runner)
 
 
-def get_test_process_list(folder):
-    test_process_list = []
-    for root, dirs, files in os.walk(folder, topdown=True):
-        files[:] = [fi for fi in files if fi.split('.')[-1] == 'nxs']
-        for f in files:
-            test_process_list.append(f)
-    return test_process_list
-
-
-def get_process_list(folder, search=False):
-    process_list = []
-    plugin_list = []
-    exclude_dir = ['__pycache__']
-    exclude_file = ['__init__.py']
-    for root, dirs, files in os.walk(folder, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dir]
-        files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-        files[:] = [fi for fi in files if fi not in exclude_file]
-        processes = get_process_list_in_file(root, files)
-        plugins = get_no_process_list_tests(root, files)
-        for p in processes:
-            process_list.append(p)
-        for p in plugins:
-            plugin_list.append(p)
-    return process_list, plugin_list
-
-
-def get_process_list_in_file(root, files):
-    processes = []
-    for fname in files:
-        fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        for line in in_file:
-            if '.nxs' in line:
-                processes.append(get_nxs_file_name(line))
-    return processes
-
-
-def get_no_process_list_tests(root, files):
-    processes = []
-    for fname in files:
-        fname = root + '/' + fname
-        in_file = open(fname, 'r')
-        func = 'run_protected_plugin_runner_no_process_list'
-        exclude = ['def', 'search_str']
-        pos = 1
-        param = get_param_name(func, pos, in_file, exclude=exclude)
-        if param:
-            in_file.seek(0)
-            plugin_id_list = get_param_value_from_file(param, in_file)
-            for pid in plugin_id_list:
-                plugin_name = pid.split('.')[-1].split("'")[0]
-                processes.append(plugin_name + '.py')
-    return processes
-
-
-def get_nxs_file_name(line):
-    split_list = line.split("'")
-    for entry in split_list:
-        if 'nxs' in entry:
-            if (len(entry.split(' ')) == 1):
-                return entry
-
-
-def get_param_name(func, pos, in_file, exclude=[]):
-    """ Find the name of an argument passed to a function.
-
-    :param str func: function name
-    :param int pos: function argument position
-    :param file in_file: open file to search
-    :keyword list[str] exclude: ignore lines containing these strings.
-                                Defaults to [].
-    :returns: name associated with function argument
-    :rtype: str
+def initialise_options(data, experiment, process_path):
     """
-    search_str = 'run_protected_plugin_runner_no_process_list('
-    ignore = ['def', 'search_str']
-    val_str = None
-    for line in in_file:
-        if search_str in line:
-            if not [i in line for i in ignore].count(True):
-                if ')' not in line:
-                    line += next(in_file)
-                params = line.split('(')[1].split(')')[0]
-                val_str = params.split(',')[1].strip()
-    return val_str
+    initialises options and creates a temporal directory in tmp for output.
 
-
-def get_param_value_from_file(param, in_file):
-    """ Find all values associated with a parameter name in a file.
-
-    :param str param: parameter name to search for
-    :param file in_file: open file to search
-    :returns: value associated with param
-    :rtype: list[str]
+    :param str data: data to run test with (can be None)
+    :param str experiment: experiment type to run test with (can be None)
+    :param str process_path: a path to the preocess list (can be None)
     """
-    param_list = []
-    for line in in_file:
-        if param in line and line.split('=')[0].strip() == param:
-            if "\\" in line:
-                line += next(in_file)
-                line = ''.join(line.split('\\'))
-            value = line.split('=')[1].strip()
-            param_list.append(value)
-    return param_list
+    test_folder = tempfile.mkdtemp(suffix='my_test/')
+    if data is not None:
+        data_file = get_test_data_path(data)
+    if process_path is not None:
+        process_file = get_test_process_path(process_path)
+    if (experiment is not None) & (data is None):
+        options = set_experiment(experiment)
+    elif (experiment is not None) & (data is not None):
+        if experiment == 'load_data':
+            options = set_experiment('tomo')
+            options['data_file'] = data
+        else:
+            options = set_experiment(experiment)
+            options['data_file'] = data_file
+        options['process_file'] = process_file
+    else:
+        options = set_options(data_file, process_file=process_file)
+    options['out_path'] = os.path.join(test_folder)
+    return options
+
+
+def cleanup(options):
+    """
+    Performs folders cleaning in tmp/.
+    using _shutil_ module in order to delete everything recursively
+    """
+    shutil.rmtree(options["out_path"], ignore_errors=True)
+    """
+    classb = savu.test.base_checkpoint_test.BaseCheckpointTest()
+    cp_folder = os.path.join(options["out_path"], 'checkpoint')
+    classb._empty_folder(cp_folder)
+    # delete folders after imagesavers
+    im_folder = os.path.join(options["out_path"], 'ImageSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    im_folder = os.path.join(options["out_path"], 'TiffSaver-tomo')
+    if os.path.isdir(im_folder):
+        classb._empty_folder(im_folder)
+        os.removedirs(im_folder)
+    os.removedirs(cp_folder)
+    classb._empty_folder(options["out_path"])
+    os.removedirs(options["out_path"])
+    """
+    return options

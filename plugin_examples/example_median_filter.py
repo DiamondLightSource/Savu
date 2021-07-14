@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: An Example median_3x3_filter
+.. module:: example_median_filter
    :platform: Unix
    :synopsis: A plugin to filter each frame with a 3x3 median filter
 
@@ -29,11 +29,6 @@ import scipy.signal.signaltools as sig
 
 
 class ExampleMedianFilter(BaseFilter, CpuPlugin):
-    """
-    A plugin to filter each frame with a 3x3 median filter
-
-    :param kernel_size: Kernel size for the filter. Default: (1, 3, 3).
-    """
 
     def __init__(self):
         logging.debug("Starting Median Filter")
@@ -44,7 +39,7 @@ class ExampleMedianFilter(BaseFilter, CpuPlugin):
         return result
 
     def set_filter_padding(self, in_data, out_data):
-        padding = (self.parameters['kernel_size'][0]-1)/2
+        padding = (self.parameters['kernel_size'][0]-1) // 2
         in_data[0].padding = {'pad_multi_frames': padding}
         out_data[0].padding = {'pad_multi_frames': padding}
 

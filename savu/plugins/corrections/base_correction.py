@@ -47,7 +47,7 @@ class BaseCorrection(Plugin):
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
         # set pattern_name and nframes to process for all datasets
-        if 'pattern' in self.parameters.keys():
+        if 'pattern' in list(self.parameters.keys()):
             pattern = self.parameters['pattern']
         else:
             pattern = 'PROJECTION'

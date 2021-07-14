@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: filter
+.. module:: base_filter
    :platform: Unix
    :synopsis: A base class for all standard filters
 

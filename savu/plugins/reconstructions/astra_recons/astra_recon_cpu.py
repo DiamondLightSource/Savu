@@ -28,13 +28,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class AstraReconCpu(BaseAstraRecon, CpuPlugin):
-    """
-    A Plugin to run the astra reconstruction
-
-    :u*param algorithm: Reconstruction type \
-        (FBP|SIRT|SART|ART|CGLS|FP|BP|). Default: 'FBP'.
-    :param projector: Set astra projector (line|strip|linear). Default: 'line'.
-    """
 
     def __init__(self):
         super(AstraReconCpu, self).__init__("AstraReconCpu")

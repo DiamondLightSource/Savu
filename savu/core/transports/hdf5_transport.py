@@ -49,8 +49,10 @@ class Hdf5Transport(BaseTransport):
 
         # check the saver plugin and turn off if it is hdf5
         for idx in saver_idx:
-            if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
-                remove.append(idx)
+            # This saver id is not a location in the plugin list
+            if idx <= len(plugin_list.plugin_list):
+                if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
+                    remove.append(idx)
         for idx in sorted(remove, reverse=True):
             plugin_list._remove(idx)
 
@@ -59,7 +61,7 @@ class Hdf5Transport(BaseTransport):
         self.hdf5 = Hdf5Utils(self.exp)
         self.exp_coll = self.exp._get_collection()
         self.data_flow = self.exp.meta_data.plugin_list._get_dataset_flow()
-        n_plugins = range(len(self.exp_coll['datasets']))
+        n_plugins = list(range(len(self.exp_coll['datasets'])))
 
         for i in n_plugins:
             self.exp._set_experiment_for_current_plugin(i)
@@ -73,7 +75,7 @@ class Hdf5Transport(BaseTransport):
         self._set_file_details(self.files[count])
 
     def _transport_post_plugin(self):
-        for data in self.exp.index['out_data'].values():
+        for data in list(self.exp.index['out_data'].values()):
             if not data.remove:
                 msg = self.__class__.__name__ + "_transport_post_plugin."
                 self.exp._barrier(msg=msg)
@@ -97,10 +99,10 @@ class Hdf5Transport(BaseTransport):
             self._metadata_dump(f, 'out_data')
 
     def _metadata_dump(self, f, gname):
-        if gname in f.keys():
+        if gname in list(f.keys()):
             del f[gname]
 
-        for data in self.exp.index[gname].values():
+        for data in list(self.exp.index[gname].values()):
             name = data.get_name()
             entry = f.require_group(gname + '/' + name)
             self._output_metadata(data, entry, name, dump=True)
@@ -123,6 +125,6 @@ class Hdf5Transport(BaseTransport):
         n_plugins = len(self.exp_coll['datasets'])
         for i in range(i, n_plugins):
             self.exp._set_experiment_for_current_plugin(i)
-            for data in self.exp.index['out_data'].values():
+            for data in list(self.exp.index['out_data'].values()):
                 self.hdf5._close_file(data)
 

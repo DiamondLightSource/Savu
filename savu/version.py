@@ -15,19 +15,12 @@
 """
 Get the Savu version
 """
-
-# from pkg_resources import get_distribution
-#
-# __version__ = get_distribution('savu').version
-
 import os
+import pathlib
 
-path = os.path.abspath(os.path.dirname(__file__))
-thepath = path + '/../install/'
-thepath = thepath if os.path.exists(thepath) else path + '/install/'
-
-with open(thepath + 'latest_version.txt', 'r') as f:
-    version_file = f.readline().strip()
-    __version__ = version_file.split('savu_v')[1].split('/')[0]
-
-__install__ = 'install/' + version_file.split('/')[0]
+# for the savu_installer
+savu_path = pathlib.Path(__file__).parent.absolute()
+__install__ = "install/savu_hpc/savu_installer"
+with open(os.path.join(
+        os.path.join(savu_path, "..", __install__, "version.txt"))) as f:
+    __version__ = f.readline().strip()

@@ -27,7 +27,6 @@ import h5py
 import logging
 from mpi4py import MPI
 
-import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
@@ -54,6 +53,7 @@ class Experiment(object):
         self.plugin = None
         self._transport = None
         self._barrier_count = 0
+        self._dataset_names_complete = False
 
     def get(self, entry):
         """ Get the meta data dictionary. """
@@ -63,7 +63,7 @@ class Experiment(object):
         self.meta_data.plugin_list = PluginList()
         try:
             rtype = self.meta_data.get('run_type')
-            if rtype is 'test':
+            if rtype == 'test':
                 self.meta_data.plugin_list.plugin_list = \
                     self.meta_data.get('plugin_list')
             else:
@@ -72,6 +72,7 @@ class Experiment(object):
             template = self.meta_data.get('template')
             self.meta_data.plugin_list._populate_plugin_list(process_file,
                                                              template=template)
+        self.meta_data.set("nPlugin", 0) # initialise
 
     def create_data_object(self, dtype, name, override=True):
         """ Create a data object.
@@ -80,39 +81,36 @@ class Experiment(object):
 
         :params str dtype: either "in_data" or "out_data".
         """
-        if name not in self.index[dtype].keys() or override:
+        if name not in list(self.index[dtype].keys()) or override:
             self.index[dtype][name] = Data(name, self)
             data_obj = self.index[dtype][name]
             data_obj._set_transport_data(self.meta_data.get('transport'))
         return self.index[dtype][name]
 
-    def _setup(self, transport, plugin_list):
-        self.__set_transport(self)
+    def _setup(self, transport):
+        self._set_nxs_file()
+        self._set_transport(transport)
+        self.collection = {'plugin_dict': [], 'datasets': []}
+
         self._barrier()
         self._check_checkpoint()
         self._barrier()
 
+    def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')
+        self._set_dataset_names_complete()
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1 and not checkpoint:                  
+                len(self.meta_data.get('processes'))-1 and not checkpoint:
+            # links the input data to the nexus file
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
-            # links the input data to the nexus file            
-            self._add_input_data_to_nxs_file(transport)
-        self._barrier()
-        
-        # create experiment collection here
-        self.collection = {'plugin_dict': [], 'datasets': []}
+            self._add_input_data_to_nxs_file(self._get_transport())
+        self._set_dataset_names_complete()
 
     def _set_initial_datasets(self):
         self.initial_datasets = copy.deepcopy(self.index['in_data'])
 
-    def _update(self, plugin_dict):
-        data = self.index['out_data'].copy()
-        self.collection['datasets'].append(data)
-        self.collection['plugin_dict'].append(plugin_dict)
-
-    def __set_transport(self, transport):
+    def _set_transport(self, transport):
         self._transport = transport
 
     def _get_transport(self):
@@ -125,7 +123,7 @@ class Experiment(object):
             # look in conda environment to see which version is being used
             savu_path = sys.modules['savu'].__path__[0]
             sys_files = os.path.join(
-                    os.path.dirname(savu_path), 'system_files')
+                os.path.dirname(savu_path), 'system_files')
             subdirs = os.listdir(sys_files)
             sys_folder = 'dls' if len(subdirs) > 1 else subdirs[0]
             fname = 'system_parameters.yml'
@@ -145,15 +143,27 @@ class Experiment(object):
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
-        for name, data in self.index['in_data'].iteritems():
+        for name, data in self.index['in_data'].items():
             self.meta_data.set(['link_type', name], 'input_data')
             self.meta_data.set(['group_name', name], name)
             self.meta_data.set(['filename', name], data.backing_file)
             transport._populate_nexus_file(data)
             h5._link_datafile_to_nexus_file(data)
 
+    def _set_dataset_names_complete(self):
+        """ Missing in/out_datasets fields have been populated
+        """
+        self._dataset_names_complete = True
+
+    def _get_dataset_names_complete(self):
+        return self._dataset_names_complete
+
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
+        # clear out dataset dictionaries
+        for data_dict in self.collection['datasets']:
+            for data in data_dict.values():
+                data.meta_data._set_dictionary({})
 
     def _get_collection(self):
         return self.collection
@@ -204,34 +214,34 @@ class Experiment(object):
                 log_folder.close()
 
         self._create_nxs_entry()
-    
-    def _create_nxs_entry(self):
+
+    def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
-        import h5py
-        if self.meta_data.get('process') == \
-                len(self.meta_data.get('processes'))-1:
-  	    with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
-              entry_group = nxs_file.create_group('entry')
-              entry_group.attrs['NX_class'] = 'NXentry'
+        if self.meta_data.get('process') == len(
+                self.meta_data.get('processes')) - 1 and not self.checkpoint:
+            with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:
+                entry_group = nxs_file.create_group('entry')
+                entry_group.attrs['NX_class'] = 'NXentry'
 
     def _clear_data_objects(self):
         self.index["out_data"] = {}
         self.index["in_data"] = {}
 
-    def _merge_out_data_to_in(self):
-        for key, data in self.index["out_data"].iteritems():
+    def _merge_out_data_to_in(self, plugin_dict):
+        out_data = self.index['out_data'].copy()
+        for key, data in out_data.items():
             if data.remove is False:
                 self.index['in_data'][key] = data
+        self.collection['datasets'].append(out_data)
+        self.collection['plugin_dict'].append(plugin_dict)
         self.index["out_data"] = {}
 
     def _finalise_experiment_for_current_plugin(self):
-        finalise = {}
+        finalise = {'remove': [], 'keep': []}
         # populate nexus file with out_dataset information and determine which
         # datasets to remove from the framework.
-        finalise['remove'] = []
-        finalise['keep'] = []
 
-        for key, data in self.index['out_data'].iteritems():
+        for key, data in self.index['out_data'].items():
             if data.remove is True:
                 finalise['remove'].append(data)
             else:
@@ -239,10 +249,11 @@ class Experiment(object):
 
         # find in datasets to replace
         finalise['replace'] = []
-        for out_name in self.index['out_data'].keys():
-            if out_name in self.index['in_data'].keys():
+        for out_name in list(self.index['out_data'].keys()):
+            if out_name in list(self.index['in_data'].keys()):
                 finalise['replace'].append(self.index['in_data'][out_name])
 
+        
         return finalise
 
     def _reorganise_datasets(self, finalise):
@@ -254,7 +265,7 @@ class Experiment(object):
             del self.index["out_data"][data.data_info.get('name')]
 
         # Add remaining output datasets to input datasets
-        for name, data in self.index['out_data'].iteritems():
+        for name, data in self.index['out_data'].items():
             data.get_preview().set_preview([])
             self.index["in_data"][name] = copy.deepcopy(data)
         self.index['out_data'] = {}
@@ -262,13 +273,13 @@ class Experiment(object):
     def __unreplicate_data(self):
         in_data_list = self.index['in_data']
         from savu.data.data_structures.data_types.replicate import Replicate
-        for in_data in in_data_list.values():
+        for in_data in list(in_data_list.values()):
             if isinstance(in_data.data, Replicate):
-                in_data.data = in_data.data.reset()
+                in_data.data = in_data.data._reset()
 
     def _set_all_datasets(self, name):
         data_names = []
-        for key in self.index["in_data"].keys():
+        for key in list(self.index["in_data"].keys()):
             if 'itr_clone' not in key:
                 data_names.append(key)
         return data_names
@@ -286,9 +297,9 @@ class Experiment(object):
         Log the contents of the experiment at the specified level
         """
         logging.log(log_level, "Experimental Parameters for %s", log_tag)
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "in data (%s) shape = %s", key,
                         value.get_shape())
-        for key, value in self.index["in_data"].iteritems():
+        for key, value in self.index["in_data"].items():
             logging.log(log_level, "out data (%s) shape = %s", key,
                         value.get_shape())

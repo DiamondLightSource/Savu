@@ -16,6 +16,7 @@
 .. module:: data_removal
    :platform: Unix
    :synopsis: Plugin to remove unwanted data.
+
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,13 +30,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class DataRemoval(BaseFilter, CpuPlugin):
-    """
-    A class to remove any unwanted data from the specified pattern frame.
-    :param indices: A list or range of values to remove, e.g. [0, 1, 2], \
-        0:2 (start:stop) or 0:2:1 (start:stop:step). Default: None.
-    :param pattern: Explicitly state the slicing pattern. Default: 'SINOGRAM'.
-    :param dim: Data dimension to reduce. Default: 0.
-    """
 
     def __init__(self):
         super(DataRemoval, self).__init__("DataRemoval")
@@ -54,7 +48,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         in_data.amend_axis_label_values(
             in_pData._get_data_slice_list(self.sl))
 
-    def process_frames(self, data, frame_list):
+    def process_frames(self, data):
         return data[0][self.sl]
 
     def setup(self):
@@ -74,7 +68,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         if self.parameters['pattern']:
             pattern = self.parameters['pattern']
         else:
-            pattern = in_dataset[0].get_data_patterns().keys()[0]
+            pattern = list(in_dataset[0].get_data_patterns().keys())[0]
 
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
@@ -86,7 +80,7 @@ class DataRemoval(BaseFilter, CpuPlugin):
         else:
             indices_list = indices.split(':')
             indices_list = [int(i) for i in indices_list]
-            if len(indices_list) is 2:
+            if len(indices_list) == 2:
                 indices_list.append(1)
             self.indices = np.arange(*indices_list)
         return np.setxor1d(np.arange(orig_shape), self.indices)

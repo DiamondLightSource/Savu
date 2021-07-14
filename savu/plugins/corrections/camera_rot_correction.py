@@ -19,48 +19,26 @@
 .. moduleauthor:: Malte Storm<malte.storm@diamond.ac.uk>
 """
 
-
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
-
 from skimage.transform import rotate
 import numpy as np
 
 
 @register_plugin
 class CameraRotCorrection(BaseFilter, CpuPlugin):
-    """
-    A plugin to apply a rotation to projection images, for example to correct\
-     for missing camera alignment.
-     
-    :u*param angle: The rotation angle for the output image in degrees. \
-    Default: 0.0.
-    :u*param crop_edges: When a rotation is applied to any image,\
-    the result will contain zeros around the edges, which can be removed by \
-    cropping the edges by a specified number of pixels. Default: 0
-    :u*param auto_crop: If activated, this feature will automatically crop \
-    the image to eliminate any regions without data (because of the rotation).\
-    Default: False
-    :param use_auto_centre: This parameter automatically sets the centre \
-    of rotation to the centre of the image. If set to False, the values \
-    from centre_x and centre_y are used. Note: The centre needs to be within \
-    the image dimensions. Default: True 
-    :param centre_x: If not use_auto_centre, this value determines the \
-    detector x coordinate for the centre of rotation. The Default: 1279.5
-    :param centre_y: If not use_auto_centre, this value determines the \
-    detector x coordinate for the centre of rotation. Default: 1079.5
-    """
 
     def __init__(self):
         super(CameraRotCorrection, self).__init__("CameraRotCorrection")
 
     def pre_process(self):
         pass
-            
+
     def process_frames(self, data):
-        return rotate(data[0].astype(np.float64), self.parameters['angle'], center=\
-        self.centre)[self.new_slice]
+        return rotate(data[0].astype(np.float64),
+                      self.parameters['angle'], center=self.centre,
+                      mode='reflect')[tuple(self.new_slice)]
 
     def post_process(self):
         pass
@@ -74,7 +52,7 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
 
         self.shape = list(in_dataset[0].get_shape())
         self.core_dims = in_pData[0].get_core_dimensions()
-        
+
         self.use_auto_centre = self.parameters['use_auto_centre']
         self.angle = self.parameters['angle']
         self.static_crop = self.parameters['crop_edges']
@@ -88,33 +66,35 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
 
         img_dims = self.get_in_datasets()[0].get_shape()
         if self.use_auto_centre:
-            self.centre = (img_dims[det_y] / 2 - 0.5 \
-            * np.mod(img_dims[det_y], 2), img_dims[det_x] / 2 \
-            - 0.5 * np.mod(img_dims[det_x], 2))
+            self.centre = (
+            img_dims[det_y] // 2 - 0.5 * np.mod(img_dims[det_y], 2),
+            img_dims[det_x] // 2 - 0.5 * np.mod(img_dims[det_x], 2))
         else:
-            self.centre = (self.parameters['centre_y'], \
-            self.parameters['centre_x'])
-        
+            self.centre = (
+            self.parameters['centre_y'], self.parameters['centre_x'])
+
         # If the data is cropped then the centre of rotation must be shifted
         # accordingly, e.g if preview is [:, a:b, c:d] then shift is (a, c)
-        shift = self.exp.meta_data.get(in_dataset[0].get_name() + '_preview_starts')
-        self.centre = (self.centre[0] - shift[det_y], \
-                       self.centre[1] - shift[det_x])
-        
-        
+        shift = self.exp.meta_data.get(
+            in_dataset[0].get_name() + '_preview_starts')
+        self.centre = (
+        self.centre[0] - shift[det_y], self.centre[1] - shift[det_x])
+
         self.new_slice = [slice(None)] * 2
         img_dims = self.get_in_datasets()[0].get_shape()
-                
+
         if self.static_crop > 0 and not self.auto_crop:
-            self.new_slice= \
-            [slice(self.static_crop, img_dims[det_y] - self.static_crop),\
-             slice(self.static_crop, img_dims[det_x] - self.static_crop)]
+            self.new_slice = [
+                slice(self.static_crop, img_dims[det_y] - self.static_crop),
+                slice(self.static_crop, img_dims[det_x] - self.static_crop)]
             for ddim in [det_x, det_y]:
                 self.shape[ddim] = self.shape[ddim] - 2 * self.static_crop
-        
+
         elif self.auto_crop:
-            xs = np.array([0, 0, img_dims[det_x], img_dims[det_x]]).astype(np.float32)
-            ys = np.array([0, img_dims[det_x], img_dims[det_x], 0]).astype(np.float32)
+            xs = np.array([0, 0, img_dims[det_x], img_dims[det_x]]).astype(
+                np.float32)
+            ys = np.array([0, img_dims[det_x], img_dims[det_x], 0]).astype(
+                np.float32)
             r = np.sqrt((xs - self.centre[1]) ** 2 + (ys - self.centre[0]) ** 2)
             theta = np.pi + np.arctan2(xs - self.centre[1], ys - self.centre[0])
             theta_p = theta + self.angle / 180. * np.pi
@@ -124,7 +104,7 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
             x1 = np.floor(min(x_p[2], x_p[3], img_dims[det_x])).astype(int)
             y0 = np.ceil(max(y_p[0], y_p[1], 0)).astype(int)
             y1 = np.floor(min(y_p[2], y_p[3], img_dims[det_y])).astype(int)
-            self.new_slice = [slice(y0, y1),slice(x0, x1)]
+            self.new_slice = [slice(y0, y1), slice(x0, x1)]
             self.shape[det_x] = x1 - x0
             self.shape[det_y] = y1 - y0
 
@@ -132,4 +112,3 @@ class CameraRotCorrection(BaseFilter, CpuPlugin):
                                       axis_labels=in_dataset[0],
                                       shape=tuple(self.shape))
         out_pData[0].plugin_data_setup('PROJECTION', 'single')
-

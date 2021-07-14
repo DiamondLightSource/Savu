@@ -34,21 +34,7 @@ from savu.data.data_structures.data_types.stitch_data import StitchData
 
 @register_plugin
 class MultiNxtomoLoader(BaseLoader):
-    """
-    A class to load multiple scans in Nexus format into one dataset.
 
-    :param name: The name assigned to the dataset. Default: 'tomo'.
-    :param file_name: The shared part of the name of each file\
-        (not including .nxs). Default: None.
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param stack_or_cat: Stack or concatenate the data\
-        (4D and 3D respectively). Default: 'stack'.
-    :param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
-    :param axis_label: New axis label, if required, in the form\
-        'name.units'. Default: 'scan.number'.
-    :param range: The start and end of file numbers. Default: [0, 10].
-    """
 
     def __init__(self, name='MultiNxtomoLoader'):
         super(MultiNxtomoLoader, self).__init__(name)
@@ -76,22 +62,27 @@ class MultiNxtomoLoader(BaseLoader):
             self._extend_axis_label_values(data_obj_list, data_obj)
         else:
             self._setup_4d(data_obj)
-            # may want to add this as a parameter...
-            self._set_nD_rotation_angle(data_obj_list, data_obj)
 
-        #print "setting the final data shape", data_obj.data.get_shape()
         data_obj.set_original_shape(data_obj.data.get_shape())
         self.set_data_reduction_params(data_obj)
-
+        # Must do this here after preview has been applied
+        if stack_or_cat == 'stack':
+            self._set_nD_rotation_angle(data_obj_list, data_obj)
+    
     def _get_nxtomo(self):
         nxtomo = NxtomoLoader()
         nxtomo.exp = self.exp
-        nxtomo._populate_default_parameters()
-        return nxtomo
+    
+        # update nxtomo parameters with any common keys
+        shared_keys = set(nxtomo.parameters.keys()).intersection(
+            set(self.parameters.keys()))
+        for key in shared_keys:
+            nxtomo.parameters[key] = self.parameters[key]
+        return nxtomo    
 
     def _get_data_objects(self, nxtomo):
         rrange = self.parameters['range']
-        file_list = range(rrange[0], rrange[1]+1)
+        file_list = list(range(rrange[0], rrange[1]+1))
         file_path = copy.copy(self.exp.meta_data.get('data_file'))
         file_name = '' if self.parameters['file_name'] is None else\
             self.parameters['file_name']
@@ -126,9 +117,14 @@ class MultiNxtomoLoader(BaseLoader):
         data_obj.add_pattern('SINOGRAM', core_dims=(detX, rot),
                              slice_dims=(detY, extra))
 
+        data_obj.add_pattern('PROJECTION_STACK', core_dims=(detX, detY),
+                             slice_dims=(extra, rot))
+        data_obj.add_pattern('SINOGRAM_STACK', core_dims=(detX, rot),
+                             slice_dims=(extra, detY))
+
     def _extend_axis_label_values(self, data_obj_list, data_obj):
         dim = self.parameters['stack_or_cat_dim']
-        axis_name = data_obj.get_axis_labels()[dim].keys()[0].split('.')[0]
+        axis_name = list(data_obj.get_axis_labels()[dim].keys())[0].split('.')[0]
 
         new_values = np.zeros(data_obj.data.get_shape()[dim])
         inc = len(data_obj_list[0].meta_data.get(axis_name))
@@ -140,7 +136,8 @@ class MultiNxtomoLoader(BaseLoader):
         data_obj.meta_data.set(axis_name, new_values)
 
     def _set_nD_rotation_angle(self, data_obj_list, data_obj):
-        rot_dim_len = data_obj.data.get_shape()[
+        shape = data_obj.get_shape()
+        rot_dim_len = data_obj.get_shape()[
             data_obj.get_data_dimension_by_axis_label('rotation_angle')]
         new_values = np.zeros([rot_dim_len, len(data_obj_list)])
         for i in range(len(data_obj_list)):

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: cgls_recon
+.. module:: ccpi_cgls_recon
    :platform: Unix
    :synopsis: Wrapper around the CCPi cgls reconstruction algorithm.
 
@@ -34,20 +34,6 @@ from savu.plugins.reconstructions.base_recon import BaseRecon
 @register_plugin
 class CcpiCglsRecon(BaseRecon, CpuPlugin):
     """
-     A Plugin to run the CCPi implementation of the CGLS reconstruction \
-     algorithm.
-
-    :u*param n_iterations: Number of iterations. Default: 5.
-    :u*param resolution: number of output voxels (res = n_pixels/n_voxels), \
-    set res > 1 for reduced resolution. Default: 1.
-    :param n_frames: This algorithm requires a multiple of 8 frames for \
-    processing and this number may affect performance depending on your data \
-    size (choose from 8, 16, 24, 32). Default: 16.
-
-    :~param centre_pad: Not an option. Default: False.
-    :*param outer_pad: Not an option. Default: False.
-    :*param init_vol: Not an option. Default: None.
-    :*param enforce_positive: Not an option. Default: False.
     """
 
     def __init__(self):

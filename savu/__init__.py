@@ -29,32 +29,49 @@ import savu
 import os
 import sys
 from . import test
+from unittest import defaultTestLoader, TestLoader, TextTestRunner
+import subprocess
+
 
 savuPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(savuPath + "/../lib"))
 os.environ['savu_mode'] = 'hdf5'
 
+def run_refresh_lists():
+    print("This function will refresh all process lists")
+    result = subprocess.run(["python", savuPath+'/../scripts/configurator_tests/refresh_process_lists_test.py'])
+    if (result.returncode == 1):
+        print("Tests FAILED, please see the report")
+        exit(1)
+    else:
+        print("Tests PASSED")
+        exit(0)
 
 def run_full_tests():
-    import unittest
 
-    print "Tests will run shortly, and may take some time to complete"
-    print "The tests may raise errors, please don't worry about these as " + \
-        "they may be raised deliberately."
-    print "The key information is in the final test results"
-
+    print("Tests may take some time to complete...")
+    print("The tests may raise errors, please don't worry about these as "
+          "they may be raised deliberately.")
     path = os.path.split(test.travis.__file__)[0]
-    suite = unittest.defaultTestLoader.discover(path, pattern='*test.py')
-    unittest.TextTestRunner(buffer=True).run(suite)
-
+    result2 = subprocess.run(["pytest", path+'/../../../scripts/configurator_tests/savu_config_test.py'])
+    result = subprocess.run(["python", path+'/tests.py'])
+    if ((result.returncode == 1) or (result2.returncode == 1)):
+        print("Tests FAILED, please see the report")
+        exit(1)
+    else:
+        print("Tests PASSED")
+        exit(0)
 
 def run_tests():
     import unittest
-    from savu.test.travis.process_list_tests.tomo_pipeline_preview_test \
+    from savu.test.travis.plugin_tests.reconstruction_tests.tomo_pipeline_preview_test \
         import TomoPipelinePreviewTest
     print("Running a quick test...")
-
-    suite = \
-        unittest.TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
-    unittest.TextTestRunner(verbosity=1, buffer=True).run(suite)
+    tests = TestLoader().loadTestsFromTestCase(TomoPipelinePreviewTest)
+    testRunner = TextTestRunner(verbosity=1, buffer=True)
+    test_results = testRunner.run(tests)
     print("Test complete...")
+    if test_results.wasSuccessful():
+        exit(0)
+    else:
+        exit(1)

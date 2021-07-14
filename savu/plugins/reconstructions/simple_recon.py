@@ -22,7 +22,6 @@
 
 """
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 import numpy as np
@@ -32,16 +31,13 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class SimpleRecon(BaseRecon, CpuPlugin):
-    """
-    A Plugin to apply a simple reconstruction with no dependancies
-    """
 
     def __init__(self):
         super(SimpleRecon, self).__init__("SimpleRecon")
 
     def _filter(self, sinogram):
         ff = np.arange(sinogram.shape[0])
-        ff -= sinogram.shape[0]/2
+        ff -= sinogram.shape[0] // 2
         ff = np.abs(ff)
         fs = np.fft.fft(sinogram)
         ffs = fs*ff
@@ -62,8 +58,8 @@ class SimpleRecon(BaseRecon, CpuPlugin):
         sinogram = sino[:, np.newaxis, :]
         try:
             centre = self.kwargs['centre']
-        except:
-            centre = (vol_shape[0]/2, vol_shape[1]/2)
+        except Exception:
+            centre = (vol_shape[0] // 2, vol_shape[1] // 2)
 
         results = []
         for j in range(sinogram.shape[1]):
@@ -84,26 +80,3 @@ class SimpleRecon(BaseRecon, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The Tomographic reconstruction performed in this processing " +
-             "chain is derived from this work.")
-        cite_info.bibtex = \
-            ("@book{avinash2001principles,\n" +
-             "  title={Principles of computerized tomographic imaging},\n" +
-             "  author={Avinash C.. Kak and Slaney, Malcolm},\n" +
-             "  year={2001},\n" +
-             "  publisher={Society for Industrial and Applied Mathematics}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Book\n" +
-             "%T Principles of computerized tomographic imaging\n" +
-             "%A Avinash C.. Kak\n" +
-             "%A Slaney, Malcolm\n" +
-             "%@ 089871494X\n" +
-             "%D 2001\n" +
-             "%I Society for Industrial and Applied Mathematics")
-        cite_info.doi = "https://doi.org/10.1137/1.9780898719277"
-        return cite_info

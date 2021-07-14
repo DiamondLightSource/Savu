@@ -30,25 +30,14 @@ from savu.data.experiment_collection import Experiment
 
 
 class ChunkingTests(unittest.TestCase):
-
-#    def test_spectra_to_tomo(self):
-#        options = {
-#            "transport": "hdf5",
-#            "process_names": "CPU0",
-#            "data_file": tu.get_test_data_path('mm.nxs'),
-#            "process_file": tu.get_test_process_path('pyfai_tomo_chunking_test.nxs'),
-#            "out_path": tempfile.mkdtemp()
-#            }
-#        run_protected_plugin_runner(options)
-
     def create_chunking_instance(self, current_list, nnext_list, nProcs):
         current = self.create_pattern('a', current_list)
         nnext = self.create_pattern('b', nnext_list)
         options = tu.set_experiment('tomoRaw')
-        options['processes'] = range(nProcs)
+        options['processes'] = list(range(nProcs))
         # set a dummy process list
         options['process_file'] = \
-            tu.get_test_process_path('basic_tomo_process.nxs')
+            tu.get_test_process_path('loaders/basic_tomo_process.nxs')
         exp = Experiment(options)
         test_dict = {'current': current, 'next': nnext}
         chunking = Chunking(exp, test_dict)
@@ -70,20 +59,6 @@ class ChunkingTests(unittest.TestCase):
         """ If any temporary amendments are applied to the final chunking
         values in the framework, then remove these here. """
         return chunks
-#        new_chunks = list(chunks)
-#        for i in range(len(new_chunks)):
-#            if chunks[i]-1 > 0:
-#                new_chunks[i] = chunks[i] + 1
-#        return tuple(new_chunks)
-
-#    def test_chunks_2D(self):
-#        current = [1, (0,), (1,)]
-#        nnext = [1, (0,), (1,)]
-#        shape = (100, 20)
-#        nProcs = 1
-#        chunking = self.create_chunking_instance(current, nnext, nProcs)
-#        chunks = chunking._calculate_chunking(shape, np.float32)
-#        self.assertEqual(chunks, True)
 
     def test_chunks_3D_1(self):
         current = [1, (0,), (1, 2)]
@@ -167,6 +142,7 @@ class ChunkingTests(unittest.TestCase):
         chunking = self.create_chunking_instance(current, nnext, nProcs)
         chunks = chunking._calculate_chunking(shape, np.float32)
         self.assertEqual(self.amend_chunks(chunks), (4, 8, 8, 500))
+
 
 if __name__ == "__main__":
     unittest.main()

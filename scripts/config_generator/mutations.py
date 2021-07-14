@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: mutations.py
+.. module:: mutations
    :platform: Unix
-   :synopsis: A dictionary detailing changes to plugins, actions and \
-       descriptions that are required by the configurator.
+   :synopsis: A dictionary detailing changes to plugins, actions and descriptions that are required by the configurator.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -24,7 +23,7 @@
 
 import textwrap
 from colorama import Back, Fore
-import display_formatter as df
+from . import display_formatter as df
 
 
 def wrap(string):
@@ -76,10 +75,10 @@ def notice_str(name, notice):
 def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
-    replaced = [entry['old'] for k in keys for entry in param_mutations[k]
-                if entry['old'] in old.keys()]
-    replacing = [entry['new'] for k in keys for entry in param_mutations[k]
-                 if entry['old'] in old.keys()]
+    replaced = [entry['old'] for k in keys for entry in param_mutations[k]['params']
+                if entry['old'] in list(old.keys())]
+    replacing = [entry['new'] for k in keys for entry in param_mutations[k]['params']
+                 if entry['old'] in list(old.keys())]
 
     removed = [x for x in removed if x not in replaced]
     added = [x for x in added if x not in replacing]
@@ -89,8 +88,8 @@ def param_change_str(old, new, plugin, keys):
         added_str = ["Adding parameter %s" % a for a in added]
         replaced_str = ["Replacing parameter %s with %s" % (
                 replaced[i], replacing[i]) for i in range(len(replaced))]
-        print wrap(param_changes_str(plugin) + '%s' % (
-                '\n'.join(removed_str + added_str + replaced_str)))
+        print(wrap(param_changes_str(plugin) + '%s' % (
+                '\n'.join(removed_str + added_str + replaced_str))))
 
 hdf5_notice = 'is now used by default.\nPlease remove from the process list, '\
     'unless you wish to override the default parameters (which must be done '\
@@ -103,6 +102,18 @@ distortion_notice = 'A new version of DistortionCorrection is available with'\
     ' the version available in 2.3 \nand below being renamed as '\
     'DistortionCorrectionDeprecated.  Please replace with \nthe new version.'
 
+medianfilt_notice = '\nThis version of MedianFilter is now deprecated. Please'\
+' replace with the newer faster versions - MedianFilter or MedianFilterGpu.'
+
+dezinger_dep_notice ='is now deprecated.  Please replace with the new version'\
+                    ' of Dezinger (or DezingerGPU).'
+
+dezinger_notice = '\nDezinger plugin has been replaced with a new version, '\
+    'please update the parameters.  '\
+    '\nNB: Dezinger should now be applied to normalised data. A GPU version '\
+    'DezingerGPU is also available.'
+
+
 plugin_mutations = \
     {'TimeseriesFieldCorrections':
         {'replace': 'DarkFlatFieldCorrection',
@@ -113,14 +124,30 @@ plugin_mutations = \
          'desc': replace_str('Hdf5TomoSaver', 'Hdf5Saver')},
      'DezingFilter':
         {'replace': 'DezingerSimple',
-         'desc': rename_str('DezingFilter', 'DezingerSimple') + dezing_notice},
+         'desc': rename_str('DezingFilter', 'DezingerSimple') + wrap(dezing_notice)},
      'SavuLoader':
         {'replace': 'SavuNexusLoader',
          'desc': replace_str('SavuLoader', 'SavuNexusLoader')},
      'DistortionCorrection':
         {'replace': 'DistortionCorrectionDeprecated',
          'up_to_version': '2.4', # if the plist version is less than 2.4 (or not defined) then apply this mutation
-         'desc': '\n' + Fore.RED + auto_replace_str() + distortion_notice + Fore.RESET}
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(distortion_notice) + Fore.RESET},
+     'MedianFilter':
+        {'replace': 'MedianFilterDeprecated',
+         'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(medianfilt_notice) + Fore.RESET},
+     'Dezinger':
+        {'replace': 'Dezinger',
+         'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+         'desc': '\n' + Fore.RED + auto_replace_str() + wrap(dezinger_notice) + Fore.RESET},
+      'DezingerSimple':
+         {'replace': 'DezingerSimpleDeprecated',
+          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSimple " + dezinger_dep_notice) + Fore.RESET},
+      'DezingerSinogram':
+         {'replace': 'DezingerSinogramDeprecated',
+          'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
+          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSinogram " + dezinger_dep_notice) + Fore.RESET}
      }
 
 param_mutations = \

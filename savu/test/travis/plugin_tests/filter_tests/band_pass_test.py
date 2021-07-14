@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 Diamond Light Source Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
-.. module:: plugins_test
+.. module:: band_pass_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: tests the band pass filter
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <nicola.wadeson@diamond.ac.uk>
 
 """
 
@@ -27,15 +25,19 @@ import unittest
 
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
+    run_protected_plugin_runner
 
 
 class BandPassTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
 
     def test_band_pass(self):
-        options = tu.set_experiment('tomo')
-        plugin = 'savu.plugins.filters.band_pass'
-        run_protected_plugin_runner_no_process_list(options, plugin)
-
+        process_list = 'filters/band_pass_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+        
 if __name__ == "__main__":
     unittest.main()

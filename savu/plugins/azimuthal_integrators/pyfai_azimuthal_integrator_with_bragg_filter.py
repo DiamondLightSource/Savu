@@ -30,14 +30,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
-    """
-    Uses pyfai to remap the data. We then remap, percentile file and integrate.
-
-    :param use_mask: Should we mask. Default: False.
-    :param num_bins: number of bins. Default: 1005.
-    :param num_bins_azim: number of bins. Default: 200.
-    :param thresh: threshold of percentile filter. Default: [5,95].
-    """
 
     def __init__(self):
         logging.debug("Starting 1D azimuthal integration***")
@@ -63,7 +55,7 @@ class PyfaiAzimuthalIntegratorWithBraggFilter(BaseAzimuthalIntegrator):
 #             print i
             idx = mask[:,i] == 1
             if np.sum(idx*1)==0:
-                logging.warn("Found a bin where all the pixels are masked! Bin num: %s" , str(i))
+                logging.warning("Found a bin where all the pixels are masked! Bin num: %s" , str(i))
                 out[i] = 0.0
             else:
                 foo = remapped[:,i][idx]

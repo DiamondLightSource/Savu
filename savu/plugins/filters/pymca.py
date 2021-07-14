@@ -33,17 +33,11 @@ from PyMca5.PyMcaPhysics.xrf import McaAdvancedFitBatch
 @dawn_compatible(OUTPUT_TYPE_METADATA_ONLY)
 @register_plugin
 class Pymca(BaseFilter, CpuPlugin):
-    """
-    uses pymca to fit spectral data
-
-    :u*param config: path to the config file. Default: 'Savu/test_data/data/test_config.cfg'.
-
-    """
 
     def __init__(self):
-        logging.debug("fitting spectrum")        
+        logging.debug("fitting spectrum")
         super(Pymca, self).__init__("Pymca")
-        
+
     def pre_process(self):
         in_dataset, _out_datasets = self.get_datasets()
         in_d1 = in_dataset[0]
@@ -59,7 +53,7 @@ class Pymca(BaseFilter, CpuPlugin):
             op_stack = np.rollaxis(stack,0,3)
         except (AttributeError, KeyError) as e:
             op_stack = -np.ones((1,1,self.outputshape[-1]))
-            logging.warn("Error in fit:%s",e) 
+            logging.warning("Error in fit:%s",e)
         op = op_stack[0,0]
         return op
 
@@ -72,22 +66,22 @@ class Pymca(BaseFilter, CpuPlugin):
         np.random.seed=1
         dummy_spectrum = np.random.random((1, 1, spectra_shape))
         c = self.setup_fit(dummy_spectrum)# seed it with junk, zeros made the matrix singular unsurprisingly and this bungles it.
-        
+
         # temporary measure to stop the next line printing arrays to screen.
         c.processList()#_McaAdvancedFitBatch__processStack()# perform an initial fit to get the shapes
 
         fit_labels = c.outbuffer.labels('parameters') # and then take out the axis labels for the channels
         out_meta_data = out_datasets[0].meta_data
         out_meta_data.set("PeakElements",fit_labels)
-        
+
         self.outputshape = rest_shape+(len(fit_labels),) # and this is the shape the thing will be
 #         print "input shape is", in_dataset[0].get_shape()
 #         print "the output shape in setup is"+str(outputshape)
-        
+
         axis_labels = ['-1.PeakElements.label']
         in_patterns = in_dataset[0].get_data_patterns()
 #         pattern_list = ['SINOGRAM', 'PROJECTION']
-        pattern_list = in_patterns.keys()
+        pattern_list = list(in_patterns.keys())
 
         fitResult = out_datasets[0]
 
@@ -99,12 +93,12 @@ class Pymca(BaseFilter, CpuPlugin):
 #         print "slice directions are:"+str(slice_directions)
         fitResult.add_pattern("CHANNEL", core_dims=(-1,),
                         slice_dims=slice_directions)
-        
+
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.get_plugin_pattern(), self.get_max_frames())
         out_pData[0].plugin_data_setup('CHANNEL', self.get_max_frames())
-        
-        
+
+
     def get_max_frames(self):
         return 'single'
 
@@ -117,7 +111,7 @@ class Pymca(BaseFilter, CpuPlugin):
     def setup_fit(self,y):
         '''
         takes a data shape and returns a fit-primed object
-        '''        
+        '''
         outputdir=None # nope
         roifit=0# nope
         roiwidth=y.shape[1] #need this to pretend its an image
@@ -130,18 +124,18 @@ class Pymca(BaseFilter, CpuPlugin):
                                                     nosave=True,
                                                     quiet=True) # prime the beauty
         b.pleaseBreak = 1
-        
+
         # temporary measure to stop the next line printing arrays to screen.
         b.processList()
 
         b.pleaseBreak = 0
         return b
-    
+
     def get_conf_path(self):
         path = self.parameters['config']
         if path.split(os.sep)[0] == 'Savu':
             path = tu.get_test_data_path(path.split('/test_data/data')[1])
         return path
-    
+
     def get_dummyhdf_path(self):
         return tu.get_test_data_path('i18_test_data.nxs')

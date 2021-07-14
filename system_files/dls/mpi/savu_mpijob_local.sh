@@ -3,7 +3,7 @@
 echo "SAVU_MPI_LOCAL:: Running Job"
 
 nNodes=1
-nCoresPerNode=`grep '^core id' /proc/cpuinfo |sort -u|wc -l`
+nCoresPerNode=`lscpu --all --parse=CORE,SOCKET | grep -E "^[0-9]" | wc -l`
 nGPUs=$(nvidia-smi -L | wc -l)
 
 echo "***********************************************"
@@ -16,15 +16,13 @@ outpath=$3
 shift 3
 options=$@
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
-savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=$(python -c "import savu, os; print (savu.__path__[0])")
 savupath=${savupath%/savu}
 echo "savupath is:" $savupath
 
 nCPUs=$((nNodes*nCoresPerNode))
 
 # launch mpi job
-export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
 
 echo "running on host: "$HOSTNAME

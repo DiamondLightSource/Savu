@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value
+.. module:: data_threshold
    :platform: Unix
    :synopsis: module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value
 
@@ -29,14 +29,6 @@ import numpy as np
 
 @register_plugin
 class DataThreshold(Plugin, CpuPlugin):
-    """
-    The module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value,\
-    based on the condition the data values will be replaced by the provided new value
-
-    :param inequality_condition: set to less, lessequal, equal, greater, greaterequal. Default: 'greater'.
-    :param given_value: The value to be replaced with by inequality_condition. Default: 1.   
-    :param new_value: The value to be replaced with by inequality_condition. Default: 1.   
-    """
 
     def __init__(self):
         super(DataThreshold, self).__init__("DataThreshold")
@@ -44,9 +36,10 @@ class DataThreshold(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')        
+        pattern_type=self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
 
     def process_frames(self, data):
         if (self.parameters['inequality_condition'] == 'less'):
@@ -58,7 +51,7 @@ class DataThreshold(Plugin, CpuPlugin):
         elif (self.parameters['inequality_condition'] == 'greaterequal'):
             indeces = np.where(data[0] >= self.parameters['given_value'])
         else:
-            indeces = np.where(data[0] == self.parameters['given_value'])                
+            indeces = np.where(data[0] == self.parameters['given_value'])
         corr_data = np.copy(data[0])
         corr_data[indeces] = self.parameters['new_value']
         return corr_data

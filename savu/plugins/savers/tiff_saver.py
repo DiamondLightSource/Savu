@@ -30,15 +30,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class TiffSaver(BaseImageSaver, CpuPlugin):
-    """
-    A class to save tomography data to tiff files
-    :param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param prefix: Override the default output tiff file prefix. Default: None.
-
-    :config_warn: Do not use this plugin if the raw data is greater than \
-    100 GB.
-    """
-
     def __init__(self, name='TiffSaver'):
         super(TiffSaver, self).__init__(name)
 

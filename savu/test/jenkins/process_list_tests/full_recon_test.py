@@ -27,7 +27,6 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class PluginRunnerFullReconTest(unittest.TestCase):
-
     def test_fbp(self):
         data_file = tu.get_test_data_path('24737.nxs')
         process_file = tu.get_test_process_path('miro_test.nxs')

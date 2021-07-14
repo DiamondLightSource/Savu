@@ -54,7 +54,7 @@ class BasicTransport(BaseTransport):
         plist = self.exp.meta_data.plugin_list
         self.n_plugins = plist._get_n_processing_plugins()
         self.final_dict = plist.plugin_list[-1]
-        if self.n_plugins is not 1:
+        if self.n_plugins != 1:
             self.exp.meta_data.set('transport', 'basic')
 
     def _transport_pre_plugin(self):

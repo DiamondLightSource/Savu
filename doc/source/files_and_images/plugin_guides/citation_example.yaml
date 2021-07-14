@@ -1,0 +1,30 @@
+
+def citation1(self):
+    The code of ring removal is the implementation of the work of
+    Nghia T. Vo et al. taken from algorithm 3,4,5,6 in this paper.
+    bibtex:
+            @article{vo2018superior,
+            title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
+            author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+            journal={Optics express},
+            volume={26},
+            number={22},
+            pages={28396--28412},
+            year={2018},
+            publisher={Optical Society of America}}
+    doi: "10.1364/OE.26.028396"
+
+def citation2(self):
+    The code of ring removal is the implementation of the work of
+    Nghia T. Vo et al. taken from algorithm 3,4,5,6 in this paper."
+    bibtex:
+            @article{vo2019superior,
+            title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
+            author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+            journal={Optics express},
+            volume={26},
+            number={22},
+            pages={28396--28412},
+            year={2018},
+            publisher={Optical Society of America}}
+    doi: "x10.1364/OE.26.028396"

@@ -9,8 +9,10 @@ function is_gpfs03 ()
   check=$3
   pathtofile=`readlink -f $file`
   if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
+	if [ ! -d $pathtofile ]; then
 		echo $file": No such file or directory"
 		return 1
+	fi
   fi
 
   gpfs03="$(df $pathtofile | grep gpfs03)"
@@ -24,12 +26,14 @@ function is_gpfs03 ()
 # input optional arguments
 zocalo=false
 keep=false
-while getopts ":t:i:s:z:k::" opt; do
+cpu=false
+while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
 		t ) type=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
         z ) zocalo=$OPTARG ;;
+		c ) cpu=true ;;
         k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
@@ -125,8 +129,21 @@ else
 	shift 3
 	options=$@
 
+	# which project?
+	pathtodatafile=`readlink -f $data_file`
+	if [[ $pathtodatafile == /dls/staging* ]] ; then
+		pathtodatafile=${pathtodatafile#/dls/staging}
+	fi
+	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
+	# in the case there is more than once instance of the pattern above
+	project=`echo $project | head -n1 | awk '{print $1;}'`
+	if [ -z "$project" ] ; then
+	  project=tomography
+	fi
+
 	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true 
+    is_gpfs03 $data_file gpfs03 true # ***********************Error here for folders
+
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
 		# determine cluster setup based on type
@@ -143,7 +160,12 @@ else
 	else
 		cluster='hamilton'
 		# determine cluster setup based on type
-		gpu_arch=Pascal
+
+		case $project in
+			"k11") gpu_arch='Volta' ;;
+			*) gpu_arch='Pascal' ;;
+		esac
+
 		case $type in
 			'AUTO') nNodes=1 ;;
 			'PREVIEW') nNodes=1 ;;
@@ -153,12 +175,6 @@ else
 			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
 				exit 1 ;;
 		esac
-	fi
-
-	# which project?
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
-	if [ -z "$project" ] ; then
-	  project=tomography
 	fi
 
 fi
@@ -201,7 +217,10 @@ case $cluster in
 
     	# which gpu architecture?
 		if [ -z $gpu_arch ] ; then
-			gpu_arch='Pascal'
+			case $project in
+				"k11") gpu_arch='Volta' ;;
+				*) gpu_arch='Pascal' ;;
+			esac
 		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
 			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
 			echo -e "Please choose from 'Pascal' or 'Volta'\n"
@@ -254,7 +273,7 @@ function create_folder()
 # get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
-savupath=$(python -c "import savu, os; print savu.__path__[0]")
+savupath=$(python -c "import savu, os; print (savu.__path__[0])")
 savupath=${savupath%/savu}
 
 # set the suffix
@@ -327,35 +346,51 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+
+# =========================== qsub =======================================
+# general arguments
 # openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
-# requirements are not satisfied.
-generic="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
--l gpu=$gpus_per_node -l gpu_arch=$gpu_arch -q $cluster_queue -P $project \
-$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-$gpus_to_use_per_node $delete $options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
+# requirements are not satisfied.'
+
+qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
+-q $cluster_queue -P $project"
+
+# blocking
+if [ $zocalo == true ] ; then
+	qsub_args="${qsub_args} -sync y"
+fi
+
+# gpu processing
+if [ $cpu == false ] ; then
+	#qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
+	qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
+fi
+
+# savu_mpijob.sh args
+mpijob_args="$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
+$gpus_to_use_per_node $delete"
+
+# savu args
+savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
-if [ $cluster = "cluster" ] && [ $zocalo = true ] ; then
-    cluster=zocalo_cluster
-fi
+args="${qsub_args} ${mpijob_args} ${savu_args}"
 
 case $cluster in
 	"test_cluster")
-		qsub -l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+		qsub -l infiniband $args > /dls/tmp/savu/$USER.out ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
 		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
-		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
-	"zocalo_cluster")
-		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -sync y\
-		-l infiniband $generic > /dls/tmp/savu/$USER.out ;;
+		-l infiniband $args > /dls/tmp/savu/$USER.out ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -l m_mem_free=7G $generic > /dls/tmp/savu/$USER.out ;;
+		qsub -l m_mem_free=7G $args > /dls/tmp/savu/$USER.out ;;
 esac
+
+# =========================== end qsub ===================================
 
 # get the job number here
 filename=`echo $outname.o`

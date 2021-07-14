@@ -31,11 +31,7 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PyfaiAzimuthalIntegrator(BaseAzimuthalIntegrator):
-    """
-    1D azimuthal integrator by pyFAI
-    :param use_mask: Should we mask. Default: False.
-    :param num_bins: number of bins. Default: 1005.
-    """
+
 
     def __init__(self):
         logging.debug("Starting 1D azimuthal integrationr")

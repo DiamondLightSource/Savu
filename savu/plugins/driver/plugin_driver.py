@@ -44,12 +44,12 @@ class PluginDriver(BasicDriver):
 
         self.__set_communicator(communicator)
         out_data = self.get_out_datasets()
-        extra_dims = self.extra_dims
+        extra_dims = self.get_plugin_tools().extra_dims
         repeat = np.prod(extra_dims) if extra_dims else 1
 
         param_idx = self.__calc_param_indices(extra_dims)
         out_data_dims = [len(d.get_shape()) for d in out_data]
-        param_dims = [range(d - len(extra_dims), d) for d in out_data_dims]
+        param_dims = [list(range(d - len(extra_dims), d)) for d in out_data_dims]
 
         if extra_dims:
             init_vars = self.__get_local_dict()
@@ -57,7 +57,8 @@ class PluginDriver(BasicDriver):
         for i in range(repeat):
             if extra_dims:
                 self.__reset_local_vars(init_vars)
-                self._set_parameters_this_instance(param_idx[i])
+                self.get_plugin_tools()._set_parameters_this_instance(
+                    param_idx[i])
                 for j in range(len(out_data)):
                     out_data[j]._get_plugin_data()\
                         .set_fixed_dimensions(param_dims[j], param_idx[i])
@@ -76,7 +77,7 @@ class PluginDriver(BasicDriver):
         class. """
         from savu.plugins.plugin import Plugin
         plugin = Plugin()
-        copy_keys = vars(self).viewkeys() - vars(plugin).viewkeys()
+        copy_keys = vars(self).keys() - vars(plugin).keys()
         copy_dict = {}
         for key in copy_keys:
             copy_dict[key] = getattr(self, key)
@@ -84,7 +85,7 @@ class PluginDriver(BasicDriver):
 
     def __reset_local_vars(self, copy_dict):
         """ Resets the class variables in copy_dict. """
-        for key, value in copy_dict.iteritems():
+        for key, value in copy_dict.items():
             setattr(self, key, value)
 
     def __calc_param_indices(self, dims):
@@ -92,7 +93,7 @@ class PluginDriver(BasicDriver):
         for i in range(len(dims)):
             chunk = int(np.prod(dims[0:i]))
             repeat = int(np.prod(dims[i+1:]))
-            idx = np.ravel(np.kron(range(dims[i]), np.ones((repeat, chunk))))
+            idx = np.ravel(np.kron(list(range(dims[i])), np.ones((repeat, chunk))))
             indices_list.append(idx.astype(int))
         return np.transpose(np.array(indices_list))
 

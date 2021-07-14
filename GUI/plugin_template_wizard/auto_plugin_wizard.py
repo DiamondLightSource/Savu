@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 
-from template import Template   
+from .template import Template   
 
 current_template = Template()
 

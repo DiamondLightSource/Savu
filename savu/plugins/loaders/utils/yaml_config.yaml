@@ -1,0 +1,22 @@
+# It extends the default yamllint config by adjusting some options.
+
+extends: default
+
+rules:
+  comments-indentation: disable
+  # Allow values [true, false, True, False]
+  truthy: {allowed-values: ["True", "False",'true','false']}
+  # No strict indentation pattern
+  indentation: disable
+  # {indent-sequences: whatever, spaces: consistent, level: warning}
+  # 80 chars should be long enough for line length, don't fail if a line is longer
+  line-length: disable
+  #line-length: {max: 80, level: warning, allow-non-breakable-inline-mappings: true}
+  # No new line required at end
+  new-line-at-end-of-file: disable
+  # Trailing spaces are not flagged
+  trailing-spaces: disable
+  # No requirement for three dashes to begin a file
+  document-start: disable
+  # No error for empty lines
+  empty-lines: disable

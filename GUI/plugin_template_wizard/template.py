@@ -89,4 +89,4 @@ class Template:
 
               
           f.close        
-          print 'done, go to :  '+ os.path.dirname(os.path.realpath(__file__)) + '/' + modname
+          print('done, go to :  '+ os.path.dirname(os.path.realpath(__file__)) + '/' + modname)

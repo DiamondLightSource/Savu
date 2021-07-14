@@ -1,7 +1,0 @@
-miniconda   4.5.4  # change this to 'latest' for latest version
-mpi4py      3.0.0
-tomopy      1.0.1
-dxchange    0.1.1
-ccpi        0.10.0
-pyfai       0.15.0
-

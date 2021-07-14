@@ -17,25 +17,37 @@
 """
 .. module:: plugins_test
    :platform: Unix
-   :synopsis: unittest test classes for plugins
+   :synopsis: unittest test classes for ccpi denoising plugins (GPU)
 
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
 
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner
+        run_protected_plugin_runner
+import savu.test.base_checkpoint_test
+import tempfile
+import os
+
 
 class CcpiDenoisingGpuTest(unittest.TestCase):
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
-    def test_ccpi_denoise_gpu(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('ccpi_denoising_gpu_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
+    def test_ccpidenoising2d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising_gpu_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_ccpidenoising3d_gpu(self):
+        process_list = 'filters/ccpi/ccpi_denoising_gpu3d_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

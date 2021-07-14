@@ -1,19 +1,20 @@
-import pandas as pd
-import numpy as np
-import GraphicalThreadProfiler as gtp
 import os
+
+import numpy as np
+import pandas as pd
+
+from . import GraphicalThreadProfiler as gtp
 
 
 def convert(filename):
-
     the_key = ""  # CPU0"
     the_interval = 0.8  # millisecs
 
     all_frames = []
     for files in filename:
-        frame = gtp.get_frame(files, the_key)
+        frame = gtp.get_frame(files, the_key, 'DEBUG')
         [index, nth] = get_index(frame)
-        frame.Time_end[frame.index[np.cumsum(nth)-1]] = frame.Time.max()
+        frame.Time_end[frame.index[np.cumsum(nth) - 1]] = frame.Time.max()
         frame = frame.reset_index(drop=True)
         temp = pd.DataFrame(np.array(frame.Time_end - frame.Time),
                             columns=['Time_diff'])
@@ -40,7 +41,7 @@ def get_index(frame):
     index = []
     for i in range(np.size(frame.Key.unique())):
         nth.append(frame[frame.Key == frame.Key.unique()[i]].count()[0])
-        index.append(range(nth[i]))
+        index.append(list(range(nth[i])))
 
     return [index, nth]
 
@@ -57,7 +58,6 @@ def get_average_duration(frames):
 
 
 def set_file_name(filename):
-
     [dir_path, name] = get_base_path(filename)
 
     name = name[0].split('.')[0] + '_avg' + repr(filename) + '.html'
@@ -67,7 +67,6 @@ def set_file_name(filename):
 
 
 def get_links(filename):
-
     [dir_path, fname] = get_base_path(filename)
 
     name = [gtp.set_file_name(file) for file in fname]
@@ -78,15 +77,16 @@ def get_links(filename):
 
 def render_template(frame, the_interval, outfilename, theLinks, theStats):
     from jinja2 import Template
-    import template_strings as ts
 
     frame = frame[(frame.Time_end - frame.Time) > the_interval].values
 
     f_out = open(outfilename, 'w')
-    print outfilename
-    style = os.path.dirname(__file__) + '/style_sheet.css'
-    template = Template(ts.set_template_string_multi(1300))
-    f_out.write(template.render(vals=map(list, frame[:, 0:4]), links=theLinks,
+    dirname = os.path.dirname(__file__)
+    style = os.path.join(dirname, 'style_sheet.css')
+    with open(os.path.join(dirname, 'string_single.html'), 'r') as template_file:
+        template = Template(template_file.read())
+    f_out.write(template.render(chart_width=1300, position=[16, 9],
+                                vals=map(list, frame[:, 0:4]), links=theLinks,
                                 stats=theStats, style_sheet=style))
     f_out.close()
 
@@ -115,7 +115,7 @@ def get_machine_names(all_frames):
 
 
 def get_base_path(filename):
-    if len(filename[0].split('/')) is 0:
+    if len(filename[0].split('/')) == 0:
         dir_path = os.getcwd()
     else:
         dir_path = os.path.dirname(filename[0])
@@ -126,10 +126,11 @@ def get_base_path(filename):
 
 if __name__ == "__main__":
     import optparse
+
     usage = "%prog [options] input_file"
     parser = optparse.OptionParser(usage=usage)
 
     (options, args) = parser.parse_args()
-    print args
+    print(args)
     filename = [(os.getcwd() + '/' + file) for file in args]
     convert(filename)

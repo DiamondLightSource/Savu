@@ -1,0 +1,42 @@
+name: savu_install
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      - master
+
+jobs:
+  build-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+      max-parallel: 5
+    env:
+      build_dir: "build"
+      config: "Release"
+    steps:
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: latest
+        activate-environment: savu_lite
+        python-version: 3.7
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Installing savu-lite from savu-dep channel
+      shell: bash -l {0}
+      run: |
+        conda activate /usr/share/miniconda3/envs/savu_lite
+        conda install --yes savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev
+
+    - name: Running savu_full_tests
+      shell: bash -l {0}
+      run: |
+        conda activate /usr/share/miniconda3/envs/savu_lite
+        savu_full_tests

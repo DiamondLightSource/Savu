@@ -20,8 +20,11 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import math
+import copy
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
 import savu.core.utils as cu
 from savu.plugins.plugin import Plugin
@@ -30,40 +33,7 @@ MAX_OUTER_PAD = 2.1
 
 
 class BaseRecon(Plugin):
-    """
-    A base class for reconstruction plugins
 
-    :u*param centre_of_rotation: Centre of rotation to use for the \
-    reconstruction. Default: 0.0.
-    :u*param init_vol: Dataset to use as volume initialiser \
-    (doesn't currently work with preview). Default: None.
-
-    :param centre_pad: Pad the sinogram to centre it in order to fill the \
-    reconstructed volume ROI for asthetic purposes.\
-    NB: Only available for selected algorithms and will be ignored otherwise. \
-    WARNING: This will significantly increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :param outer_pad: Pad the sinogram width to fill the reconstructed volume \
-    for asthetic purposes.\
-    Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
-    NB: Only available for selected algorithms and will be ignored otherwise.\
-    WARNING: This will increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :u*param log: Take the log of the data before reconstruction \
-    (True or False). Default: True.
-    :u*param preview: A slice list of required frames. Default: [].
-    :param force_zero: Set any values in the reconstructed image outside of \
-    this range to zero. Default: [None, None].
-    to zero. Default: False.
-    :param ratio: Ratio of the m2asks diameter in pixels to the smallest edge\
-        size along given axis. Default: 0.95.
-    :param log_func: Override the default log \
-        function. Default: 'np.nan_to_num(-np.log(sino))'.
-    :param vol_shape: Override the size of the reconstruction volume with an \
-    integer value. Default: 'fixed'.
-    """
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
@@ -88,62 +58,49 @@ class BaseRecon(Plugin):
         self.pad_dim = \
             in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
-        self.__set_padding_alg()
 
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
+        self.set_centre_of_rotation(in_data[0], out_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
-        if len(self.angles.shape) is not 1:
+        if len(self.angles.shape) != 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
         self.slice_dirs = out_data[0].get_slice_dimensions()
 
         shape = in_pData[0].get_shape()
         factor = self.__get_outer_pad()
-        self.sino_pad = int(math.ceil(factor*shape[self.pad_dim]))
+        self.sino_pad = int(math.ceil(factor * shape[self.pad_dim]))
 
-        self.sino_func, self.cor_func = self.set_function(shape) if \
-            self.padding_alg else self.set_function(False)
+        self.sino_func, self.cor_func = self.set_function(shape)
 
         self.range = self.parameters['force_zero']
         self.fix_sino = self.get_sino_centre_method()
 
     def __get_outer_pad(self):
-        factor = math.sqrt(2)-1  # length of diagonal of square is side*sqrt(2)
-        pad = self.parameters['outer_pad'] if 'outer_pad' in \
-            self.parameters.keys() else False
-
-        if pad is not False and not self.padding_alg:
-            msg = 'This reconstruction algorithm cannot be padded.'
-            cu.user_message(msg)
-            return 0
-
+        pad = self.parameters['outer_pad'] if 'outer_pad' in self.parameters \
+            else False
+        # length of diagonal of square is side*sqrt(2)
+        factor = math.sqrt(2) - 1
         if isinstance(pad, bool):
             return factor if pad is True else 0
+
         factor = float(pad)
         if factor > MAX_OUTER_PAD:
             factor = MAX_OUTER_PAD
             msg = 'Maximum outer_pad value is 2.1, using this instead'
             cu.user_message(msg)
-        return float(pad)
-
-    def __set_padding_alg(self):
-        """ Determine if this is an algorithm that allows sinogram padding. """
-        pad_algs = self.get_padding_algorithms()
-        alg = self.parameters['algorithm'] if 'algorithm' in \
-            self.parameters.keys() else None
-        self.padding_alg = True if alg in pad_algs else False
+        return factor
 
     def get_vol_shape(self):
         return self.br_vol_shape
 
-    def set_centre_of_rotation(self, inData, mData, pData):
+    def set_centre_of_rotation(self, inData, outData, mData):
         # if cor has been passed as a dataset then do nothing
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
-        if 'centre_of_rotation' in mData.get_dictionary().keys():
+        if 'centre_of_rotation' in list(mData.get_dictionary().keys()):
             cor = self.__set_cor_from_meta_data(mData, inData)
         else:
             val = self.parameters['centre_of_rotation']
@@ -152,43 +109,58 @@ class BaseRecon(Plugin):
             else:
                 sdirs = inData.get_slice_dimensions()
                 cor = np.ones(np.prod([inData.get_shape()[i] for i in sdirs]))
-                # if centre of rotation has not been set then fix it in the centre
+                # if centre of rotation has not been set then fix it in the
+                # centre
                 val = val if val != 0 else \
-                    (self.get_vol_shape()[self._get_detX_dim()])/2
+                    (self.get_vol_shape()[self._get_detX_dim()]) / 2.0
                 cor *= val
-                #mData.set('centre_of_rotation', cor) see Github ticket
+                # mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
+        outData.meta_data.set("centre_of_rotation", copy.deepcopy(self.cor))
         self.centre = self.cor[0]
+
+    def populate_metadata_to_output(self, inData, outData, mData):
+        # writing  rotation angles into the metadata associated with the output (reconstruction)
+        self.angles = mData.get('rotation_angle')
+        outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
+
+        xDim = inData.get_data_dimension_by_axis_label('x', contains=True)
+        det_length = inData.get_shape()[xDim]
+        outData.meta_data.set("detector_x_length", copy.deepcopy(det_length))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
         if total_frames > len(cor):
-            cor = np.tile(cor, total_frames/len(cor))
+            cor = np.tile(cor, total_frames // len(cor))
         return cor
 
     def __polyfit_cor(self, cor_dict, inData):
-        if 'detector_y' in inData.meta_data.get_dictionary().keys():
+        if 'detector_y' in list(inData.meta_data.get_dictionary().keys()):
             y = inData.meta_data.get('detector_y')
         else:
             yDim = inData.get_data_dimension_by_axis_label('detector_y')
             y = np.arange(inData.get_shape()[yDim])
 
-        z = np.polyfit(map(int, cor_dict.keys()), cor_dict.values(), 1)
+        z = np.polyfit(list(map(int, list(cor_dict.keys()))), list(cor_dict.values()), 1)
         p = np.poly1d(z)
         cor = p(y)
         return cor
 
     def set_function(self, pad_shape):
-        if not pad_shape:
-            cor_func = lambda cor: cor
+        centre_pad = self.parameters['centre_pad'] if 'centre_pad' in \
+            self.parameters else False
+        if not centre_pad:
+            def cor_func(cor):
+                return cor
             if self.parameters['log']:
                 sino_func = self.__make_lambda()
             else:
                 sino_func = self.__make_lambda(log=False)
         else:
-            cor_func = lambda cor: cor + self.sino_pad
+            def cor_func(cor):
+                return cor + self.sino_pad
             if self.parameters['log']:
                 sino_func = self.__make_lambda(pad=pad_shape)
             else:
@@ -196,19 +168,16 @@ class BaseRecon(Plugin):
         return sino_func, cor_func
 
     def __make_lambda(self, log=True, pad=False):
-        log_func = 'np.nan_to_num(sino)' if not log else \
-            self.parameters['log_func']
+        log_func = 'np.nan_to_num(sino)' if not log else self.parameters['log_func']
         if pad:
             pad_tuples, mode = self.__get_pad_values(pad)
             log_func = log_func.replace(
                     'sino', 'np.pad(sino, %s, "%s")' % (pad_tuples, mode))
-        func = "f = lambda sino: " + log_func
-        exec(func)
-        return f
+        return eval("lambda sino: " + log_func)
 
     def __get_pad_values(self, pad_shape):
         mode = 'edge'
-        pad_tuples = [(0, 0)]*(len(pad_shape)-1)
+        pad_tuples = [(0, 0)] * (len(pad_shape) - 1)
         pad_tuples.insert(self.pad_dim, (self.sino_pad, self.sino_pad))
         pad_tuples = tuple(pad_tuples)
         return pad_tuples, mode
@@ -221,13 +190,14 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+        angles = np.squeeze(angles)
 
         self.frame_angles = angles
 
         dim_sl = sl[self.main_dir]
 
         if self.cor_as_dataset:
-            self.frame_cors = self.cor_func(data[len(data)-1])
+            self.frame_cors = self.cor_func(data[len(data) - 1])
         else:
             frame_nos = \
                 self.get_plugin_in_datasets()[0].get_current_frame_idx()
@@ -240,35 +210,32 @@ class BaseRecon(Plugin):
 
         len_data = len(np.arange(dim_sl.start, dim_sl.stop, dim_sl.step))
 
-        missing = [self.centre]*(len(self.frame_cors) - len_data)
+        missing = [self.centre] * (len(self.frame_cors) - len_data)
         self.frame_cors = np.append(self.frame_cors, missing)
-        
+
         # fix to remove NaNs in the initialised image
         if init is not None:
             init[np.isnan(init)] == 0.0
         self.frame_init_data = init
-        
+
         data[0] = self.fix_sino(self.sino_func(data[0]), self.frame_cors[0])
         return data
 
     def base_process_frames_after(self, data):
         lower_range, upper_range = self.range
+        data = np.nan_to_num(data)
         if lower_range is not None:
-            data[data < lower_range] = 0
+            data[data < lower_range] = 0.0
         if upper_range is not None:
-            data[data > upper_range] = 0
+            data[data > upper_range] = 0.0
         return data
-
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return []
 
     def pad_sino(self, sino, cor):
         """  Pad the sinogram so the centre of rotation is at the centre. """
         detX = self._get_detX_dim()
         pad = self.get_centre_offset(sino, cor, detX)
         self.cor_shift = pad[0]
-        pad_tuples = [(0, 0)]*(len(sino.shape)-1)
+        pad_tuples = [(0, 0)] * (len(sino.shape) - 1)
         pad_tuples.insert(detX, tuple(pad))
         self.__set_pad_amount(max(pad))
         return np.pad(sino, tuple(pad_tuples), mode='edge')
@@ -281,8 +248,7 @@ class BaseRecon(Plugin):
         centre_pad = self.br_array_pad(cor, sino.shape[detX])
         sino_width = sino.shape[detX]
         new_width = sino_width + max(centre_pad)
-        sino_pad = \
-            int(math.ceil(float(sino_width)/new_width * self.sino_pad)/2)
+        sino_pad = int(math.ceil(float(sino_width) / new_width * self.sino_pad) // 2)
         pad = np.array([sino_pad]*2) + centre_pad
         return pad
 
@@ -295,7 +261,7 @@ class BaseRecon(Plugin):
         detX = self._get_detX_dim()
         start, stop = self.br_array_pad(cor, sino.shape[detX])[::-1]
         self.cor_shift = -start
-        sl = [slice(None)]*len(sino.shape)
+        sl = [slice(None)] * len(sino.shape)
         sl[detX] = slice(start, sino.shape[detX] - stop)
         sino = sino[tuple(sl)]
         self.set_mask(sino.shape)
@@ -305,8 +271,8 @@ class BaseRecon(Plugin):
         width = nPixels - 1.0
         alen = ctr
         blen = width - ctr
-        mid = (width-1.0)/2.0
-        shift = round(abs(blen-alen))
+        mid = (width - 1.0) / 2.0
+        shift = round(abs(blen - alen))
         p_low = 0 if (ctr > mid) else shift
         p_high = shift + 0 if (ctr > mid) else 0
         return np.array([int(p_low), int(p_high)])
@@ -317,13 +283,13 @@ class BaseRecon(Plugin):
 
     def get_sino_centre_method(self):
         centre_pad = self.keep_sino
-        if 'centre_pad' in self.parameters.keys():
+        if 'centre_pad' in list(self.parameters.keys()) and \
+                self.parameters['centre_pad'] is not False:
             cpad = self.parameters['centre_pad']
             if not (cpad is True or cpad is False):
                 raise Exception('Unknown value for "centre_pad", please choose'
                                 ' True or False.')
-            centre_pad = self.pad_sino if cpad and self.padding_alg \
-                else self.crop_sino
+            centre_pad = self.pad_sino if cpad else self.crop_sino
         return centre_pad
 
     def __set_pad_amount(self, pad_amount):
@@ -339,7 +305,7 @@ class BaseRecon(Plugin):
         detX = pData.get_data_dimension_by_axis_label('x', contains=True)
         original_length = sino.shape[detX]
         shift = self.get_centre_shift(sino, cor)
-        return (original_length-shift)/float(original_length)
+        return (original_length - shift) / float(original_length)
 
     def get_reconstruction_alg(self):
         return None
@@ -386,42 +352,29 @@ class BaseRecon(Plugin):
         self.preview_flag = \
             self.set_preview(in_dataset[0], self.parameters['preview'])
 
-        axis_labels = in_dataset[0].data_info.get('axis_labels')[0]
+        self._set_volume_dimensions(in_dataset[0])
+        axis_labels = self._get_axis_labels(in_dataset[0])
+        shape = self._get_shape(in_dataset[0])
 
-        dim_volX, dim_volY, dim_volZ = \
-            self.map_volume_dimensions(in_dataset[0])
-
-        axis_labels = [0]*3
-        axis_labels = {in_dataset[0]:
-                       [str(dim_volX) + '.voxel_x.voxels',
-                        str(dim_volY) + '.voxel_y.voxels',
-                        str(dim_volZ) + '.voxel_z.voxels']}
-
-        shape = list(in_dataset[0].get_shape())
-        if self.parameters['vol_shape'] == 'fixed':
-            shape[dim_volX] = shape[dim_volZ]
-        else:
-            shape[dim_volX] = self.parameters['vol_shape']
-            shape[dim_volZ] = self.parameters['vol_shape']
-    
-        if 'resolution' in self.parameters.keys():
-            shape[dim_volX] /= self.parameters['resolution']
-            shape[dim_volZ] /= self.parameters['resolution']
-
-        out_dataset[0].create_dataset(axis_labels=axis_labels,
-                                      shape=tuple(shape))
-        out_dataset[0].add_volume_patterns(dim_volX, dim_volY, dim_volZ)
+        # output dataset
+        out_dataset[0].create_dataset(axis_labels=axis_labels, shape=shape)
+        out_dataset[0].add_volume_patterns(*self._get_volume_dimensions())
 
         # set information relating to the plugin data
         in_pData, out_pData = self.get_plugin_datasets()
 
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        self.init_vol = 1 if 'init_vol' in list(self.parameters.keys()) and\
+            self.parameters['init_vol'] else 0
+        self.cor_as_dataset = 1 if isinstance(
+            self.parameters['centre_of_rotation'], str) else 0
 
-        idx = 1
+        for i in range(len(in_dataset) - self.init_vol - self.cor_as_dataset):
+            in_pData[i].plugin_data_setup('SINOGRAM', self.get_max_frames(),
+                                          slice_axis=self.get_slice_axis())
+            idx = 1
+
         # initial volume dataset
-        if 'init_vol' in self.parameters.keys() and \
-                self.parameters['init_vol']:
-            self.init_vol = True
+        if self.init_vol:
 #            from savu.data.data_structures.data_types import Replicate
 #            if self.rep_dim:
 #                in_dataset[idx].data = Replicate(
@@ -430,34 +383,101 @@ class BaseRecon(Plugin):
             idx += 1
 
         # cor dataset
-        if isinstance(self.parameters['centre_of_rotation'], str):
+        if self.cor_as_dataset:
             self.cor_as_dataset = True
             in_pData[idx].plugin_data_setup('METADATA', self.get_max_frames())
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        # metadata output populator
+        in_meta_data = self.get_in_meta_data()[0]
+        self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data)
+
+    def _get_axis_labels(self, in_dataset):
+        """
+        Get the new axis labels for the output dataset - this is now a volume.
+
+        Parameters
+        ----------
+        in_dataset : :class:`savu.data.data_structures.data.Data`
+            The input dataset to the plugin.
+
+        Returns
+        -------
+        labels : dict
+            The axis labels for the dataset that is output from the plugin.
+
+        """
+        labels = in_dataset.data_info.get('axis_labels')[0]
+        volX, volY, volZ = self._get_volume_dimensions()
+        labels = [str(volX) + '.voxel_x.voxels', str(volZ) + '.voxel_z.voxels']
+        if volY:
+            labels.append(str(volY) + '.voxel_y.voxels')
+        labels = {in_dataset: labels}
+        return labels
+
+    def _set_volume_dimensions(self, data):
+        """
+        Map the input dimensions to the output volume dimensions
+
+        Parameters
+        ----------
+        in_dataset : :class:`savu.data.data_structures.data.Data`
+            The input dataset to the plugin.
+        """
+        data._finalise_patterns()
+        self.volX = data.get_data_dimension_by_axis_label("rotation_angle")
+        self.volZ = data.get_data_dimension_by_axis_label("x", contains=True)
+        self.volY = data.get_data_dimension_by_axis_label(
+            "y", contains=True, exists=True)
+
+    def _get_volume_dimensions(self):
+        return self.volX, self.volY, self.volZ
+
+    def _get_shape(self, in_dataset):
+        shape = list(in_dataset.get_shape())
+        volX, volY, volZ = self._get_volume_dimensions()
+
+        if self.parameters['vol_shape'] in ('auto', 'fixed'):
+            shape[volX] = shape[volZ]
+        else:
+            shape[volX] = self.parameters['vol_shape']
+            shape[volZ] = self.parameters['vol_shape']
+
+        if 'resolution' in self.parameters.keys():
+            shape[volX] = int(shape[volX] // self.parameters['resolution'])
+            shape[volZ] = int(shape[volZ] // self.parameters['resolution'])
+        return tuple(shape)
 
     def get_max_frames(self):
+        """
+        Number of data frames to pass to each instance of process_frames func
+
+        Returns
+        -------
+        str or int
+            "single", "multiple" or integer (only to be used if the number of
+                                             frames MUST be fixed.)
+        """
         return 'multiple'
 
-    def map_volume_dimensions(self, data):
-        data._finalise_patterns()
-        dim_rotAngle = data.get_data_patterns()['PROJECTION']['main_dir']
-        sinogram = data.get_data_patterns()['SINOGRAM']
-        dim_detY = sinogram['main_dir']
+    def get_slice_axis(self):
+        """
+        Fix the fastest changing slice dimension
 
-        core_dirs = sinogram['core_dims']
-        dim_detX = list(set(core_dirs).difference(set((dim_rotAngle,))))[0]
+        Returns
+        -------
+        str or None
+            str should be the axis_label corresponding to the fastest changing
+            dimension
 
-        dim_volX = dim_rotAngle
-        dim_volY = dim_detY
-        dim_volZ = dim_detX
-        return dim_volX, dim_volY, dim_volZ
+        """
+        return None
 
     def nInput_datasets(self):
         nIn = 1
         if 'init_vol' in self.parameters.keys() and \
-                                             self.parameters['init_vol']:
+                self.parameters['init_vol']:
             if len(self.parameters['init_vol'].split('.')) == 3:
                 name, temp, self.rep_dim = self.parameters['init_vol']
                 self.parameters['init_vol'] = name
@@ -465,7 +485,7 @@ class BaseRecon(Plugin):
             self.parameters['in_datasets'].append(self.parameters['init_vol'])
         if isinstance(self.parameters['centre_of_rotation'], str):
             self.parameters['in_datasets'].append(
-                    self.parameters['centre_of_rotation'])
+                self.parameters['centre_of_rotation'])
             nIn += 1
         return nIn
 

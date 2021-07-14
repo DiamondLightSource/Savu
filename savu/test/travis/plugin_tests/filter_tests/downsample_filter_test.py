@@ -29,12 +29,15 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class PluginRunnerDownsamplePluginTest(unittest.TestCase):
+    global data_file, experiment
+    data_file = '24737.nxs'
+    experiment = None
 
     def test_downsample_correction(self):
-        data_file = tu.get_test_data_path('24737.nxs')
-        process_file = tu.get_test_process_path('downsample_filter_test.nxs')
-        run_protected_plugin_runner(tu.set_options(data_file,
-                                                   process_file=process_file))
-
+        process_list = 'downsample_filter_test.nxs'
+        options = tu.initialise_options(data_file, experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+        
 if __name__ == "__main__":
     unittest.main()

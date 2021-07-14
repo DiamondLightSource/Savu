@@ -27,7 +27,6 @@ import savu
 import os
 
 from savu.plugins import utils as pu
-from savu.plugins import docstring_parser as doc
 from savu.plugins import plugin as test_plugin
 
 
@@ -40,12 +39,6 @@ class Test(unittest.TestCase):
                          "Failed to load the correct class")
         self.assertRaises(NotImplementedError,
                           plugin.process_frames, None)
-
-    def testfind_args(self):
-        mod = "savu.plugins.filters.denoising.denoise_bregman_filter"
-        plugin = pu.load_class(mod)()
-        params = doc.find_args(plugin)
-        self.assertEqual(len(params['param']), 4)
 
     def test_get_plugin_external_path(self):
         savu_path = os.path.split(savu.__path__[0])[0]
@@ -79,6 +72,11 @@ class Test(unittest.TestCase):
         plugin = pu.load_class("example_median_filter")()
         self.assertEqual(plugin.name, "ExampleMedianFilter")
         os.environ["SAVU_PLUGINS_PATH"] = ""
+
+    def test_get_tools_class(self):
+        mod = "savu.plugins.filters.denoising.denoise_bregman_filter_tools"
+        tools_class = pu.get_tools_class(mod)
+        self.assertEqual(tools_class.__name__, "DenoiseBregmanFilterTools")
 
 if __name__ == "__main__":
     unittest.main()

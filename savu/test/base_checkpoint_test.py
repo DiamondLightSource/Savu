@@ -27,9 +27,11 @@ import h5py
 import unittest
 import numpy as np
 from shutil import copyfile
+import shutil
 
 from savu.core.plugin_runner import PluginRunner
 from savu.core.checkpointing import Checkpointing
+from savu.core.utils import ensure_string
 from savu.data.experiment_collection import Experiment
 
 
@@ -58,10 +60,12 @@ class BaseCheckpointTest(object):
 
     def tearDown(self):
         cp_folder = os.path.join(self.tmpdir, 'checkpoint')
-        self._empty_folder(cp_folder)
-        os.removedirs(cp_folder)
-        self._empty_folder(self.tmpdir)
-        os.removedirs(self.tmpdir)
+        #self._empty_folder(cp_folder)
+        #os.removedirs(cp_folder)
+        #self._empty_folder(self.tmpdir)
+        #os.removedirs(self.tmpdir)
+        shutil.rmtree(cp_folder, ignore_errors=True)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _empty_folder(self, folder):
         for f in os.listdir(folder):
@@ -83,7 +87,7 @@ class BaseCheckpointTest(object):
         options = self.set_data_options()
         options['out_path'] = self.tmpdir
         options['nxs_filename'] = self.cfile if cfile else None
-        options['processes'] = range(1)
+        options['processes'] = list(range(1))
         options['process'] = 0
         options['mpi'] = False
         options['inter_path'] = self.tmpdir
@@ -154,8 +158,7 @@ class BaseCheckpointTest(object):
 
     def test_plugin_level_4b(self):
         # 4: Killed during processing
-            # b) after a plugin that doesn't populate nxs file
-                    # - (works with full-field processing list)
+        #    b) after a plugin that doesn't populate nxs file - (works with full-field processing list)
         vals = (5, 3, 3, 'plugin')
         self._set_checkpoint_parameters(*vals)
         # rerun from checkpoint
@@ -169,7 +172,7 @@ class BaseCheckpointTest(object):
 
     def test_plugin_level_4c(self):
         # 4: Killed during processing
-            # c) re-loading of a different data type, e.g., ImageKey
+        #    c) re-loading of a different data type, e.g., ImageKey
         vals = (1, 3, 3, 'plugin')
         self._set_checkpoint_parameters(*vals)
         # rerun from checkpoint
@@ -223,15 +226,14 @@ class BaseCheckpointTest(object):
             self._create_dataset(f, 'completed_plugins', p_no)
 
     def _create_dataset(self, f, name, data):
-        if name in f.keys():
+        if name in list(f.keys()):
             f.__delitem__(name)
         if data is not None:
-            f.create_dataset(name, data=np.zeros(1, dtype=np.int8))
-            f[name][:] = data
+            f.create_dataset(name, data=data, dtype=np.int16)
 
     def _read_nexus_file(self, nxsfile, datasets):
         # find NXdata
-        for key, value in nxsfile.items():
+        for key, value in list(nxsfile.items()):
             if self._is_nxdata(value):
                 datasets.append(value)
             elif isinstance(value, h5py.Group) and key != 'input_data':
@@ -239,8 +241,7 @@ class BaseCheckpointTest(object):
         return datasets
 
     def _is_nxdata(self, value):
-        check = 'NX_class' in value.attrs.keys() and\
-            value.attrs['NX_class'] == 'NXdata'
+        check = 'NX_class' in list(value.attrs.keys()) and ensure_string(value.attrs['NX_class']) == 'NXdata'
         return check
 
     def _assert_checkpoint_params_equal(self, p_no, tidx, pidx, level, exp):

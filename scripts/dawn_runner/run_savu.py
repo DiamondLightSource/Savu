@@ -21,7 +21,7 @@ def get_output_rank(path2plugin, inputs, params, persistence):
     try:
         parameters = {}
         # slight repack here
-        for key in params.keys():
+        for key in list(params.keys()):
             val = params[key]["value"]
             if type(val)==type(''):
                 val = val.replace('\n','').strip()
@@ -67,14 +67,14 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
         if not plugin_object:
             parameters = {}
                 # slight repack here
-            for key in params.keys():
+            for key in list(params.keys()):
 #                 print "here"
                 val = params[key]["value"]
                 if type(val)==type(''):
                     val = val.replace('\n','').strip()
 #                 print val
                 parameters[key] = val
-                print("val: {}".format(val))
+                print(("val: {}".format(val)))
 #             print "initialising the object"
             plugin_object = _savu_setup(path2plugin, inputs, parameters)
             persistence['plugin_object'] = plugin_object
@@ -114,7 +114,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
     else:
         data = inputs['data']
 
-    print("metaOnly: {}".format(metaOnly))
+    print(("metaOnly: {}".format(metaOnly)))
 
     if not metaOnly: 
 
@@ -134,7 +134,7 @@ def runSavu(path2plugin, params, metaOnly, inputs, persistence):
 
         result['auxiliary'] = aux
     t2 = time.time()
-    print "time to runSavu = "+str((t2-t1))
+    print("time to runSavu = "+str((t2-t1)))
     return result
 
 
@@ -144,7 +144,7 @@ def _savu_setup(path2plugin, inputs, parameters):
     parameters['out_datasets'] = [inputs['dataset_name']]
     plugin = get_plugin(path2plugin.split('.py')[0]+'.py')
     plugin.exp = setup_exp_and_data(inputs, inputs['data'], plugin)
-    plugin._set_parameters(parameters)
+    plugin.set_parameters(parameters)
     plugin._set_plugin_datasets()
     plugin.setup()
     return plugin
@@ -179,11 +179,11 @@ def setup_exp_and_data(inputs, data, plugin):
         data_obj.add_pattern('PROJECTION', core_dims=(1,), slice_dims=(0, ))
     if len(inputs['data'].shape)==2:
         if inputs['xaxis_title'] is None  or inputs['xaxis_title'].isspace():
-            print "set x"
+            print("set x")
             inputs['xaxis_title']='x'
             inputs['xaxis'] = np.arange(inputs['data'].shape[0])
         if inputs['yaxis_title'] is None or inputs['yaxis_title'].isspace():
-            print "set y"
+            print("set y")
             inputs['yaxis_title']='y'
             size_y_axis = inputs['data'].shape[1]
             inputs['yaxis'] = np.arange(size_y_axis)

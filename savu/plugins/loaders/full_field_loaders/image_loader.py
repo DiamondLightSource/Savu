@@ -13,42 +13,32 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: image_loader
    :platform: Unix
-   :synopsis: A class for loading standard tomography data in a variety of
-    formats.
+   :synopsis: A plugin for loading standard tomography data in image formats
+     (e.g. tiff).
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
 import os
-import h5py
 import tempfile
+import warnings
+import glob
+
+import h5py
 import numpy as np
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import NoImageKey
+from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
-from savu.data.data_structures.data_types.image_data import ImageData
 
 
 @register_plugin
 class ImageLoader(BaseLoader):
-    """
-    Load any FabIO compatible formats (e.g. tiffs)
-
-    :param dataset_name: The name assigned to the dataset. Default: 'tomo'.
-    :param angles: A python statement to be evaluated \
-    (e.g np.linspace(0, 180, nAngles)) or a file. Default: None.
-    :param frame_dim: Which dimension requires stitching? Default: 0.
-    :param data_prefix: A file prefix for the data file. Default: None.
-    :param dark_prefix: A file prefix for the dark field files, including the\
-    folder path if different from the data. Default: None.
-    :param flat_prefix: A file prefix for the flat field files, including the\
-    folder path if different from the data. Default: None.
-    """
 
     def __init__(self, name='ImageLoader'):
         super(ImageLoader, self).__init__(name)
@@ -71,10 +61,12 @@ class ImageLoader(BaseLoader):
                              slice_dims=(detY,))
 
         path = os.path.abspath(exp.meta_data.get("data_file"))
+        list_file = glob.glob(path + "/*")
+        if len(list_file) == 0:
+            raise ValueError("\n\n!!!ERROR!!! The given folder is empty, please"
+                             " check the input path:\n->'{}'\n".format(path))
         data_obj.data = self._get_data_type(data_obj, path)
-
         self.set_rotation_angles(data_obj)
-
         # dummy file
         filename = path.split(os.sep)[-1] + '.h5'
         data_obj.backing_file = \
@@ -85,23 +77,21 @@ class ImageLoader(BaseLoader):
         self._set_darks_and_flats(data_obj, path)
 
     def _set_darks_and_flats(self, dObj, path):
-        if not self.parameters['flat_prefix']:
-            return
-
         dObj.data = NoImageKey(dObj, None, 0)
         fdim = self.parameters['frame_dim']
-
         # read dark and flat images
-        fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
-        flat = ImageData(fpath, dObj, [fdim], None, ffix)
-        
-        if self.parameters['dark_prefix']:
+        if self.parameters['flat_prefix'] is not None:
+            fpath, ffix = self._get_path(self.parameters['flat_prefix'], path)
+            flat = ImageData(fpath, dObj, [fdim], None, ffix)
+        else:
+            shape = dObj.get_shape()
+            flat = np.ones([1] + [shape[i] for i in [1, 2]], dtype=np.float32)
+        if self.parameters['dark_prefix'] is not None:
             dpath, dfix = self._get_path(self.parameters['dark_prefix'], path)
             dark = ImageData(dpath, dObj, [fdim], None, dfix)
         else:
             shape = dObj.get_shape()
             dark = np.zeros([1] + [shape[i] for i in [1, 2]], dtype=flat.dtype)
-        
         dObj.data._set_dark_path(dark)
         dObj.data._set_flat_path(flat)
         dObj.data._set_dark_and_flat()
@@ -114,21 +104,25 @@ class ImageLoader(BaseLoader):
 
     def _get_data_type(self, obj, path):
         prefix = self.parameters['data_prefix']
-        return ImageData(path, obj, [self.parameters['frame_dim']], None, prefix)
+        return ImageData(path, obj, [self.parameters['frame_dim']], None,
+                         prefix)
 
     def set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
-
         if angles is None:
             angles = np.linspace(0, 180, data_obj.data.get_shape()[0])
         else:
             try:
-                exec("angles = " + angles)
-            except:
+                ldict = {}
+                exec("angles = " + angles, globals(), ldict)
+                angles = ldict['angles']
+            except Exception as e:
+                warnings.warn("Could not execute statement: {}".format(e))
                 try:
                     angles = np.loadtxt(angles)
-                except:
-                    raise Exception('Cannot set angles in loader.')
+                except Exception as e:
+                    raise Exception(
+                        'Cannot set angles in loader. Error: {}'.format(e))
 
         n_angles = len(angles)
         data_angles = data_obj.data.get_shape()[self.parameters['frame_dim']]

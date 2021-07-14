@@ -24,3 +24,12 @@ scripts/config_generator/test_processes_2
 .nfs*
 # vim swap files
 *.swp
+# conda build directory
+build/
+
+# VSCode settings
+.vscode
+.vscode/
+
+# experiment directory
+mics/

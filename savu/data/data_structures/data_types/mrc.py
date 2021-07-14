@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: base_type
+.. module:: mrc
    :platform: Unix
    :synopsis: A module to load MRC image data.
 
@@ -31,13 +31,12 @@ class MRC(BaseType):
         self._data_obj = Data
         self.filename = filename
         super(MRC, self).__init__()
-
         self.file = mrcfile.mmap(filename, 'r')
         self.dtype = self.file.data.dtype
 
     def __getitem__(self, idx):
         data = self.file.data[idx].astype(np.float32)
-        data = data/1000.0
+        data /= 65535.0
         return data
 
     def get_shape(self):

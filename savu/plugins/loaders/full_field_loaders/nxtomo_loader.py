@@ -25,41 +25,23 @@ import h5py
 import logging
 import numpy as np
 
-import savu.core.utils as cu
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
+
 
 @register_plugin
 class NxtomoLoader(BaseLoader):
     """
-    A class to load tomography data from a hdf5 file
-
-    :param name: The name assigned to the dataset. Default: 'tomo'.
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry1/tomo_entry/data/data'.
-    :param image_key_path: Path to the image key entry inside the nxs \
-        file. Set this parameter to "None" if use this loader for radiography\
-        . Default: 'entry1/tomo_entry/instrument/detector/image_key'.
-    :param dark: Optional path to the dark field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param flat: Optional Path to the flat field data file, nxs path and \
-        scale value. Default: [None, None, 1].
-    :param angles: A python statement to be evaluated or a file. Default: None.
-    :param 3d_to_4d: If this is 4D data stored in 3D then pass an integer \
-        value equivalent to the number of projections per 180-degree scan\
-        . Default: False.
-    :param ignore_flats: List of batch numbers of flats (start at 1) to \
-        ignore. Default: None.
     """
-
     def __init__(self, name='NxtomoLoader'):
         super(NxtomoLoader, self).__init__(name)
         self.warnings = []
 
     def log_warning(self, msg):
-        logging.warn(msg)
+        logging.warning(msg)
         self.warnings.append(msg)
 
     def setup(self):
@@ -69,7 +51,7 @@ class NxtomoLoader(BaseLoader):
         data_obj.backing_file = self._get_data_file()
 
         data_obj.data = self._get_h5_entry(
-                data_obj.backing_file, self.parameters['data_path'])
+            data_obj.backing_file, self.parameters['data_path'])
 
         self._set_dark_and_flat(data_obj)
 
@@ -78,7 +60,7 @@ class NxtomoLoader(BaseLoader):
             self.__setup_4d(data_obj)
             self.__setup_3d_to_4d(data_obj, self.nFrames)
         else:
-            if len(data_obj.data.shape) is 3:
+            if len(data_obj.data.shape) == 3:
                 self._setup_3d(data_obj)
             else:
                 self.__setup_4d(data_obj)
@@ -87,9 +69,9 @@ class NxtomoLoader(BaseLoader):
 
         try:
             control = self._get_h5_path(
-                    data_obj.backing_file, 'entry1/tomo_entry/control/data')
+                data_obj.backing_file, 'entry1/tomo_entry/control/data')
             data_obj.meta_data.set("control", control[...])
-        except:
+        except Exception:
             self.log_warning("No Control information available")
 
         nAngles = len(data_obj.meta_data.get('rotation_angle'))
@@ -110,9 +92,9 @@ class NxtomoLoader(BaseLoader):
         if self.parameters['3d_to_4d'] is True:
             try:
                 # for backwards compatibility
-                exec("n_frames = " + self.parameters['angles'])
+                n_frames = eval(self.parameters["angles"], {"builtins": None, "np": np})
                 return np.array(n_frames).shape[0]
-            except:
+            except Exception:
                 raise Exception("Please specify the angles, or the number of "
                                 "frames per scan (via 3d_to_4d param) in the loader.")
         if isinstance(self.parameters['3d_to_4d'], int):
@@ -182,7 +164,7 @@ class NxtomoLoader(BaseLoader):
             self.parameters['ignore_flats'] else None
         try:
             image_key = data_obj.backing_file[
-                'entry1/tomo_entry/instrument/detector/image_key'][...]
+                self.parameters['image_key_path']][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
         except KeyError:
@@ -212,11 +194,12 @@ class NxtomoLoader(BaseLoader):
 
     def __set_data(self, data_obj, name, func):
         path, entry, scale = self.parameters[name]
-
-        if path.split('/')[0] == 'test_data':
+            
+        if path.split('/')[0] == 'Savu':
             import os
-            path = \
-                os.path.dirname(os.path.abspath(__file__))+'/../../../../'+path
+            savu_base_path = os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), '..', '..', '..', '..')
+            path = os.path.join(savu_base_path, path.split('Savu')[1][1:])
 
         ffile = h5py.File(path, 'r')
         try:
@@ -234,16 +217,15 @@ class NxtomoLoader(BaseLoader):
             angles = 'entry1/tomo_entry/data/rotation_angle'
 
         nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
-        
         if nxs_angles is None:
             try:
-                exec("angles = " + angles)
+                angles = eval(angles)
             except Exception as e:
-                logging.warn(e.message)
+                logging.warning(e)
                 try:
                     angles = np.loadtxt(angles)
                 except Exception as e:
-                    logging.debug(e.message)
+                    logging.debug(e)
                     self.log_warning("No angles found so evenly distributing them "
                                      "between 0 and 180 degrees")
                     angles = np.linspace(0, 180, data_obj.get_shape()[0])
@@ -266,19 +248,20 @@ class NxtomoLoader(BaseLoader):
         return h5py.File(data, 'r')
 
     def __check_angles(self, data_obj, n_angles):
-        data_angles = data_obj.data.get_shape()[0]
+        rot_dim = data_obj.get_data_dimension_by_axis_label("rotation_angle")
+        data_angles = data_obj.data.get_shape()[rot_dim]
         if data_angles != n_angles:
-            # FIXME problem with this 
             if self.nFrames > 1:
                 rot_angles = data_obj.meta_data.get("rotation_angle")
                 try:
-                    full_rotations = n_angles/data_angles
-                    cleaned_size = full_rotations*data_angles
+                    full_rotations = n_angles // data_angles
+                    cleaned_size = full_rotations * data_angles
                     if cleaned_size != n_angles:
                         rot_angles = rot_angles[0:cleaned_size]
-                        self.log_warning("the angle list has more values than expected in it")
+                        self.log_warning(
+                            "the angle list has more values than expected in it")
                     rot_angles = np.reshape(
-                            rot_angles, [full_rotations, data_angles])
+                        rot_angles, [full_rotations, data_angles])
                     data_obj.meta_data.set("rotation_angle",
                                            np.transpose(rot_angles))
                     return

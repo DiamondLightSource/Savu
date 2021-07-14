@@ -31,13 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class NxfluoLoader(BaseMultiModalLoader):
-    """ A class to load tomography data from an NXFluo file.
-
-    :param fluo_offset: fluo scale offset. Default: 0.0.
-    :param fluo_gain: fluo gain. Default: 0.01.
-    :param name: The name assigned to the dataset. Default: 'fluo'.
-    """
-
     def __init__(self, name='NxfluoLoader'):
         super(NxfluoLoader, self).__init__(name)
 
@@ -50,9 +43,9 @@ class NxfluoLoader(BaseMultiModalLoader):
         gain = self.parameters["fluo_gain"]
         energy = np.arange(self.parameters["fluo_offset"], gain*npts, gain)
         mono_path = fluo_entry.name + '/instrument/monochromator/energy'
-        mono_energy = data_obj.backing_file[mono_path].value
+        mono_energy = data_obj.backing_file[mono_path][()]
         monitor_path = fluo_entry.name + '/monitor/data'
-        monitor = data_obj.backing_file[monitor_path].value
+        monitor = data_obj.backing_file[monitor_path][()]
 
         data_obj.meta_data.set("energy", energy)
         data_obj.meta_data.set("mono_energy", mono_energy)

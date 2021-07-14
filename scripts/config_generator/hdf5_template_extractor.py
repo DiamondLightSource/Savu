@@ -1,9 +1,24 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 29 15:42:30 2019
+# Copyright 2014 Diamond Light Source Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-@author: qmm55171
+"""
+.. module:: hdf5_template_extractor
+   :platform: Unix
+   :synopsis: Extract hdf5 templates
+
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
 """
 
 import os
@@ -33,7 +48,7 @@ def get_parameter_value(nxsfile, plugin_name, plugin_param):
     found_params = []
     for plugin in plist:
         if plugin['name'] == plugin_name:
-            if plugin_param in plugin['data'].keys():
+            if plugin_param in list(plugin['data'].keys()):
                 found_params.append(plugin['data'][plugin_param])
 
     return found_params
@@ -58,7 +73,7 @@ def get_data_dict(paths):
 
 def get_string_result(key, data_dict, mData, res=[]):
     if '*' in key:
-        for data in data_dict.keys():
+        for data in list(data_dict.keys()):
             res = get_string_result(
                     key.replace('*', data), data_dict, mData, res)
     else:
@@ -74,6 +89,6 @@ if __name__ == '__main__':
     paths = check_yaml_path(get_parameter_value(arg.nxsfile, plugin, param))
     data_dict = get_data_dict(paths)
     res = get_string_result(arg.key, data_dict, MetaData(data_dict))
-    print ','.join(res)
+    print(','.join(res))
 
     

@@ -29,21 +29,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.corrections.base_correction import BaseCorrection
 from savu.plugins.utils import register_plugin
 
-
 @register_plugin
 class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
-    """
-    A Plugin to apply a simple dark and flat field correction to data.
-    :param pattern: Data processing pattern is 'PROJECTION' or \
-        'SINOGRAM'. Default: 'PROJECTION'.
-    :param lower_bound: Set all values below the lower_bound to this \
-        value. Default: None.
-    :param upper_bound: Set all values above the upper bound to this \
-        value. Default: None.
-    :param warn_proportion: Output a warning if this proportion of values, \
-        or greater, are below and/or above the lower/upper bounds, \
-        e.g enter 0.05 for 5%. Default: 0.05.
-    """
 
     def __init__(self):
         super(DarkFlatFieldCorrection,
@@ -59,11 +46,9 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.dark = inData.data.dark_mean()
         logging.debug('getting the flat data')
         self.flat = inData.data.flat_mean()
-        #np.save('avflats.npy', self.flat)
-        #print(np.shape(self.flat))
 
         pData_shape = in_pData.get_shape()
-        tile = [1]*len(pData_shape)
+        tile = [1] * len(pData_shape)
         rot_dim = inData.get_data_dimension_by_axis_label('rotation_angle')
         self.slice_dir = in_pData.get_slice_dimension()
 
@@ -77,6 +62,7 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.warn = self.parameters['warn_proportion']
         self.low = self.parameters['lower_bound']
         self.high = self.parameters['upper_bound']
+        self.in_pData = in_pData
 
     def _proj_pre_process(self, data, shape, tile, dim):
         tile[dim] = shape[dim]
@@ -90,25 +76,25 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         self.process_frames = self.correct_sino
         self.n_plugin_frames = pData.get_shape()[self.slice_dir]
 
-        length = full_shape[self.slice_dir]
+        self.length = full_shape[self.slice_dir]
         self.mfp = pData._get_max_frames_process()
-        self.reps_at = int(np.ceil(length/float(self.mfp)))
+        self.reps_at = int(np.ceil(self.length / float(self.mfp)))
 
-        if len(full_shape) is 3:
+        if len(full_shape) == 3:
             self.convert_size = lambda a, b, x, pad: np.pad(
-                    np.tile(x[a:b], tile), pad, 'edge')
+                np.tile(x[a:b], tile), pad, 'edge')
         else:
             nSino = \
                 full_shape[data.get_data_dimension_by_axis_label('detector_y')]
             self.convert_size = \
                 lambda a, b, x, pad: np.pad(
-                        np.tile(x[a % nSino:b], tile), pad, 'edge')
+                    np.tile(x[a % nSino:b], tile), pad, 'edge')
 
     def correct_proj(self, data):
         data = data[0]
         dark = self.convert_size(self.dark)
         flat_minus_dark = self.convert_size(self.flat_minus_dark)
-        data = np.nan_to_num((data-dark)/flat_minus_dark)
+        data = np.nan_to_num((data - dark) / flat_minus_dark)
         self.__data_check(data)
         return data
 
@@ -117,24 +103,27 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
         sl = self.get_current_slice_list()[0][self.slice_dir]
         count = self.get_process_frames_counter()
         current_idx = self.get_global_frame_index()[count]
-        start = (current_idx % self.reps_at)*self.mfp
-        end = start + len(np.arange(sl.start, sl.stop, sl.step))
 
-        pad = [[0, 0] for i in range(3)]
-        pad[self.slice_dir][1] = self.n_plugin_frames - (end - start)
+        start = (current_idx % self.reps_at) * self.mfp
+        end = start + len(np.arange(sl.start, sl.stop, sl.step))
+        pad = self._get_pad_amount(end)
 
         dark = self.convert_size(start, end, self.dark, pad)
         flat_minus_dark = \
             self.convert_size(start, end, self.flat_minus_dark, pad)
-        data = np.nan_to_num((data-dark)/flat_minus_dark)
+
+        data = np.nan_to_num((data - dark) / flat_minus_dark)
         self.__data_check(data)
         return data
 
+    def _get_pad_amount(self, end):
+        pad = [[0, 0] for i in range(3)]
+        if end > self.length:
+            pad[self.slice_dir][1] = end - self.length
+        return pad
+
     def fixed_flag(self):
-        if self.parameters['pattern'] == 'PROJECTION':
-            return True
-        else:
-            return False
+        return self.parameters['pattern'] == 'PROJECTION'
 
     def __data_check(self, data):
         # make high and low crop masks and flag if those masks include a large
@@ -161,14 +150,15 @@ class DarkFlatFieldCorrection(BaseCorrection, CpuPlugin):
             summary.append(("WARNING: over %i%% of pixels are being clipped " +
                             "as they have %f times the intensity of the " +
                             "provided flat field. Check your Dark and Flat " +
-                            "correction images") % (self.warn*100, self.high))
+                            "correction images") % (self.warn * 100, self.high))
 
         if self.flag_low_warning:
             summary.append(("WARNING: over %i%% of pixels are being clipped " +
                             "as they below the expected lower corrected " +
                             "threshold of  %f. Check your Dark and Flat " +
-                            "correction images") % (self.warn*100, self.low))
+                            "correction images") % (self.warn * 100, self.low))
         if len(summary) > 0:
             return summary
 
         return ["Nothing to Report"]
+        

@@ -15,7 +15,7 @@
 """
 .. module:: poly_background_estimator
    :platform: Unix
-   :synopsis: A plugin to find the peaks
+   :synopsis: A plugin to find peaks in spectra
 
 .. moduleauthor:: Aaron Parsons <scientificsoftware@diamond.ac.uk>
 
@@ -25,19 +25,16 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 
+def division_zero(x,y):
+    try:
+        return x/y
+    except ZeroDivisionError:
+        return 0
 
 @register_plugin
 class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
-    """
-    This plugin uses peakutils to find peaks in spectra. This is then metadata.
-    :param out_datasets: Create a list of the dataset(s). Default: ['Peaks'].
-    :param n: max number of polys. Default: 2.
-    :param MaxIterations: max number of iterations. Default: 12.
-    :param weights: weightings to apply. Default: '1/data'.
-    :param pvalue: ratio of variance between successive poly \
-        iterations. Default: 0.9.
-    """
 
     def __init__(self):
         super(PolyBackgroundEstimator,
@@ -48,9 +45,9 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         x = self.axis
         n = self.parameters['n']
         if self.parameters['weights'] == '1/data':
-            weights = 1.0 / data
+            weights = division_zero(1.0, data)
         elif self.parameters['weights'] == '1/data^2':
-            weights = 1.0 / data**2
+            weights =  division_zero(1.0,data**2)
         pvalue = self.parameters['pvalue']
         MaxIterations = self.parameters['MaxIterations']
         zu, _c, _poly, _weight, _index = \
@@ -70,7 +67,7 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
         in_meta = self.get_in_meta_data()[0]
         # get the axis
         alabel = \
-            in_dataset[0].data_info.get('axis_labels')[-1].keys()[0]
+            list(in_dataset[0].data_info.get('axis_labels')[-1].keys())[0]
         self.axis = in_meta.get(alabel)
 
     def get_max_frames(self):
@@ -186,4 +183,3 @@ class PolyBackgroundEstimator(BaseFilter, CpuPlugin):
             c_old = c
         #print "finished", index.sum(), len(zu), Npoints, n, m
         return zu, c, poly, weight, index
-

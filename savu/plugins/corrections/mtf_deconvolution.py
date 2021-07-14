@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: Point-spread-function correction
+.. module:: mtf_deconvolution
    :platform: Unix
-   :synopsis: A plugin for MTF (modulation transfer function) deconvolution\
-    or PSF (point spread function) correction in the Fourier domain.
+   :synopsis: A plugin for MTF (modulation transfer function) deconvolution or \
+    PSF (point spread function) correction in the Fourier domain.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,20 +29,13 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.plugin_list import CitationInformation
+import savu.test.test_utils as tu
 import savu.core.utils as cu
 
 
 
 @register_plugin
 class MtfDeconvolution(Plugin, CpuPlugin):
-    """
-    Method to correct the point-spread-function effect. \
-    Working on raw projections and flats.
-    :u*param file_path: Path to file containing a 2D array of a MTF function. \
-        File formats: 'npy', or 'tif'. Default: None.
-    :param pad_width: Pad the image before the deconvolution. Default: 128.
-
-    """
 
     def __init__(self):
         super(MtfDeconvolution, self).__init__("MtfDeconvolution")
@@ -65,14 +58,14 @@ class MtfDeconvolution(Plugin, CpuPlugin):
         file_ext = ".tif"
         if file_path is None:
             msg = "!!! Please provide a file path to the MTF !!!"
-            logging.warn(msg)
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
         else:
             if not os.path.isfile(file_path):
                 msg = "!!! No such file: %s !!!"\
                         " Please check the file path" %str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
             else:
@@ -99,7 +92,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
         flat = inData.data.flat()
         self.data_size = inData.get_shape()
         (self.depth, self.height, self.width) = flat.shape
-        file_path = self.parameters["file_path"]
+        file_path = self.get_conf_path()
         file_ext = self.check_file_path(file_path)
         if file_ext==".npy":
             try:
@@ -109,7 +102,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
                     "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
                     " % str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
         else:
@@ -120,7 +113,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
                     "!!! ERROR !!! -> Can't open this file: %s \n"\
                     "*****************************************\n\
                     " % str(file_path)
-                logging.warn(msg)
+                logging.warning(msg)
                 cu.user_message(msg)
                 raise ValueError(msg)
 
@@ -132,7 +125,7 @@ class MtfDeconvolution(Plugin, CpuPlugin):
             "!!! ERROR !!!-> Projection shape: ({0},{1}) is not the same as "\
             "the mtf shape: ({2},{3})".format(
                 self.height, self.width, height_mtf, width_mtf)
-            logging.warn(msg)
+            logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
 
@@ -146,6 +139,12 @@ class MtfDeconvolution(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         return self.psf_correction(data[0], self.mtf_array, self.pad_width)
+
+    def get_conf_path(self):
+        path = self.parameters["file_path"]
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data')[1])
+        return path
 
     def get_citation_information(self):
         cite_info = CitationInformation()
@@ -169,4 +168,3 @@ class MtfDeconvolution(Plugin, CpuPlugin):
             "}")
         cite_info.doi = "doi: DOI: 10.1117/12.2530324"
         return cite_info
-        

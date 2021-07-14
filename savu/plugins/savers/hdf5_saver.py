@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_tomo_saver
+.. module:: hdf5_saver
    :platform: Unix
    :synopsis: A class to save data to a hdf5 output file.
 
@@ -31,18 +31,8 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.data.chunking import Chunking
 
-
 @register_plugin
 class Hdf5Saver(BaseSaver, CpuPlugin):
-    """
-    A class to save tomography data to a hdf5 file
-
-    :param pattern: Optimise data storage to this access pattern: 'optimum' \
-        will automate this process by choosing the output pattern from the \
-        previous plugin, if it exists, else the first \
-        pattern. Default: 'optimum'.
-    """
-
     def __init__(self, name='Hdf5Saver'):
         super(Hdf5Saver, self).__init__(name)
         self.in_data = None
@@ -85,7 +75,7 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
 
     def __set_current_pattern(self):
         pattern = copy.deepcopy(self.in_data._get_plugin_data().get_pattern())
-        pattern[pattern.keys()[0]]['max_frames'] = self.get_max_frames()
+        pattern[list(pattern.keys())[0]]['max_frames'] = self.get_max_frames()
         return pattern
 
     def get_pattern(self):
@@ -93,8 +83,8 @@ class Hdf5Saver(BaseSaver, CpuPlugin):
             return self.parameters['pattern']
         previous_pattern = self.get_in_datasets()[0].get_previous_pattern()
         if previous_pattern:
-            return previous_pattern.keys()[0]
-        return self.get_in_datasets()[0].get_data_patterns().keys()[0]
+            return list(previous_pattern.keys())[0]
+        return list(self.get_in_datasets()[0].get_data_patterns().keys())[0]
 
     def __get_file_name(self):
         nPlugin = self.exp.meta_data.get('nPlugin')

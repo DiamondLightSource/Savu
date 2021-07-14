@@ -28,29 +28,17 @@ import numpy as np
 import skimage.transform as sktf
 
 
-
 @register_plugin
 class SubpixelShift(BaseFilter, CpuPlugin):
-    """
-    A plugin to apply a sub-pixel correction to images, for example to allow \
-    subpixel alignment for the AstraGpu plugin.
-    
-    :u*param x_shift: The shift in x for the output image in pixels. Positive \
-    values correspond to data being shifted towards larger indices. \
-    Default: 0.0.
-    :param transform_module: The module (skimage|scipy) to be used for image \
-    translation. skimage corresponds to skimage.transform.SimilarityTransform \
-    while scipy corresponds to scipy.ndimage.interpolation. Default: 'skimage'.
 
-    """
     def __init__(self):
         super(SubpixelShift, self).__init__('SubpixelShift')
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        self.det_x = in_dataset[0].\
-        get_data_dimension_by_axis_label('detector_x')
+        self.det_x = in_dataset[0]. \
+            get_data_dimension_by_axis_label('detector_x')
 
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData[0].plugin_data_setup('SINOGRAM', 'single')
@@ -66,25 +54,24 @@ class SubpixelShift(BaseFilter, CpuPlugin):
         self.xshift = float(self.parameters['x_shift'])
         if self.parameters['transform_module'] == 'skimage':
             self.xshift *= -1
-            if self.xshift >=0:
+            if self.xshift >= 0:
                 self.pad_slice = slice(0, int(np.ceil(self.xshift)))
                 self.pad_col = int(np.ceil(self.xshift))
-            elif self.xshift <0:
-                self.pad_slice = slice(self.det_x+\
-                int(np.floor(self.xshift)), self.det_x)
-                self.pad_col =self.det_x+int(np.floor(self.xshift)) -1
-            self.tf = sktf.SimilarityTransform(scale = 1, rotation = 0, \
-            translation = (self.xshift, 0))
-    
+            elif self.xshift < 0:
+                self.pad_slice = slice(self.det_x + \
+                                       int(np.floor(self.xshift)), self.det_x)
+                self.pad_col = self.det_x + int(np.floor(self.xshift)) - 1
+            self.tf = sktf.SimilarityTransform(scale=1, rotation=0, \
+                                               translation=(self.xshift, 0))
+
     def process_frames_scipy(self, data):
         return sip.shift(data[0], (self.xshift, 0), mode='nearest', order=3)
 
     def process_frames_skimage(self, data):
-        tmpdata = sktf.warp(data[0].astype(np.float64), self.tf)\
-        .astype(np.float32)
-        tmpdata[:,self.pad_slice] = tmpdata[:, self.pad_col][:,np.newaxis]
+        tmpdata = sktf.warp(data[0].astype(np.float64), self.tf) \
+            .astype(np.float32)
+        tmpdata[:, self.pad_slice] = tmpdata[:, self.pad_col][:, np.newaxis]
         return tmpdata
 
     def post_process(self):
         pass
-
