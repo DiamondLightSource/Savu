@@ -121,6 +121,8 @@ extensions = [
     "sphinx.ext.viewcode",
     # Documents command line tools with argparser library
     "sphinxarg.ext",
+    # Allows a grid layout and dropdown boxes
+    "sphinx_panels",
 ]
 autosummary_generate = True
 

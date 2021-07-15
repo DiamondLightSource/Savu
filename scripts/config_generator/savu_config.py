@@ -369,9 +369,9 @@ def main(test=False):
 
 
 def _write_command_to_log(in_text):
-    logger.debug('TEST COMMAND: ' + in_text)
-    block_text = _log_file_code('bash')
-    logger_rst.debug(block_text + pu.indent('>>> ' + in_text))
+    logger.debug("TEST COMMAND: " + in_text)
+    logger_rst.debug(f".. dropdown:: >>> {in_text}\n\n" \
+                     f"    .. code-block:: bash \n")
 
 
 def _write_output_to_log(accumulative_output):
@@ -400,17 +400,10 @@ def _write_output_to_log(accumulative_output):
         current_output = current_output.replace(code, '')
 
     # Indent the text for the rst file format
-    indent_current_output = pu.indent_multi_line_str(current_output)
+    indent_current_output = pu.indent_multi_line_str(current_output, 2)
     # Write to the rst log file
     logger_rst.debug(indent_current_output)
     return sys.stdout.getvalue()
-
-
-def _log_file_code(type):
-    block_text = '''.. code-block:: '''+str(type)+'''
-
-'''
-    return block_text
 
 
 def _reduce_logging_level():
