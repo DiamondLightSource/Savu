@@ -29,9 +29,9 @@ def add_doc_log_handler(logger, doc_log_path):
     :param logger: Logger which we want to add the file handler to
     :param doc_log_path: file path at which to store log file
     """
-    filename = os.path.join(doc_log_path, 'doc.log')
-    fh = logging.FileHandler(filename, mode='w')
-    fh.setFormatter(logging.Formatter('%(message)s'))
+    filename = os.path.join(doc_log_path, "doc.log")
+    fh = logging.FileHandler(filename, mode="w")
+    fh.setFormatter(logging.Formatter("%(message)s"))
     ch = logging.StreamHandler()
 
     fh.setLevel(logging.DEBUG)
@@ -45,8 +45,8 @@ def add_doc_rst_handler(logger, doc_rst_path):
     :param logger: Logger which we want to add the file handler to
     :param doc_log_path: file path at which to store rst  file
     """
-    rst_filename = os.path.join(doc_rst_path, 'doc.rst')
-    fh = logging.FileHandler(rst_filename, mode='w')
-    fh.setFormatter(logging.Formatter('%(message)s'))
+    rst_filename = os.path.join(doc_rst_path, "doc.rst")
+    fh = logging.FileHandler(rst_filename, mode="w")
+    fh.setFormatter(logging.Formatter("%(message)s"))
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)

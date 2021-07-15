@@ -32,13 +32,13 @@ def create_plugin_doc_testing_file(savu_base_path, module_name, file_path):
     :param file_path: plugin documentation file path
     """
     # Read the testing lines from the plugin documentation file
-    doc_file_path = savu_base_path + module_name + '/' + file_path
+    doc_file_path = f"{savu_base_path}{module_name}/{file_path}"
     testing_lines, process_lists = read_test_file(doc_file_path)
 
     # If there are testing lines and/or process lists inside the plugin
     # documentation, then append the configurator end lines for use with
     # the unittest
-    plugin_directory = module_name.split('plugins')[1]
+    plugin_directory = module_name.split("plugins")[1]
     if testing_lines:
         file_name = file_path.split('.')[0]
         create_unittest(file_name, testing_lines, process_lists,
@@ -52,9 +52,9 @@ def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
     :param process_lists: List of process list file paths to check
     :param log_directory: Plugin directory to save the log files inside
     """
-    unittest_file_path = savu_base_path \
-                         + 'savu/test/travis/doc_tests/plugins/' \
-                         + plugin_directory +'/'+ file_name + '_test.py'
+    unittest_file_path = f"{savu_base_path}savu/test/travis/" \
+                         f"doc_tests/plugins/{plugin_directory}/" \
+                         f"{file_name}_test.py"
     pu.create_dir(unittest_file_path)
 
     unittest_setup = get_unittest_setup(file_name)
@@ -106,24 +106,23 @@ def get_logging_set_up(plugin_directory, file_name):
 
         :param out_path: The file path to the directory to save to
         """
-        doc_test_path = 'savu/test/travis/doc_tests/'
-        plugin_log_file = \\
-            doc_test_path +'logs'''\
-            + plugin_directory + '/' + folder_name + '''/'
+        doc_test_path = "savu/test/travis/doc_tests/"
+        plugin_log_file = f"{doc_test_path}logs'''\
+            + plugin_directory + "/" + folder_name + '''/"
         out_path = savu_base_path + plugin_log_file
         # Create directory if it doesn't exist
         pu.create_dir(out_path)
 
         logging.config.fileConfig(
-            savu_base_path + doc_test_path + 'logging.conf')
+            savu_base_path + doc_test_path + "logging.conf")
 
-        logger = logging.getLogger('documentationLog')
+        logger = logging.getLogger("documentationLog")
         dtu.add_doc_log_handler(logger, out_path)
 
-        logger_rst = logging.getLogger('documentationRst')
+        logger_rst = logging.getLogger("documentationRst")
         dtu.add_doc_rst_handler(logger_rst, out_path)
 
-        print('The log files are inside the directory '+out_path)
+        print("The log files are inside the directory "+out_path)
         '''
     return logging_handlers
 
@@ -150,20 +149,19 @@ def get_unittest_process_list_function(process_lists):
         """
         process_lists = ['''
     refresh_process_end = ''']
-        output_checks = ['Exception','Error','ERROR']
+        output_checks = ["Exception","Error","ERROR"]
 
         logger = logging.getLogger('documentationLog')
 
         for process_list_path in process_lists:
             file_exists = os.path.exists(savu_base_path + process_list_path)
-            error_msg = 'The process list at ' \\
-                         + process_list_path \\
-                         + ' does not exist.'
+            error_msg = f"The process list at {process_list_path} does not exist."
+            
             self.assertTrue(file_exists, msg=error_msg)
             if file_exists:
                 # Write the process list being tested to the logger
-                logger.debug('REFRESH PROCESS LIST: ' \\
-                            + savu_base_path + process_list_path)
+                logger.debug(f"REFRESH PROCESS LIST: " \\
+                             f"{savu_base_path}{process_list_path}")
                 saved_stdout = sys.stdout
                 try:
                     out = StringIO()
@@ -172,7 +170,7 @@ def get_unittest_process_list_function(process_lists):
                                               + process_list_path)
                     output_value = out.getvalue().strip()
                     for check in output_checks:
-                        error_msg = 'Refresh failed: '+check+' in the output.'
+                        error_msg = f"Refresh failed: {check} in the output."
                         assert check not in output_value, error_msg
                 finally:
                     sys.stdout = saved_stdout
@@ -205,7 +203,7 @@ def get_unittest_commands(testing_lines, process_lists, file_name):
     unittest_function_start += '''
         input_list = ['''
     unittest_function_end = '''"exit", "y"]
-        output_checks = ['Exception','Error','ERROR']
+        output_checks = ["Exception","Error","ERROR"]
         sctu.savu_config_runner(input_list, output_checks, 
                                 error_str=True)'''
     return unittest_function_start, unittest_function_end, test_list
@@ -264,8 +262,9 @@ import scripts.configurator_tests.savu_config_test_utils as sctu
 import scripts.configurator_tests.refresh_process_lists_test as refresh
 
 # Determine Savu base path
-savu_base_path = \\
-os.path.dirname(os.path.realpath(__file__)).split('savu')[0]
+main_dir = \\
+    os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
+savu_base_path = f"{main_dir}/Savu/"
 
 class '''+unittest_name+'''Test(unittest.TestCase):
 '''
@@ -274,11 +273,11 @@ class '''+unittest_name+'''Test(unittest.TestCase):
 
 if __name__ == "__main__":
     # determine Savu base path
-    savu_base_path = \
-        os.path.dirname(os.path.realpath(__file__)).split('doc')[0]
-
-    plugin_doc_file_path = savu_base_path \
-                           + 'doc/source/plugin_guides/plugins/'
+    main_dir = \
+        os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
+    savu_base_path = f"{main_dir}/Savu/"
+    plugin_doc_file_path = \
+        f"{savu_base_path}doc/source/plugin_guides/plugins/"
 
     for root, dirs, files in os.walk(plugin_doc_file_path, topdown=True):
         if '__' not in root:
