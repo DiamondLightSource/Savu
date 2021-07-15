@@ -18,7 +18,11 @@ python -m doc.create_plugin_doc api_plugin plugin_autosummary.rst
 python -m doc.create_plugin_doc plugin_documentation plugin_documentation.rst
 
 # Pick up command prompt lines from plugin documentation and create tests
-# python -m doc.create_individual_doc_test
+python -m doc.create_individual_doc_test
+
+# Run documentation tests for process list refresh and process list command execution
+# Errors should be raised here if there is a problem with a plugin reference
+# Log files containing the resulting output from each command will be created
 # python -m unittest savu.test.travis.framework_tests.plugin_doc_test_runner
 
 module unload savu/4.0
