@@ -26,7 +26,7 @@ Setup a new virtual environment using the requirements file Savu/doc/source/doc-
 If you are using a diamond computer you can load python into your path to do this.
 
     >>> module load python/3.7
-    >>> python/3.7 -m venv /path/to/venv/doc-env
+    >>> python -m venv /path/to/venv/doc-env
 
 Next, activate this virtual environment and install the requirements.
 
