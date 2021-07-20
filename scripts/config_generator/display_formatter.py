@@ -127,8 +127,7 @@ class DisplayFormatter(object):
 
         doc_link = doc_str.get("documentation_link")
         if doc_link:
-            documentation_link = self._get_equal_lines(doc_link, width,
-                                            info_colour, colour_off, " " * 2)
+            documentation_link = f"  {doc_link}"
             info +="\n"+documentation_link
 
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
