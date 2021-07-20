@@ -827,7 +827,7 @@ class PluginDocumentation(object):
 
     def set_doc_link(self):
         """If there is a restructured text documentation file inside the
-        doc/source/documentation folder, then save the link to the page.
+        doc/source/plugin_guides/plugins folder, then save the link to the page.
 
         """
         # determine Savu base path
@@ -835,14 +835,14 @@ class PluginDocumentation(object):
             os.path.dirname(os.path.realpath(__file__)).split("savu")[0]
 
         # Locate documentation file
-        doc_folder = savu_base_path + "doc/source/documentation"
+        doc_folder = savu_base_path + "doc/source/plugin_guides"
         module_path = \
             self.plugin_class.__module__.replace(".", "/").replace("savu", "")
         file_ = module_path + "_doc"
         file_name = file_ + ".rst"
         file_path = doc_folder + file_name
-        sphinx_link = 'https://savu.readthedocs.io/en/latest/' \
-                      'documentation' + file_
+        sphinx_link = f"https://savu.readthedocs.io/en/latest/" \
+                      f"plugin_guides{file_}.html"
         if os.path.isfile(file_path):
             self.doc.set("documentation_link", sphinx_link)
 
