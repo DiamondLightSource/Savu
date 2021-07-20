@@ -50,13 +50,12 @@ def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
     :param file_name: Plugin file name
     :param testing_lines: Command lines to test
     :param process_lists: List of process list file paths to check
-    :param log_directory: Plugin directory to save the log files inside
+    :param plugin_directory: Plugin directory to save the log files inside
     """
     unittest_file_path = f"{savu_base_path}savu/test/travis/" \
                          f"doc_tests/plugins/{plugin_directory}/" \
                          f"{file_name}_test.py"
     pu.create_dir(unittest_file_path)
-
     unittest_setup = get_unittest_setup(file_name)
     setup_function = get_logging_set_up(plugin_directory, file_name)
 
@@ -90,6 +89,23 @@ if __name__ == "__main__":
             unittest_file.write(unittest_config_end)
 
         unittest_file.write(unittest_main)
+
+def create_init_file(plugin_directory):
+    """ Create a an init file for the unit test
+
+    :param plugin_directory: Plugin directory to save the log files inside
+    """
+    template_init_file_path = f"{savu_base_path}savu/test/travis/" \
+                                f"doc_tests/__init__.py"
+    init_file_path = f"{plugin_directory}/__init__.py"
+    if not os.path.isfile(init_file_path):
+        with open(init_file_path, "w+") as init_file:
+            append_file(init_file, template_init_file_path)
+
+def append_file(f, additional_file):
+    """ Append the additional_file on to main file f """
+    with open(additional_file) as input:
+        f.write(input.read())
 
 def get_logging_set_up(plugin_directory, file_name):
     """ Create the log handlers unittest function
@@ -278,17 +294,17 @@ if __name__ == "__main__":
     savu_base_path = f"{main_dir}/Savu/"
     plugin_doc_file_path = \
         f"{savu_base_path}doc/source/plugin_guides/plugins/"
-
+    doc_test_path = f"{savu_base_path}savu/test/travis/doc_tests/"
     for root, dirs, files in os.walk(plugin_doc_file_path, topdown=True):
-        if '__' not in root:
-            pkg_path = root.split('Savu/')[1]
-            module_name = pkg_path.replace('savu/', '')
-            for file in files:
-                file_name = file.split('.')[0]
-                unittest_file_path = savu_base_path \
-                                     + 'savu/test/travis/doc_tests/' \
-                                     + file_name + '_test.py'
+        pkg_path = root.split('Savu/')[1]
+        module_name = pkg_path.replace('savu/', '')
+        for file in files:
+            file_name = file.split('.')[0]
+            unittest_file_path =  f"{doc_test_path}{file_name}_test.py"
 
-                # Read the testing lines from the plugin documentation file
-                create_plugin_doc_testing_file(savu_base_path,
-                                            module_name, file)
+            # Read the testing lines from the plugin documentation file
+            create_plugin_doc_testing_file(savu_base_path,
+                                        module_name, file)
+    for root, dirs, files in os.walk(f"{doc_test_path}plugins",
+                                     topdown=True):
+        create_init_file(root)
