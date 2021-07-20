@@ -23,17 +23,17 @@ Parameter definitions
             description: "The names assigned to each dataset in the order [fluorescence, diffraction, absorption, monitor]"
             default: "['fluo', 'xrd', 'stxm', 'monitor']"
         
-        fluo_offset:
-            visibility: basic
-            dtype: float
-            description: fluo scale offset.
-            default: "0.0"
-        
         fluo_gain:
             visibility: intermediate
             dtype: float
             description: fluo gain
             default: "0.01"
+        
+        fluo_offset:
+            visibility: basic
+            dtype: float
+            description: fluo scale offset.
+            default: "0.0"
         
         calibration_path:
             visibility: basic
