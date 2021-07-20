@@ -4,7 +4,8 @@ Raven Filter
 Description
 --------------------------
 
-FFT-based method for removing ring artifacts. 
+FFT-based method for removing ring artifacts. Explanation about the method and how to use
+is `here <https://sarepy.readthedocs.io/toc/section3_1/section3_1_2.html#fft-based-methods>`_
 
 Parameter definitions
 --------------------------

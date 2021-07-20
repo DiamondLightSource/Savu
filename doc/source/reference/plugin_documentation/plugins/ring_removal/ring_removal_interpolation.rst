@@ -4,7 +4,8 @@ Ring Removal Interpolation
 Description
 --------------------------
 
-Interpolation-based method working in the sinogram space to remove ring artifacts. 
+Interpolation-based method working in the sinogram space to remove ring artifacts. Explanation about the method and how to use
+is `here <https://sarepy.readthedocs.io/toc/section4/section4_2.html#deriving-an-interpolation-based-ring-removal-method>`_
 
 Parameter definitions
 --------------------------
