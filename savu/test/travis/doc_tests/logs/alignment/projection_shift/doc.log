@@ -1,0 +1,9 @@
+REFRESH PROCESS LIST: /home/glb23482/git_projects/Savu/test_data/process_lists/vo_centering_process.nxs
+REFRESH PROCESS LIST: /home/glb23482/git_projects/Savu/test_data/process_lists/vo_centering_test.nxs
+TEST COMMAND: add NxtomoLoader
+TEST COMMAND: mod 1.1 []
+TEST COMMAND: disp -a
+TEST COMMAND: add ProjectionShift
+TEST COMMAND: disp 1.3 -vv
+TEST COMMAND: open /home/glb23482/git_projects/Savu/test_data/process_lists/vo_centering_process.nxs
+TEST COMMAND: exit
