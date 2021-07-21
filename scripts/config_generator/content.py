@@ -811,7 +811,7 @@ class Content(object):
         else:
             raise ValueError(
                 "Following the second decimal place, please "
-                "specify a dimension '1.1.dim1/1.preview.dim1'"
+                "specify a dimension 1.1.dim1 or 1.preview.dim1"
             )
         return dim
 
