@@ -122,9 +122,11 @@ def get_logging_set_up(plugin_directory, file_name):
 
         :param out_path: The file path to the directory to save to
         """
+        self.setup_argparser()
         doc_test_path = "savu/test/travis/doc_tests/"
-        plugin_log_file = f"{doc_test_path}logs'''\
-            + plugin_directory + "/" + folder_name + '''/"
+        plugin_log_file = f"{doc_test_path}logs"  \\
+                          f"''' + plugin_directory \
+                                + "/" + folder_name + '''/"
         out_path = savu_base_path + plugin_log_file
         # Create directory if it doesn't exist
         pu.create_dir(out_path)
@@ -139,6 +141,12 @@ def get_logging_set_up(plugin_directory, file_name):
         dtu.add_doc_rst_handler(logger_rst, out_path)
 
         print("The log files are inside the directory "+out_path)
+    
+    def setup_argparser(self):
+        """ Clean sys.argv so that command line testing will complete"""
+        import sys
+        sys.argv = ['']
+        del sys
         '''
     return logging_handlers
 
@@ -160,8 +168,8 @@ def get_unittest_process_list_function(process_lists):
     def refresh_process_lists(self):
         """ Run through the process list files and refresh them to update
         any inconsistent parameter values.
-        If there is a value which cannot be used, that parameter will be set
-        to the default value.
+        If there is a value which cannot be used, that parameter will 
+        be set to the default value.
         """
         process_lists = ['''
     refresh_process_end = ''']
@@ -171,7 +179,8 @@ def get_unittest_process_list_function(process_lists):
 
         for process_list_path in process_lists:
             file_exists = os.path.exists(savu_base_path + process_list_path)
-            error_msg = f"The process list at {process_list_path} does not exist."
+            error_msg = f"The process list at {process_list_path}" \\
+                        f"does not exist."
             
             self.assertTrue(file_exists, msg=error_msg)
             if file_exists:
