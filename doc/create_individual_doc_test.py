@@ -23,8 +23,9 @@ import os
 
 import savu.plugins.utils as pu
 
+
 def create_plugin_doc_testing_file(savu_base_path, module_name, file_path):
-    """ Open the provided file path. Read the lines beginning with a command
+    """Open the provided file path. Read the lines beginning with a command
     prompt and save these to a list. Write these lines to a unittest file.
 
     :param savu_base_path:
@@ -38,26 +39,24 @@ def create_plugin_doc_testing_file(savu_base_path, module_name, file_path):
     # If there are testing lines and/or process lists inside the plugin
     # documentation, then append the configurator end lines for use with
     # the unittest
-    plugin_directory = module_name.split("plugins")[1]
+    plugin_dir = module_name.split("plugins")[1]
     if testing_lines:
-        file_name = file_path.split('.')[0]
-        create_unittest(file_name, testing_lines, process_lists,
-                                                plugin_directory)
+        file_name = file_path.split(".")[0]
+        create_unittest(file_name, testing_lines, process_lists, plugin_dir)
 
-def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
-    """ Create a unittest file
+
+def create_unittest(file_name, testing_lines, process_lists, plugin_dir):
+    """Create a unittest file
 
     :param file_name: Plugin file name
     :param testing_lines: Command lines to test
     :param process_lists: List of process list file paths to check
-    :param plugin_directory: Plugin directory to save the log files inside
+    :param plugin_dir: Plugin directory to save the log files inside
     """
-    unittest_file_path = f"{savu_base_path}savu/test/travis/" \
-                         f"doc_tests/plugins/{plugin_directory}/" \
-                         f"{file_name}_test.py"
+    unittest_file_path = f"{savu_base_path}doc/doc_tests//plugins/" \
+                        f"{plugin_dir}/{file_name}_test.py"
     pu.create_dir(unittest_file_path)
-    unittest_setup = get_unittest_setup(file_name)
-    setup_function = get_logging_set_up(plugin_directory, file_name)
+    unittest_setup = get_unittest_setup(plugin_dir, file_name)
 
     if testing_lines:
         unittest_config_start, unittest_config_end, test_list \
@@ -68,15 +67,19 @@ def create_unittest(file_name , testing_lines, process_lists, plugin_directory):
         unittest_process_start, unittest_process_end, process_list_format = \
             get_unittest_process_list_function(process_lists)
 
-    unittest_main = '''
+    unittest_end = '''
     
+    def tearDown(self):
+        # End the logging session
+        dtu.end_logging(logger, logger_rst, fh, ch, fh_rst)
+        logging.shutdown()
+
 if __name__ == "__main__":
     unittest.main()
     '''
 
     with open(unittest_file_path, "w") as unittest_file:
         unittest_file.write(unittest_setup)
-        unittest_file.write(setup_function)
 
         if process_lists:
             unittest_file.write(unittest_process_start)
@@ -88,77 +91,36 @@ if __name__ == "__main__":
             unittest_file.writelines(test_list)
             unittest_file.write(unittest_config_end)
 
-        unittest_file.write(unittest_main)
+        unittest_file.write(unittest_end)
+
 
 def create_init_file(plugin_directory):
-    """ Create a an init file for the unit test
+    """Create a an init file for the unit test
 
     :param plugin_directory: Plugin directory to save the log files inside
     """
-    template_init_file_path = f"{savu_base_path}savu/test/travis/" \
-                                f"doc_tests/__init__.py"
+    template_init_file_path = f"{savu_base_path}doc/doc_tests/__init__.py"
     init_file_path = f"{plugin_directory}/__init__.py"
     if not os.path.isfile(init_file_path):
         with open(init_file_path, "w+") as init_file:
             append_file(init_file, template_init_file_path)
+
 
 def append_file(f, additional_file):
     """ Append the additional_file on to main file f """
     with open(additional_file) as input:
         f.write(input.read())
 
-def get_logging_set_up(plugin_directory, file_name):
-    """ Create the log handlers unittest function
-
-    :param plugin_directory: The plugin file directory
-    :param file_name: plugin file name
-    :return: logging_handlers
-
-    """
-    folder_name = file_name.replace('_doc', '')
-    logging_handlers = '''
-    def setUp(self):
-        """ Set up file handlers for the log and rst file.
-
-        :param out_path: The file path to the directory to save to
-        """
-        self.setup_argparser()
-        doc_test_path = "savu/test/travis/doc_tests/"
-        plugin_log_file = f"{doc_test_path}logs"  \\
-                          f"''' + plugin_directory \
-                                + "/" + folder_name + '''/"
-        out_path = savu_base_path + plugin_log_file
-        # Create directory if it doesn't exist
-        pu.create_dir(out_path)
-
-        logging.config.fileConfig(
-            savu_base_path + doc_test_path + "logging.conf")
-
-        logger = logging.getLogger("documentationLog")
-        dtu.add_doc_log_handler(logger, out_path)
-
-        logger_rst = logging.getLogger("documentationRst")
-        dtu.add_doc_rst_handler(logger_rst, out_path)
-
-        print("The log files are inside the directory "+out_path)
-    
-    def setup_argparser(self):
-        """ Clean sys.argv so that command line testing will complete"""
-        import sys
-        sys.argv = ['']
-        del sys
-        '''
-    return logging_handlers
 
 def get_unittest_process_list_function(process_lists):
-    """ Create function to refresh process lists
+    """Create function to refresh process lists
 
     :param process_lists: List of process list file paths
     :return: refresh_process_start, refresh_process_end, process_list_format
     """
     # Set up the indentation for the proces list
-    indent = 25 * ' '
-    newline_str = ',\n'+indent
+    indent = 25 * " "
+    newline_str = ",\n" + indent
     # Create the list as a string
     process_list_format = list(map(lambda x: '\"' + x + '\"', process_lists))
     process_list_format = \
@@ -174,9 +136,6 @@ def get_unittest_process_list_function(process_lists):
         process_lists = ['''
     refresh_process_end = ''']
         output_checks = ["Exception","Error","ERROR"]
-
-        logger = logging.getLogger('documentationLog')
-
         for process_list_path in process_lists:
             file_exists = os.path.exists(savu_base_path + process_list_path)
             error_msg = f"The process list at {process_list_path}" \\
@@ -204,17 +163,17 @@ def get_unittest_process_list_function(process_lists):
 
 
 def get_unittest_commands(testing_lines, process_lists, file_name):
-    """ Set up the method for testing savu configurator commands
+    """Set up the method for testing savu configurator commands
 
     :param testing_lines: The command lines to test
     :return: unittest_function_start, unittest_function_end, test_list
     """
 
     # Set up the indentation for the command list
-    indent = 22 * ' '
-    newline_str = '\",\n' + indent
+    indent = 22 * " "
+    newline_str = '",\n' + indent
     # Create the list as a string
-    test_list = list(map(lambda x: '\"' + x + newline_str, testing_lines))
+    test_list = list(map(lambda x: '"' + x + newline_str, testing_lines))
 
     # Set up the unittest
     unittest_function_start = '''    
@@ -223,7 +182,7 @@ def get_unittest_commands(testing_lines, process_lists, file_name):
         """
         '''
     if process_lists:
-        unittest_function_start += 'self.refresh_process_lists()'
+        unittest_function_start += "self.refresh_process_lists()"
 
     unittest_function_start += '''
         input_list = ['''
@@ -233,21 +192,22 @@ def get_unittest_commands(testing_lines, process_lists, file_name):
                                 error_str=True)'''
     return unittest_function_start, unittest_function_end, test_list
 
+
 def read_test_file(doc_file_path):
-    """ Read the command prompt lines from the doc file and append to list
+    """Read the command prompt lines from the doc file and append to list
 
     :param doc_file_path:
     :return: testing_lines, process_lists
     """
     testing_lines = []
     process_lists = []
-    with open(doc_file_path, 'r') as doc_file:
+    with open(doc_file_path, "r") as doc_file:
         for line in doc_file:
             if ">>>" in line:
                 line = line.replace(">>>", "")
                 if "open " in line:
                     # Replace file path with the correct full path
-                    line = line.replace("open ", "open "+savu_base_path)
+                    line = line.replace("open ", "open " + savu_base_path)
                 testing_lines.append(line.strip())
             if ".. ::process_list::" in line:
                 # Documentation must include this line in order to update
@@ -257,12 +217,16 @@ def read_test_file(doc_file_path):
                 process_lists.append(line.strip())
     return testing_lines, process_lists
 
-def get_unittest_setup(file_name):
-    """ Setup unittest
 
+def get_unittest_setup(dir_name, file_name):
+    """Setup unittest
+
+    :param dir_name: Directory name
     :param file_name: Plugin name
     :return: unittest_setup
     """
+    folder_name = file_name.replace("_doc", "")
+
     unittest_name = file_name.replace('_', ' ').title().replace(' ','')
     unittest_setup='''
 """
@@ -281,8 +245,7 @@ import logging.config
 
 from io import StringIO
 
-import savu.plugins.utils as pu
-import savu.test.travis.doc_tests.doc_test_utils as dtu
+import doc.doc_tests.doc_test_utils as dtu
 import scripts.configurator_tests.savu_config_test_utils as sctu
 import scripts.configurator_tests.refresh_process_lists_test as refresh
 
@@ -291,6 +254,15 @@ main_dir = \\
     os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
 savu_base_path = f"{main_dir}/Savu/"
 
+# Reset the args for command line input
+dtu.setup_argparser()
+
+# Start logging
+logger, logger_rst = dtu.get_loggers()
+fh, ch, fh_rst = dtu.setup_log_files(logger, logger_rst,
+                                     "'''+f"{dir_name}/{folder_name}/"\
+                                         +'''")
+                                     
 class '''+unittest_name+'''Test(unittest.TestCase):
 '''
     return unittest_setup
@@ -298,22 +270,19 @@ class '''+unittest_name+'''Test(unittest.TestCase):
 
 if __name__ == "__main__":
     # determine Savu base path
-    main_dir = \
-        os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
+    main_dir = os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
     savu_base_path = f"{main_dir}/Savu/"
     plugin_doc_file_path = \
         f"{savu_base_path}doc/source/plugin_guides/plugins/"
-    doc_test_path = f"{savu_base_path}savu/test/travis/doc_tests/"
+    doc_test_path = f"{savu_base_path}doc/doc_tests/"
     for root, dirs, files in os.walk(plugin_doc_file_path, topdown=True):
-        pkg_path = root.split('Savu/')[1]
-        module_name = pkg_path.replace('savu/', '')
+        pkg_path = root.split("Savu/")[1]
+        module_name = pkg_path.replace("savu/", "")
         for file in files:
-            file_name = file.split('.')[0]
-            unittest_file_path =  f"{doc_test_path}{file_name}_test.py"
+            file_name = file.split(".")[0]
+            unittest_file_path = f"{doc_test_path}{file_name}_test.py"
 
             # Read the testing lines from the plugin documentation file
-            create_plugin_doc_testing_file(savu_base_path,
-                                        module_name, file)
-    for root, dirs, files in os.walk(f"{doc_test_path}plugins",
-                                     topdown=True):
+            create_plugin_doc_testing_file(savu_base_path, module_name, file)
+    for root, dirs, files in os.walk(f"{doc_test_path}plugins", topdown=True):
         create_init_file(root)
