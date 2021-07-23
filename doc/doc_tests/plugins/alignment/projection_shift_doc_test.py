@@ -15,8 +15,7 @@ import logging.config
 
 from io import StringIO
 
-import savu.plugins.utils as pu
-import savu.test.travis.doc_tests.doc_test_utils as dtu
+import doc.doc_tests.doc_test_utils as dtu
 import scripts.configurator_tests.savu_config_test_utils as sctu
 import scripts.configurator_tests.refresh_process_lists_test as refresh
 
@@ -25,38 +24,16 @@ main_dir = \
     os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
 savu_base_path = f"{main_dir}/Savu/"
 
+# Reset the args for command line input
+dtu.setup_argparser()
+
+# Start logging
+logger, logger_rst = dtu.get_loggers()
+fh, ch, fh_rst = dtu.setup_log_files(logger, logger_rst,
+                                     "/alignment/projection_shift/")
+                                     
 class ProjectionShiftDocTest(unittest.TestCase):
 
-    def setUp(self):
-        """ Set up file handlers for the log and rst file.
-
-        :param out_path: The file path to the directory to save to
-        """
-        self.setup_argparser()
-        doc_test_path = "savu/test/travis/doc_tests/"
-        plugin_log_file = f"{doc_test_path}logs"  \
-                          f"/alignment/projection_shift/"
-        out_path = savu_base_path + plugin_log_file
-        # Create directory if it doesn't exist
-        pu.create_dir(out_path)
-
-        logging.config.fileConfig(
-            savu_base_path + doc_test_path + "logging.conf")
-
-        logger = logging.getLogger("documentationLog")
-        dtu.add_doc_log_handler(logger, out_path)
-
-        logger_rst = logging.getLogger("documentationRst")
-        dtu.add_doc_rst_handler(logger_rst, out_path)
-
-        print("The log files are inside the directory "+out_path)
-    
-    def setup_argparser(self):
-        """ Clean sys.argv so that command line testing will complete"""
-        import sys
-        sys.argv = ['']
-        del sys
-        
     def refresh_process_lists(self):
         """ Run through the process list files and refresh them to update
         any inconsistent parameter values.
@@ -66,9 +43,6 @@ class ProjectionShiftDocTest(unittest.TestCase):
         process_lists = ["test_data/process_lists/vo_centering_process.nxs",
                          "test_data/process_lists/vo_centering_test.nxs"]
         output_checks = ["Exception","Error","ERROR"]
-
-        logger = logging.getLogger('documentationLog')
-
         for process_list_path in process_lists:
             file_exists = os.path.exists(savu_base_path + process_list_path)
             error_msg = f"The process list at {process_list_path}" \
@@ -107,6 +81,11 @@ class ProjectionShiftDocTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks, 
                                 error_str=True)
     
+    def tearDown(self):
+        # End the logging session
+        dtu.end_logging(logger, logger_rst, fh, ch, fh_rst)
+        logging.shutdown()
+
 if __name__ == "__main__":
     unittest.main()
     
