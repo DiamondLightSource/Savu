@@ -18,4 +18,9 @@ class UnetApplyTools(PluginTools):
             dtype: str
             description: Path to the model file
             default: my_model.zip
+        number_of_labels:
+            visibility: basic
+            dtype: int
+            description: Number of labels in the segmentation
+            default: 2
         """

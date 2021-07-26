@@ -33,6 +33,7 @@ from skimage import io, img_as_ubyte, img_as_float
 from zipfile import ZipFile
 import os
 import json
+import torch
 
 
 @register_plugin
@@ -49,10 +50,32 @@ class UnetApply(Plugin, GpuPlugin):
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
+        # AMEND THE PATTERNS: The output dataset will have one dimension more
+        # than the in_dataset, so add another slice dimensions the patterns
+        add_dim = str(len(in_dataset[0].get_shape()))
+        patterns = {in_dataset[0]: ['.'.join(['*', add_dim])]}
+
+        # AMEND THE AXIS LABELS: Add an extra slice dim to all axis labels
+        axis_list = ['.'.join(['~' + add_dim, 'label',
+                            'probability'])]
+        axis_labels = {in_dataset[0]: axis_list}
+
+        # AMEND THE SHAPE: Remove the two unrequired dimensions from the
+        # original shape and add a new dimension shape.
+        self.rep = self.parameters['number_of_labels']
+        shape = list(in_dataset[0].get_shape())
+        shape.append(self.rep)
+
+        # populate the output dataset
+        out_dataset[0].create_dataset(
+                patterns=patterns,
+                axis_labels=axis_labels,
+                shape=tuple(shape))
+
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], self.rep,
+                                       slice_axis='label')
 
     def pre_process(self):
         model_path = Path(self.parameters['model_file_path'])
@@ -64,15 +87,17 @@ class UnetApply(Plugin, GpuPlugin):
         data = img_as_float(data[0])
         img = Image(pil2tensor(data, dtype=np.float32))
         flags = fix_odd_sides(img)
-        prediction = self.model.predict(img)
-        output_im = prediction[1][0]
+        prediction = self.model.predict(img)[2]
         if 'y' in flags:
-            ymax = list(output_im.shape)[0]
-            output_im = output_im[:ymax-1, :]
+            ymax = list(prediction.shape)[1]
+            prediction = prediction[:, :ymax-1, :]
         if 'x' in flags:
-            xmax = list(output_im.shape)[1]
-            output_im = output_im[:, :xmax-1]
-        return output_im
+            xmax = list(prediction.shape)[2]
+            prediction = prediction[:, :, :xmax-1]
+        prediction = torch.transpose(prediction, 0, 2)
+        if self.parameters['pattern'] in ['VOLUME_YZ', 'VOLUME_XY']:
+            prediction = torch.transpose(prediction, 1, 0)
+        return prediction
 
     def post_process(self):
         pass
