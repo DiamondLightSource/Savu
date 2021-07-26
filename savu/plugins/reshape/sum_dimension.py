@@ -32,12 +32,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class SumDimension(Plugin, CpuPlugin):
-    """
-    
-    :u*param pattern: How to slice the data passed to the plugin. Default: None.
-    :u*param axis_label: Axis label of the dimension to sum. Default: None.
-
-    """
 
     def __init__(self):
         super(SumDimension, self).__init__('SumDimension')
