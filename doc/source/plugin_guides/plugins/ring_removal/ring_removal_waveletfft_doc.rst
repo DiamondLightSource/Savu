@@ -3,8 +3,6 @@
 Ring Removal Waveletfft Documentation
 #################################################################
 
-(Change this) Include your plugin documentation here. Use a restructured text format.
+Explanation about the method and how to use is `here <https://sarepy.readthedocs.io/toc/section3_1/section3_1_2.html#sarepy.prep.stripe_removal_former.remove_stripe_based_wavelet_fft>`_
+(note that ring artifacts in a reconstructed image corresponding to stripe artifacts in the sinogram image).
 
-..
-    This is a comment. Include an image or file by using the following text
-    ".. figure:: ../files_and_images/plugin_guides/plugins/ring_removal/ring_removal_waveletfft.png"

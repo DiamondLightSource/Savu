@@ -3,8 +3,11 @@
 Ring Removal Normalization Documentation
 #################################################################
 
-(Change this) Include your plugin documentation here. Use a restructured text format.
+This plugin is used to remove full ring artifacts.
 
-..
-    This is a comment. Include an image or file by using the following text
-    ".. figure:: ../files_and_images/plugin_guides/plugins/ring_removal/ring_removal_normalization.png"
+Explanation about the method and how to use is `here <https://sarepy.readthedocs.io/toc/section3_1/section3_1_2.html#sarepy.prep.stripe_removal_former.remove_stripe_based_normalization>`_
+(note that ring artifacts in a reconstructed image corresponding to stripe artifacts in the sinogram image).
+
+**Important note:**
+
+This plugin should *not* be used after a plugin which blurs an image such as PaganinFilter or FresnelFilter.
