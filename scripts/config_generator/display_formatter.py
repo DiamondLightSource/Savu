@@ -736,14 +736,11 @@ class CiteDisplay(DisplayFormatter):
         """
         citation_dict = {}
         framework_cites = fc.get_framework_citations()
-        for cite in framework_cites:
-            citation = CitationInformation(**cite)
-            citation_dict.update({citation.name: citation})
-
+        for name, cite in framework_cites.items():
+            citation_dict.update({name: cite})
         title = \
             self._get_framework_title(width, Fore.LIGHTWHITE_EX,
                                              Back.LIGHTBLACK_EX)
-
         cite = self._get_citation_str(citation_dict, width)
         return title + cite + "\n"
 

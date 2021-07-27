@@ -35,6 +35,7 @@ import h5py
 import numpy as np
 
 import savu.data.framework_citations as fc
+import savu.plugins.docstring_parser as doc
 import savu.plugins.loaders.utils.yaml_utils as yu
 import savu.plugins.utils as pu
 from savu.data.meta_data import MetaData
@@ -280,12 +281,11 @@ class PluginList(object):
         :param group: Group for nxs file
         """
         framework_cites = fc.get_framework_citations()
-        for cite in framework_cites:
-            label = cite["short_name_article"]
-            del cite["short_name_article"]
-            self._save_citation_group(
-                CitationInformation(**cite), cite, group, label
-            )
+        for cite in framework_cites.values():
+            label = cite.short_name_article
+            del cite.short_name_article
+            self._save_citation_group(cite, cite.__dict__, group, label)
+
 
     def _save_citation_group(self, citation, cite_dict, group, group_label):
         """Save the citations to the provided group label
@@ -664,7 +664,8 @@ class CitationInformation(object):
         :param end_char: Character to end the split at
         :return: The string contained between both characters
         """
-        item = self.bibtex.partition(start_char)[2].split(end_char)[0]
+        plain_text = doc.remove_new_lines(self.bibtex)
+        item = plain_text.partition(start_char)[2].split(end_char)[0]
         if author:
             # Return one author only
             if " and " in item:
