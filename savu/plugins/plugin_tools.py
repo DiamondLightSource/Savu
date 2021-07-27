@@ -154,9 +154,11 @@ class PluginParameters(object):
         param_info_dict = None
         if hasattr(tool_class, "define_parameters"):
             yaml_text = tool_class.define_parameters.__doc__
+            # If yaml_text is not None and not empty or consisting of spaces
             if yaml_text and yaml_text.strip():
-                # If yaml_text is not None and not empty or consisting of spaces
-                param_info_dict = doc.load_yaml_doc(yaml_text)
+                # When loading yaml parameter information, convert dtype value to a string
+                docsting = doc.change_dtype_to_str(yaml_text)
+                param_info_dict = doc.load_yaml_doc(docsting)
                 if param_info_dict:
                     if not isinstance(param_info_dict, OrderedDict):
                         error_msg = (

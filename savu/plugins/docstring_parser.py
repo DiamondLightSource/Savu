@@ -64,6 +64,29 @@ def remove_new_lines(in_string):
     return out_string
 
 
+def change_dtype_to_str(doc):
+    """
+    Not all Savu dtypes are valid yaml syntax, this function
+    will convert them all to strings
+
+    param doc: the plugin tools docstring
+    :return: Altered yaml docstring with dtype values changed to be strings
+    """
+    lines = doc.split('\n')
+    doc = ""
+    for i, l in enumerate(lines):
+        split = (l.split('dtype:', 1))
+        if len(split) == 2:
+            dtype = split[1].lstrip().rstrip()
+            if dtype:
+                if not dtype[0] == "'" and not dtype[0] == '"':
+                    l = l.replace(dtype, "'" + dtype + "'")
+            else:
+                print(f"Empty dtype entry for this plugin"
+                      f" tools file on line {i}")
+        doc += l + "\n"
+    return doc
+
 def load_yaml_doc(doc):
     """Load in the yaml format. Call yaml_utils.py
 
@@ -78,20 +101,6 @@ def load_yaml_doc(doc):
         Ordered dict of parameters
 
     """
-    # not all Savu dtypes are valid yaml syntax so convert them all to strings
-    lines = doc.split('\n')
-    doc = ""
-    for i, l in enumerate(lines):
-        split = (l.split('dtype:', 1))
-        if len(split) == 2:
-            dtype = split[1].lstrip().rstrip()
-            if dtype:
-                if not dtype[0] == "'" and not dtype[0] == '"':
-                    l = l.replace(dtype, "'" + dtype + "'")
-            else:
-                print(f"Empty dtype entry for this plugin"
-                      f" tools file on line {i}")
-        doc += l + "\n"
     all_params = ""
     try:
         all_params = yu.read_yaml_from_doc(doc)
