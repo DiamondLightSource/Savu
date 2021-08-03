@@ -134,17 +134,7 @@ class Content(object):
             raise Exception("Please add an item to the process list.")
 
     def add(self, name, str_pos):
-        if name not in list(pu.plugins.keys()):
-            if (self.failed is not None) and (
-                name in list(self.failed.keys())
-            ):
-                msg = (
-                    "IMPORT ERROR: %s is unavailable due to the following"
-                    " error:\n\t%s" % (name, self.failed[name])
-                )
-                raise Exception(msg)
-            else:
-                raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+        self.check_for_plugin_failure(name)
         plugin = pu.plugins[name]()
         plugin.get_plugin_tools()._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
@@ -162,6 +152,31 @@ class Content(object):
         self.plugin_list.plugin_list[pos]["active"] = active
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
+
+
+    def check_for_plugin_failure(self, name):
+        """Check if the plugin failed to load
+
+        :param name: plugin name
+        """
+        if (name not in list(pu.plugins.keys())):
+                if self.plugin_in_failed_dict(name):
+                    msg = f"IMPORT ERROR: {name} is unavailable due to" \
+                          f" the following error:\n\t{self.failed[name]}"
+                    raise Exception(msg)
+                else:
+                    raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+
+
+    def plugin_in_failed_dict(self, name):
+        """Check if plugin in failed dictionary
+
+        :param name: plugin name
+        :return: True if plugin name in the list of failed plugins
+        """
+        failed_plugin_list = list(self.failed.keys()) if self.failed else []
+        return True if name in failed_plugin_list else False
+
 
     def check_preview_param(self, plugin_pos):
         """ Check that the plugin position number is valid and it contains

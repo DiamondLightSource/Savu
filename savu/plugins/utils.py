@@ -154,8 +154,6 @@ def get_tools_class(plugin_tools_id, cls=None):
             return load_class(plugin_tools_id)(cls)
         else:
             return load_class(plugin_tools_id)
-    else:
-        Exception("Tools file %s not found." % path_name)
 
 
 def get_plugins_paths(examples=True):
