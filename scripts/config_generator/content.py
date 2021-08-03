@@ -159,7 +159,8 @@ class Content(object):
 
         :param name: plugin name
         """
-        if (name not in list(pu.plugins.keys())):
+        if (name not in list(pu.plugins.keys())
+                or self.plugin_in_failed_dict(name)):
                 if self.plugin_in_failed_dict(name):
                     msg = f"IMPORT ERROR: {name} is unavailable due to" \
                           f" the following error:\n\t{self.failed[name]}"

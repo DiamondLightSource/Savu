@@ -133,13 +133,16 @@ def _load_module(finder, module_name, failed_imports, error_mode):
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod
         spec.loader.exec_module(mod)
+        # Load the plugin class and ensure the tools file is present
+        plugin = pu.load_class(module_name)()
+        if not plugin.get_plugin_tools():
+            raise Exception(f"Tools file not found.")
     except Exception as e:
         if _is_registered_plugin(mod):
             clazz = pu._get_cls_name(module_name)
             failed_imports[clazz] = e
             if error_mode:
                 print(("\nUnable to load plugin %s\n%s" % (module_name, e)))
-
     return failed_imports
 
 
