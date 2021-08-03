@@ -122,7 +122,8 @@ def populate_plugins(error_mode=False, examples=False):
     for path, name in plugins_paths.items():
         for finder, module_name, is_pkg in pkgutil.walk_packages([path], name):
             if not is_pkg:
-                _load_module(finder, module_name, failed_imports, error_mode)
+                failed_imports = _load_module(finder, module_name, failed_imports, error_mode)
+    return failed_imports
 
 
 def _load_module(finder, module_name, failed_imports, error_mode):
