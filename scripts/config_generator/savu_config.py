@@ -84,6 +84,8 @@ def _disp(content, args):
 def _list(content, args):
     """ List the available plugins. """
     list_content = Content()
+    # Instead of reloading all plugins, copy the list of failed plugins
+    list_content.failed = content.failed
     utils._populate_plugin_list(list_content, pfilter=args.string)
     if not len(list_content.plugin_list.plugin_list):
         print("No result found.")

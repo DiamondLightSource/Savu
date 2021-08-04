@@ -178,8 +178,11 @@ def _populate_plugin_list(content, pfilter=""):
     """ Populate the plugin list from a list of plugin instances. """
     content.plugin_list.plugin_list = []
     sorted_plugins = __get_filtered_plugins(pfilter)
+    # Remove plugins which failed to load correctly
+    loaded_plugins = [p for p in sorted_plugins
+                      if not content.plugin_in_failed_dict(p)]
     count = 0
-    for key in sorted_plugins:
+    for key in loaded_plugins:
         content.add(key, str(count))
         count += 1
 
