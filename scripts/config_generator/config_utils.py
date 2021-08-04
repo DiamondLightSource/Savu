@@ -136,7 +136,7 @@ def _load_module(finder, module_name, failed_imports, error_mode):
         # Load the plugin class and ensure the tools file is present
         plugin = pu.load_class(module_name)()
         if not plugin.get_plugin_tools():
-            raise Exception(f"Tools file not found.")
+            raise OSError(f"Tools file not found.")
     except Exception as e:
         if _is_registered_plugin(mod):
             clazz = pu._get_cls_name(module_name)
