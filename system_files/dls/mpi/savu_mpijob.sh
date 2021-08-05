@@ -46,21 +46,19 @@ if [ ! $delete == false ]; then
 fi
        #-mca btl sm,self,openib \
 
-if [[ $HOSTNAME =~ .*com10.* ]]
-then
-   mpirun -np ${processes} \
+if [[ $HOSTNAME =~ .*com10.*  || $HOSTNAME =~ .*com14.* ]]; then
+	mpirun -np ${processes} \
        -mca pml ucx -x UCX_NET_DEVICES=mlx4_0:1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
 else
-   mpirun -np ${processes} \
+   	mpirun -np ${processes} \
        -mca pml ucx -x UCX_NET_DEVICES=mlx5_0:1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
        python $filename $datafile $processfile $outfile -n $CPUs -v $@
 fi
-
 
 
 if [ ! $delete == false ]; then
