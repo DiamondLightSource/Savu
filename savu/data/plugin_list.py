@@ -109,8 +109,7 @@ class PluginList(object):
                         plugin_tools = plugin_class.get_plugin_tools()
                         if not plugin_tools:
                             raise OSError(f"Tools file not found for {plugin['name']}")
-                        else:
-                            plugin_tools._populate_default_parameters()
+                        plugin_tools._populate_default_parameters()
                     except ImportError:
                         # No plugin class found
                         logging.error(f"No class found for {plugin['name']}")

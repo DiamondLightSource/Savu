@@ -108,8 +108,8 @@ def create_init_file(plugin_directory):
 
 def append_file(f, additional_file):
     """ Append the additional_file on to main file f """
-    with open(additional_file) as input:
-        f.write(input.read())
+    with open(additional_file) as add_file:
+        f.write(add_file.read())
 
 
 def get_unittest_process_list_function(process_lists):

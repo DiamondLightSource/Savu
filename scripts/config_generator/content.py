@@ -165,8 +165,7 @@ class Content(object):
                     msg = f"IMPORT ERROR: {name} is unavailable due to" \
                           f" the following error:\n\t{self.failed[name]}"
                     raise Exception(msg)
-                else:
-                    raise Exception("INPUT ERROR: Unknown plugin %s" % name)
+                raise Exception("INPUT ERROR: Unknown plugin %s" % name)
 
 
     def plugin_in_failed_dict(self, name):
