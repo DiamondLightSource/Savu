@@ -11,6 +11,7 @@ Submodules
    plugins.reshape.downsample_filter
    plugins.reshape.image_stitching
    plugins.reshape.mipmap
+   plugins.reshape.sum_dimension
 
 Module contents
 ---------------

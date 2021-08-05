@@ -34,7 +34,7 @@ python -m doc.create_individual_doc_test
 # Run documentation tests for process list refresh and process list command execution
 # Log files containing the resulting output from each command will be created
 # Errors should be raised here if there is a problem with a plugin reference
-pytest $DIR/doc_tests/plugins/
+# pytest $DIR/doc_tests/plugins/
 
 module unload savu/4.0
 
