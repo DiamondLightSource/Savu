@@ -10,6 +10,6 @@ Median Filter Documentation
     ".. figure:: ../files_and_images/plugin_guides/plugins/filters/denoising/median_filter.png"
 
 >>> add MedianFilter
->>> mod 1.1 ['data']
->>> mod 1.3 4
+>>> mod 1.1 6
+>>> mod 1.3 2D
 >>> disp -a

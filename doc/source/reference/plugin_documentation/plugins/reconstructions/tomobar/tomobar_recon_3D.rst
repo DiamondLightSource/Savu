@@ -97,7 +97,7 @@ Parameter definitions
         
         data_Huber_thresh:
             visibility: advanced
-            dtype: "[None,int]"
+            dtype: "[None,float]"
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
         

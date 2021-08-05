@@ -21,12 +21,16 @@ This script will remove obsolete documentation files and repopulate these pages.
 Create a virtual environment
 ============================
 
-Setup a new virtual environment using the requirements file Savu/doc/source/doc-requirements.txt.
+.. note::
+    If you are installing the packages from the doc-requirements file for the first time, then you
+    need to open this file and uncomment all packages preceeded by a # symbol.
+    To do this you could use the line "gedit /path/to/Savu/doc/source/doc-requirements.txt"
 
+Setup a new virtual environment using the requirements file Savu/doc/source/doc-requirements.txt.
 If you are using a diamond computer you can load python into your path to do this.
 
     >>> module load python/3.7
-    >>> python/3.7 -m venv /path/to/venv/doc-env
+    >>> python -m venv /path/to/venv/doc-env
 
 Next, activate this virtual environment and install the requirements.
 

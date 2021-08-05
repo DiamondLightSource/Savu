@@ -259,6 +259,7 @@ Reshape
    Downsample Filter <plugin_documentation/plugins/reshape/downsample_filter>
    Mipmap <plugin_documentation/plugins/reshape/mipmap>
    Image Stitching <plugin_documentation/plugins/reshape/image_stitching>
+   Sum Dimension <plugin_documentation/plugins/reshape/sum_dimension>
 
 
 Ring Removal
@@ -301,8 +302,8 @@ Morphological Operations
 
    Morph Proc <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc>
    Morph Remove Objects <plugin_documentation/plugins/segmentation/morphological_operations/morph_remove_objects>
-   Morph Proc Line3D <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line3D>
    Morph Proc Line <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line>
+   Morph Proc Line3D <plugin_documentation/plugins/segmentation/morphological_operations/morph_proc_line3D>
 
 
 Evolving Contours

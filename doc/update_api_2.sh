@@ -1,7 +1,11 @@
 #!/bin/bash
 
+echo "***********************************************************************"
+echo "                Starting the second read the docs script"
+echo "***********************************************************************"
+echo "        Creating plugin API files and html pages for read the docs.."
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo $DIR
 
 # members will document all modules
 # undoc keeps modules without docstrings
@@ -15,3 +19,9 @@ sphinx-apidoc -feT -o $DIR/source/reference/api_plugin $DIR/../savu/plugins/ $DI
 # add -Q to suppress warnings
 
 sphinx-build -a -E -b html $DIR/source/ $DIR/build/
+
+
+echo "***********************************************************************"
+echo "                          End of script"
+echo "***********************************************************************"
+

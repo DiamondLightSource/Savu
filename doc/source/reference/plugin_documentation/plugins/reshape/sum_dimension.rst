@@ -1,10 +1,10 @@
-Ring Removal Interpolation
+Sum Dimension
 ########################################################
 
 Description
 --------------------------
 
-Interpolation-based method working in the sinogram space to remove ring artifacts. 
+Sum over a dimension of the data. 
 
 Parameter definitions
 --------------------------
@@ -27,17 +27,17 @@ Parameter definitions
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
         
-        size:
+        pattern:
             visibility: basic
-            dtype: "[float, list[float]]"
-            description: Size of the median filter window. Greater is stronger.
-            default: "31"
+            dtype: "[str, None]"
+            description: How to slice the data passed to the plugin
+            default: None
         
-        snr:
+        axis_label:
             visibility: basic
-            dtype: float
-            description: Ratio used to locate stripe artifacts. Greater is less sensitive.
-            default: "3.0"
+            dtype: "[str, None]"
+            description: Axis label name assigned to the dimension to sum.
+            default: None
         
 Key
 ^^^^^^^^^^

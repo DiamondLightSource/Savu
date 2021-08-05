@@ -120,6 +120,13 @@ class PluginCoverageTest(unittest.TestCase):
         return data_list
 
     def get_test_plugin_list(self, process_files, path):
+        """For every process list file, populate the plugin list
+        in order to test it
+
+        :param process_files: List of process list files to test
+        :param path:
+        :return: a list of plugin names
+        """
         plugin_names = []
         for pfile in process_files:
             plist = PluginList()

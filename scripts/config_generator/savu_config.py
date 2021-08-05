@@ -84,6 +84,8 @@ def _disp(content, args):
 def _list(content, args):
     """ List the available plugins. """
     list_content = Content()
+    # Instead of reloading all plugins, copy the list of failed plugins
+    list_content.failed = content.failed
     utils._populate_plugin_list(list_content, pfilter=args.string)
     if not len(list_content.plugin_list.plugin_list):
         print("No result found.")
@@ -125,11 +127,13 @@ def _mod(content, args):
         # Run the start stop step view for that dimension alone
         _expand(content, f"{pos_str} {dims} {True}")
     else:
-        content.check_required_args(args.value, True)
+        if not args.default:
+            content.check_required_args(args.value, True)
         # Get the parameter name for the display later
         args.param = content.get_param_arg_str(pos_str, subelem)
         content_modified = content.modify(pos_str, subelem,
                                           ' '.join(args.value),
+                                          default=args.default,
                                           dim=command)
         if content_modified:
             # Display the selected parameter only
@@ -369,9 +373,9 @@ def main(test=False):
 
 
 def _write_command_to_log(in_text):
-    logger.debug('TEST COMMAND: ' + in_text)
-    block_text = _log_file_code('bash')
-    logger_rst.debug(block_text + pu.indent('>>> ' + in_text))
+    logger.debug("TEST COMMAND: " + in_text)
+    logger_rst.debug(f".. dropdown:: >>> {in_text}\n\n" \
+                     f"    .. code-block:: bash \n")
 
 
 def _write_output_to_log(accumulative_output):
@@ -400,17 +404,10 @@ def _write_output_to_log(accumulative_output):
         current_output = current_output.replace(code, '')
 
     # Indent the text for the rst file format
-    indent_current_output = pu.indent_multi_line_str(current_output)
+    indent_current_output = pu.indent_multi_line_str(current_output, 2)
     # Write to the rst log file
     logger_rst.debug(indent_current_output)
     return sys.stdout.getvalue()
-
-
-def _log_file_code(type):
-    block_text = '''.. code-block:: '''+str(type)+'''
-
-'''
-    return block_text
 
 
 def _reduce_logging_level():

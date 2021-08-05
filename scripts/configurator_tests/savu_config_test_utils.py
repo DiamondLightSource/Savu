@@ -70,5 +70,6 @@ def _get_error_feedback(output, output_checks):
         if any(check in line for check in output_checks):
             error_list.append(prev_line)
         prev_line = line
-    error_msg = "Error in command ouput: \n" + ("\n".join(error_list))
-    return error_msg
+    if error_list:
+        return "Error in command ouput: \n" + ("\n".join(error_list))
+    return False

@@ -122,7 +122,8 @@ def populate_plugins(error_mode=False, examples=False):
     for path, name in plugins_paths.items():
         for finder, module_name, is_pkg in pkgutil.walk_packages([path], name):
             if not is_pkg:
-                _load_module(finder, module_name, failed_imports, error_mode)
+                failed_imports = _load_module(finder, module_name, failed_imports, error_mode)
+    return failed_imports
 
 
 def _load_module(finder, module_name, failed_imports, error_mode):
@@ -132,13 +133,16 @@ def _load_module(finder, module_name, failed_imports, error_mode):
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod
         spec.loader.exec_module(mod)
+        # Load the plugin class and ensure the tools file is present
+        plugin = pu.load_class(module_name)()
+        if not plugin.get_plugin_tools():
+            raise OSError(f"Tools file not found.")
     except Exception as e:
         if _is_registered_plugin(mod):
             clazz = pu._get_cls_name(module_name)
             failed_imports[clazz] = e
             if error_mode:
                 print(("\nUnable to load plugin %s\n%s" % (module_name, e)))
-
     return failed_imports
 
 
@@ -174,8 +178,11 @@ def _populate_plugin_list(content, pfilter=""):
     """ Populate the plugin list from a list of plugin instances. """
     content.plugin_list.plugin_list = []
     sorted_plugins = __get_filtered_plugins(pfilter)
+    # Remove plugins which failed to load correctly
+    loaded_plugins = [p for p in sorted_plugins
+                      if not content.plugin_in_failed_dict(p)]
     count = 0
-    for key in sorted_plugins:
+    for key in loaded_plugins:
         content.add(key, str(count))
         count += 1
 

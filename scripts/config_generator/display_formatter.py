@@ -127,8 +127,7 @@ class DisplayFormatter(object):
 
         doc_link = doc_str.get("documentation_link")
         if doc_link:
-            documentation_link = self._get_equal_lines(doc_link, width,
-                                            info_colour, colour_off, " " * 2)
+            documentation_link = f"  {doc_link}"
             info +="\n"+documentation_link
 
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
@@ -737,14 +736,11 @@ class CiteDisplay(DisplayFormatter):
         """
         citation_dict = {}
         framework_cites = fc.get_framework_citations()
-        for cite in framework_cites:
-            citation = CitationInformation(**cite)
-            citation_dict.update({citation.name: citation})
-
+        for name, cite in framework_cites.items():
+            citation_dict.update({name: cite})
         title = \
             self._get_framework_title(width, Fore.LIGHTWHITE_EX,
                                              Back.LIGHTBLACK_EX)
-
         cite = self._get_citation_str(citation_dict, width)
         return title + cite + "\n"
 
