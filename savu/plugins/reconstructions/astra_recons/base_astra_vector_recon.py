@@ -117,16 +117,31 @@ class BaseAstraVectorRecon(BaseRecon):
 
     def set_mask(self, shape):
         l = self.get_plugin_out_datasets()[0].get_shape()[0]
-        c = np.linspace(-l/2.0, l/2.0, l)
+        c = np.linspace(-l / 2.0, l / 2.0, l)
         x, y = np.meshgrid(c, c)
-        r = (shape[self.dim_detX]-1)*self.parameters['ratio']
 
+        ratio = self.parameters['ratio']
+        if isinstance(ratio, list) or isinstance(ratio, tuple):
+            ratio_mask = ratio[0]
+            outer_mask = ratio[1]
+            if isinstance(outer_mask, str):
+                if self.parameters['outer_pad'] is True:
+                    outer_mask = 1.0
+                else:
+                    outer_mask = 0.0
+        else:
+            ratio_mask = ratio
+            if self.parameters['outer_pad'] is True:
+                outer_mask = 1.0
+            else:
+                outer_mask = 0.0
+        r = (l - 1) * ratio_mask
         outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
             else False
         if not outer_pad:
             self.manual_mask = \
-                np.array((x**2 + y**2 < (r/2.0)**2), dtype=np.float)
-            self.manual_mask[self.manual_mask == 0] = np.nan
+                np.array((x**2 + y**2 < (r / 2.0)**2), dtype=np.float)
+            self.manual_mask[self.manual_mask == 0] = outer_mask
         else:
             self.manual_mask = False
 
