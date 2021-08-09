@@ -166,7 +166,7 @@ def _set_arg_parser(args=None, doc=True):
     desc = sc.get_description()['set']
     parser = ArgumentParser(prog='set', description=desc)
     parser.add_argument('plugin_pos', type=str, nargs='+',
-                        help="Plugin position.")
+                        help="Plugin position(s).")
     parser.add_argument("status", type=str, choices=['on', 'ON', 'off', 'OFF'],
                         help="Plugin status.")
     return __arg_parser(parser, args, 'set', doc)
@@ -200,7 +200,8 @@ def _rem_arg_parser(args=None, doc=True):
     """ Argument parser for rem command. """
     desc = sc.get_description()['rem']
     parser = ArgumentParser(prog='rem', description=desc)
-    parser.add_argument('pos', help="Plugin position(s).")
+    parser.add_argument('pos', type=str, nargs='+',
+                            help="Plugin position(s).")
     return __arg_parser(parser, args, 'rem', doc)
 
 
