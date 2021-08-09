@@ -977,7 +977,7 @@ class Content(object):
         pos_str = self.plugin_list.plugin_list[pos]["pos"]
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
-        self.inc_positions(pos, pos_list, pos_str, -1)
+        self.inc_positions(pos, pos_list, pos_str, 0)
 
     @property
     def size(self):
