@@ -283,8 +283,7 @@ class BaseRecon(Plugin):
 
     def get_sino_centre_method(self):
         centre_pad = self.keep_sino
-        if 'centre_pad' in list(self.parameters.keys()) and \
-                self.parameters['centre_pad'] is not False:
+        if 'centre_pad' in list(self.parameters.keys()):
             cpad = self.parameters['centre_pad']
             if not (cpad is True or cpad is False):
                 raise Exception('Unknown value for "centre_pad", please choose'
