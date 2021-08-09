@@ -19,6 +19,49 @@ class AstraReconCpuTools(PluginTools):
                 CGLS: Conjugate Gradient Least Squares
                 BP: Back Projection
             default: FBP
+        FBP_filter:
+            visibility: intermediate
+            dtype: str
+            options: [none,
+                ram-lak,
+                shepp-logan,
+                cosine,
+                hamming,
+                hann,
+                tukey,
+                lanczos,
+                triangular,
+                gaussian,
+                barlett-hann,
+                blackman,
+                nuttall,
+                blackman-harris,
+                blackman-nuttall,
+                flat-top,
+                kaiser,
+                parzen]
+            description:
+              summary: The FBP reconstruction filter type
+              options:
+                none: No filtering
+                ram-lak: Ram-Lak or ramp filter
+                shepp-logan: Multiplies the Ram-Lak filter by a sinc function
+                cosine: Multiplies the Ram-Lak filter by a cosine function
+                hamming: Multiplies the Ram-Lak filter by a hamming window
+                hann: Multiplies the Ram-Lak filter by a hann window
+                tukey:
+                lanczos:
+                triangular:
+                gaussian:
+                barlett-hann:
+                blackman:
+                nuttall:
+                blackman-harris:
+                blackman-nuttall:
+                flat-top:
+                kaiser:
+                parzen:
+            default: 'ram-lak'
         projector:
             visibility: intermediate
             dtype: str
