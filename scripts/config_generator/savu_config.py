@@ -208,8 +208,16 @@ def _cite(content, args):
 @error_catcher
 def _rem(content, args):
     """ Remove plugin(s) from the list. """
+    pos_sort = []
     for pos in args.pos:
-        content.remove(content.find_position(pos))
+        pos_sort.append(int(pos))
+    pos_sort.sort()
+    counter=0
+    for pos in pos_sort:
+        if ((counter>0 and pos > 0)):
+            pos-=1
+        content.remove(content.find_position(str(pos)))
+        counter+=1
     _disp(content, '-q')
     return content
 
