@@ -105,8 +105,8 @@ class DisplayFormatter(object):
         )
         p_dict["data"] = self._remove_quotes(p_dict["data"])
         pos = p_dict["pos"].strip() if "pos" in list(p_dict.keys()) else count
-        fore = Fore.RED + Style.DIM if active else Fore.LIGHTWHITE_EX
-        back = Back.LIGHTBLACK_EX
+        fore = Fore.LIGHTWHITE_EX
+        back = Back.RED if active else Back.LIGHTBLACK_EX
         return self._get_plugin_title(
             p_dict, width, fore, back, active=active, quiet=quiet, pos=pos
         )
