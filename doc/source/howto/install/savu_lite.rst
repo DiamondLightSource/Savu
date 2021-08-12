@@ -1,7 +1,7 @@
 .. |miniconda| replace:: :download:`savu installer <https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh>`
 
 How to install Savu on a PC (Unix)
-=================================
+===================================
 
 Savu-lite is designed to run on a local PC workstation with Unix-based OS. The main functionality of Savu is preserved with Savu-lite except the MPI part.
 Currently Savu-lite is built for Python 3.7 with Numpy 1.15. To install it you'll need a clean conda environment.

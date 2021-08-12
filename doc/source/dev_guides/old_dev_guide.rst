@@ -3,9 +3,11 @@ Savu Developer Information
 **************************
 
 Developing in locally installed Savu (Lite)
-================
+=============================================
 Once Savu-lite has been installed into conda environment you can test the changes you make by simply reinstalling conda in your environment by running:
+
 >>> python setup.py install
+
 This will reinstall Savu with your changes in your conda location, e.g. here: "miniconda3/envs/savu/lib/python3.7/site-packages/savu-4.0-py3.7.egg". One can also work directly in conda environment to see the immediate changes or for debugging purposes.
 
 
