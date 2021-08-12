@@ -35,7 +35,7 @@ class MedianFilter(BaseMedianFilter, CpuPlugin):
         super(MedianFilter, self).__init__("MedianFilter")
 
     def process_frames(self, data):
-        input_temp = np.float32(data[0])
+        input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (self.parameters['dimension'] == '3D'):
