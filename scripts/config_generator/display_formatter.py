@@ -33,6 +33,15 @@ from savu.data.plugin_list import CitationInformation
 WIDTH = 95
 
 
+def get_terminal_width():
+    """Return the width of the terminal"""
+    try:
+        terminal_width = os.get_terminal_size().columns
+        return terminal_width if terminal_width < WIDTH else WIDTH
+    except (AttributeError, OSError) as ae:
+        return WIDTH
+
+
 class DisplayFormatter(object):
     def __init__(self, plugin_list):
         self.plugin_list_inst = plugin_list
@@ -40,7 +49,7 @@ class DisplayFormatter(object):
 
     def _get_string(self, **kwargs):
         out_string = []
-        width = self._get_terminal_width()
+        width = get_terminal_width()
 
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("current_level", "basic")
@@ -169,14 +178,6 @@ class DisplayFormatter(object):
             val = str(val).replace("'", "")
             data_dict[key] = val
         return data_dict
-
-    def _get_terminal_width(self):
-        """Return the width of the terminal"""
-        try:
-            terminal_width = os.get_terminal_size().columns
-            return terminal_width if terminal_width < WIDTH else WIDTH
-        except (AttributeError, OSError) as ae:
-            return WIDTH
 
 class ParameterFormatter(DisplayFormatter):
     def __init__(self, plugin_list):
@@ -366,7 +367,7 @@ class DispDisplay(ParameterFormatter):
             raise
 
     def _separator(self, key, p_dict, prev_visibility, params, width):
-        """Add a line seperator to the parameter string 'params'
+        """Add a line separator to the parameter string 'params'
 
         :param key: parameter name
         :param p_dict: dictionary of parameter definitions
