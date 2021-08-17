@@ -37,7 +37,7 @@ class MedianFilterGpu(BaseMedianFilter, GpuPlugin):
         self.start = 0
 
     def process_frames(self, data):
-        input_temp = np.float32(data[0])
+        input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
         if (self.parameters['dimension'] == '3D'):

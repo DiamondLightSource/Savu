@@ -82,6 +82,7 @@ class PluginCoverageTest(unittest.TestCase):
         plugin_list = self.get_plugin_list(dir_plugin_path)
 
         print ("===============================================================")
+
         print ("\nThe following plugins are not covered by the tests:\n")
         uncovered = list(set(plugin_list).difference(set(tested_plugin_list)))
         for plugin in uncovered:
@@ -92,6 +93,7 @@ class PluginCoverageTest(unittest.TestCase):
                         if fnmatch.fnmatch(name, plugin):
                             print("-->", name, "|||", os.path.relpath(root, savu_base_path))
         print ("===============================================================")
+
         print ("===============================================================")
         print("\nThe following process lists are redundant:\n")
         redundant = list(set(self.nxs_avail).difference(set(self.nxs_used)))
@@ -161,14 +163,15 @@ class PluginCoverageTest(unittest.TestCase):
 
     def get_plugin_list(self, folder):
         plugin_list = []
-        exclude_dir = ['__pycache__']
+        exclude_dir = ['__pycache__', 'unregistered', 'driver']
         exclude_file = ['__init__.py']
         for root, dirs, files in os.walk(folder, topdown=True):
             dirs[:] = [d for d in dirs if d not in exclude_dir]
             files[:] = [fi for fi in files if fi not in exclude_file]
             files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
             for f in files:
-                plugin_list.append(f)
+                if (("tools" not in f and "base" not in f and "deprecated" not in f)):
+                    plugin_list.append(f)
         return plugin_list
 
     def load_plugin(self, name):
