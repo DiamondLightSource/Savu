@@ -235,41 +235,18 @@ class ParameterFormatter(DisplayFormatter):
         str_margin = " " * margin
         sp = (len(longest_key) - len(key)) * " "
         # Align the parameter numbers
-        while len(str(keycount)) < 5:
-            keycount = f" {keycount}"
         temp = f"{keycount}) {sp}{key} : "
+        temp = "\n   %2i) %20s : %s"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
             expand_dict = p_dict["tools"].get_expand_dict(val, expand_dim)
-            val = self._dict_to_str(expand_dict, f"{sp}  ")
-        temp = f"{temp}{val}"
-        params += "\n" + temp
+            val = self._dict_to_str(expand_dict, 15*" ")
+        params += temp % (keycount, key, val)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
                                               width, params, breakdown)
         return params
 
-    def _get_console_spacing(self, temp, width, new_space):
-        """Create string containing parameter number and value.
-        Add balancing spaces between keycount and key
-
-        :param temp: temporary string
-        :param new_space: length of space to optionally add when the
-           width is large enough
-        :param width: Terminal/display width
-        :return: Spacing of display output, so that it is inline with
-           the preceeding lines
-        """
-        offset = 20
-        space = new_space * " "
-        temp_length = len(space) + len(temp)
-        while temp_length < (width // 2) - offset:
-            new_space += 1
-            temp_length += 1
-        while temp_length > (width // 2) - offset:
-            new_space -= 1
-            temp_length -= 1
-        return new_space * " "
 
     def _dict_to_str(self, _dict, indent):
         """Change the dictionary to a formatted string
