@@ -21,10 +21,24 @@
 
 """
 import os
+import argparse
 import unittest
+
 import savu.test.test_process_list_utils as tplu
 import scripts.config_generator.config_utils as cu
 from scripts.config_generator.content import Content
+
+
+def __option_parser(doc=True):
+    """Option parser for command line arguments."""
+    parser = argparse.ArgumentParser(prog="savu_refresh")
+    parser.add_argument("-f", "--file",
+                        help="The process list file to be refreshed",
+                        action="store", type=str)
+    dir_str = "Refresh all process list files inside this directory"
+    parser.add_argument("-d", "--directory", help=dir_str,
+                        action="store", type=str)
+    return parser if doc==True else parser.parse_args()
 
 
 class RefreshProcessListsTest(unittest.TestCase):
@@ -38,12 +52,13 @@ class RefreshProcessListsTest(unittest.TestCase):
             content.refresh(pos_str)
         # save
         content.save(content.filename)
-        print("content has been saved")
+        print("Content has been saved")
 
 
 def generate_test(path):
     def test(self):
         self._refresh_process_file(path)
+
     return test
 
 
@@ -51,11 +66,10 @@ def _under_revision():
     files = tplu.get_test_process_list(
         path + 'test_data/test_process_lists/under_revision')
     return ['under_revision/' + f for f in files]
-    
 
-if __name__ == "__main__":
-    cu.populate_plugins()
-    path = os.path.dirname(os.path.realpath(__file__)).split('scripts')[0]
+
+def refresh_unittest():
+    path = os.path.dirname(os.path.realpath(__file__)).split("scripts")[0]
 
     nxs_in_tests, plugins_in_tests = \
         tplu.get_process_list(path + '/savu/test')
@@ -64,10 +78,10 @@ if __name__ == "__main__":
         + tplu.get_test_process_list(path+'test_data/test_process_lists')
     nxs_used = list(set(nxs_in_tests).intersection(set(lists)))
 
-    test_path = path + '/test_data/test_process_lists'
-    test_path2 = path + '/test_data/process_lists'
+    test_path = path + "/test_data/test_process_lists"
+    test_path2 = path + "/test_data/process_lists"
 
-    exclude = ['multimodal/simple_fit_test_XRF.nxs'] + _under_revision()
+    exclude = ["multimodal/simple_fit_test_XRF.nxs"] + _under_revision()
 
     for f in [n for n in nxs_used if n not in exclude]:
         print("Refreshing process list", f, "...")
@@ -82,3 +96,32 @@ if __name__ == "__main__":
         # every process list is ran as an independent test
         setattr(RefreshProcessListsTest, f"test_{path}", test)
     unittest.main()
+
+
+def refresh_file(f):
+    if os.path.isfile(f):
+        if f.endswith(".nxs"):
+            RefreshProcessListsTest()._refresh_process_file(
+                os.path.abspath(f)
+            )
+    else:
+        print("File not found")
+
+
+if __name__ == "__main__":
+    cu.populate_plugins()
+
+    args = __option_parser(doc=False)
+
+    if args.directory:
+        print(f"Refreshing all .nxs process lists found within the"
+              f" directory {args.directory}")
+        folder = os.path.dirname(args.directory)
+        for f in os.listdir(folder):
+            print(f"Refreshing {f}")
+            refresh_file(os.path.abspath(folder + "/" + f))
+    elif args.file:
+        print(f"Refreshing {args.file}")
+        refresh_file(args.file)
+    else:
+        refresh_unittest()
