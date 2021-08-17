@@ -38,7 +38,7 @@ def __option_parser(doc=True):
     dir_str = "Refresh all process list files inside this directory"
     parser.add_argument("-d", "--directory", help=dir_str,
                         action="store", type=str)
-    return parser if doc==True else parser.parse_args()
+    return parser if doc is True else parser.parse_args()
 
 
 class RefreshProcessListsTest(unittest.TestCase):
@@ -62,7 +62,7 @@ def generate_test(path):
     return test
 
 
-def _under_revision():
+def _under_revision(path):
     files = tplu.get_test_process_list(
         path + 'test_data/test_process_lists/under_revision')
     return ['under_revision/' + f for f in files]
@@ -81,7 +81,7 @@ def refresh_unittest():
     test_path = path + "/test_data/test_process_lists"
     test_path2 = path + "/test_data/process_lists"
 
-    exclude = ["multimodal/simple_fit_test_XRF.nxs"] + _under_revision()
+    exclude = ["multimodal/simple_fit_test_XRF.nxs"] + _under_revision(path)
 
     for f in [n for n in nxs_used if n not in exclude]:
         print("Refreshing process list", f, "...")
