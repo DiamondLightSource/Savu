@@ -27,12 +27,6 @@ Parameter definitions
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
         
-        outlier_mu:
-            visibility: basic
-            dtype: float
-            description: Threshold for defecting outliers, greater is less sensitive. If very small, dezinger acts like a median filter.
-            default: "1.0"
-        
         kernel_size:
             visibility: basic
             dtype: int
@@ -40,16 +34,23 @@ Parameter definitions
             default: "3"
         
         dimension:
-            visibility: intermediate
+            visibility: advanced
             dtype: str
-            description: dimensionality of the filter 2D/3D.
+            description: Dimensionality of the filter 2D/3D.
             default: 3D
         
         pattern:
-            visibility: basic
+            visibility: intermediate
             dtype: str
+            options: "['PROJECTION', 'SINOGRAM', 'VOLUME_YZ', 'VOLUME_XZ', 'VOLUME_XY']"
             description: Pattern to apply this to.
             default: PROJECTION
+        
+        outlier_mu:
+            visibility: basic
+            dtype: float
+            description: Threshold for defecting outliers, greater is less sensitive. If very small, dezinger acts like a median filter.
+            default: "1.0"
         
 Key
 ^^^^^^^^^^

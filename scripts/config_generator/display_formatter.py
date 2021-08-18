@@ -30,7 +30,16 @@ import savu.data.framework_citations as fc
 from savu.data.plugin_list import CitationInformation
 
 
-WIDTH = 85
+WIDTH = 95
+
+
+def get_terminal_width():
+    """Return the width of the terminal"""
+    try:
+        terminal_width = os.get_terminal_size().columns
+        return terminal_width if terminal_width < WIDTH else WIDTH
+    except (AttributeError, OSError) as ae:
+        return WIDTH
 
 
 class DisplayFormatter(object):
@@ -40,6 +49,8 @@ class DisplayFormatter(object):
 
     def _get_string(self, **kwargs):
         out_string = []
+        width = get_terminal_width()
+
         verbosity = kwargs.get("verbose", False)
         level = kwargs.get("current_level", "basic")
         datasets = kwargs.get("datasets", False)
@@ -54,7 +65,7 @@ class DisplayFormatter(object):
 
         count = start
         plugin_list = self.plugin_list[start:stop]
-        line_break = "%s" % ("-" * WIDTH)
+        line_break = "%s" % ("-" * width)
         out_string.append(line_break)
 
         display_args = {
@@ -65,7 +76,7 @@ class DisplayFormatter(object):
         for p_dict in plugin_list:
             count += 1
             description = self._get_description(
-                WIDTH, level, p_dict, count, verbosity, display_args
+                width, level, p_dict, count, verbosity, display_args
             )
             out_string.append(description)
             out_string.append(line_break)
@@ -91,13 +102,13 @@ class DisplayFormatter(object):
 
     def _get_plugin_title(self, p_dict, width, fore_colour, back_colour,
                           active="", quiet=False, pos=None):
-        pos = "%2s" % (str(pos) + ")") if pos else ""
-        title = "%s %s %s" % (active, pos, p_dict["name"])
-        title = title if quiet else title + " (%s)" % p_dict["id"]
-        width -= len(title)
-        return (
-            back_colour + fore_colour + title + " " * width + Style.RESET_ALL
-        )
+        pos = f"{pos})" if pos else ""
+        active = f"{active} " if active else ""
+        title = f"{active}{pos} {p_dict['name']}"
+        title = title if quiet else f"{title} ({p_dict['id']})"
+        title_str = self._get_equal_lines(
+            title, width, back_colour+fore_colour, Style.RESET_ALL, " ")
+        return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
         active = (
@@ -168,14 +179,6 @@ class DisplayFormatter(object):
             data_dict[key] = val
         return data_dict
 
-    def _get_terminal_width(self):
-        """Return the width of the terminal"""
-        try:
-            terminal_width = os.get_terminal_size().columns
-            return terminal_width if terminal_width < WIDTH else WIDTH
-        except (AttributeError, OSError) as ae:
-            return WIDTH
-
 class ParameterFormatter(DisplayFormatter):
     def __init__(self, plugin_list):
         super(ParameterFormatter, self).__init__(plugin_list)
@@ -198,11 +201,13 @@ class ParameterFormatter(DisplayFormatter):
         keycount = 0
         # Return the list of parameters according to the visibility level
         keys = pu.set_order_by_visibility(p_dict["param"], level=level)
+        longest_key = max(keys, key=len)
         try:
             for key in keys:
                 keycount += 1
                 params = self._create_display_string(
-                    desc, key, p_dict, params, keycount, width, breakdown
+                    desc, key, p_dict, params, keycount, longest_key,
+                    width, breakdown
                 )
             return params
         except Exception as e:
@@ -210,41 +215,38 @@ class ParameterFormatter(DisplayFormatter):
             raise
 
     def _create_display_string(self, desc, key, p_dict, params, keycount,
-                               width, breakdown, expand_dim=None):
+                               longest_key, width, breakdown, expand_dim=None):
+        """Create a string to describe the current parameter (key)
+        to display to the terminal
+
+        :param desc: the verbose description to display
+        :param key: current parameter name
+        :param p_dict: parameter dictionary for one plugin
+        :param params: parameter info string to display
+        :param keycount: current parameter number
+        :param longest_key: longest parameter name for this plugin
+        :param width: display text width
+        :param breakdown: bool True if the verbose verbose information
+          should be shown
+        :param expand_dim: number of dimensions
+        :return: string to describe parameter (key)
+        """
         margin = 6
         str_margin = " " * margin
-        temp = "\n   %2i)   %20s : %s"
+        sp = (len(longest_key) - len(key)) * " "
+        # Align the parameter numbers
+        temp = f"{keycount}) {sp}{key} : "
+        temp = "\n   %2i) %20s : %s"
         val = p_dict["data"][key]
         if key == "preview" and expand_dim is not None:
             expand_dict = p_dict["tools"].get_expand_dict(val, expand_dim)
-            val = self._dict_to_str(expand_dict, "")
+            val = self._dict_to_str(expand_dict, 15*" ")
         params += temp % (keycount, key, val)
         if desc:
             params = self._append_description(desc, key, p_dict, str_margin,
                                               width, params, breakdown)
         return params
 
-    def _get_console_spacing(self, temp, width, new_space):
-        """Create string containing parameter number and value.
-        Add balancing spaces between keycount and key
-
-        :param temp: temporary string
-        :param new_space: length of space to optionally add when the
-           width is large enough
-        :param width: Terminal/display width
-        :return: Spacing of display output, so that it is inline with
-           the preceeding lines
-        """
-        offset = 13
-        space = new_space * " "
-        temp_length = len(space) + len(temp)
-        while temp_length < (width // 2) - offset:
-            new_space += 1
-            temp_length += 1
-        while temp_length > (width // 2) - offset:
-            new_space -= 1
-            temp_length -= 1
-        return new_space * " "
 
     def _dict_to_str(self, _dict, indent):
         """Change the dictionary to a formatted string
@@ -258,7 +260,7 @@ class ParameterFormatter(DisplayFormatter):
         for k,v in _dict.items():
             if isinstance(v, dict):
                 v = self._dict_to_str(v, indent+"  ")
-            dict_str += f"\n{indent}{k: >28} : {v}"
+            dict_str += f"\n{indent}{k:>11} : {v}"
         return dict_str
 
 
@@ -302,12 +304,17 @@ class DispDisplay(ParameterFormatter):
         keys = pu.set_order_by_visibility(p_dict["param"], level=level)
 
         filter = subelem if subelem else datasets
+        # If datasets parameter specified, only show these
         filter_items = (
             [pu.param_to_str(subelem, keys)]
             if subelem
             else ["in_datasets", "out_datasets"]
         )
-        # If datasets parameter specified, only show these
+        # Get the longest parameter name, to align values in console
+        if filter:
+            longest_key = max(filter_items, key=len)
+        else:
+            longest_key = max(keys, key=len)
         params = ""
         keycount = 0
         prev_visibility = ""
@@ -320,15 +327,15 @@ class DispDisplay(ParameterFormatter):
                             self._separator(key, p_dict, prev_visibility,
                                             params, width)
                         params = self._create_display_string(desc, key,
-                                       p_dict, params, keycount, width,
-                                       breakdown, expand_dim)
+                                       p_dict, params, keycount, longest_key,
+                                       width, breakdown, expand_dim)
                 else:
                     params = \
                         self._separator(key, p_dict, prev_visibility,
                                         params, width)
                     params = self._create_display_string(desc, key, p_dict,
-                                        params, keycount, width, breakdown,
-                                        expand_dim)
+                                        params, keycount, longest_key, width,
+                                        breakdown, expand_dim)
                 prev_visibility = p_dict["param"][key]["visibility"]
 
             return params
@@ -337,7 +344,7 @@ class DispDisplay(ParameterFormatter):
             raise
 
     def _separator(self, key, p_dict, prev_visibility, params, width):
-        """Add a line seperator to the parameter string 'params'
+        """Add a line separator to the parameter string 'params'
 
         :param key: parameter name
         :param p_dict: dictionary of parameter definitions
@@ -629,7 +636,7 @@ class ListDisplay(ParameterFormatter):
         return default_str + info
 
     def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
-        all_params = self._get_param_details("all", p_dict, 100)
+        all_params = self._get_param_details("all", p_dict, width)
         default_str = self._get_default(level, p_dict, count, width)
         info_c = Fore.CYAN
         warn_c = Fore.RED
