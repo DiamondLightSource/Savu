@@ -33,6 +33,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from .content import Content
     from .completer import Completer
+    from . import display_formatter
     from .display_formatter import ListDisplay, DispDisplay, \
         CiteDisplay
     from . import arg_parsers as parsers
@@ -44,13 +45,21 @@ with warnings.catch_warnings():
 
 def _help(content, args):
     """ Display the help information"""
-    print('%s Savu configurator commands %s\n' % tuple(['*'*21]*2))
+    width = display_formatter.get_terminal_width()
+    command_title = " Savu configurator commands "
+    title_separator = "*"*((width-len(command_title))//2)
+    print(f"{title_separator}{command_title}{title_separator}")
     for key in list(commands.keys()):
         doc = commands[key].__doc__
         if doc:
             print("%8s : %s" % (key, commands[key].__doc__))
-    print("\n%s\n* For more information about individual commands type "
-          "'<command> -h' *\n%s\n" % tuple(['*'*70]*2))
+    line_separator = "*" * width
+    info_text = "* For more information about individual commands type " \
+                "'<command> -h' *"
+    title_separator = " "*((width-len(info_text))//2)
+    print(f"\n{line_separator}")
+    print(f"{title_separator}{info_text}{title_separator}")
+    print(line_separator)
     return content
 
 
