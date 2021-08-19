@@ -36,10 +36,10 @@ The template for the plugin class is below.
 .. literalinclude:: ../files_and_images/plugin_guides/plugin_name_example.py
     :language: python
 
-You can download it
-:download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
-An extended version is available
-:download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
+You can download this here:
+:download:`plugin file <../files_and_images/plugin_guides/plugin_name_example.py>`.
+
+An extended version is available here: :ref:`plugin_template1_with_detailed_notes`
 
 For a list of templates, visit the :ref:`plugin template<plugin_templates>` page.
 
