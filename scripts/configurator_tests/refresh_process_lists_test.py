@@ -100,7 +100,7 @@ def refresh_unittest():
 
 def refresh_file(f):
     if os.path.isfile(f):
-        if f.endswith(".nxs"):
+        if f.endswith(".nxs") or f.endswith(".savu"):
             RefreshProcessListsTest()._refresh_process_file(
                 os.path.abspath(f)
             )
@@ -114,14 +114,19 @@ if __name__ == "__main__":
     args = __option_parser(doc=False)
 
     if args.directory:
-        print(f"Refreshing all .nxs process lists found within the"
-              f" directory {args.directory}")
+        print("\n*******************************************************")
+        print(f"Refreshing all process lists found within the"
+              f"\ndirectory {args.directory}")
+        print("*******************************************************")
         folder = os.path.dirname(args.directory)
         for f in os.listdir(folder):
             print(f"Refreshing {f}")
             refresh_file(os.path.abspath(folder + "/" + f))
+        print("******************   Refresh complete   *****************")
+
     elif args.file:
         print(f"Refreshing {args.file}")
         refresh_file(args.file)
+        print("******************   Refresh complete   *****************")
     else:
         refresh_unittest()
