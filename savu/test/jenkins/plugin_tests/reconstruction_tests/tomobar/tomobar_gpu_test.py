@@ -25,38 +25,34 @@
 import unittest
 from savu.test import test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
-    run_protected_plugin_runner_no_process_list
-from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
-import tempfile
-import os
 
 class TomobarGpuTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = 'tomo'
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
     def test_tomobar_2drecon(self):
         process_list = 'reconstruction/tomobar/tomobar2d_gpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
     def test_tomobar_swls_2drecon(self):
         process_list = 'reconstruction/tomobar/tomobar2d_SWLS_gpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
     """
     def test_tomobar3d_full(self):
         process_list = 'reconstruction/tomobar/tomobar_fully3d_gpu_recon.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
     """
     def test_tomobar3d_fast(self):
         process_list = 'reconstruction/tomobar/tomobar3d_gpu_recon.nxs'
-        options1 = tu.initialise_options(data_file, experiment, process_list)
+        options1 = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options1)
 
         #read the output file using SavuNexusLoader
