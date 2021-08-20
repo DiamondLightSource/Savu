@@ -41,7 +41,7 @@ Frequently Asked Questions
 
         :blue:`If you are on a diamond workstation and you are developing a plugin
         which you want to be accessible straight away, you can save it to
-        /dls_sw/apps/savu/4.0/savu_plugins_new. Plugins from this directory
+        /dls_sw/apps/savu/*savu_version*/savu_plugins_new. Plugins from this directory
         are automatically accessible from any Diamond workstation after
         module loading Savu.`
 
@@ -109,7 +109,7 @@ Working from a workstation at Diamond Light Source
 
     2. Using the `module`_ system, ``module load`` the version of Savu you are using
 
-    >>> module load savu/4.0
+    >>> module load savu/*savu_version*
 
     This will add all of the related packages and files into your path, meaning
     that your program will be able to access these packages when it is run.
@@ -152,8 +152,8 @@ Working from a workstation at Diamond Light Source
 
     You can use repeat the `module`_ command, replacing ``load`` with ``unload``
 
-    >>> module unload savu/<version_number>
+    >>> module unload savu/*old_savu_version*
 
     Then proceed with the version which you originally wanted to load.
 
-    >>> module load savu/4.0
+    >>> module load savu/*savu_version*
