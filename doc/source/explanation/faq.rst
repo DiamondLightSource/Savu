@@ -39,20 +39,20 @@ Frequently Asked Questions
         Within the plugins directory, you can also create a folder or choose
         an existing folder within which to put these files.
 
-        If you are on a diamond workstation and you are developing a plugin
+        :blue:`If you are on a diamond workstation and you are developing a plugin
         which you want to be accessible straight away, you can save it to
         /dls_sw/apps/savu/4.0/savu_plugins_new. Plugins from this directory
         are automatically accessible from any Diamond workstation after
-        module loading Savu.
+        module loading Savu.`
 
-        If you don't want to load plugins from this directory, then you should
-        clear the ``SAVU_PLUGINS_PATH`` prior to using ``module load``.
+        :blue:`If you don't want to load plugins from this directory, then you should
+        clear the` ``SAVU_PLUGINS_PATH`` :blue:`prior to using` ``module load``.
 
         >>> export SAVU_PLUGINS_PATH=''
 
-        Alternatively, you could point this variable to another directory,
+        :blue:`Alternatively, you could point this variable to another directory,
         holding your plugin and plugin tools files. This would mean that
-        these plugins are accessible when you run savu commands.
+        these plugins are accessible when you run savu commands.`
 
         >>> export SAVU_PLUGINS_PATH=/dir/to/plugins
 
