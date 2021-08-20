@@ -24,6 +24,8 @@ import os
 import argparse
 import unittest
 
+from colorama import Style
+
 import savu.test.test_process_list_utils as tplu
 import scripts.config_generator.config_utils as cu
 from scripts.config_generator.content import Content
@@ -99,11 +101,20 @@ def refresh_unittest():
 
 
 def refresh_file(f):
+    """Refresh the process list file at path f"""
+    c_on = Style.BRIGHT
+    c_off = Style.RESET_ALL
     if os.path.isfile(f):
         if f.endswith(".nxs") or f.endswith(".savu"):
-            RefreshProcessListsTest()._refresh_process_file(
-                os.path.abspath(f)
-            )
+            try:
+                RefreshProcessListsTest()._refresh_process_file(
+                    os.path.abspath(f)
+                )
+            except IOError:
+                print(f"{c_on}ERROR: Problem refreshing {f} \n"
+                      f"Please make sure that this is a valid Savu "
+                      f"process list.{c_off}")
+
     else:
         print("File not found")
 
