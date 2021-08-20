@@ -7,7 +7,7 @@
 .. role:: blue
 
 How to develop a Savu plugin
-******************************
+****************************
 
 The architecture of the savu package is that new plugins can be easily developed
 without having to take the framework into consideration.  This is mostly true for
@@ -23,7 +23,7 @@ written anywhere and included easily as shown below without having to be submitt
 to the core code.
 
 Required Files
-=======================
+==============
 
 To create a plugin for Savu you will need to create two modules:
 
@@ -55,10 +55,11 @@ Examples are:
 * 1. A plugin module remove_all_rings.py containing a class RemoveAllRings
   2. A plugin tools module remove_all_rings_tools.py containing a class RemoveAllRingsTools
 
-The plugin file and the plugin tools file should both be stored at the same directory inside ../Savu/savu/plugins/.
+The plugin file and the plugin tools file should both be stored at the same directory inside
+../Savu/savu/plugins/.
 
 1. Introduction to creating a Plugin
-========================================
+====================================
 
 A docstring is a piece of text contained by three quotation marks """ \
 <docstring_text> """. In the beginning docstring, write your plugin name \
@@ -175,7 +176,7 @@ Plugin Class example:
 .. _toolclassguide:
 
 2. How to create the tools class and documentation
-===================================================
+==================================================
 
 This tools class holds the parameter details in a yaml format.
 There is advice on this format :ref:`here<yaml_format>`.
@@ -227,7 +228,7 @@ An example of a plugin tools class.
             """
 
 Yaml Text
-----------
+---------
 
 .. code-block:: yaml
 
@@ -830,8 +831,8 @@ link to this file will be printed to the terminal window.
 
 You will need to open the linked file and write down instructions about
 how to use your plugin. The language this file should be written in is
-reStructured text. This is described in more detail here:
-https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+reStructured text. This is described in more detail
+`here. <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_
 
 An example would be:
 

@@ -124,6 +124,7 @@ class Content(object):
 
     def clear(self, check="y"):
         if check.lower() == "y":
+            self.expand_dim = None
             self.plugin_list.plugin_list = []
 
     def check_plugin_list_exists(self):
