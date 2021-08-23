@@ -80,6 +80,7 @@ class PluginList(object):
         with h5py.File(filename, "r") as plugin_file:
             if "entry/savu_notes/version" in plugin_file:
                 self.version = plugin_file["entry/savu_notes/version"][()]
+                self._show_process_list_version()
 
             plugin_group = plugin_file["entry/plugin"]
             self.plugin_list = []
@@ -132,6 +133,16 @@ class PluginList(object):
             if template:
                 self.add_template()
                 self._template.update_process_list(template)
+
+    def _show_process_list_version(self):
+        """If the input process list was created using an older version
+        of Savu, then alert the user"""
+        from savu.version import __version__
+        if float(__version__) > float(self.version):
+            print(f"*** This process list was created using Savu "
+                  f"{self.version}  ***")
+            space_str = " " * 18
+            print(f"***{space_str}Updating.. {space_str}***")
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, "a") as nxs_file:
