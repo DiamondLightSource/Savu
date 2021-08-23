@@ -119,11 +119,10 @@ def refresh_file(f):
         print("File not found")
 
 
-if __name__ == "__main__":
+def refresh_lists():
+    """Refresh the directory or process list file provided"""
     cu.populate_plugins()
-
     args = __option_parser(doc=False)
-
     if args.directory:
         print("\n*******************************************************")
         print(f"Refreshing all process lists found within the"
@@ -139,5 +138,8 @@ if __name__ == "__main__":
         print(f"Refreshing {args.file}")
         refresh_file(args.file)
         print("******************   Refresh complete   *****************")
-    else:
-        refresh_unittest()
+
+
+if __name__ == "__main__":
+    cu.populate_plugins()
+    refresh_unittest()
