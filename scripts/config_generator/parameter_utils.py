@@ -586,7 +586,7 @@ type_error_dict = {
     "filename": "file name",
     "nptype": "numpy data type",
     "int": "integer",
-    "bool": "boolean",
+    "bool": "true/false",
     "str": "string",
     "float": "float/integer",
     "list": "list",

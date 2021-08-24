@@ -34,11 +34,13 @@ from scripts.config_generator.content import Content
 def __option_parser(doc=True):
     """Option parser for command line arguments."""
     parser = argparse.ArgumentParser(prog="savu_refresh")
-    parser.add_argument("-f", "--file",
+    # Require at least one of the optional arguments
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-f", "--file",
                         help="The process list file to be refreshed",
                         action="store", type=str)
     dir_str = "Refresh all process list files inside this directory"
-    parser.add_argument("-d", "--directory", help=dir_str,
+    group.add_argument("-d", "--directory", help=dir_str,
                         action="store", type=str)
     return parser if doc is True else parser.parse_args()
 

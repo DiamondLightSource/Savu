@@ -138,11 +138,18 @@ class PluginList(object):
         """If the input process list was created using an older version
         of Savu, then alert the user"""
         from savu.version import __version__
-        if float(__version__) > float(self.version):
+        pl_version = float(self.version)
+        if float(__version__) > pl_version:
+            separator = "*" * 53
+            print(separator)
             print(f"*** This process list was created using Savu "
-                  f"{self.version}  ***")
-            space_str = " " * 18
-            print(f"***{space_str}Updating.. {space_str}***")
+                  f"{pl_version}  ***")
+            print(separator)
+            print(f"The process list has been updated, the incorrect \n"
+                  f"parameter values have been reverted to default. \n"
+                  f"Any warnings below point to the problematic parameters.\n"
+                  f"Save this process list to save the updated values.")
+            print(separator)
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, "a") as nxs_file:
