@@ -146,7 +146,7 @@ class PluginList(object):
             print(separator)
             print(f"The process list has been updated, the incorrect \n"
                   f"parameter values have been reverted to default. \n"
-                  f"The warnings below point to the problematic parameters.\n"
+                  f"Any warnings below point to the problematic parameters.\n"
                   f"Save this process list to save the updated values.")
             print(separator)
 
