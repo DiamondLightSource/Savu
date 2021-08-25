@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template2
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes two datasets as\
    input and returns two similar datasets as output.
@@ -29,13 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate2(Plugin, CpuPlugin):
-    """
-    A simple plugin template with multiple input and output datasets.
-
-    :param example: Example of a plugin parameter. Default: None.
-    :param out_datasets: Overriding the out_datasets \
-        parameter. Default: ['in_datasets[1]', 'data2']
-    """
 
     def __init__(self):
         super(PluginTemplate2, self).__init__('PluginTemplate2')

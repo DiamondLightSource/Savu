@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """
- .. module:: perform elemetary arithmetic operations on data: addition, subtraction, multiplication and division
+.. module:: arithmetic_operations
    :platform: Unix
-   :synopsis: perform elemetary arithmetic operations on data: addition, subtraction, multiplication and division
+   :synopsis: Perform elementary arithmetic operations on data: addition,\
+       subtraction, multiplication and division
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -29,14 +30,7 @@ import numpy as np
 
 @register_plugin
 class ArithmeticOperations(Plugin, CpuPlugin):
-    """
-    Basic arithmetic operations on data: addition, subtraction, multiplication and division.\
-    Operations can be performed by extracting scalars from METADATA (min, max, mean) OR providing a scalar value.
-    
-    :param scalar_value: A scalar value value for arithmetic operation (it not in metadata). Default: None.
-    :param operation: arithmetic operation to apply to data, choose from addition, subtraction, multiplication and division. Default: 'division'.
-    :param metadata_value: A type of scalar extracted from metadata (min, max, mean). Default: 'max'.
-    """
+
 
     def __init__(self):
         super(ArithmeticOperations, self).__init__("ArithmeticOperations")

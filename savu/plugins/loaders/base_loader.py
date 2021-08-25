@@ -23,19 +23,8 @@
 
 from savu.plugins.plugin import Plugin
 
-
 class BaseLoader(Plugin):
-    """
-    A base plugin from which all data loader plugins should inherit.
-
-    :u*param preview: A slice list of required frames. Default: [].
-    :*param data_file: Hidden parameter for Savu template. Default: "<>".
-    :~param in_datasets:
-    :~param out_datasets:
-
-    """
-
-    def __init__(self, name="baseLoader"):
+    def __init__(self, name='BaseLoader'):
         super(BaseLoader, self).__init__(name)
         self.hits = []
         self.application = None

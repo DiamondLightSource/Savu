@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-import GraphicalThreadProfiler as gtp
+from . import GraphicalThreadProfiler as gtp
 
 
 def convert(filename):

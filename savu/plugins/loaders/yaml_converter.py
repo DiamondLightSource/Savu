@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: yaml_loader
+.. module:: yaml_converter
    :platform: Unix
-   :synopsis: A class to load data from a non-standard nexus/hdf5 file using \
-   descriptions loaded from a yaml file.
+   :synopsis: 'A class to load data from a non-standard nexus/hdf5 file using \
+               descriptions loaded from a yaml file.'
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -26,6 +26,7 @@ import os
 import h5py
 import yaml
 import copy
+import logging
 import collections.abc as collections
 import numpy as np  # used in exec so do not delete
 from ast import literal_eval
@@ -37,16 +38,6 @@ from savu.data.experiment_collection import Experiment
 
 
 class YamlConverter(BaseLoader):
-    """
-    A class to load data from a non-standard nexus/hdf5 file using \
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    :*param template_param: A hidden parameter to hold parameters passed in \
-        via a savu template file. Default: {}.
-    """
-
     def __init__(self, name='YamlConverter'):
         super(YamlConverter, self).__init__(name)
 
@@ -67,14 +58,25 @@ class YamlConverter(BaseLoader):
     def _get_yaml_file(self, yaml_file):
         if yaml_file is None:
             raise Exception('Please pass a yaml file to the yaml loader.')
+            
+        # try the absolute path
+        yaml_abs = os.path.abspath(yaml_file)
+        if os.path.exists(yaml_abs):
+            return yaml_abs
+        
+        # try adding the path to savu
+        if len(yaml_file.split('Savu/')) > 1:
+            yaml_savu = os.path.join(os.path.dirname(__file__), "../../../",
+                                     yaml_file.split('Savu/')[1])
+            if os.path.exists(yaml_savu):
+                return yaml_savu
 
-        if not os.path.exists(yaml_file):
-            path = os.path.dirname(
-                __file__.split(os.path.join('savu', 'plugins'))[0])
-            yaml_file = os.path.join(path, yaml_file)
-            if not os.path.exists(yaml_file):
-                raise Exception('The yaml file does not exist %s' % yaml_file)
-        return yaml_file
+        # try adding the path to the templates folder
+        yaml_templ = os.path.join(os.path.dirname(__file__), yaml_file)
+        if os.path.exists(yaml_templ):
+            return yaml_templ
+
+        raise Exception('The yaml file does not exist %s' % yaml_file)
 
     def _add_template_updates(self, ddict):
         all_entries = ddict.pop('all', {})
@@ -210,7 +212,6 @@ class YamlConverter(BaseLoader):
                         value = eval(value, globals(), locals())
                         value = self._convert_bytes(value)
                     except:
-                        value = eval(value, globals(), locals())
                         raise Exception(msg)
         return value
 

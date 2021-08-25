@@ -23,76 +23,28 @@
 import sys
 import re
 
+import savu.plugins.loaders.utils.yaml_utils as yu
 
-def find_args(dclass, inst=None):
+
+def find_synopsis(dclass):
     """
     Finds the parameters list from the docstring
     """
-    docstring = None
-    if not dclass.__doc__:
-        if inst:
-            inst._override_class_docstring()
-            docstring = dclass._override_class_docstring.__doc__
-    else:
-        docstring = dclass.__doc__
-
-    if not docstring:
-        return []
-
     mod_doc_lines = _get_doc_lines(sys.modules[dclass.__module__].__doc__)
-    lines = _get_doc_lines(docstring)
-
-    return _parse_args(mod_doc_lines, lines)
+    return _parse_synopsis(mod_doc_lines)
 
 
-def _parse_args(mod_doc_lines, lines):
-    param_list, user, hide, not_param, param_lines = __get_params(lines)
-
-    warn_regexp = re.compile(r'^:config_warn: \s?(?P<config_warn>.*[^ ])$')
-    warn, idx1 = __find_regexp(warn_regexp, lines)
-    warn = '' if not warn else '.\n'.join(warn)+'.'
-    syn_regexp = re.compile(r'^:synopsis: \s?(?P<synopsis>.*[^ ])$')
+def _parse_synopsis(mod_doc_lines):
+    syn_regexp = re.compile(r"^:synopsis: \s?(?P<synopsis>.*[^ ])$")
     synopsis, idx2 = __find_regexp(syn_regexp, mod_doc_lines)
-    synopsis = '' if not synopsis else synopsis[0]+'.'
-
-    info = __find_docstring_info(param_lines+idx1+idx2, lines)
-
-    return {'warn': warn, 'info': info, 'synopsis': synopsis,
-            'param': param_list, 'hide_param': hide, 'user_param': user,
-            'not_param': not_param}
+    synopsis = "" if not synopsis else synopsis[0] + "."
+    return synopsis
 
 
 def _get_doc_lines(doc):
     if not doc:
-        return ['']
-    return [" ".join(l.strip(' .').split()) for l in doc.split('\n')]
-
-
-def __get_params(lines):
-    fixed_str = '(?P<param>\w+):\s?(?P<doc>\w.*[^ ])\s'\
-                + '?Default:\s?(?P<default>.*[^ ])$'
-    param_regexp = re.compile('^:param ' + fixed_str)
-    param, idx1 = __find_regexp(param_regexp, lines)
-
-    not_param_regexp = re.compile('^:~param (?P<param>\w+):')
-    not_param, idx2 = __find_regexp(not_param_regexp, lines)
-
-    hidden_param_regexp = re.compile('^:\*param ' + fixed_str)
-    hidden_param, idx3 = __find_regexp(hidden_param_regexp, lines)
-    hide_keys = [p[0] for p in hidden_param]
-
-    user_param_regexp = re.compile('^:u\*param ' + fixed_str)
-    user_param, idx4 = __find_regexp(user_param_regexp, lines)
-    user_keys = [p[0] for p in user_param]
-
-    lines_read = idx1+idx2+idx3+idx4
-
-    param = user_param + param + hidden_param
-
-    param_entry = [{'dtype': type(value), 'name': a[0], 'desc': a[1],
-                    'default': value} for a in param for value in [eval(a[2])]]
-
-    return param_entry, user_keys, hide_keys, not_param, lines_read
+        return [""]
+    return [" ".join(l.strip(" .").split()) for l in doc.split("\n")]
 
 
 def __find_regexp(regexp, str_list):
@@ -102,8 +54,56 @@ def __find_regexp(regexp, str_list):
     return args, index
 
 
-def __find_docstring_info(index, str_list):
-    info = [str_list[i] for i in range(len(str_list)) if i not in index]
-    info = [i for i in info if i]
-    info = "" if not info else "\n".join(info) + '.'
-    return info
+def remove_new_lines(in_string):
+    """Remove new lines between text"""
+    out_string = in_string
+    if out_string:
+        out_string = in_string.splitlines()
+        out_string = [l.strip() for l in out_string]
+        out_string = " ".join(out_string)
+    return out_string
+
+
+def change_dtype_to_str(doc):
+    """
+    Not all Savu dtypes are valid yaml syntax, this function
+    will convert them all to strings
+
+    param doc: the plugin tools docstring
+    :return: Altered yaml docstring with dtype values changed to be strings
+    """
+    lines = doc.split('\n')
+    doc = ""
+    for i, l in enumerate(lines):
+        split = (l.split('dtype:', 1))
+        if len(split) == 2:
+            dtype = split[1].lstrip().rstrip()
+            if dtype:
+                if not dtype[0] == "'" and not dtype[0] == '"':
+                    l = l.replace(dtype, "'" + dtype + "'")
+            else:
+                print(f"Empty dtype entry for this plugin"
+                      f" tools file on line {i}")
+        doc += l + "\n"
+    return doc
+
+def load_yaml_doc(doc):
+    """Load in the yaml format. Call yaml_utils.py
+
+    Parameters
+    ----------
+    lines : str
+        String of information
+
+    Returns
+    ----------
+    all_params: OrderedDict
+        Ordered dict of parameters
+
+    """
+    all_params = ""
+    try:
+        all_params = yu.read_yaml_from_doc(doc)
+    except Exception as e:
+        print("\nError reading the yaml structure from Yaml Utils.\n %s" % e)
+    return all_params

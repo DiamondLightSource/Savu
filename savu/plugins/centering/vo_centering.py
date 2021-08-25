@@ -21,7 +21,6 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
-from savu.data.plugin_list import CitationInformation
 import savu.core.utils as cu
 
 import logging
@@ -30,36 +29,8 @@ import scipy.ndimage as ndi
 import pyfftw.interfaces.scipy_fftpack as fft
 
 
-
-import sys
-
 @register_plugin
 class VoCentering(BaseFilter, CpuPlugin):
-    """
-    A plugin to calculate the centre of rotation using the Vo Method
-    :u*param preview: A slice list of required frames (sinograms) to use in \
-    the calulation of the centre of rotation (this will not reduce the data \
-    size for subsequent plugins). Default: [].
-    :u*param start_pixel: The estimated centre of rotation. If value is None,\
-        use the horizontal centre of the image. Default: None.
-    :u*param search_area: Search area around the estimated centre of rotation\
-        . Default: (-50, 50).
-    :u*param ratio: The ratio between the size of object and FOV of \
-        the camera. Default: 0.5.
-    :param search_radius: Use for fine searching. Default: 6.
-    :param step: Step of fine searching. Default: 0.5.
-    :param datasets_to_populate: A list of datasets which require this \
-        information. Default: [].
-    :param out_datasets: The default names\
-        . Default: ['cor_preview','cor_broadcast'].
-    :param broadcast_method: Method of broadcasting centre values calculated\
-        from preview slices to full dataset. Available option: 'median', \
-        'mean', 'nearest', 'linear_fit'. Default: 'median'.
-    :param row_drop: Drop lines around vertical center of the \
-        mask. Default: 20.
-    :param average_radius: Averaging sinograms around a required sinogram to\
-        improve signal-to-noise ratio. Default: 5.
-    """
 
     def __init__(self):
         super(VoCentering, self).__init__("VoCentering")
@@ -76,8 +47,8 @@ class VoCentering(BaseFilter, CpuPlugin):
             (pos1, pos2) = np.clip(np.sort(
                 (-pos + cen_col, pos + cen_col)), 0, ncol - 1)
             mask[i, pos1:pos2 + 1] = 1.0
-        mask[cen_row - drop:cen_row + drop + 1,:] = 0.0
-        mask[:, cen_col-1:cen_col+2] = 0.0
+        mask[cen_row - drop:cen_row + drop + 1, :] = 0.0
+        mask[:, cen_col - 1:cen_col + 2] = 0.0
         return mask
 
     def _coarse_search(self, sino, start_cor, stop_cor, ratio, drop):
@@ -85,21 +56,18 @@ class VoCentering(BaseFilter, CpuPlugin):
         Coarse search for finding the rotation center.
         """
         (nrow, ncol) = sino.shape
-        start_cor, stop_cor = np.sort((start_cor,stop_cor))
-        start_cor = np.int16(np.clip(start_cor, 0, ncol-1))
-        stop_cor = np.int16(np.clip(stop_cor, 0, ncol-1))
+        start_cor, stop_cor = np.sort((start_cor, stop_cor))
+        start_cor = np.int16(np.clip(start_cor, 0, ncol - 1))
+        stop_cor = np.int16(np.clip(stop_cor, 0, ncol - 1))
         cen_fliplr = (ncol - 1.0) / 2.0
-        # Flip left-right the [0:Pi ] sinogram to make a full [0;2Pi] sinogram
         flip_sino = np.fliplr(sino)
-        # Below image is used for compensating the shift of the [Pi;2Pi] sinogram
-        # It helps to avoid local minima.
         comp_sino = np.flipud(sino)
         list_cor = np.arange(start_cor, stop_cor + 1.0)
         list_metric = np.zeros(len(list_cor), dtype=np.float32)
         mask = self._create_mask(2 * nrow, ncol, 0.5 * ratio * ncol, drop)
         sino_sino = np.vstack((sino, flip_sino))
         for i, cor in enumerate(list_cor):
-            shift = np.int16(2.0*(cor - cen_fliplr))
+            shift = np.int16(2.0 * (cor - cen_fliplr))
             _sino = sino_sino[nrow:]
             _sino[...] = np.roll(flip_sino, shift, axis=1)
             if shift >= 0:
@@ -107,81 +75,84 @@ class VoCentering(BaseFilter, CpuPlugin):
             else:
                 _sino[:, shift:] = comp_sino[:, shift:]
             list_metric[i] = np.mean(
-                np.abs(np.fft.fftshift(fft.fft2(sino_sino)))*mask)
+                np.abs(np.fft.fftshift(fft.fft2(sino_sino))) * mask)
         minpos = np.argmin(list_metric)
-        if minpos==0:
-            self.error_msg_1 = "!!! WARNING !!! Global minimum is out of "\
-            "the searching range. Please extend smin"
+        if minpos == 0:
+            self.error_msg_1 = "!!! WARNING !!! Global minimum is out of " \
+                               "the searching range. Please extend smin"
             logging.warning(self.error_msg_1)
             cu.user_message(self.error_msg_1)
-        if minpos==len(list_metric)-1:
-            self.error_msg_2 = "!!! WARNING !!! Global minimum is out of "\
-             "the searching range. Please extend smax"
+        if minpos == len(list_metric) - 1:
+            self.error_msg_2 = "!!! WARNING !!! Global minimum is out of " \
+                               "the searching range. Please extend smax"
             logging.warning(self.error_msg_2)
             cu.user_message(self.error_msg_2)
         rot_centre = list_cor[minpos]
         return rot_centre
 
     def _fine_search(self, sino, start_cor, search_radius,
-                      search_step, ratio, drop):
+                     search_step, ratio, drop):
         """
         Fine search for finding the rotation center.
         """
         # Denoising
         (nrow, ncol) = sino.shape
         flip_sino = np.fliplr(sino)
-        search_radius = np.clip(np.abs(search_radius), 1, ncol//10 - 1)
+        search_radius = np.clip(np.abs(search_radius), 1, ncol // 10 - 1)
         search_step = np.clip(np.abs(search_step), 0.1, 1.1)
         start_cor = np.clip(start_cor, search_radius, ncol - search_radius - 1)
         cen_fliplr = (ncol - 1.0) / 2.0
         list_cor = start_cor + np.arange(
-                -search_radius, search_radius + search_step, search_step)
-        comp_sino = np.flipud(sino) # Used to avoid local minima
-        list_metric = np.zeros(len(list_cor), dtype = np.float32)
+            -search_radius, search_radius + search_step, search_step)
+        comp_sino = np.flipud(sino)  # Used to avoid local minima
+        list_metric = np.zeros(len(list_cor), dtype=np.float32)
         mask = self._create_mask(2 * nrow, ncol, 0.5 * ratio * ncol, drop)
         for i, cor in enumerate(list_cor):
-            shift = 2.0*(cor - cen_fliplr)
+            shift = 2.0 * (cor - cen_fliplr)
             sino_shift = ndi.interpolation.shift(
-                flip_sino, (0, shift), order = 3, prefilter = True)
-            if shift>=0:
+                flip_sino, (0, shift), order=3, prefilter=True)
+            if shift >= 0:
                 shift_int = np.int16(np.ceil(shift))
-                sino_shift[:,:shift_int] = comp_sino[:,:shift_int]
+                sino_shift[:, :shift_int] = comp_sino[:, :shift_int]
             else:
                 shift_int = np.int16(np.floor(shift))
-                sino_shift[:,shift_int:] = comp_sino[:,shift_int:]
+                sino_shift[:, shift_int:] = comp_sino[:, shift_int:]
             mat1 = np.vstack((sino, sino_shift))
             list_metric[i] = np.mean(
-                np.abs(np.fft.fftshift(fft.fft2(mat1)))*mask)
+                np.abs(np.fft.fftshift(fft.fft2(mat1))) * mask)
         min_pos = np.argmin(list_metric)
         cor = list_cor[min_pos]
         return cor
 
     def _downsample(self, image, dsp_fact0, dsp_fact1):
-        """
-        Downsample an image by averaging.
+        """Downsample an image by averaging.
+
+        Parameters
+        ----------
+            image : 2D array.
+            dsp_fact0 : downsampling factor along axis 0.
+            dsp_fact1 : downsampling factor along axis 1.
+
+        Returns
         ---------
-        Parameters: - image: 2D array.
-                    - dsp_fact0: downsampling factor along axis 0.
-                    - dsp_fact1: downsampling factor along axis 1.
-        ---------
-        Return:     - Downsampled image.
+            image_dsp : Downsampled image.
         """
         (height, width) = image.shape
         dsp_fact0 = np.clip(np.int16(dsp_fact0), 1, height // 2)
         dsp_fact1 = np.clip(np.int16(dsp_fact1), 1, width // 2)
-        height_dsp = height//dsp_fact0
-        width_dsp = width//dsp_fact1
+        height_dsp = height // dsp_fact0
+        width_dsp = width // dsp_fact1
         if dsp_fact0 == 1 and dsp_fact1 == 1:
             image_dsp = image
         else:
-            image_dsp = image[0:dsp_fact0*height_dsp,0:dsp_fact1*width_dsp]
+            image_dsp = image[0:dsp_fact0 * height_dsp, 0:dsp_fact1 * width_dsp]
             image_dsp = image_dsp.reshape(
-                height_dsp,dsp_fact0,width_dsp,dsp_fact1).mean(-1).mean(1)
+                height_dsp, dsp_fact0, width_dsp, dsp_fact1).mean(-1).mean(1)
         return image_dsp
 
     def set_filter_padding(self, in_data, out_data):
         padding = np.int16(self.parameters['average_radius'])
-        if padding>0:
+        if padding > 0:
             in_data[0].padding = {'pad_multi_frames': padding}
 
     def pre_process(self):
@@ -195,18 +166,19 @@ class VoCentering(BaseFilter, CpuPlugin):
         self.error_msg_1 = ""
         self.error_msg_2 = ""
         self.error_msg_3 = ""
-        if not((self.broadcast_method == 'mean')
+        if not ((self.broadcast_method == 'mean')
                 or (self.broadcast_method == 'median')
-                 or (self.broadcast_method == 'linear_fit')
-                  or (self.broadcast_method == 'nearest')):
-            self.error_msg_3 = "!!! WARNING !!! Selected broadcasting "\
-             "method is out of the list. Use the default option: 'median'"
+                or (self.broadcast_method == 'linear_fit')
+                or (self.broadcast_method == 'nearest')):
+            self.error_msg_3 = "!!!WARNING!!! Selected broadcasting method" \
+                               " is out of the list. Use the default option:" \
+                               " 'median'"
             logging.warning(self.error_msg_3)
             cu.user_message(self.error_msg_3)
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
-        starts,stops,steps = data.get_preview().get_starts_stops_steps()[0:3]
+        starts, stops, steps = data.get_preview().get_starts_stops_steps()[0:3]
         start_ind = starts[1]
         stop_ind = stops[1]
         step_ind = steps[1]
@@ -214,31 +186,38 @@ class VoCentering(BaseFilter, CpuPlugin):
         pre_start = self.exp.meta_data.get(name + '_preview_starts')[1]
         pre_stop = self.exp.meta_data.get(name + '_preview_stops')[1]
         pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]
-        self.origin_prev = np.arange(pre_start,pre_stop, pre_step)
+        self.origin_prev = np.arange(pre_start, pre_stop, pre_step)
         self.plugin_prev = self.origin_prev[start_ind:stop_ind:step_ind]
+        num_sino = len(self.plugin_prev)
+        if num_sino > 20:
+            warning_msg = "\n!!!WARNING!!! You selected to calculate the " \
+                          "center-of-rotation using '{}' sinograms.\n" \
+                          "This is computationally expensive. Considering to " \
+                          "adjust the preview parameter to use\na smaller " \
+                          "number of sinograms (< 20).\n".format(num_sino)
+            logging.warning(warning_msg)
+            cu.user_message(warning_msg)
 
     def process_frames(self, data):
-        if len(data[0].shape)>2:
-            sino = np.mean(data[0],axis=1)
+        if len(data[0].shape) > 2:
+            sino = np.mean(data[0], axis=1)
         else:
             sino = data[0]
         (nrow, ncol) = sino.shape
         dsp_row = 1
         dsp_col = 1
-        if ncol>2000:
+        if ncol > 2000:
             dsp_col = 4
-        if nrow>2000:
+        if nrow > 2000:
             dsp_row = 2
         # Denoising
-        # There's a critical reason to use different window sizes
-        # between coarse and fine search.
-        sino_csearch = ndi.gaussian_filter(sino, (3,1), mode='reflect')
-        sino_fsearch = ndi.gaussian_filter(sino, (2,2), mode='reflect')
+        sino_csearch = ndi.gaussian_filter(sino, (3, 1), mode='reflect')
+        sino_fsearch = ndi.gaussian_filter(sino, (2, 2), mode='reflect')
         sino_dsp = self._downsample(sino_csearch, dsp_row, dsp_col)
         fine_srange = max(self.search_radius, dsp_col)
-        off_set = 0.5*dsp_col if dsp_col > 1 else 0.0
+        off_set = 0.5 * dsp_col if dsp_col > 1 else 0.0
         if self.est_cor is None:
-            self.est_cor = (ncol-1.0) / 2.0
+            self.est_cor = (ncol - 1.0) / 2.0
         else:
             self.est_cor = np.float32(self.est_cor)
         start_cor = np.int16(
@@ -246,10 +225,10 @@ class VoCentering(BaseFilter, CpuPlugin):
         stop_cor = np.int16(
             np.ceil(1.0 * (self.est_cor + self.smax) / dsp_col))
         raw_cor = self._coarse_search(sino_dsp, start_cor, stop_cor,
-                                       self.ratio, self.drop)
+                                      self.ratio, self.drop)
         cor = self._fine_search(
-            sino_fsearch, raw_cor*dsp_col + off_set, fine_srange,
-             self.search_step, self.ratio, self.drop)
+            sino_fsearch, raw_cor * dsp_col + off_set, fine_srange,
+            self.search_step, self.ratio, self.drop)
         return [np.array([cor]), np.array([cor])]
 
     def post_process(self):
@@ -261,15 +240,15 @@ class VoCentering(BaseFilter, CpuPlugin):
         if self.broadcast_method == 'mean':
             cor_broad[:] = np.mean(np.squeeze(cor_prev))
             self.cor_for_executive_summary = np.mean(cor_broad[:])
-        if (self.broadcast_method == 'linear_fit') and (len(cor_prev)>1):
-            afact, bfact = np.polyfit(self.plugin_prev, cor_prev[:,0], 1)
-            list_cor = self.origin_prev*afact + bfact
-            cor_broad[:,0] = list_cor
+        if (self.broadcast_method == 'linear_fit') and (len(cor_prev) > 1):
+            afact, bfact = np.polyfit(self.plugin_prev, cor_prev[:, 0], 1)
+            list_cor = self.origin_prev * afact + bfact
+            cor_broad[:, 0] = list_cor
             self.cor_for_executive_summary = cor_broad[:]
-        if (self.broadcast_method == 'nearest') and (len(cor_prev)>1):
+        if (self.broadcast_method == 'nearest') and (len(cor_prev) > 1):
             for i, pos in enumerate(self.origin_prev):
-                minpos = np.argmin(np.abs(pos-self.plugin_prev))
-                cor_broad[i,0] = cor_prev[minpos,0]
+                minpos = np.argmin(np.abs(pos - self.plugin_prev))
+                cor_broad[i, 0] = cor_prev[minpos, 0]
             self.cor_for_executive_summary = cor_broad[:]
         out_datasets[1].data[:] = cor_broad[:]
         self.populate_meta_data('cor_preview', np.squeeze(cor_prev))
@@ -291,11 +270,6 @@ class VoCentering(BaseFilter, CpuPlugin):
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
         self.orig_full_shape = in_dataset[0].get_shape()
-
-        # if preview parameters exist then use these
-        # else get the size of the data
-        # get n processes and take 4 different sets of 5 from the data if this is feasible based on the data size.
-        # calculate the slice list here and determine if it is feasible, else apply to max(n_processes, data_size)
 
         # reduce the data as per data_subset parameter
         self.set_preview(in_dataset[0], self.parameters['preview'])
@@ -338,46 +312,11 @@ class VoCentering(BaseFilter, CpuPlugin):
     def fix_transport(self):
         return 'hdf5'
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The center of rotation for this reconstruction was calculated " +
-             "automatically using the method described in this work")
-        cite_info.bibtex = \
-            ("@article{vo2014reliable,\n" +
-             "title={Reliable method for calculating the center of rotation " +
-             "in parallel-beam tomography},\n" +
-             "author={Vo, Nghia T and Drakopoulos, Michael and Atwood, " +
-             "Robert C and Reinhard, Christina},\n" +
-             "journal={Optics Express},\n" +
-             "volume={22},\n" +
-             "number={16},\n" +
-             "pages={19078--19086},\n" +
-             "year={2014},\n" +
-             "publisher={Optical Society of America}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Reliable method for calculating the center of rotation in " +
-             "parallel-beam tomography\n" +
-             "%A Vo, Nghia T\n" +
-             "%A Drakopoulos, Michael\n" +
-             "%A Atwood, Robert C\n" +
-             "%A Reinhard, Christina\n" +
-             "%J Optics Express\n" +
-             "%V 22\n" +
-             "%N 16\n" +
-             "%P 19078-19086\n" +
-             "%@ 1094-4087\n" +
-             "%D 2014\n" +
-             "%I Optical Society of America")
-        cite_info.doi = "https://doi.org/10.1364/OE.22.019078"
-        return cite_info
-
     def executive_summary(self):
         if ((self.error_msg_1 == "")
-             and (self.error_msg_2 == "")):
-            msg = "Centre of rotation is : %s" % (str(self.cor_for_executive_summary))
+                and (self.error_msg_2 == "")):
+            msg = "Centre of rotation is : %s" % (
+                str(self.cor_for_executive_summary))
         else:
             msg = "\n" + self.error_msg_1 + "\n" + self.error_msg_2
             msg2 = "(Not well) estimated centre of rotation is : %s" % (str(

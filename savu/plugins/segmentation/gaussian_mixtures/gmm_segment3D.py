@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Gaussian mixture models for classification-segmentation routine
+.. module:: gmm_segment3d
    :platform: Unix
-   :synopsis: Wrapper around scikit GMM function
+   :synopsis: Gaussian mixture models for classification-segmentation routine. Wrapper around scikit GMM function
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 """
@@ -29,11 +29,6 @@ from sklearn.mixture import GaussianMixture
 
 @register_plugin
 class GmmSegment3d(Plugin, MultiThreadedPlugin):
-    """
-    A Plugin to segment data using Gaussian Mixtures from scikit
-
-    :param classes: The number of classes for GMM. Default: 4.
-    """
 
     def __init__(self):
         super(GmmSegment3d, self).__init__("GmmSegment3d")

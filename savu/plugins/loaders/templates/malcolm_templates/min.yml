@@ -7,7 +7,7 @@
 # ================================================================================================== #
 
 inherit: 
-    - savu/plugins/loaders/templates/malcolm_templates/mean.yml
+    - Savu/savu/plugins/loaders/templates/malcolm_templates/mean.yml
 
 override:
     pmean: pmin  # override the inherited dataset name pmean with pmin

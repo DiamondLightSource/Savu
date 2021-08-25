@@ -8,7 +8,8 @@ from savu.test.test_process_list_utils import get_all_files_from
 
 facility = 'dls'
 facility_path = 'system_files/dls'
-templates_path = 'savu/plugins/loaders/templates/malcolm_templates/'
+utils_path = 'savu/plugins/loaders/utils'
+templates_path = 'savu/plugins/loaders/templates/'
 
 from savu.version import __version__, __install__
 
@@ -62,16 +63,15 @@ if '--help' in sys.argv:
 mpi_all_files = glob.glob(os.path.join(facility_path, 'mpi', '*.sh'))
 mpi_files = [mfile for mfile in mpi_all_files if 'dev' not in mfile]
 install_test_files = glob.glob(os.path.join('install/tests', '*.sh'))
+all_templates=glob.glob(templates_path + "/**/*.yml", recursive = True)
 
 # data file locations
 version_file = os.path.join(__install__, 'version.txt')
 env_file = os.path.join(__install__, 'environment.yml')
 sys_file = os.path.join(facility_path, "system_parameters.yml")
+utils_file = os.path.join(utils_path, "yaml_config.yaml")
 mod_file = os.path.join(facility_path, "modulefile", __version__)
-templates_file = os.path.join(templates_path, "malcolm.yml")
-templates_file1 = os.path.join(templates_path, "max.yml")
-templates_file2 = os.path.join(templates_path, "mean.yml")
-templates_file3 = os.path.join(templates_path, "min.yml")
+mod_file = [mod_file] if os.path.exists(mod_file) else []
 conda_recipes = get_files(os.path.join(__install__, '..', 'conda-recipes'))
 test_data = get_files("test_data")
 
@@ -95,11 +95,14 @@ setup(name='savu',
       license='Apache License, Version 2.0',
       packages=find_packages(),
 
-      scripts=mpi_files + install_test_files,
+      scripts=mpi_files + install_test_files + all_templates,
 
       entry_points={'console_scripts': [
           'savu_config=scripts.config_generator.savu_config:main',
+          'savu_plugin_generator=scripts.plugin_generator.savu_plugin_generator:main',
+          'savu_refresh=scripts.configurator_tests.refresh_process_lists_test:refresh_lists',
           'savu=savu.tomo_recon:main',
+          'refresh_lists=savu:run_refresh_lists',
           'savu_quick_tests=savu:run_tests',
           'savu_full_tests=savu:run_full_tests',
           'savu_citations=scripts.citation_extractor.citation_extractor:main',
@@ -118,13 +121,9 @@ setup(name='savu',
                   ('css', ['scripts/log_evaluation/style_sheet.css']),
                   (os.path.dirname(version_file), [version_file]),
                   (os.path.dirname(sys_file), [sys_file]),
-                  (os.path.dirname(mod_file), [mod_file]),
-                  (os.path.dirname(templates_file), [templates_file]),
-                  (os.path.dirname(templates_file1), [templates_file1]),
-                  (os.path.dirname(templates_file2), [templates_file2]),
-                  (os.path.dirname(templates_file3), [templates_file3]),
-                  (os.path.dirname(env_file), [env_file])] \
-                  + conda_recipes + test_data,
+                  (os.path.dirname(utils_file), [utils_file]),
+                      (os.path.dirname(env_file), [env_file])] \
+                  + conda_recipes + test_data + mod_file,
 
       include_package_data=True,
       zip_safe=False)

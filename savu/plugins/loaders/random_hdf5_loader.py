@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: temp_loader
+.. module:: random_hdf5_loader
    :platform: Unix
    :synopsis: A loader that creates a random number generated hdf5 dataset of\
        any size.
@@ -35,30 +35,6 @@ from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
 @register_plugin
 class RandomHdf5Loader(BaseLoader):
-    """
-    A hdf5 dataset of a specified size is created at runtime using numpy\
-    random sampling (numpy.random) and saved to file. This created dataset\
-    will be used as the input file, and the input file path passed to Savu\
-    will be ignored (use a dummy).
-
-    :u*param size: A list specifiying the required data size. Default: [].
-    :u*param axis_labels: A list of the axis labels to be associated with each\
-    dimension, of the form ['name1.unit1', 'name2.unit2',...]. Default: [].
-    :u*param patterns: A list of data access patterns e.g.\
-    [SINOGRAM.0c.1s.2c, PROJECTION.0s.1c.2s], where 'c' and 's' represent core\
-    and slice dimensions respectively and every dimension must be\
-    specified.  Default: [].
-    :u*param file_name: Assign a name to the created h5\
-    file. Default: 'input_array'.
-    :param dtype: A numpy array data type.  Default: 'int16'.
-    :param dataset_name: The name assigned to the dataset. Default: 'tomo'.
-    :param angles: A python statement to be evaluated or a file - if the value\
-    is None, values will be in the interval [0, 180]. Default: None.
-    :param pattern: Pattern used to create and store the hdf5 dataset - \
-    default is the first pattern in the pattern dictionary. Default: None.
-    :param range: Set the distribution interval. Default: [1, 10].
-    """
-
     def __init__(self, name='RandomHdf5Loader'):
         super(RandomHdf5Loader, self).__init__(name)
 
@@ -122,7 +98,7 @@ class RandomHdf5Loader(BaseLoader):
         for i in range(total_frames):
             low, high = self.parameters['range']
             dset[tuple(sl)] = np.random.randint(
-                low, high=high, size=sub_size, dtype=self.parameters['dtype'])
+                low, high=high, size=sub_size, dtype=self.parameters['dtype_'])
             if sl[slice_dirs[idx]].stop == dset.shape[slice_dirs[idx]]:
                 idx += 1
                 if idx == len(slice_dirs):

@@ -31,8 +31,11 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class BandPassTest(unittest.TestCase):
 
+    def setUp(self):
+        self.experiment = 'tomo'
+
     def test_band_pass(self):
-        options = tu.initialise_options(None, 'tomo', None)
+        options = tu.initialise_options(None, self.experiment, None)
         plugin = 'savu.plugins.filters.band_pass'
         run_protected_plugin_runner_no_process_list(options, plugin)
         tu.cleanup(options)

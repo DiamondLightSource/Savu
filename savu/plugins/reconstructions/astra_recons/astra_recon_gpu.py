@@ -25,25 +25,11 @@ import numpy as np
 from savu.plugins.reconstructions.astra_recons.base_astra_vector_recon \
     import BaseAstraVectorRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
 class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
-    """
-    A Plugin to run the astra reconstruction (GPU) for vector geometry
-
-    :u*param res_norm: Output the residual norm at each iteration\
-        (Error in the solution - iterative solvers only). Default: False.
-    :u*param algorithm: Reconstruction type (FBP_CUDA|SIRT_CUDA|\
-        SART_CUDA (not currently working)|CGLS_CUDA|FP_CUDA|BP_CUDA|\
-        SIRT3D_CUDA|CGLS3D_CUDA). Default: 'FBP_CUDA'.
-    :u*param FBP_filter: The FBP reconstruction filter type (none|ram-lak|\
-        shepp-logan|cosine|hamming|hann|tukey|lanczos|triangular|gaussian|\
-        barlett-hann|blackman|nuttall|blackman-harris|blackman-nuttall|\
-        flat-top|kaiser|parzen). Default: 'ram-lak'.
-    """
 
     def __init__(self):
         super(AstraReconGpu, self).__init__("AstraReconGpu")
@@ -285,40 +271,3 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
             vectors[i,9:12] = vec_temp[:] # Vector from detector pixel (0,0) to (1,0)
         return vectors
 
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.name = 'citation3'
-        cite_info.description = \
-            ("The tomography reconstruction algorithm used in this processing \
-             pipeline is part of the ASTRA Toolbox")
-        cite_info.bibtex = \
-            ("@article{palenstijn2011performance,\n" +
-             "title={Performance improvements for iterative electron \
-             tomography reconstruction using graphics processing units \
-             (GPUs)},\n" +
-             "author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},\n" +
-             "journal={Journal of structural biology},\n" +
-             "volume={176},\n" +
-             "number={2},\n" +
-             "pages={250--253},\n" +
-             "year={2011},\n" +
-             "publisher={Elsevier}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Performance improvements for iterative electron tomography \
-             reconstruction using graphics processing units (GPUs)\n" +
-             "%A Palenstijn, WJ\n" +
-             "%A Batenburg, KJ\n" +
-             "%A Sijbers, J\n" +
-             "%J Journal of structural biology\n" +
-             "%V 176\n" +
-             "%N 2\n" +
-             "%P 250-253\n" +
-             "%@ 1047-8477\n" +
-             "%D 2011\n" +
-             "%I Elsevier\n")
-        cite_info.doi = "doi: 10.1016/j.jsb.2011.07.017"
-
-        return super(AstraReconGpu, self).get_citation_information() + \
-            [cite_info]

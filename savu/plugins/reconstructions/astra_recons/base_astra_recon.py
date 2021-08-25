@@ -23,16 +23,8 @@ import astra
 import numpy as np
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
-
 
 class BaseAstraRecon(BaseRecon):
-    """
-    A Plugin to perform Astra toolbox reconstruction
-
-    :u*param n_iterations: Number of Iterations - only valid for iterative \
-        algorithms. Default: 1.
-    """
 
     def __init__(self, name='BaseAstraRecon'):
         super(BaseAstraRecon, self).__init__(name)
@@ -102,10 +94,16 @@ class BaseAstraRecon(BaseRecon):
             ratio_mask = ratio[0]
             outer_mask = ratio[1]
             if isinstance(outer_mask, str):
-                outer_mask = np.nan
+                if self.parameters['outer_pad'] is True:
+                    outer_mask = 1.0
+                else:
+                    outer_mask = np.nan
         else:
             ratio_mask = ratio
-            outer_mask = np.nan
+            if self.parameters['outer_pad'] is True:
+                outer_mask = 1.0
+            else:
+                outer_mask = np.nan
         r = (l - 1) * ratio_mask
         outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
             else False
@@ -184,88 +182,8 @@ class BaseAstraRecon(BaseRecon):
         if proj_id:
             astra.projector.delete(proj_id)
 
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return ['FBP', 'FBP_CUDA']
-
     def _get_single(self):
         return 'single'
 
     def _get_multiple(self):
         return 'multiple'
-
-    def get_citation_information(self):
-        cite_info1 = CitationInformation()
-        cite_info1.name = 'citation1'
-        cite_info1.description = \
-            ("The tomography reconstruction algorithm used in this processing \
-             pipeline is part of the ASTRA Toolbox")
-        cite_info1.bibtex = \
-            ("@article{van2016fast,\n" +
-             "title={Fast and flexible X-ray tomography using the ASTRA \
-             toolbox},\n" +
-             "author={van Aarle, Wim and Palenstijn, Willem Jan and Cant, \
-             Jeroen and Janssens, Eline and Bleichrodt, Folkert and \
-             Dabravolski, Andrei and De Beenhouwer, Jan and Batenburg, K Joost\
-             and Sijbers, Jan},\n" +
-             "journal={Optics Express},\n" +
-             "volume={24},\n" +
-             "number={22},\n" +
-             "pages={25129--25147},\n" +
-             "year={2016},\n" +
-             "publisher={Optical Society of America}\n" +
-             "}")
-        cite_info1.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Fast and flexible X-ray tomography using the ASTRA \
-             toolbox\n" +
-             "%A van Aarle, Wim\n" +
-             "%A Palenstijn, Willem Jan\n" +
-             "%A Cant, Jeroen\n" +
-             "%A Janssens, Eline\n" +
-             "%A Bleichrodt, Folkert\n" +
-             "%A Dabravolski, Andrei\n" +
-             "%A De Beenhouwer, Jan\n" +
-             "%A Batenburg, K Joost\n" +
-             "%A Sijbers, Jan\n" +
-             "%J Optics Express\n" +
-             "%V 24\n" +
-             "%N 22\n" +
-             "%P 25129-25147\n" +
-             "%@ 1094-4087\n" +
-             "%D 2016\n" +
-             "%I Optical Society of America\n")
-        cite_info1.doi = "doi: 10.1364/OE.24.025129"
-
-        cite_info2 = CitationInformation()
-        cite_info2.name = 'citation2'
-        cite_info2.description = \
-            ("The tomography reconstruction algorithm used in this processing \
-             pipeline is part of the ASTRA Toolbox")
-        cite_info2.bibtex = \
-            ("@article{van2015astra,\n" +
-             "title={The ASTRA Toolbox: A platform for advanced algorithm \
-             development in electron tomography},\n" +
-             "author={van Aarle, Wim and Palenstijn, Willem Jan and \
-             De Beenhouwer, Jan and Altantzis, Thomas and Bals, Sara and \
-             Batenburg, K Joost and Sijbers, Jan},\n" +
-             "journal={Ultramicroscopy},\n" +
-             "volume={157},\n" +
-             "pages={35--47},\n" +
-             "year={2015},\n" +
-             "publisher={Elsevier}\n" +
-             "}")
-        cite_info2.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Numerical removal of ring artifacts in microtomography\n" +
-             "%A Raven, Carsten\n" +
-             "%J Review of scientific instruments\n" +
-             "%V 69\n" +
-             "%N 8\n" +
-             "%P 2978-2980\n" +
-             "%@ 0034-6748\n" +
-             "%D 1998\n" +
-             "%I AIP Publishing")
-        cite_info2.doi = "doi: 10.1364/OE.24.025129"
-
-        return [cite_info1, cite_info2]

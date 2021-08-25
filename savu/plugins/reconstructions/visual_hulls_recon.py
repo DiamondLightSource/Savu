@@ -26,22 +26,12 @@ import numpy as np
 
 from scipy.ndimage.filters import median_filter
 from savu.plugins.reconstructions.base_recon import BaseRecon
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
 class VisualHullsRecon(BaseRecon, CpuPlugin):
-    """
-    A Plugin to reconstruct an image by filter back projection
-    using the inverse radon transform from scikit-image.
-
-    :param threshold: threshold to binarize the input sinogram. Default: 0.5.
-
-    :~param outer_pad: Not required. Default: False.
-    :~param centre_pad: Not required. Default: False.
-    """
 
     def __init__(self):
         logging.debug("initialising Scikitimage Filter Back Projection")
@@ -87,33 +77,3 @@ class VisualHullsRecon(BaseRecon, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The reconstruction performed in this processing " +
-             "chain is derived from this work.")
-        cite_info.bibtex = \
-            ("@article{laurentini1994visual," +
-             "title={The visual hull concept for silhouette-based image understanding}," +
-             "author={Laurentini, Aldo}," +
-             "journal={IEEE Transactions on pattern analysis and machine intelligence}," +
-             "volume={16}," +
-             "number={2}," +
-             "pages={150--162}," +
-             "year={1994}," +
-             "publisher={IEEE}" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article" +
-             "%T The visual hull concept for silhouette-based image understanding" +
-             "%A Laurentini, Aldo" +
-             "%J IEEE Transactions on pattern analysis and machine intelligence" +
-             "%V 16" +
-             "%N 2" +
-             "%P 150-162" +
-             "%@ 0162-8828" +
-             "%D 1994" +
-             "%I IEEE")
-        cite_info.doi = "http://dx.doi.org/10.1109/34.273735"
-        return cite_info

@@ -29,21 +29,6 @@ import savu.core.utils as cu
 
 @register_plugin
 class MinAndMax(Plugin, CpuPlugin):
-    """
-    A plugin to calculate the min and max values of each slice (as determined \
-    by the pattern parameter)
-
-    :u*param pattern: How to slice the data. Default: 'VOLUME_XZ'.
-    :param smoothing: Apply a smoothing filter or not. Default: True.
-    :u*param masking: Apply a circular mask or not. Default: True.
-    :u*param ratio: Used to calculate the circular mask. If not provided, \
-        it is calculated using the center of rotation. Default: None.
-    :u*param method: Method to find the global min and the global max. \
-        Available options: 'extrema', 'percentile'. Default: 'percentile'.
-    :u*param p_range: Percentage range if use the 'percentile' method. \
-        Default: [0.0, 100.0].
-    :param out_datasets: The default names. Default: ['the_min','the_max'].
-    """
 
     def __init__(self):
         super(MinAndMax, self).__init__("MinAndMax")
@@ -63,7 +48,7 @@ class MinAndMax(Plugin, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         data = self.get_in_datasets()[0]
         data_shape = data.get_shape()
-        width = data_shape[-1]
+        width = data_shape[0]
         self.use_mask = self.parameters['masking']
         self.data_pattern = self.parameters['pattern']
         self.mask = np.ones((width, width), dtype=np.float32)
@@ -78,10 +63,10 @@ class MinAndMax(Plugin, CpuPlugin):
             self.mask = self.circle_mask(width, ratio)
         self.method = self.parameters['method']
         if not (self.method == 'percentile' or self.method == 'extrema'):
-            msg = "\n***********************************************\n"\
-                "!!! ERROR !!! -> Wrong method. Please use only one of "\
-                "the provided options \n"\
-                "***********************************************\n"
+            msg = "\n***********************************************\n" \
+                  "!!! ERROR !!! -> Wrong method. Please use only one of " \
+                  "the provided options \n" \
+                  "***********************************************\n"
             logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)
@@ -93,7 +78,8 @@ class MinAndMax(Plugin, CpuPlugin):
         frame = np.nan_to_num(data[0])
         if use_filter is True:
             frame = gaussian_filter(frame, (3, 3))
-        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ'):
+        if (self.use_mask is True) and (self.data_pattern == 'VOLUME_XZ') \
+                and (self.mask.shape == frame.shape):
             frame = frame * self.mask
         if self.method == 'percentile':
             list_out = [np.array(
@@ -118,12 +104,11 @@ class MinAndMax(Plugin, CpuPlugin):
         try:
             in_pData[0].plugin_data_setup(self._get_pattern(), 'single')
         except:
-            msg = "\n***************************************************"\
-            "**********\n"\
-            "Can't find the data pattern: {}.\nThe pattern parameter of " \
-            "this plugin must be relevant to its \nprevious plugin" \
-            "\n*************************************************************"\
-            "\n".format(self._get_pattern())
+            msg = "\n***************************************************" \
+                  "**********\nCan't find the data pattern: {}.\nThe pattern " \
+                  "parameter of this plugin must be relevant to its \n" \
+                  "previous plugin\n****************************************" \
+                  "*********************\n".format(self._get_pattern())
             logging.warning(msg)
             cu.user_message(msg)
             raise ValueError(msg)

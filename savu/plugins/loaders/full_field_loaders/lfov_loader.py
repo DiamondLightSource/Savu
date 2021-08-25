@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: Large field of view loader
+.. module:: lfov_loader
    :platform: Unix
-   :synopsis: A class for loading multiple standard tomography scans.
-
+   :synopsis: Large field-of-view loader. A class for loading 2 standard
+    tomography scans.
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
@@ -32,24 +32,6 @@ from savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader import \
 
 @register_plugin
 class LfovLoader(MultiNxtomoLoader):
-    """
-    A class to load 2 scans in Nexus/hdf format into one dataset.
-
-    :u*param file_name: The shared part of the name of each file\
-        (not including .nxs). Default: 'projection'.
-    :param data_path: Path to the data inside the \
-        file. Default: 'entry/data/data'.
-    :param order: Order of datasets used for stitching. Default: [1, 0].
-    :param row_offset: Offsets of row indices between datasets. Default: [0, -1].
-
-    :*param stack_or_cat: Stack or concatenate the data\
-        (4D and 3D respectively). Default: 'stack'.
-    :*param stack_or_cat_dim: Dimension to stack or concatenate. Default: 3.
-    :*param axis_label: New axis label, if required, in the form\
-        'name.units'. Default: 'scan.number'.
-
-    :~param range: No need. Default: None. 
-    """
 
     def __init__(self, name='LfovLoader'):
         super(LfovLoader, self).__init__(name)
@@ -111,7 +93,7 @@ class LfovLoader(MultiNxtomoLoader):
         if len(order_list) != len(file_list):
             raise ValueError(
                 "Number of files found in the folder is not the same as the"
-                +" requested number")
+                " requested number")
         return file_list
     
     def _find_files(self, base, name):
@@ -125,7 +107,6 @@ class LfovLoader(MultiNxtomoLoader):
         dark_list = self._find_files(dark_folder, "/*dark*")
         flat_list = self._find_files(flat_folder, "/*flat*")
         offset = self.parameters['row_offset']
-       
         data_obj_list = []
         for i in order_list:
             self.exp.meta_data.set('data_file', file_list[i])
@@ -136,6 +117,7 @@ class LfovLoader(MultiNxtomoLoader):
             if flat_folder is not None:
                 nxtomo.parameters['flat'] = [
                     flat_list[i], flat_key, flat_scale]
+
             nxtomo.setup()
             # update preview
             if offset[i] != 0:

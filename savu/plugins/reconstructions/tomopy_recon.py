@@ -33,29 +33,12 @@ import tomopy
 logger.setLevel(level)
 import numpy as np
 
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 from savu.plugins.reconstructions.base_recon import BaseRecon
 
 
 @register_plugin
 class TomopyRecon(BaseRecon, CpuPlugin):
-    """
-     A wrapper to the tomopy reconstruction library. Extra keywords not \
-     required for the chosen algorithm will be ignored.
-
-    :u*param algorithm: The reconstruction algorithm (art|bart|fbp|gridrec|\
-        mlem|osem|ospml_hybrid|ospml_quad|pml_hybrid|pml_quad\
-        |sirt). Default: 'gridrec'.
-    :u*param filter_name: Valid for fbp|gridrec, options: none|shepp|cosine|\
-     hann|hamming|ramlak|parzen|butterworth). Default: 'ramlak'.
-    :u*param reg_par: Regularization parameter for smoothing, valid for \
-        ospml_hybrid|ospml_quad|pml_hybrid|pml_quad. Default: 0.0.
-    :param n_iterations: Number of iterations - only valid for iterative \
-    algorithms. Default: 1.
-    :~param init_vol: Not an option. Default: None.
-    :~param centre_pad: Not an option. Default: None.
-    """
 
     def __init__(self):
         super(TomopyRecon, self).__init__("TomopyRecon")
@@ -137,43 +120,3 @@ class TomopyRecon(BaseRecon, CpuPlugin):
             'pml_quad': ['num_gridx', 'num_gridy', 'num_iter', 'reg_par'],
             'sirt': ['num_gridx', 'num_gridy', 'num_iter'],
         }
-
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return ['fbp', 'gridrec']
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("An algorithm from the TomoPy framework is used to perform the \
-             reconstruction in this processing pipeline")
-        cite_info.bibtex = \
-            ("@article{gursoy2014tomopy,\n" +
-             "title={TomoPy: a framework for the analysis of synchrotron,\n" +
-             "tomographic data},\n" +
-             "author={G{\"u}rsoy, Doga and De Carlo, Francesco and Xiao,\n" +
-             "Xianghui and Jacobsen, Chris},\n" +
-             "journal={Journal of synchrotron radiation},\n" +
-             "volume={21},\n" +
-             "number={5},\n" +
-             "pages={1188--1193},\n" +
-             "year={2014},\n" +
-             "publisher={International Union of Crystallography}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T TomoPy: a framework for the analysis of synchrotron\n" +
-             "tomographic data\n" +
-             "%A Gursoy, Doga\n" +
-             "%A De Carlo, Francesco" +
-             "%A Xiao, Xianghui" +
-             "%A Jacobsen, Chris" +
-             "%J Journal of synchrotron radiation" +
-             "%V 21" +
-             "%N 5" +
-             "%P 1188-1193" +
-             "%@ 1600-5775" +
-             "%D 2014" +
-             "%I International Union of Crystallography")
-        cite_info.doi = "doi: 10.1107/S1600577514013939"
-        return cite_info

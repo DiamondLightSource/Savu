@@ -29,13 +29,6 @@ from larix.methods.segmentation import MORPH_PROC_LINE
 
 @register_plugin
 class MorphProcLine3d(Plugin, MultiThreadedPlugin):
-    """
-    A Larix morphological processing module using line segments to remove inconsistent gaps in 3D mask
-
-    :param primeclass: a mask class to start morphological processing from. Default: 0.
-    :param correction_window: the size of the correction window. Default: 7.
-    :param iterations: the number of iterations for segmentation. Default: 3.
-    """
 
     def __init__(self):
         super(MorphProcLine3d, self).__init__("MorphProcLine3d")
@@ -45,7 +38,7 @@ class MorphProcLine3d(Plugin, MultiThreadedPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0], dtype=np.uint8)
         in_pData, out_pData = self.get_plugin_datasets()
-        
+
         getall = ["VOLUME_XZ", "voxel_y"]
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
         out_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)

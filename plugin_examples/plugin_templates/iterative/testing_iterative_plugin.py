@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-.. module:: iterative_plugin
+.. module:: testing_iterative_plugin
    :platform: Unix
    :synopsis: Iterative plugin example
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>

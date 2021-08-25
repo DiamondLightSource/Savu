@@ -24,10 +24,11 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # get version from the version file in base of savu
 export savu_version=$(cat $DIR/version.txt)
-# dealing with a case when "master" passed as savu_version
+# dealing with a case when a branch name passed as savu_version
 if [ "$savu_version" != "master" ]; then
   export savu_version="v$savu_version"
 fi
+echo "--> Savu version has passed as $savu_version" | xargs
 
 # function for parsing optional arguments
 function arg_parse() {
@@ -90,14 +91,16 @@ if [ ! $conda_folder ]; then
   conda_folder=Savu_$savu_version
 fi
 
-# set the savu recipe
-arg_parse "-s" savu_recipe "$@"
-case $savu_recipe in
-  "master") savu_recipe="savu_master" ;;
-  "local") savu_recipe="savu_local" ;;
-  "") savu_recipe="savu" ;;
-  *) echo "Unknown Savu installation version."; exit 1 ;;
-esac
+# set the branch from which install savu
+arg_parse "-s" savu_branch "$@"
+# by default the savu branch is "master", if the version branch is required then
+# do: export savu_branch="savu_version"
+if [ ! $savu_branch ]; then
+  savu_branch="master"
+fi
+if [ "$savu_branch" == "savu_version" ]; then
+  savu_branch=$savu_version
+fi
 
 # override the conda recipes folder
 arg_parse "-r" recipes "$@"
@@ -118,23 +121,25 @@ else
 fi
 
 if [ $facility = dls ]; then
-  echo "Proceed with $facility installation" | xargs
-  # set compiler wrapper
-  MPICC=$(command -v mpicc)
-  MPI_HOME=${MPICC%/mpicc}
-  if ! [ "$MPICC" ]; then
-    echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
-    exit 1
-  else
-    echo "Using mpicc:   " $MPICC
-    export PATH=$MPI_HOME:$PATH
-    openmpi_ver_string=$(mpicxx --showme:version)
-    export openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
-    echo "Proceed with $openmpi_version version" | xargs
-  fi
+  echo "Proceed with the DLS-specific installation and will use locally installed openmpi..." | xargs
 else
-  echo "Proceed with a PC installation, going to use the openmpi installation from conda"
-  echo "Consider of installing Savu-lite from savu-dep conda channel instead"
+  echo -e "Proceed with $facility installation and will attempt to use the pre-installed openmpi."
+  echo -e "If a PC (non-MPI) installation is required, then install Savu-lite in a new Python 3.7 conda environment using the command:"
+  echo -e "conda install savu-lite -c conda-forge -c savu-dep -c ccpi -c astra-toolbox/label/dev"
+fi
+
+# set compiler wrapper
+MPICC=$(command -v mpicc)
+MPI_HOME=${MPICC%/mpicc}
+if ! [ "$MPICC" ]; then
+  echo "ERROR: I require mpicc but I can't find it.  Check /path/to/mpi_implementation/bin is in your PATH"
+  exit 1
+else
+  echo "Using mpicc:   " $MPICC
+  export PATH=$MPI_HOME:$PATH
+  openmpi_ver_string=$(mpicxx --showme:version)
+  export openmpi_version=$(echo $openmpi_ver_string | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+  echo "Proceed with $openmpi_version version" | xargs
 fi
 
 # # check for cuda
@@ -247,42 +252,47 @@ if [ ! $test_flag ]; then
 
   conda install -y -q conda-build
 
+  echo -e "=============================================================\n"
+  echo "Building Savu..."
+  conda build $DIR/savu-recipe
+  savubuild=`conda build $DIR/savu-recipe --output`
+  echo -e "=============================================================\n"
+  echo "Installing Savu..."
+  conda install -y -q --use-local $savubuild
+
+  path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
+  savu_path=${path%/savu/__init__.py*}
+
+  # get the savu version
+  if [ -z $recipes ]; then
+    install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
+    recipes=$savu_path/$install_path/../conda-recipes
+  fi
+
+  # getting versions of mpi4py/hdf5/h5py from the versions file
+  string=$(awk '/^mpi4py/' $versions_file)
+  mpi4py_version=$(echo $string | cut -d " " -f 2)
+  string=$(awk '/^hdf5/' $versions_file)
+  hdf5_version=$(echo $string | cut -d " " -f 2)
+  string=$(awk '/^h5py/' $versions_file)
+  h5py_version=$(echo $string | cut -d " " -f 2)
+
   if [ $facility = dls ]; then
-    echo "Building Savu..."
-    conda build $DIR/$savu_recipe
-    savubuild=`conda build $DIR/$savu_recipe --output`
-    echo "Installing Savu..."
-    conda install -y -q --use-local $savubuild
-
-    path=$(python -c "import savu; import os; print(os.path.abspath(savu.__file__))")
-    savu_path=${path%/savu/__init__.py*}
-
-    # get the savu version
-    if [ -z $recipes ]; then
-      install_path=$(python -c "import savu; import savu.version as sv; print(sv.__install__)")
-      recipes=$savu_path/$install_path/../conda-recipes
-    fi
 
     if [ $EXPLICIT_FILE = false ]; then
     echo "Installing mpi4py from savu-dep conda channel"
-    string=$(awk '/^mpi4py/' $versions_file)
-    mpi4py_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
     conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
 
     echo "Installing hdf5 from savu-dep conda channel"
-    string=$(awk '/^hdf5/' $versions_file)
-    hdf5_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
     conda install -y -c savu-dep hdf5=$VERSION_BUILD_HDF5 --no-deps
 
     echo "Installing h5py from savu-dep conda channel"
-    string=$(awk '/^h5py/' $versions_file)
-    h5py_version=$(echo $string | cut -d " " -f 2)
     export VERSION_BUILD_H5PY=$h5py_version"_mpi4pi_"$mpi4py_version"_hdf5_"$VERSION_BUILD_HDF5
     conda install -y -c savu-dep h5py=$VERSION_BUILD_H5PY --no-deps
 
-    echo "Installing pytorch..."
+    echo "Installing cudatoolkit and pytorch..."
     string=$(awk '/^cudatoolkit/' $versions_file)
     cudatoolkit_version=$(echo $string | cut -d " " -f 2)
     conda install -y -q pytorch torchvision cudatoolkit=$cudatoolkit_version -c pytorch
@@ -306,7 +316,25 @@ if [ ! $test_flag ]; then
       conda update -n root --file $DIR/explicit_lists/$EXPLICIT_FILE
     fi
   else
-    echo "Installation for $facility has been chosen, make sure you install your custom-build mpi4py/hdf5/h5py packages" | xargs
+    echo "Installation for $facility has been chosen, installing packages from the explicit list first" | xargs
+    conda update -n root --file $DIR/explicit_lists/savu_explicit_packages.txt
+
+    echo "Installing mpi4py from the recipe"
+    export VERSION_MPI4PY=$mpi4py_version
+    export VERSION_BUILD_MPI4PY=$mpi4py_version"_openmpi_"$openmpi_version
+    . $recipes/installer.sh "mpi4py" $VERSION_BUILD_MPI4PY
+
+    echo "Installing hdf5 from the recipe"
+    export hdf5_XYZ_version=$hdf5_version
+    export PATCH_HDF="hdf5-"$hdf5_version
+    export RELEASE_HDF=${PATCH_HDF%.*}
+    export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
+    . $recipes/installer.sh "hdf5" $VERSION_BUILD_HDF5
+
+    echo "Installing h5py from the recipe"
+    export VERSION_H5PY=$h5py_version
+    export VERSION_BUILD_H5PY=$h5py_version
+    . $recipes/installer.sh "h5py" $VERSION_BUILD_H5PY
   fi
 
   # cleanup build artifacts

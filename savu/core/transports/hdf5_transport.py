@@ -49,8 +49,10 @@ class Hdf5Transport(BaseTransport):
 
         # check the saver plugin and turn off if it is hdf5
         for idx in saver_idx:
-            if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
-                remove.append(idx)
+            # This saver id is not a location in the plugin list
+            if idx <= len(plugin_list.plugin_list):
+                if plugin_list.plugin_list[idx]['name'] == 'Hdf5Saver':
+                    remove.append(idx)
         for idx in sorted(remove, reverse=True):
             plugin_list._remove(idx)
 

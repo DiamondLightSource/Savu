@@ -31,13 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class NxfluoLoader(BaseMultiModalLoader):
-    """ A class to load tomography data from an NXFluo file.
-
-    :param fluo_offset: fluo scale offset. Default: 0.0.
-    :param fluo_gain: fluo gain. Default: 0.01.
-    :param name: The name assigned to the dataset. Default: 'fluo'.
-    """
-
     def __init__(self, name='NxfluoLoader'):
         super(NxfluoLoader, self).__init__(name)
 

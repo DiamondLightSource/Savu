@@ -1,5 +1,5 @@
 import os
-
+import fnmatch
 
 def get_all_files_from(folder):
     all_files = []
@@ -48,6 +48,23 @@ def get_process_list_in_file(root, files):
                     processes.append(get_nxs_file_name(line))
     return processes
 
+def find_plugin_for_process_list(folder, proc_list):
+    plugin_name = []
+    for root, dirs, files in os.walk(folder):
+        for name in files:
+            fname = root + '/' + name
+            fname_nohead = fname.rsplit('/',1)[1]
+            fname_type = os.path.splitext(fname_nohead)[1]
+            if (fname_type == '.py'):
+                with open(fname, 'r') as in_file:
+                    for line in in_file:
+                        if '.nxs' in line:
+                            nxs_name = get_nxs_file_name(line)
+                            if fnmatch.fnmatch(str(nxs_name), proc_list):
+                                plugin_name = fname
+                                break
+    return plugin_name
+
 def get_no_process_list_tests(root, files):
     processes = []
     for fname in files:
@@ -64,7 +81,6 @@ def get_no_process_list_tests(root, files):
                     plugin_name = pid.split('.')[-1].split("'")[0]
                     processes.append(plugin_name + '.py')
     return processes
-
 
 def get_nxs_file_name(line):
     split_list = line.split("'")

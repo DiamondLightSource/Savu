@@ -33,58 +33,37 @@ from savu.plugins.loaders.mapping_loaders.nxmonitor_loader \
 import logging
 
 from savu.plugins.utils import register_plugin
-from savu.core.utils import docstring_parameter
-from savu.plugins.loaders.mapping_loaders.base_multi_modal_loader \
-    import BaseMultiModalLoader
 
 
 @register_plugin
 class MmLoader(BaseLoader):
-
     def __init__(self, name='MmLoader'):
         super(MmLoader, self).__init__(name)
-        base = BaseMultiModalLoader()
-        base._populate_default_parameters()
-        self.doc_string = base.__doc__
-        self.dict = base.parameters
-        self.fluo_keys = self.set_params(fluo(), 'fluo')
-        self.xrd_keys = self.set_params(xrd(), 'xrd')
-        self.stxm_keys = self.set_params(stxm(), 'stxm')
-        self.mon_keys = self.set_params(mon(), 'monitor')
-        for key, value in self.dict.items():
-            self.parameters[key] = value
+        self.fluo_keys = self.add_default_params(fluo(), 'fluo')
+        self.xrd_keys = self.add_default_params(xrd(), 'xrd')
+        self.stxm_keys = self.add_default_params(stxm(), 'stxm')
+        self.mon_keys = self.add_default_params(mon(), 'monitor')
 
-    def set_params(self, inst, name):
-        inst._populate_default_parameters()
-        copy_keys = inst.parameters.keys() - self.dict.keys()
+    def add_default_params(self, inst, name):
+        ptools = self.get_plugin_tools()
+        inst_keys = inst.parameters.keys()
+        copy_keys = list(inst_keys - self.parameters.keys())
+        if 'name' in copy_keys: copy_keys.remove('name')
         for key in copy_keys:
-            self.parameters[key] = inst.parameters[key]
-        return list(copy_keys)
+            ptools.param.set(key, inst.get_plugin_tools().param.get(key))
+            ptools.parameters[key] = inst.get_plugin_tools().parameters[key]
+        return inst_keys
 
     def separate_params(self, name, keys):
-        all_keys = list(self.dict.keys()) + keys
+        mm_loader_keys = self.get_plugin_tools()._load_param_from_doc(
+            self.get_plugin_tools()).keys()
+        all_keys = keys - mm_loader_keys
         new_dict = {}
         for key in [k for k in all_keys if k != 'name']:
             new_dict[key] = self.parameters[key]
         new_dict['name'] = self.name_dict[name]
         new_dict['preview'] = self.parameters['preview'][new_dict['name']]
         return new_dict
-
-    @docstring_parameter(BaseMultiModalLoader.__doc__, xrd.__doc__,
-                         stxm.__doc__, mon.__doc__, fluo.__doc__)
-    def _override_class_docstring(self):
-        """
-        :u*param dataset_names: The names assigned to each dataset in the \
-            order: fluorescence, diffraction, absorption, \
-            monitor. Default: ['fluo', 'xrd', 'stxm', 'monitor'].
-        :u*param preview: A slice list of required frames to apply to ALL \
-        datasets, else a dictionary of slice lists where the key is the \
-        dataset name. Default: [].
-
-        {0} \n {1} \n {2} \n {3} \n {4}
-
-        """
-        pass
 
     def __set_names(self):
         fluo, xrd, stxm, monitor = self.parameters['dataset_names']

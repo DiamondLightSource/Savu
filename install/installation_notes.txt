@@ -1,0 +1,22 @@
+Installation notes (for creating a new release and installing at Diamond)
+=========================================================================
+ 
+- Freeze on pull requests
+- Install latest version of Savu from Master into /dls_sw/apps/savu
+- Create savu_plugins folder in /dls_sw/apps/savu/$release/
+- Create a new module file
+- Test new installation
+- Update Savu/install/latest_version.py to contain the new version number (and the corresponding file)
+- Update installation notes with the latest tested versions of libraries
+- Create tar.gz of the new install folder
+   >>> tar -zcvf savu_installer.tar.gz Savu/install/savu_hpc/savu_installer
+- Push all changes to Github (ensure all tests passing) and check download link works correctly
+- Collate release notes
+	Get all Git commits since the last release: git log --oneline v3.0.. HEAD > a.txt
+	Get all Git files added since the last release: git diff v3.0 HEAD --name-status | grep A
+- Create release on Github
+- Reinstall Savu into new release Conda environment
+- Further testing
+- (Make this module default load if during shutdown)
+- Email beamlines
+

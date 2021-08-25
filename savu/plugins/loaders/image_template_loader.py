@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-.. module:: yaml_loader
+.. module:: image_template_loader
    :platform: Unix
-   :synopsis: A class to load data from a folder of Fabio compatible images \
-   using data descriptions loaded from a yaml file.
+   :synopsis: 'A class to load data from a folder of Fabio compatible images \
+        using data descriptions loaded from a yaml file.'
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -31,14 +31,6 @@ from savu.plugins.loaders.yaml_converter import YamlConverter
 
 @register_plugin
 class ImageTemplateLoader(YamlConverter):
-    """
-    A class to load data from a folder of FabIO compatible images using data
-    descriptions loaded from a yaml file.
-
-    :u*param yaml_file: Path to the file containing the data \
-        descriptions. Default: None.
-    """
-
     def __init__(self, name='ImageTemplateLoader'):
         super(ImageTemplateLoader, self).__init__(name)
 

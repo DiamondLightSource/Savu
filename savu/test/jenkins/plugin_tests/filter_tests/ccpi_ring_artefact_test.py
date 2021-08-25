@@ -14,7 +14,7 @@
 
 
 """
-.. module:: plugins_test
+.. module:: ccpi_ring_artefact_test
    :platform: Unix
    :synopsis: unittest test classes for plugins
 

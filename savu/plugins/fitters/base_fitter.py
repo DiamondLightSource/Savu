@@ -28,15 +28,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 class BaseFitter(Plugin, CpuPlugin):
-    """
-    This plugin fits peaks.
-    :param in_datasets: Create a list of the dataset(s). Default: [].
-    :param out_datasets: \
-        A. Default: ["FitWeights", "FitWidths", "FitAreas", "residuals"].
-    :param width_guess: An initial guess at the width. Default: 0.02.
-    :param peak_shape: Which shape do you want. Default: "gaussian".
-    :param PeakIndex: the peak index. Default: [].
-    """
 
     def __init__(self, name='BaseFitter'):
         super(BaseFitter, self).__init__(name)
@@ -152,8 +143,7 @@ class BaseFitter(Plugin, CpuPlugin):
     def getAreas(self, fun, x, positions, fitmatrix):
         rest = fitmatrix
         numargsinp = self.getFitFunctionNumArgs(str(fun.__name__))  # 2 in
-        npts = len(fitmatrix) / numargsinp
-        #print npts
+        npts = len(fitmatrix) // numargsinp
         weights = rest[:npts]
         #print 'the weights are'+str(weights)
         widths = rest[npts:2*npts]

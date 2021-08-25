@@ -22,7 +22,8 @@
 """
 import logging
 from savu.plugins.utils import register_plugin
-from savu.plugins.fluo_fitters.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.unregistered.fluo_fitters.base_fluo_fitter \
+    import BaseFluoFitter
 import numpy as np
 from scipy.optimize import leastsq
 import time
@@ -30,11 +31,6 @@ import time
 
 #@register_plugin
 class SimpleFitXrf(BaseFluoFitter):
-    """
-    This plugin fits XRF peaks.
-    :param width_guess: An initial guess at the width. Default: 0.02.
-
-    """
     def __init__(self):
         super(SimpleFitXrf, self).__init__("SimpleFitXrf")
 

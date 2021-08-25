@@ -33,11 +33,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
-    """
-    Apply a time-based dark and flat field correction on data with an\
-    image drift using linear interpolation and template matching.
-
-    """
 
     def __init__(self):
         super(TimeBasedPlusDriftCorrection, self).__init__(
@@ -46,11 +41,17 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
     def pre_process(self):
         super(TimeBasedPlusDriftCorrection, self).pre_process()
 
-        self.shift_array = np.zeros((len(self.data_idx), 2))
+        self.shift_array = np.zeros((len(self.data_key), 2))
         # find shift between flat field frames
-        self.template = self.flat[0][100:300, 800:]
-        #self.template = self.flat[0][10:20, 10:20]
+        self.template = self.flat[0][tuple(self.set_template_params())]
         self.drift = self.calculate_flat_field_drift(self.template)
+
+    def set_template_params(self):
+        template_params = []
+        for p in self.parameters['template']:
+            start, end = p.split(':')
+            template_params.append(slice(int(start), int(end)))
+        return template_params
 
     def calculate_flat_field_drift(self, template):
         drift = []
@@ -77,7 +78,7 @@ class TimeBasedPlusDriftCorrection(TimeBasedCorrection, CpuPlugin):
 
         if frames[0] > 0:
             shift = shift + self.drift[frames[0]-1]
-        self.shift_array[np.where(self.data_idx == frame)[0]] = shift
+        self.shift_array[np.where(self.data_key == frame)[0]] = shift
         return flat1*distance[0] + flat2*distance[1]
 
     def fill_nans(self, im1, im2):

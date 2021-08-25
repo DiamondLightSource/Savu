@@ -46,7 +46,7 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu
-        conda install --yes --name savu --file ./install/savu_lite37/spec-savu3_0_lite_master.txt
+        conda install --yes --name savu --file ./install/savu_lite37/spec-savu_lite_latest.txt
         python setup.py install
         conda list
 
@@ -54,4 +54,5 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu
+        refresh_lists
         savu_full_tests

@@ -12,7 +12,7 @@ xrd:
         det_str: entry/instrument/detector
         xps: $cfile[det_str + '/x_pixel_size'].value*1e-3
     metadata:
-        x_pixel_size: 
+        x_pixel_size:
             value: $xps
             units: m
         beam_center_x:
@@ -21,16 +21,15 @@ xrd:
         beam_center_y:
             value: $cfile[det_str + '/beam_center_y'].value*xps
             units: m
-        distance: 
+        distance:
             value: $cfile[det_str + '/distance'].value*1e-3
             units: m
         incident_wavelength:
             value: $cfile['/entry/calibration_sample/beam/incident_wavelength'].value*1e-10
             units: Angstrom
-        yaw: 
+        yaw:
             value: $math.degrees(-math.atan2(dorient[2, 0], dorient[2, 2]))
             units: degrees
         roll:
             value: $math.degrees(-math.atan2(dorient[0, 1], dorient[1, 1]))
             units: degrees
-

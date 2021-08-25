@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template2
+.. module:: plugin_template5
    :platform: Unix
    :synopsis: A template to create a plugin with a single input dataset and \
    multiple output datasets, that do not resemble the input dataset and are \
@@ -31,15 +31,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate5(Plugin, CpuPlugin):
-    """
-    A plugin template with one in_dataset and two out_datasets that do not \
-    resemble the in_dataset and are not retained by the framework, \
-    e.g. vo_centering.
-
-    :param example: Example of a plugin parameter. Default: None.
-    :param preview: reduce the size of the data temporarily for this \
-        plugin. Default: None.
-    """
 
     def __init__(self):
         super(PluginTemplate5, self).__init__('PluginTemplate5')

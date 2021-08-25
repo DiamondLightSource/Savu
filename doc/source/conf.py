@@ -11,19 +11,61 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import os
+import sys
 
-import sys, os
-from os import path
+from unittest import mock
 
-autodoc_mock_imports = ['numpy', 'mpi4py', 'astra', 'scipy', 'h5py', 'pyfftw',
-                        'dials.array_family', 'dials.algorithms.image.threshold',
-                        'PyQt4']
+# Mock imports instead of full environment in readthedocs
+MOCK_MODULES = ["numpy",
+                "pytest",
+                "mpi4py",
+                "astra",
+                "h5py",
+                "pandas"
+                ]
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
+autodoc_mock_imports = [
+    "ccpi",
+    "dezing", # Dezinger Deprecated
+    "fabio",
+    "flupy",
+    "GeodisTK",
+    "larix",
+    "morphsnakes", # MaskInitialiser MorphSnakes
+    "mrcfile",
+    "pmacparser", # StageMotion
+    "peakutils",
+    "pyfftw",
+    "pynvml",
+    "PyMca5",
+    "ptypy",
+    "pywt",
+    "pyFAI",
+    "ral_nlls",
+    "scipy",
+    "skimage",
+    "sklearn",
+    "speckle_matching",
+    "setup",
+    "tifffile",
+    "tomopy",
+    "tomobar",
+    "tomophantom",
+    "xraylib",
+    ]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../'))
+
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../savu'))
+
+import savu
 
 print(sys.path)
 # -- General configuration -----------------------------------------------------
@@ -68,13 +110,20 @@ keep_warnings=True
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.ifconfig',
-#              'sphinx.ext.autosummary', 'sphinx.ext.viewcode']
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
-              'sphinx.ext.napoleon', 'sphinx.ext.viewcode']
-
-# have a look at this extension 'sphinx.ext.doctest',
-
+extensions = [
+    # Generates api files
+    "sphinx.ext.autodoc",
+    # Generates a short summary from docstring
+    "sphinx.ext.autosummary",
+    # Allows parsing of google style docstrings
+    "sphinx.ext.napoleon",
+    # Add links to highlighted source code
+    "sphinx.ext.viewcode",
+    # Documents command line tools with argparser library
+    "sphinxarg.ext",
+    # Allows a grid layout and dropdown boxes
+    "sphinx_panels",
+]
 autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -119,8 +168,7 @@ release = __version__
 #exclude_patterns = ['_templates', '', '../../savu/test',
 #                    '../../savu/core/transports/dist_array_transport.py',
 #                    'setup.py', 'install']
-exclude_patterns = ['api/savu.test*', 'api/setup*', 
-                    'api_plugin/savu.test*', 'api_plugin/setup*']
+exclude_patterns = ['api_plugin/savu.test*', 'api_plugin/setup*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -148,7 +196,6 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -168,6 +215,8 @@ html_theme_path = ["_themes", ]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 #html_logo = 'files_and_images/Savu_black_square_downsample2.png'
+file_path =  os.path.dirname(os.path.realpath(__file__)).split('/doc/')[0]
+html_logo = file_path + '/doc/source/files_and_images/logo_downsample.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -177,7 +226,7 @@ html_theme_path = ["_themes", ]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -284,9 +333,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Savu', 'Savu Documentation',
-   'Mark Basham', 'Savu', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        "index",
+        "Savu",
+        "Savu Documentation",
+        "Mark Basham",
+        "Savu",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -300,5 +355,14 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {"http://docs.python.org/": None}
+
+
+def setup(app):
+    # General width and navigation bar format
+    app.add_css_file("css/general.css")
+    # Style for plugin template pages
+    app.add_css_file("css/plugin_template.css")
+    app.add_css_file("css/plugin_template_download.css")
+
 

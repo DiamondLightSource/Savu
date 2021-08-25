@@ -29,11 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class NxstxmLoader(BaseMultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param name: The name assigned to the dataset. Default: 'stxm'.
-    """
-
     def __init__(self, name='NxstxmLoader'):
         super(NxstxmLoader, self).__init__(name)
 

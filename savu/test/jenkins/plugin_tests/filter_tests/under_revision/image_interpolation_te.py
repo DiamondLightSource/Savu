@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: image_interpolation_te
    :platform: Unix
    :synopsis: testing the nx_xrd loader
 
@@ -29,7 +29,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class ImageInterpolationTest(unittest.TestCase):
     def test_image_interpolation(self):
         data_file = tu.get_test_big_data_path('speckle_tracking.h5')
-        process_file = tu.get_test_process_path('to_revise/image_interpolation_test.nxs')
+        process_file = tu.get_test_process_path('under_revision/image_interpolation_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

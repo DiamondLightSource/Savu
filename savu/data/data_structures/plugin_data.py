@@ -157,6 +157,10 @@ class PluginData(object):
             size_list[i] = min(dshape[i], mft)
             mft //= np.prod(size_list) if np.prod(size_list) > 1 else 1
             i += 1
+            
+        # case of fixed integer max_frames, where max_frames > nSlices
+        if mft > 1:
+            size_list[0] *= mft
 
         self.meta_data.set('size_list', size_list)
         return size_list
@@ -438,7 +442,7 @@ class PluginData(object):
                 getattr(self.padding, key)(self.pad_dict[key])
 
     def plugin_data_setup(self, pattern, nFrames, split=None, slice_axis=None,
-                          getall=None):
+                          getall=None, fixed_length=True):
         """ Setup the PluginData object.
 
         :param str pattern: A pattern name
@@ -451,6 +455,9 @@ class PluginData(object):
         the requested pattern doesn't exist then use all of "axis_label"
         dimension of "pattern" as this is equivalent to one slice of the
         original pattern.
+        :keyword fixed_length: Data passed to the plugin is automatically
+        padded to ensure all plugin data has the same dimensions. Set this
+        value to False to turn this off.
         """
 
         if pattern not in self.data_obj.get_data_patterns() and getall:
@@ -462,6 +469,8 @@ class PluginData(object):
             nFrames, self._frame_limit = nFrames
         self.max_frames = nFrames
         self.split = split
+        if not fixed_length:
+            self._plugin.fixed_length = fixed_length
 
     def __set_getall_pattern(self, getall, nFrames):
         """ Set framework changes required to get all of a pattern of lower
@@ -481,7 +490,6 @@ class PluginData(object):
         If copy=pData (another PluginData instance) then copy """
         chunks = \
             self.data_obj.get_preview().get_starts_stops_steps(key='chunks')
-
         if not copy and not calc:
             mft, mft_shape, mfp = self._calculate_max_frames()
         elif calc:

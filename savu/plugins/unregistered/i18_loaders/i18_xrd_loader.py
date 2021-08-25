@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: I18stxm_loader
+.. module:: i18_xrd_loader
    :platform: Unix
    :synopsis: A class for loading I18's stxm data
 
@@ -21,8 +21,8 @@
 
 """
 
-from savu.plugins.loaders.mapping_loaders.i18_loaders.\
-    base_i18_multi_modal_loader import BaseI18MultiModalLoader
+from savu.plugins.unregistered.i18_loaders.base_i18_multi_modal_loader\
+    import BaseI18MultiModalLoader
 
 from savu.data.data_structures.data_types.image_data import ImageData
 from savu.plugins.utils import register_plugin
@@ -35,13 +35,6 @@ import savu.test.test_utils as tu
 
 
 class I18XrdLoader(BaseI18MultiModalLoader):
-    """
-    A class to load tomography data from an NXstxm file
-    :param data_path: Path to the folder containing the data. Default: None.
-    :param calibration_path: path to the calibration file. Default: None.
-    :param name: The name assigned to the dataset. Default: 'xrd'.
-    """
-
     def __init__(self, name='I18XrdLoader'):
         super(I18XrdLoader, self).__init__(name)
 

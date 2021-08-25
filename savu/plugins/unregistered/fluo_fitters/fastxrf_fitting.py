@@ -21,7 +21,8 @@
 """
 
 import logging
-from savu.plugins.fluo_fitters.base_fluo_fitter import BaseFluoFitter
+from savu.plugins.unregistered.fluo_fitters.base_fluo_fitter \
+    import BaseFluoFitter
 from flupy.xrf_data_handling import XRFDataset
 import numpy as np
 from savu.plugins.utils import register_plugin
@@ -29,18 +30,6 @@ from savu.plugins.utils import register_plugin
 
 #@register_plugin
 class FastxrfFitting(BaseFluoFitter):
-    """
-    fast fluorescence fitting with FastXRF. Needs to be on the path.
-    :param detector_type: The type of detector. Default: 'Vortex_SDD_Xspress'.
-    :param sample_attenuators: attentuators used and thickness. Default: ''.
-    :param detector_distance: sample to the detector in mm. Default: 70.
-    :param exit_angle: in degrees. Default: 90.0.
-    :param incident_angle: in degrees. Default: 0.0.
-    :param flux: flux in. Default: 649055.0.
-    :param background: type of background subtraction. Default: 'strip'.
-    :param average_spectrum: pass an average to do the strip. Default: None.
-    """
-
     def __init__(self):
         logging.debug("Starting fast fitter")
         super(FastxrfFitting, self).__init__("FastxrfFitting")

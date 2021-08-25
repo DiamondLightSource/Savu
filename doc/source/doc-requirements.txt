@@ -1,0 +1,17 @@
+# Base imports used on readthedocs
+# mock==1.0.1
+# pillow==5.4.1
+# alabaster>=0.7,<0.8,!=0.7.5
+# commonmark==0.8.1
+# recommonmark==0.5.0
+# sphinx==3.5.3
+# sphinx-rtd-theme==0.5.2
+# readthedocs-sphinx-ext<2.2
+# For code drop down
+sphinx-panels==0.5.2
+# For sphinx arg_parse documentation
+pyyaml==5.4
+sphinx-argparse==0.2.5
+sphinx-panels==0.5.2
+yamllint==1.26.1
+colorama==0.4.4

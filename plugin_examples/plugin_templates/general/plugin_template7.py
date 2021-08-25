@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template3
+.. module:: plugin_template7
    :platform: Unix
    :synopsis: A template to create a plugin that reduces the data dimensions.
 
@@ -31,14 +31,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class PluginTemplate7(Plugin, CpuPlugin):
-    """
-    A plugin template that increases the data dimensions.
-
-    :param pattern: How to slice the data. Default: 'PROJECTION'.
-    :param axis_len: Length of the new dimension. Default: 10.
-    :param axis_label: Axis label for the new axis. Default: 'scan'.
-    :param axis_unit: Axis unit for the new axis. Default: 'number'.
-    """
 
     def __init__(self):
         super(PluginTemplate7, self).__init__('PluginTemplate7')

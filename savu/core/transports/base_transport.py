@@ -26,6 +26,7 @@ import os
 import time
 import copy
 import h5py
+import math
 import logging
 import numpy as np
 
@@ -127,7 +128,6 @@ class BaseTransport(object):
         logging.info("transport_process get_checkpoint_params")
         cp, sProc, sTrans = self.__get_checkpoint_params(plugin)
 
-        count = 0  # temporary solution
         prange = list(range(sProc, pDict['nProc']))
         kill = False
         for count in range(sTrans, nTrans):
@@ -137,6 +137,10 @@ class BaseTransport(object):
             # get the transfer data
             logging.info("Transferring the data")
             transfer_data = self._transfer_all_data(count)
+
+            if count == nTrans-1 and plugin.fixed_length == False:
+                shape = [data.shape for data in transfer_data]
+                prange = self.remove_extra_slices(prange, shape)
 
             # loop over the process data
             logging.info("process frames loop")
@@ -151,6 +155,37 @@ class BaseTransport(object):
 
         if not kill:
             cu.user_message("%s - 100%% complete" % (plugin.name))
+
+    def remove_extra_slices(self, prange, transfer_shape):
+        # loop over datasets:
+        for i, data in enumerate(self.pDict['in_data']):
+            pData = data._get_plugin_data()
+            mft = pData.meta_data.get("max_frames_transfer")
+            mfp = pData.meta_data.get("max_frames_process")
+            sdirs = data.get_slice_dimensions()
+            finish = np.prod([transfer_shape[i][j] for j in sdirs])
+            rem, full = math.modf((mft - finish)/mfp)
+            full = int(full)
+
+            if rem:
+                rem = (mft-finish) - full
+                self._update_slice_list("in_sl", i, full, sdirs[0], rem)
+                for j, out_data in enumerate(self.pDict['out_data']):
+                    out_pData = out_data._get_plugin_data()
+                    out_mfp = out_pData.meta_data.get("max_frames_process")
+                    out_sdir = data.get_slice_dimensions()[0]
+                    out_rem = rem/(mfp/out_mfp)
+                    if out_rem%1:
+                        raise Exception("'Fixed_length' plugin option is invalid")
+                    self._update_slice_list("out_sl", j, full, out_sdir, int(out_rem))
+
+        return list(range(prange[0], prange[-1]+1-full))
+
+    def _update_slice_list(self, key, idx, remove, dim, amount):
+        sl = list(self.pDict[key]['process'][idx][-remove])
+        s = sl[dim]
+        sl[dim] = slice(s.start, s.stop - amount*s.step, s.step)
+        self.pDict[key]['process'][idx][-1] = sl        
 
     def _process_loop(self, plugin, prange, tdata, count, pDict, result, cp):
         kill_signal = False
@@ -213,7 +248,8 @@ class BaseTransport(object):
         """
         sl_dict = {}
         for data in data_list:
-            sl = data._get_transport_data()._get_slice_lists_per_process(dtype)
+            sl = data._get_transport_data().\
+                    _get_slice_lists_per_process(dtype)
             for key, value in sl.items():
                 if key not in sl_dict:
                     sl_dict[key] = [value]

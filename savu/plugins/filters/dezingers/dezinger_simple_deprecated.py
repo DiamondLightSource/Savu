@@ -15,7 +15,7 @@
 
 
 """
-.. module:: dezinger_simple
+.. module:: dezinger_simple_deprecated
    :platform: Unix
    :synopsis: A plugin to remove zingers
 
@@ -35,12 +35,6 @@ from savu.plugins.utils import register_plugin
 @register_plugin
 class DezingerSimpleDeprecated(BaseFilter, CpuPlugin):
     """
-    A plugin for cleaning x-ray strikes based on statistical evaluation of \
-    the near neighbourhood
-    :param outlier_mu: Threshold for detecting outliers, greater is less \
-    sensitive. Default: 1000.0.
-    :param kernel_size: Number of frames included in average - if the number \
-        is not odd use kernel_size+1. Default: 5.
     """
 
     def __init__(self):

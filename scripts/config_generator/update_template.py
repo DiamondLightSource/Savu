@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''
-Created on 24 Nov 2017
+"""
+.. module:: update_template
+   :platform: Unix
+   :synopsis: Update template
 
-@author: qmm55171
-'''
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
+
+"""
 
 import argparse
 

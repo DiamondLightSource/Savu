@@ -29,11 +29,13 @@ import os
 from mpi4py import MPI
 from savu.version import __version__
 
+import savu.core.utils as cu
+from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
 
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments.
     """
     version = "%(prog)s " + __version__
@@ -110,10 +112,12 @@ def __option_parser():
     choices = ['plugin', 'subplugin']
     parser.add_argument("--checkpoint", nargs="?", choices=choices,
                         const='plugin', help=check_help, default=None)
-
-    args = parser.parse_args()
-    __check_conditions(parser, args)
-    return args
+    if doc==False:
+        args = parser.parse_args()
+        __check_conditions(parser, args)
+        return args
+    else:
+        return parser
 
 
 def __check_conditions(parser, args):
@@ -203,7 +207,7 @@ def __create_output_folder(path, folder_name):
 
 
 def main(input_args=None):
-    args = __option_parser()
+    args = __option_parser(doc=False)
 
     if input_args:
         args = input_args
@@ -211,16 +215,20 @@ def main(input_args=None):
     options = _set_options(args)
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
-    if options['nProcesses'] == 1:
+    try:
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
-    else:
-        try:
-            plugin_runner = pRunner(options)
-            plugin_runner._run_plugin_list()
-        except Exception as error:
-            print(error)
-            traceback.print_exc(file=sys.stdout)
+        if options['process'] == 0:
+            in_file = plugin_runner.exp.meta_data['nxs_filename']
+            citation_extractor.main(in_file=in_file, quiet=True)
+    except Exception:
+        # raise the error in the user log
+        trace = traceback.format_exc()
+        cu.user_message(trace)
+        if options['nProcesses'] == 1:
+            sys.exit(1)
+        else:
+            # Kill all MPI processes
             MPI.COMM_WORLD.Abort(1)
 
 

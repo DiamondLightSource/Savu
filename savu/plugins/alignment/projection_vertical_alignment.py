@@ -33,11 +33,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 @register_plugin
 class ProjectionVerticalAlignment(BaseFilter, CpuPlugin):
-    """
-    Correct for vertical shift over projection images.
-
-    :config_warn: Requires the PluginShift plugin to precede it.
-    """
 
     def __init__(self):
         logging.debug("initialising Sinogram Alignment")

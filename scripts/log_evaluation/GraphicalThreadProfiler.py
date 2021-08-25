@@ -1,4 +1,3 @@
-from __future__ import print_function, division
 
 import argparse
 import itertools
@@ -130,7 +129,7 @@ def set_file_name(filename):
     return outfilename
 
 
-def __option_parser():
+def __option_parser(doc=True):
     """ Option parser for command line arguments.
     """
     parser = argparse.ArgumentParser(prog='savu_profile')
@@ -142,11 +141,11 @@ def __option_parser():
                         help='Find lines containing these entries')
     parser.add_argument('-i', '--ignore', nargs='*', default=[],
                         help='Ignore lines containing these entries')
-    return parser.parse_args()
+    return parser if doc == True else parser.parse_args()
 
 
 def main():
-    args = __option_parser()
+    args = __option_parser(doc=False)
 
     filename = os.path.abspath(args.file)
 

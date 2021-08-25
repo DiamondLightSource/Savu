@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: Remove stripe artefacts
+.. module:: ring_removal_normalization
    :platform: Unix
-   :synopsis: A plugin working in sinogram space to remove stripe artefacts
+   :synopsis: Method working in the sinogram space to remove ring artifacts.
 .. moduleauthor:: Nghia Vo <scientificsoftware@diamond.ac.uk>
 
 """
@@ -29,20 +29,10 @@ from scipy.ndimage import gaussian_filter
 
 @register_plugin
 class RingRemovalNormalization(Plugin, CpuPlugin):
-    """
-
-    Method to remove stripe artefacts in a sinogram (<-> ring artefacts in a \
-    reconstructed image) using a normalization-based method. A simple \
-    improvement to handle partial stripes is included.
-
-    :param radius: Radius of the Gaussian kernel. Default: 11.
-    :param number_of_chunks: Divide the sinogram to many chunks of \
-        rows. Default: 1
-    """
 
     def __init__(self):
         super(RingRemovalNormalization, self).__init__(
-                "RingRemovalNormalization")
+            "RingRemovalNormalization")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -65,7 +55,7 @@ class RingRemovalNormalization(Plugin, CpuPlugin):
         sinogram = np.copy(data[0])
         radius = np.clip(np.int16(self.parameters['radius']), 0, self.width1)
         num_chunks = np.clip(np.int16(
-                self.parameters['number_of_chunks']), 1, self.height1)
+            self.parameters['number_of_chunks']), 1, self.height1)
         list_pos = np.array_split(np.arange(self.height1), num_chunks)
         for pos in list_pos:
             bindex = pos[0]

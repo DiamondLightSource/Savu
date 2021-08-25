@@ -28,17 +28,6 @@ import numpy as np
 
 
 class BaseComponentAnalysis(Plugin, CpuPlugin):
-    """
-    A base plugin for doing component analysis. This sorts out the main \
-    features of a component analysis
-
-    :param in_datasets: A list of the dataset(s) to process. Default: [].
-    :param out_datasets: A list of the dataset(s) to \
-        process. Default: ['scores', 'eigenvectors'].
-    :param number_of_components: The number expected components. Default: 3.
-    :param chunk: The chunk to work on. Default: 'SINOGRAM'.
-    :param whiten: To subtract the mean or not. Default: 1.
-    """
 
     def __init__(self, name):
         super(BaseComponentAnalysis, self).__init__(name)

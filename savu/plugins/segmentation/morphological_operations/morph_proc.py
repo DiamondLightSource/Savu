@@ -30,14 +30,6 @@ from skimage.morphology import *
 
 @register_plugin
 class MorphProc(Plugin, CpuPlugin):
-    """
-    A Plugin to perform morphological operations on binary images \
-    (use: binary_erosion, binary_dilation, binary_opening, binary_closing)
-
-    :param disk_radius:  The radius of the disk-shaped structuring element for morphology. Default: 5.
-    :param morph_operation: The type of morphological operation. Default: 'binary_opening'.
-    :param pattern: pattern to apply this to. Default: "VOLUME_XZ".
-    """
 
     def __init__(self):
         super(MorphProc, self).__init__("MorphProc")

@@ -1,0 +1,41 @@
+visibility:
+    description: The visibility level of the parameter
+    values:
+        basic: Visible to all users
+        intermediate: Visibile when altering the parameter more closely
+        advanced: Visible when specific parameter alterations are required, and for developers
+        datasets: Specifically for in_datasets, out_datasets
+
+dtype:
+    description: The type of data
+    values:
+        int: Integer
+        str: String
+        float: Float
+        bool: Boolean
+        filepath: File path
+        h5path: Hdf5 path
+        yamlfilepath: Yaml file path
+        dir: Directory
+        nptype: Numpy type
+        preview: Preview slice list for data
+        list: List
+        dict: Dictionary
+
+description:
+    description: A short explanation of the parameter
+    optional_values:
+        verbose: A more in depth explanation of the parameter
+        options: A list containing explanations of option values
+
+default:
+    description: The default value
+
+options:
+    description: A list of permitted values
+
+dependency:
+    description: The name of the parameter and value which this parameter depends upon
+
+range:
+    description: A guide for the range of the parameter

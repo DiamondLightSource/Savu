@@ -20,7 +20,6 @@
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
-from __future__ import print_function, division, absolute_import
 
 import os
 import copy
@@ -162,9 +161,9 @@ class Experiment(object):
     def _reset_datasets(self):
         self.index['in_data'] = self.initial_datasets
         # clear out dataset dictionaries
-        # for data_dict in self.collection['datasets']:
-        #     for data in data_dict.values():
-        #         data.meta_data._set_dictionary({})
+        for data_dict in self.collection['datasets']:
+            for data in data_dict.values():
+                data.meta_data._set_dictionary({})
 
     def _get_collection(self):
         return self.collection
@@ -218,7 +217,6 @@ class Experiment(object):
 
     def _create_nxs_entry(self):  # what if the file already exists?!
         logging.debug("Testing nexus file")
-        import h5py
         if self.meta_data.get('process') == len(
                 self.meta_data.get('processes')) - 1 and not self.checkpoint:
             with h5py.File(self.meta_data.get('nxs_filename'), 'w') as nxs_file:

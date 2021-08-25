@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: nx_xrd_loader_test
+.. module:: umpa_te
    :platform: Unix
    :synopsis: testing the nx_xrd loader
 

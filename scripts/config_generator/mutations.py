@@ -13,10 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: mutations.py
+.. module:: mutations
    :platform: Unix
-   :synopsis: A dictionary detailing changes to plugins, actions and \
-       descriptions that are required by the configurator.
+   :synopsis: A dictionary detailing changes to plugins, actions and descriptions that are required by the configurator.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
@@ -76,9 +75,9 @@ def notice_str(name, notice):
 def param_change_str(old, new, plugin, keys):
     removed = list(set(old).difference(set(new)))
     added = list(set(new).difference(set(old)))
-    replaced = [entry['old'] for k in keys for entry in param_mutations[k]
+    replaced = [entry['old'] for k in keys for entry in param_mutations[k]['params']
                 if entry['old'] in list(old.keys())]
-    replacing = [entry['new'] for k in keys for entry in param_mutations[k]
+    replacing = [entry['new'] for k in keys for entry in param_mutations[k]['params']
                  if entry['old'] in list(old.keys())]
 
     removed = [x for x in removed if x not in replaced]
@@ -148,7 +147,7 @@ plugin_mutations = \
       'DezingerSinogram':
          {'replace': 'DezingerSinogramDeprecated',
           'up_to_version': '3.0', # if the plist version is less than 3.0 (or not defined) then apply this mutation
-          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSinogram " + dezinger_dep_notice) + Fore.RESET}        
+          'desc': '\n' + Fore.RED + auto_replace_str() + wrap("\nDezingerSinogram " + dezinger_dep_notice) + Fore.RESET}
      }
 
 param_mutations = \

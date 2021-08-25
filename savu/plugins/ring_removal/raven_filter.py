@@ -15,7 +15,7 @@
 """
 .. module:: raven_filter
    :platform: Unix
-   :synopsis: A plugin to remove ring artefacts
+   :synopsis: FFT-based method for removing ring artifacts.
 
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 """
@@ -26,21 +26,11 @@ import pyfftw.interfaces.numpy_fft as fft
 
 from savu.plugins.filters.base_filter import BaseFilter
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.data.plugin_list import CitationInformation
 from savu.plugins.utils import register_plugin
 
 
 @register_plugin
 class RavenFilter(BaseFilter, CpuPlugin):
-    """
-    Ring artefact removal method
-
-    :u*param uvalue: To define the shape of filter, e.g. bad=10, moderate=20,\
-        minor=50. Default: 20.
-    :param vvalue: How many rows to be applied the filter. Default: 2.
-    :param nvalue: To define the shape of filter. Default: 4.
-    :param padFT: Padding for Fourier transform. Default: 20.
-    """
 
     def __init__(self):
         logging.debug("Starting Raven Filter")
@@ -49,8 +39,6 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def set_filter_padding(self, in_data, out_data):
         self.pad = self.parameters['padFT']
-        # don't currently have functionality to pad top/bottom but not
-        # right/left so padding everywhere for now
         in_data[0].padding = {'pad_frame_edges': self.pad}
         out_data[0].padding = {'pad_frame_edges': self.pad}
 
@@ -58,8 +46,8 @@ class RavenFilter(BaseFilter, CpuPlugin):
         in_pData = self.get_plugin_in_datasets()[0]
         sino_shape = list(in_pData.get_shape())
 
-        width1 = sino_shape[1] + 2*self.pad
-        height1 = sino_shape[0] + 2*self.pad
+        width1 = sino_shape[1] + 2 * self.pad
+        height1 = sino_shape[0] + 2 * self.pad
 
         v0 = np.abs(self.parameters['vvalue'])
         u0 = np.abs(self.parameters['uvalue'])
@@ -68,12 +56,12 @@ class RavenFilter(BaseFilter, CpuPlugin):
         centerx = np.ceil(width1 / 2.0) - 1.0
         centery = np.int16(np.ceil(height1 / 2.0) - 1)
         self.row1 = centery - v0
-        self.row2 = centery + v0+1
-        listx = np.arange(width1)-centerx
-        filtershape = 1.0/(1.0 + np.power(listx/u0, 2*n))
+        self.row2 = centery + v0 + 1
+        listx = np.arange(width1) - centerx
+        filtershape = 1.0 / (1.0 + np.power(listx / u0, 2 * n))
         filtershapepad2d = np.zeros((self.row2 - self.row1, filtershape.size))
         filtershapepad2d[:] = np.float64(filtershape)
-        self.filtercomplex = filtershapepad2d + filtershapepad2d*1j
+        self.filtercomplex = filtershapepad2d + filtershapepad2d * 1j
 
         a = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
         b = pyfftw.empty_aligned((height1, width1), dtype='complex128', n=16)
@@ -95,34 +83,3 @@ class RavenFilter(BaseFilter, CpuPlugin):
 
     def get_max_frames(self):
         return 'single'
-
-    def get_citation_information(self):
-        cite_info = CitationInformation()
-        cite_info.description = \
-            ("The ring artefact removal algorithm used in this processing \
-             chain is taken from this work.")
-        cite_info.bibtex = \
-            ("@article{raven1998numerical,\n" +
-             "title={Numerical removal of ring artifacts in \
-             microtomography},\n" +
-             "author={Raven, Carsten},\n" +
-             "journal={Review of scientific instruments},\n" +
-             "volume={69},\n" +
-             "number={8},\n" +
-             "pages={2978--2980},\n" +
-             "year={1998},\n" +
-             "publisher={AIP Publishing}\n" +
-             "}")
-        cite_info.endnote = \
-            ("%0 Journal Article\n" +
-             "%T Numerical removal of ring artifacts in microtomography\n" +
-             "%A Raven, Carsten\n" +
-             "%J Review of scientific instruments\n" +
-             "%V 69\n" +
-             "%N 8\n" +
-             "%P 2978-2980\n" +
-             "%@ 0034-6748\n" +
-             "%D 1998\n" +
-             "%I AIP Publishing")
-        cite_info.doi = "doi: 10.1063/1.1149043"
-        return cite_info

@@ -30,22 +30,14 @@ import numpy as np
 
 @register_plugin
 class Ica(BaseComponentAnalysis):
-    """
-    This plugin performs independent component analysis on XRD/XRF spectra.
-    :param w_init: The initial mixing matrix. Default: None.
-    :param random_state: The state. Default: 1.
-    """
 
     def __init__(self):
         super(Ica, self).__init__("Ica")
 
     def process_frames(self, data):
-        logging.debug("I am starting the old componenty vous")
         data = data[0]
-        #print 'The length of the data is'+str(data.shape)
         sh = data.shape
         newshape = (np.prod(sh[:-1]), sh[-1])
-        #print "The shape of the data is:"+str(data.shape) + str(newshape)
         data = np.reshape(data, (newshape))
         # data will already be shaped correctly
         logging.debug("Making the matrix")
@@ -56,10 +48,7 @@ class Ica(BaseComponentAnalysis):
                       random_state=self.parameters['random_state'])
         logging.debug("Performing the fit")
         data = self.remove_nan_inf(data)  #otherwise the fit flags up an error for obvious reasons
-#         print "I'm here"
         S_ = ica.fit_transform(data)
-#         print "S_Shape is:"+str(S_.shape)
-#         print "self.images_shape:"+str(self.images_shape)
         scores = np.reshape(S_, (self.images_shape))
         eigenspectra = ica.components_
         logging.debug("mange-tout")

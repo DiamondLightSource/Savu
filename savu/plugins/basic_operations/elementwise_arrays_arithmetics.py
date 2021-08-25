@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
- .. module:: perform elementwise arithmetic operations on two input datasets: addition, subtraction, multiplication and division
+.. module:: elementwise_arrays_arithmetics
    :platform: Unix
    :synopsis: perform elementwise arithmetic operations on two input datasets: addition, subtraction, multiplication and division
 
@@ -29,23 +29,18 @@ import numpy as np
 
 @register_plugin
 class ElementwiseArraysArithmetics(Plugin, CpuPlugin):
-    """
-    Basic arithmetic operations on two input datasets: addition, subtraction, multiplication and division.
-
-    :param operation: arithmetic operation to apply to data, choose from addition, subtraction, multiplication and division. Default: 'multiplication'.
-    """
-
     def __init__(self):
         super(ElementwiseArraysArithmetics, self).__init__("ElementwiseArraysArithmetics")
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
+        pattern_type=self.parameters['pattern']
+        in_pData[0].plugin_data_setup(pattern_type, 'single')
+        in_pData[1].plugin_data_setup(pattern_type, 'single')
 
         out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        out_pData[0].plugin_data_setup(pattern_type, 'single')
 
     def process_frames(self, data):
         if (self.parameters['operation'] == 'addition'):

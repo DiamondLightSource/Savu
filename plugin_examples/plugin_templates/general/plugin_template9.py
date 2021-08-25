@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template9
    :platform: Unix
    :synopsis: A template to create a simple plugin that takes one dataset as\
    input and returns a similar dataset as output.
@@ -29,13 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate9(Plugin, CpuPlugin):
-    """
-	A plugin template that dynamically determines the number of output \
-    datasets based on a parameter.
-
-    :param n_out: Add this number of output datasets. Default: 1.
-    :param out_prefix: What should the datasets be called. Default: None.
-    """
 
     def __init__(self, name="PluginTemplate9"):
         super(PluginTemplate9, self).__init__(name)
@@ -71,4 +64,3 @@ class PluginTemplate9(Plugin, CpuPlugin):
 
     def post_process(self):
         pass
-

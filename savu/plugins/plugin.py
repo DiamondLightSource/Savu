@@ -21,45 +21,36 @@
 
 """
 
-import ast
 import copy
 import logging
-import inspect
 import numpy as np
 
-import savu.plugins.docstring_parser as doc
+import savu.plugins.utils as pu
 from savu.plugins.plugin_datasets import PluginDatasets
 
 
 class Plugin(PluginDatasets):
-    """
-    The base class from which all plugins should inherit.
-    :param in_datasets: Create a list of the dataset(s) to \
-        process. Default: [].
-    :param out_datasets: Create a list of the dataset(s) to \
-        create. Default: [].
-    """
 
     def __init__(self, name="Plugin"):
         super(Plugin, self).__init__(name)
         self.name = name
-        self.parameters = {}
-        self.parameters_types = {}
-        self.parameters_desc = {}
-        self.parameters_hide = []
-        self.parameters_user = []
         self.chunk = False
-        self.docstring_info = {}
         self.slice_list = None
         self.global_index = None
         self.pcount = 0
         self.exp = None
         self.check = False
+        self.fixed_length = True
+        self.parameters = {}
+        self.tools = self._set_plugin_tools()
+
+    def set_parameters(self, params):
+        self.parameters = params
 
     def initialise(self, params, exp, check=False):
         self.check = check
         self.exp = exp
-        self._set_parameters(copy.deepcopy(params))
+        self.get_plugin_tools().initialise(params)
         self._main_setup()
 
     def _main_setup(self):
@@ -82,21 +73,6 @@ class Plugin(PluginDatasets):
     def get_process_frames_counter(self):
         return self.pcount
 
-    def _set_parameters_this_instance(self, indices):
-        """ Determines the parameters for this instance of the plugin, in the
-        case of parameter tuning.
-
-        param np.ndarray indices: the index of the current value in the
-            parameter tuning list.
-        """
-        dims = set(self.multi_params_dict.keys())
-        count = 0
-        for dim in dims:
-            info = self.multi_params_dict[dim]
-            name = info['label'].split('_param')[0]
-            self.parameters[name] = info['values'][indices[count]]
-            count += 1
-
     def set_filter_padding(self, in_data, out_data):
         """
         Should be overridden to define how wide the frame should be for each
@@ -113,116 +89,17 @@ class Plugin(PluginDatasets):
         logging.error("set_up needs to be implemented")
         raise NotImplementedError("setup needs to be implemented")
 
-    def _populate_default_parameters(self):
-        """
-        This method should populate all the required parameters with default
-        values.  it is used for checking to see if new parameter values are
-        appropriate
+    def get_plugin_tools(self):
+        return self.tools
 
-        It makes use of the classes including parameter information in the
-        class docstring such as this
-
-        :param error_threshold: Convergence threshold. Default: 0.001.
-        """
-        hidden_items = []
-        user_items = []
-        params = []
-        not_params = []
-        for clazz in inspect.getmro(self.__class__)[::-1]:
-            if clazz != object:
-                desc = doc.find_args(clazz, self)
-                self.docstring_info['warn'] = desc['warn']
-                self.docstring_info['info'] = desc['info']
-                self.docstring_info['synopsis'] = desc['synopsis']
-                params.extend(desc['param'])
-                if desc['hide_param']:
-                    hidden_items.extend(desc['hide_param'])
-                if desc['user_param']:
-                    user_items.extend(desc['user_param'])
-                if desc['not_param']:
-                    not_params.extend(desc['not_param'])
-        self._add_item(params, not_params)
-        user_items = [u for u in user_items if u not in not_params]
-        hidden_items = [h for h in hidden_items if h not in not_params]
-        user_items = list(set(user_items).difference(set(hidden_items)))
-        self.parameters_hide = hidden_items
-        self.parameters_user = user_items
-        self.final_parameter_updates()
-
-    def _add_item(self, item_list, not_list):
-        true_list = [i for i in item_list if i['name'] not in not_list]
-        for item in true_list:
-            self.parameters[item['name']] = item['default']
-            self.parameters_types[item['name']] = item['dtype']
-            self.parameters_desc[item['name']] = item['desc']
+    def _set_plugin_tools(self):
+        plugin_tools_id = self.__class__.__module__ + '_tools'
+        tool_class = pu.get_tools_class(plugin_tools_id, self)
+        return tool_class
 
     def delete_parameter_entry(self, param):
         if param in list(self.parameters.keys()):
             del self.parameters[param]
-            del self.parameters_types[param]
-            del self.parameters_desc[param]
-
-    def initialise_parameters(self):
-        self.parameters = {}
-        self.parameters_types = {}
-        self._populate_default_parameters()
-        self.multi_params_dict = {}
-        self.extra_dims = []
-
-    def _set_parameters(self, parameters):
-        """
-        This method is called after the plugin has been created by the
-        pipeline framework.  It replaces ``self.parameters`` default values
-        with those given in the input process list.
-
-        :param dict parameters: A dictionary of the parameters for this \
-        plugin, or None if no customisation is required.
-        """
-        self.initialise_parameters()
-        # reverse sorting added on Python 3 conversion to make the behaviour
-        # similar (hopefully the same) as on Python 2
-        for key in parameters.keys():
-            if key in self.parameters.keys():
-                value = self.__convert_multi_params(parameters[key], key)
-                self.parameters[key] = value
-            else:
-                error = ("Parameter '%s' is not valid for plugin %s. \nTry "
-                         "opening and re-saving the process list in the "
-                         "configurator to auto remove \nobsolete parameters."
-                         % (key, self.name))
-                raise ValueError(error)
-
-    def __convert_multi_params(self, value, key):
-        """ Set up parameter tuning.
-
-        Convert parameter value to a list if it uses parameter tuning and set
-        associated parameters, so the framework knows the new size of the data
-        and which plugins to re-run.
-        """
-        dtype = self.parameters_types[key]
-        if isinstance(value, str) and ';' in value:
-            value = value.split(';')
-            if ":" in value[0]:
-                seq = value[0].split(':')
-                seq = [eval(s) for s in seq]
-                value = list(np.arange(seq[0], seq[1], seq[2]))
-                if len(value) == 0:
-                    raise RuntimeError(
-                        'No values for tuned parameter "{}", '
-                        'ensure start:stop:step; values are valid.'.format(key))
-            if not isinstance(value[0], dtype):
-                try:
-                    value.remove('')
-                except Exception:
-                    pass
-                if isinstance(value[0], str):
-                    value = [ast.literal_eval(i) for i in value]
-                value = list(map(dtype, value))
-            label = key + '_params.' + type(value[0]).__name__
-            self.multi_params_dict[len(self.multi_params_dict)] = \
-                {'label': label, 'values': value}
-            self.extra_dims.append(len(value))
-        return value
 
     def get_parameters(self, name):
         """ Return a plugin parameter
@@ -377,7 +254,6 @@ class Plugin(PluginDatasets):
         """ Get the global frame index. """
         return self.global_index
 
-
     def set_current_slice_list(self, sl):
         self.slice_list = sl
 
@@ -429,15 +305,6 @@ class Plugin(PluginDatasets):
         """ An opportunity to update the parameters after they have been set.
         """
         pass
-
-    def get_citation_information(self):
-        """
-        Gets the Citation Information for a plugin
-
-        :returns:  A populated savu.data.plugin_info.CitationInfomration
-
-        """
-        return None
 
     def executive_summary(self):
         """ Provide a summary to the user for the result of the plugin.

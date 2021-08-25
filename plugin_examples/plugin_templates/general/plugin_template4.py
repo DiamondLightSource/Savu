@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template
+.. module:: plugin_template4
    :platform: Unix
    :synopsis: A template for a plugin that takes in two datasets and returns\
        one dataset.
@@ -29,17 +29,6 @@ from savu.plugins.utils import register_plugin
 
 @register_plugin
 class PluginTemplate4(Plugin, CpuPlugin):
-    """
-    A template for a plugin that takes in two datasets and returns one dataset,
-    e.g. absorption correction.
-
-    :param example: Example of a plugin parameter. Default: None.
-    :param in_datasets: Override the in_datasets \
-        parameter. Default: ['fluo', 'stxm'].
-    :param preview: Reduce the number of sinograms of stxm to match\
-        fluo. Default: []
-    :param out_datasets: Overide the out_datasets parameter. Default: ['fluo']
-    """
 
     def __init__(self):
         super(PluginTemplate4, self).__init__('PluginTemplate4')

@@ -27,13 +27,19 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 
 class PluginRunnerScikitImageTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737.nxs'
-    experiment = None
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = None
 
-    def test_process(self):
+    def test_sart_scikitimage(self):
         process_list = 'reconstruction/scikit_sart_test_process.nxs'
-        options = tu.initialise_options(data_file, experiment, process_list)
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_fbp_scikitimage(self):
+        process_list = 'reconstruction/scikit_fbp_test_process.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

@@ -20,7 +20,9 @@
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
 import math
+import copy
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -31,46 +33,7 @@ MAX_OUTER_PAD = 2.1
 
 
 class BaseRecon(Plugin):
-    """
-    A base class for reconstruction plugins
 
-    :u*param centre_of_rotation: Centre of rotation to use for the \
-    reconstruction. Default: 0.0.
-
-    :u*param init_vol: Dataset to use as volume initialiser \
-    (doesn't currently work with preview). Default: None.
-
-    :param centre_pad: Pad the sinogram to centre it in order to fill the \
-    reconstructed volume ROI for asthetic purposes.\
-    NB: Only available for selected algorithms and will be ignored otherwise. \
-    WARNING: This will significantly increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :param outer_pad: Pad the sinogram width to fill the reconstructed volume \
-    for asthetic purposes.\
-    Choose from True (defaults to sqrt(2)), False or float <= 2.1. \
-    NB: Only available for selected algorithms and will be ignored otherwise.\
-    WARNING: This will increase the size of the data and the \
-    time to compute the reconstruction). Default: False.
-
-    :u*param log: Take the log of the data before reconstruction \
-    (True or False). Default: True.
-
-    :u*param preview: A slice list of required frames. Default: [].
-
-    :param force_zero: Set any values in the reconstructed image outside of \
-    this range to zero. Default: [None, None].
-
-    :param ratio: Ratio between the diameter of a circle mask and the width of\
-    a reconstructed image. If passed as a list or tuple, the second value is \
-    assigned to the outer mask area, e.g [0.95, 0.0]. Default: 0.95.
-
-    :param log_func: Override the default log \
-        function. Default: 'np.nan_to_num(-np.log(sino))'.
-
-    :param vol_shape: Override the size of the reconstruction volume with an \
-    integer value. Default: 'fixed'.
-    """
 
     def __init__(self, name='BaseRecon'):
         super(BaseRecon, self).__init__(name)
@@ -95,11 +58,10 @@ class BaseRecon(Plugin):
         self.pad_dim = \
             in_pData[0].get_data_dimension_by_axis_label('x', contains=True)
         in_meta_data = self.get_in_meta_data()[0]
-        self.__set_padding_alg()
 
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
-        self.set_centre_of_rotation(in_data[0], in_meta_data, in_pData[0])
+        self.set_centre_of_rotation(in_data[0], out_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
@@ -111,43 +73,30 @@ class BaseRecon(Plugin):
         factor = self.__get_outer_pad()
         self.sino_pad = int(math.ceil(factor * shape[self.pad_dim]))
 
-        self.sino_func, self.cor_func = self.set_function(shape) if \
-            self.padding_alg else self.set_function(False)
+        self.sino_func, self.cor_func = self.set_function(shape)
 
         self.range = self.parameters['force_zero']
         self.fix_sino = self.get_sino_centre_method()
 
     def __get_outer_pad(self):
+        pad = self.parameters['outer_pad'] if 'outer_pad' in self.parameters \
+            else False
         # length of diagonal of square is side*sqrt(2)
         factor = math.sqrt(2) - 1
-        pad = self.parameters['outer_pad'] if 'outer_pad' in \
-            list(self.parameters.keys()) else False
-
-        if pad is not False and not self.padding_alg:
-            msg = 'This reconstruction algorithm cannot be padded.'
-            cu.user_message(msg)
-            return 0
-
         if isinstance(pad, bool):
             return factor if pad is True else 0
+
         factor = float(pad)
         if factor > MAX_OUTER_PAD:
             factor = MAX_OUTER_PAD
             msg = 'Maximum outer_pad value is 2.1, using this instead'
             cu.user_message(msg)
-        return float(pad)
-
-    def __set_padding_alg(self):
-        """ Determine if this is an algorithm that allows sinogram padding. """
-        pad_algs = self.get_padding_algorithms()
-        alg = self.parameters['algorithm'] if 'algorithm' in \
-            list(self.parameters.keys()) else None
-        self.padding_alg = True if alg in pad_algs else False
+        return factor
 
     def get_vol_shape(self):
         return self.br_vol_shape
 
-    def set_centre_of_rotation(self, inData, mData, pData):
+    def set_centre_of_rotation(self, inData, outData, mData):
         # if cor has been passed as a dataset then do nothing
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
@@ -167,7 +116,17 @@ class BaseRecon(Plugin):
                 cor *= val
                 # mData.set('centre_of_rotation', cor) see Github ticket
         self.cor = cor
+        outData.meta_data.set("centre_of_rotation", copy.deepcopy(self.cor))
         self.centre = self.cor[0]
+
+    def populate_metadata_to_output(self, inData, outData, mData):
+        # writing  rotation angles into the metadata associated with the output (reconstruction)
+        self.angles = mData.get('rotation_angle')
+        outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
+
+        xDim = inData.get_data_dimension_by_axis_label('x', contains=True)
+        det_length = inData.get_shape()[xDim]
+        outData.meta_data.set("detector_x_length", copy.deepcopy(det_length))
 
     def __set_cor_from_meta_data(self, mData, inData):
         cor = mData.get('centre_of_rotation')
@@ -190,14 +149,18 @@ class BaseRecon(Plugin):
         return cor
 
     def set_function(self, pad_shape):
-        if not pad_shape:
-            def cor_func(cor): return cor
+        centre_pad = self.parameters['centre_pad'] if 'centre_pad' in \
+            self.parameters else False
+        if not centre_pad:
+            def cor_func(cor):
+                return cor
             if self.parameters['log']:
                 sino_func = self.__make_lambda()
             else:
                 sino_func = self.__make_lambda(log=False)
         else:
-            def cor_func(cor): return cor + self.sino_pad
+            def cor_func(cor):
+                return cor + self.sino_pad
             if self.parameters['log']:
                 sino_func = self.__make_lambda(pad=pad_shape)
             else:
@@ -227,6 +190,7 @@ class BaseRecon(Plugin):
         init = data[1] if self.init_vol else None
         angles = \
             self.angles[:, sl[self.scan_dim]] if self.scan_dim else self.angles
+        angles = np.squeeze(angles)
 
         self.frame_angles = angles
 
@@ -259,15 +223,12 @@ class BaseRecon(Plugin):
 
     def base_process_frames_after(self, data):
         lower_range, upper_range = self.range
+        data = np.nan_to_num(data)
         if lower_range is not None:
-            data[data < lower_range] = 0
+            data[data < lower_range] = 0.0
         if upper_range is not None:
-            data[data > upper_range] = 0
+            data[data > upper_range] = 0.0
         return data
-
-    def get_padding_algorithms(self):
-        """ A list of algorithms that allow the data to be padded. """
-        return []
 
     def pad_sino(self, sino, cor):
         """  Pad the sinogram so the centre of rotation is at the centre. """
@@ -327,8 +288,7 @@ class BaseRecon(Plugin):
             if not (cpad is True or cpad is False):
                 raise Exception('Unknown value for "centre_pad", please choose'
                                 ' True or False.')
-            centre_pad = self.pad_sino if cpad and self.padding_alg \
-                else self.crop_sino
+            centre_pad = self.pad_sino if cpad else self.crop_sino
         return centre_pad
 
     def __set_pad_amount(self, pad_amount):
@@ -428,6 +388,9 @@ class BaseRecon(Plugin):
 
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
+        # metadata output populator
+        in_meta_data = self.get_in_meta_data()[0]
+        self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data)
 
     def _get_axis_labels(self, in_dataset):
         """
@@ -481,8 +444,8 @@ class BaseRecon(Plugin):
             shape[volZ] = self.parameters['vol_shape']
 
         if 'resolution' in self.parameters.keys():
-            shape[volX] /= self.parameters['resolution']
-            shape[volZ] /= self.parameters['resolution']
+            shape[volX] = int(shape[volX] // self.parameters['resolution'])
+            shape[volZ] = int(shape[volZ] // self.parameters['resolution'])
         return tuple(shape)
 
     def get_max_frames(self):

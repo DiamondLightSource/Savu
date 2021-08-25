@@ -1,5 +1,5 @@
 inherit: 
-    - savu/plugins/loaders/templates/nexus_templates/xrd_calibration_legacy.yml
+    - Savu/savu/plugins/loaders/templates/nexus_templates/xrd_calibration_legacy.yml
 
 xrd:
     data:
