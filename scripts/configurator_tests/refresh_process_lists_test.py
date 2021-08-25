@@ -123,8 +123,8 @@ def refresh_file(f):
 
 def refresh_lists():
     """Refresh the directory or process list file provided"""
-    cu.populate_plugins()
     args = __option_parser(doc=False)
+    cu.populate_plugins()
     if args.directory:
         # Append a final backslash
         in_directory = os.path.join(args.directory,"")
