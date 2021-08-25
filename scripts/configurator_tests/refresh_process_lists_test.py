@@ -124,7 +124,6 @@ def refresh_file(f):
 def refresh_lists():
     """Refresh the directory or process list file provided"""
     args = __option_parser(doc=False)
-    cu.populate_plugins()
     if args.directory:
         # Append a final backslash
         in_directory = os.path.join(args.directory,"")
@@ -135,6 +134,7 @@ def refresh_lists():
               f"\ndirectory {in_directory}")
         print("*******************************************************")
         folder = os.path.dirname(in_directory)
+        cu.populate_plugins()
         for f in os.listdir(folder):
             print(f"Refreshing {f}")
             refresh_file(os.path.abspath(folder + "/" + f))
@@ -143,6 +143,7 @@ def refresh_lists():
     elif args.file:
         if not os.path.isfile(args.file):
             raise ValueError("Please enter a valid filepath.")
+        cu.populate_plugins()
         print(f"Refreshing {args.file}")
         refresh_file(args.file)
         print("*****************   Refresh complete   ****************")
