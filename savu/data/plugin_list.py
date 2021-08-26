@@ -151,7 +151,7 @@ class PluginList(object):
                   f"Save this process list to save the updated values.")
             print(separator)
 
-    def _save_plugin_list(self, out_filename):
+    def _save_plugin_list(self, out_filename, command_str=None):
         with h5py.File(out_filename, "a") as nxs_file:
 
             entry = nxs_file.require_group("entry")
@@ -160,7 +160,7 @@ class PluginList(object):
                 entry, 'framework_citations', 'NXcollection'))
 
             self.__save_savu_notes(self._overwrite_group(
-                entry, 'savu_notes', 'NXnote'))
+                entry, 'savu_notes', 'NXnote'), command_str)
 
             plugins_group = self._overwrite_group(entry, 'plugin', 'NXprocess')
 
@@ -182,10 +182,17 @@ class PluginList(object):
         group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
 
-    def __save_savu_notes(self, notes):
+    def __save_savu_notes(self, notes, command_str):
+        """ Save the version number and command if provided
+
+        :param notes: hdf5 group to save data to
+        :param command_str: savu command string
+        """
         from savu.version import __version__
 
         notes["version"] = __version__
+        if command_str:
+            notes["command"] = command_str
 
     def __populate_plugins_group(self, plugin_group, plugin):
         """Populate the plugin group information which will be saved

@@ -89,6 +89,7 @@ class Experiment(object):
 
     def _setup(self, transport):
         self._set_nxs_file()
+        self._set_process_list_path()
         self._set_transport(transport)
         self.collection = {'plugin_dict': [], 'datasets': []}
 
@@ -102,8 +103,11 @@ class Experiment(object):
         # save the plugin list - one process, first time only
         if self.meta_data.get('process') == \
                 len(self.meta_data.get('processes'))-1 and not checkpoint:
+            # Save original process list
+            plugin_list._save_plugin_list(self.meta_data.get('process_list_path'))
             # links the input data to the nexus file
-            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'),
+                                          self.meta_data.get('command'))
             self._add_input_data_to_nxs_file(self._get_transport())
         self._set_dataset_names_complete()
 
@@ -200,6 +204,13 @@ class Experiment(object):
                     return next_pattern
         return next_pattern
 
+    def _set_process_list_path(self):
+        """Create the path the process list should be saved to"""
+        folder = self.meta_data.get('out_path')
+        plname = os.path.basename(self.meta_data.get('process_file'))
+        filename = os.path.join(folder, plname)
+        self.meta_data.set('process_list_path', filename)
+
     def _set_nxs_file(self):
         folder = self.meta_data.get('out_path')
         fname = self.meta_data.get('datafile_name') + '_processed.nxs'
@@ -209,9 +220,8 @@ class Experiment(object):
         if self.meta_data.get('process') == 1:
             if self.meta_data.get('bllog'):
                 log_folder_name = self.meta_data.get('bllog')
-                log_folder = open(log_folder_name, 'a')
-                log_folder.write(os.path.abspath(filename) + '\n')
-                log_folder.close()
+                with open(log_folder_name, 'a') as log_folder:
+                    log_folder.write(os.path.abspath(filename) + '\n')
 
         self._create_nxs_entry()
 
