@@ -1,0 +1,37 @@
+{% set name = 'morphsnakes' %}
+{% set version = '1.0' %}
+
+package:
+  name: {{ name | lower }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/pmneila/morphsnakes.git
+  git_tag: master
+
+requirements:
+  build:
+    - python {{ python }}
+    - numpy
+    - scipy>=0.17.0
+  run:
+    - python {{ python }}
+    - numpy
+    - scipy>=0.17.0
+
+build:
+  number: 0
+  script:
+    - {{ PYTHON }} -m pip install .
+
+test:
+  imports:
+    - morphsnakes
+
+app:
+  summary: "Morphological Snakes for image segmentation. morphsnakes supports 2D images and 3D volumes"
+
+about:
+  home: https://github.com/pmneila/morphsnakes
+  license: MIT
+  license_file: LICENSE

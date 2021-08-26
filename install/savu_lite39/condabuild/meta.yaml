@@ -26,6 +26,10 @@ requirements:
     - tomopy
     - astra-toolbox
     - ccpi-regulariser
+    - ccpi-reconstruction
+    - morphsnakes
+    - geodistk
+    - pmacparser
     - tomophantom
     - tomobar
     - larix

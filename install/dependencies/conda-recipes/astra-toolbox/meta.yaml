@@ -18,7 +18,7 @@ requirements:
     - cython >=0.13
     - nomkl # [not win]
     - scipy
-    - cudatoolkit =11.2
+    - cudatoolkit >=10.1
     - six
 
 run:
