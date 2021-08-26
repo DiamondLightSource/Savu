@@ -208,7 +208,8 @@ class Experiment(object):
         """Create the path the process list should be saved to"""
         folder = self.meta_data.get('out_path')
         plname = os.path.basename(self.meta_data.get('process_file'))
-        filename = os.path.join(folder, plname)
+        filename = os.path.join(folder, plname if plname
+            else "process_list.nxs")
         self.meta_data.set('process_list_path', filename)
 
     def _set_nxs_file(self):
