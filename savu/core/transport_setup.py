@@ -93,7 +93,10 @@ class MPI_setup(object):
         """
         log_format = 'L %(relativeCreated)12d M000 CPU00' + \
                      ' %(levelname)-6s %(message)s'
-        filename = os.path.join(options['log_path'], 'log.txt')
+        log_folder = f"{options['out_path']}/run_log"
+        if not os.path.exists(log_folder):
+            os.makedirs(os.path.join(log_folder))
+        filename = os.path.join(log_folder, 'log.txt')
         level = cu._get_log_level(options)
         self.__set_logger(level, log_format, fname=filename)
         cu.add_user_log_level()
@@ -136,7 +139,8 @@ class MPI_setup(object):
 
     def __add_user_logging(self, options):
         logger = logging.getLogger()
-        filename = os.path.join(options['out_path'], 'user.log')
+        log_folder = f"{options['out_path']}/run_log"
+        filename = os.path.join(log_folder, 'user.log')
         cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in list(options.keys()):
             try:
