@@ -5,7 +5,7 @@ package:
   version: {{ environ['VERSION'] }}
 
 source:
-  url: https://github.com/DiamondLightSource/Savu/archive/{{ py39 }}.tar.gz
+  url: https://github.com/DiamondLightSource/Savu/archive/{{ repo }}.tar.gz
 
 build:
   preserve_egg_dir: True
@@ -21,7 +21,7 @@ requirements:
   run:
     - python
     - ipython
-    - cudatoolkit 10.1
+    - cudatoolkit >=10.1
     - numpy
     - tomopy
     - astra-toolbox
@@ -31,12 +31,13 @@ requirements:
     - larix
     - hdf5
     - openmpi
-    - h5py
+    - h5py >3.0
     - mpi4py
     - scipy
     - pandas
     - pywavelets
     - pypwt
+    - pystackreg
     - pytorch
     - fastai
     - scikit-image

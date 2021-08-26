@@ -1,0 +1,31 @@
+{% set version = "0.9" %}
+
+package:
+  name: pypwt
+  version: {{ version }}_{{ environ['CUDA_VERSION'] }}
+
+source:
+  url: https://github.com/dkazanc/pypwt/archive/{{ version }}.tar.gz
+
+requirements:
+  build:
+    - python
+    - pip
+    - numpy
+    - setuptools
+    - cython >=0.13
+    - cudatoolkit={{ environ['CUDA_VERSION'] }}
+
+  run:
+    - python
+    - numpy
+    - setuptools
+
+build:
+  preserve_egg_dir: False
+  number: 0
+
+about:
+  home: https://github.com/pierrepaleo/pypwt
+  license: Apache V2 and GPL V3
+  summary: 'pypwt is a python module for parallel Discrete Wavelet Transform. This is a wrapper of PDWT.'
