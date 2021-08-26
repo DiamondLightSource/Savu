@@ -211,6 +211,16 @@ class Experiment(object):
         filename = os.path.join(folder, plname if plname
             else "process_list.nxs")
         self.meta_data.set('process_list_path', filename)
+        self._update_command()
+
+    def _update_command(self):
+        """Update the input command and replace the path to the
+        process list"""
+        pl_path = self.meta_data.get('process_file')
+        new_pl_path = self.meta_data.get('process_list_path')
+        input_command = self.meta_data.get('command')
+        updated_command = input_command.replace(pl_path, new_pl_path)
+        self.meta_data.set('command', updated_command)
 
     def _set_nxs_file(self):
         folder = self.meta_data.get('out_path')
