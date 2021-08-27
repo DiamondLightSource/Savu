@@ -333,6 +333,9 @@ def convert_multi_params(param_name, value):
                     value = list(np.arange(seq[0], seq[1], seq[2]))
                 else:
                     error_str = "Ensure start:stop:step; values are valid."
+                if not value:
+                    # Don't allow an empty list
+                    raise ValueError
             except:
                 error_str = "Ensure start:stop:step; values are valid."
         val_list = (

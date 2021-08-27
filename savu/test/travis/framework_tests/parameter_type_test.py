@@ -1313,6 +1313,35 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertFalse(valid_modification)
 
+    def test_multi_param_15(self):
+        pdefs = self.initial_setup()
+        key = "int_param"
+        value = "22:7;"
+
+        # Error string created here as start:stop values
+        # with np.arange create an empty list
+        val_list, error_str = pu.convert_multi_params(key, value)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_multi_param_16(self):
+        pdefs = self.initial_setup()
+        key = "int_param"
+        value = "1:7:22;"
+
+        # Check the multi parameter value is changed to a list correctly
+        val_list, error_str = pu.convert_multi_params(key, value)
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
     def test_multi_param_dict_1(self):
         pdefs = self.initial_setup()
         key = "dict_param"
