@@ -183,6 +183,10 @@ class PluginList(object):
         return group
 
     def __save_savu_notes(self, notes):
+        """ Save the version number
+
+        :param notes: hdf5 group to save data to
+        """
         from savu.version import __version__
 
         notes["version"] = __version__

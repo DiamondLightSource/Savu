@@ -412,7 +412,11 @@ class Content(object):
             if parameter_valid:
                 self._change_value(param_name, value, tools, parameters)
             else:
-                print(f"ERROR: The input value {value} for {param_name} is not correct.")
+                value = str(value)
+                display_value = f"{value[0:12]}.." if len(value) > 12 \
+                                else value
+                print(f"ERROR: The input value {display_value} "
+                      f"for {param_name} is not correct.")
                 print(error_str)
         else:
             print("Not in parameter keys.")
