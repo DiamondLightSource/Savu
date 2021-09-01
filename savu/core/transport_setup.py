@@ -93,10 +93,8 @@ class MPI_setup(object):
         """
         log_format = 'L %(relativeCreated)12d M000 CPU00' + \
                      ' %(levelname)-6s %(message)s'
-        log_folder = f"{options['out_path']}/run_log"
-        if not os.path.exists(log_folder):
-            os.makedirs(os.path.join(log_folder))
-        filename = os.path.join(log_folder, 'log.txt')
+        log_dir = self.__get_log_directory(options)
+        filename = os.path.join(log_dir, 'log.txt')
         level = cu._get_log_level(options)
         self.__set_logger(level, log_format, fname=filename)
         cu.add_user_log_level()
@@ -139,8 +137,8 @@ class MPI_setup(object):
 
     def __add_user_logging(self, options):
         logger = logging.getLogger()
-        log_folder = f"{options['out_path']}/run_log"
-        filename = os.path.join(log_folder, 'user.log')
+        log_dir = self.__get_log_directory(options)
+        filename = os.path.join(log_dir, 'user.log')
         cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in list(options.keys()):
             try:
@@ -150,3 +148,15 @@ class MPI_setup(object):
                 logger.warn("Unable to add syslog logging for server %s on"
                             " port %i", options['syslog_server'],
                             options['syslog_port'])
+
+    def __get_log_directory(self, options):
+        """Create run_log directory to hold log files
+
+        :param options: dictionary holding the directory
+          to hold result files
+        :return: str, directory for log files
+        """
+        log_dir = f"{options['out_path']}/run_log"
+        if not os.path.exists(log_dir):
+            os.makedirs(os.path.join(log_dir))
+        return log_dir
