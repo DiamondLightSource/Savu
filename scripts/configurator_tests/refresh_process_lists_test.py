@@ -33,7 +33,9 @@ from scripts.config_generator.content import Content
 
 def __option_parser(doc=True):
     """Option parser for command line arguments."""
-    parser = argparse.ArgumentParser(prog="savu_refresh")
+    desc = "Refresh process lists to update their parameter and " \
+           "citation information with the most recent version of Savu."
+    parser = argparse.ArgumentParser(prog="savu_refresh", description=desc)
     # Require at least one of the optional arguments
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-f", "--file",
