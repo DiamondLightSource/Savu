@@ -43,10 +43,9 @@ def _int(value):
 
 
 def _str(value):
-    parameter_valid = False
     if isinstance(value, str):
-        parameter_valid = True
-    return parameter_valid
+        return True
+    return False
 
 
 def _float(value):
@@ -127,7 +126,9 @@ def _yaml_is_valid(filepath):
 
 def _nptype(value):
     """Check if the value is a numpy data type. Return true if it is."""
-    return (value in np.typecodes) or (value in np.sctypeDict.keys())
+    if _int(value) or _str(value):
+        return (value in np.typecodes) or (value in np.sctypeDict.keys())
+    return False
 
 
 def _preview(value):
