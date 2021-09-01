@@ -37,7 +37,10 @@ def __option_parser(doc=True):
     """ Option parser for command line arguments. Use -d for file deletion
     and -q for quick template.
     """
-    parser = argparse.ArgumentParser(prog='savu_plugin_generator')
+    desc = "Generate three plugin files: a plugin file, a plugin tools " \
+           "file and a plugin guide file. These files will be stored inside " \
+           "the Savu directory and the file paths will be printed to the screen."
+    parser = argparse.ArgumentParser(prog='savu_plugin_generator', description=desc)
     parser.add_argument('plugin_name',
                         help='Plugin name to create file',
                         type=str)
