@@ -294,14 +294,19 @@ if [ ! $foldername ] ; then
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
+logfolder=$outpath/$foldername/run_log
 
 # create the output folder
 if [ ! -d $outfolder ]; then
   #echo -e "\t Creating the output folder "$outfolder
   create_folder $outfolder
-fi
+
+# create the log folder
+if [ ! -d $logfolder ]; then
+  create_folder $logfolder
+
 # create the user log
-touch $outfolder/user.log
+touch $logfolder/user.log
 
 # set the intermediate folder
 arg_parse "-d" interfolder $options
@@ -417,7 +422,7 @@ echo -e "\t\t   >> qstat"
 tput setaf 3
 echo -e "\n\t\t* Monitor the progression of your Savu job:"
 tput sgr0
-echo -e "\t\t   >> tail -f $outfolder/user.log"
+echo -e "\t\t   >> tail -f $logfolder/user.log"
 echo -e "\t\t   >> Ctrl+C (to quit)"
 tput setaf 6
 echo -e "\n\t For a more detailed log file see: "
