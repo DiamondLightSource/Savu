@@ -350,10 +350,15 @@ tput sgr0
 fi
 
 # copy process list to the intermediate folder
+orig_process_file=$process_file
 process_file=`readlink -f $process_file`
 basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
+
+# create a modified command with the new process list path
+log_process_file=$logfolder/$basename
+modified_command=${original_command/$orig_process_file/$log_process_file}
 
 # copy original command to the log folder
 command_file=$logfolder/run_command.txt
@@ -361,6 +366,9 @@ command_file=$logfolder/run_command.txt
 cat > $command_file <<ENDFILE
 # The original savu_mpi command used
 $original_command
+# A modified savu_mpi command to use to reproduce the  obtained result
+$modified_command
+
 ENDFILE
 
 # =========================== qsub =======================================
