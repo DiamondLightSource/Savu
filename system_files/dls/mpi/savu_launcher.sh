@@ -364,11 +364,10 @@ modified_command=${original_command/$orig_process_file/$log_process_file}
 command_file=$logfolder/run_command.txt
 
 cat > $command_file <<ENDFILE
-# The original savu_mpi command used
+# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
 $original_command
-# A modified savu_mpi command to use to reproduce the  obtained result
+# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
 $modified_command
-
 ENDFILE
 
 # =========================== qsub =======================================
@@ -449,3 +448,4 @@ echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
 
+ 
