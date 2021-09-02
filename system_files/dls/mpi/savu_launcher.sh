@@ -1,5 +1,7 @@
 #!/bin/bash
 
+original_command="savu_mpi $@"
+
 # function for checking which data centre
 # assuming only gpfs03 in new data centre - to be updated
 function is_gpfs03 ()
@@ -300,10 +302,12 @@ logfolder=$outpath/$foldername/run_log
 if [ ! -d $outfolder ]; then
   #echo -e "\t Creating the output folder "$outfolder
   create_folder $outfolder
+fi
 
 # create the log folder
 if [ ! -d $logfolder ]; then
   create_folder $logfolder
+fi
 
 # create the user log
 touch $logfolder/user.log
@@ -316,7 +320,7 @@ if [ ! $interfolder ] ; then
 fi
 
 if [ ! $interfolder ] ; then
-	interfolder=$outfolder
+	interfolder=$logfolder
 else
 	interfolder=$interfolder/$foldername
 	if [ ! -d $interfolder ]; then
@@ -351,6 +355,13 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+# copy original command to the log folder
+command_file=$logfolder/run_command.txt
+
+cat > $command_file <<ENDFILE
+# The original savu_mpi command used
+$original_command
+ENDFILE
 
 # =========================== qsub =======================================
 # general arguments
