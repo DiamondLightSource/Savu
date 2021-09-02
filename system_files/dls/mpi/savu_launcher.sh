@@ -300,10 +300,12 @@ logfolder=$outpath/$foldername/run_log
 if [ ! -d $outfolder ]; then
   #echo -e "\t Creating the output folder "$outfolder
   create_folder $outfolder
+fi
 
 # create the log folder
 if [ ! -d $logfolder ]; then
   create_folder $logfolder
+fi
 
 # create the user log
 touch $logfolder/user.log
@@ -316,7 +318,7 @@ if [ ! $interfolder ] ; then
 fi
 
 if [ ! $interfolder ] ; then
-	interfolder=$outfolder
+	interfolder=$logfolder
 else
 	interfolder=$interfolder/$foldername
 	if [ ! -d $interfolder ]; then
