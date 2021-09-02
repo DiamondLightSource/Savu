@@ -120,12 +120,14 @@ class Experiment(object):
         fname = "run_command.txt"
         filename = os.path.join(log_folder, fname)
         modified_command = self._get_modified_command()
-        with open(filename, 'a') as command_log:
-            command_log.write(f"# Original Savu run command\n")
-            command_log.write(f"{self.meta_data.get('command')}\n")
-            command_log.write(f"# A modified Savu command to use to "
-                              f"reproduce the  obtained result\n")
-            command_log.write(f"{modified_command}\n")
+        if not os.path.isfile(filename):
+            # Only write savu command if savu_mpi command has not been saved
+            with open(filename, 'w') as command_log:
+                command_log.write(f"# Original Savu run command\n")
+                command_log.write(f"{self.meta_data.get('command')}\n")
+                command_log.write(f"# A modified Savu command to use to "
+                                  f"reproduce the  obtained result\n")
+                command_log.write(f"{modified_command}\n")
 
     def _get_modified_command(self):
         """Modify the input Savu run command, and replace the path to the

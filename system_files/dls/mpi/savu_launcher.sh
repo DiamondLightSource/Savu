@@ -1,5 +1,7 @@
 #!/bin/bash
 
+original_command="savu_mpi $@"
+
 # function for checking which data centre
 # assuming only gpfs03 in new data centre - to be updated
 function is_gpfs03 ()
@@ -353,6 +355,13 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+# copy original command to the log folder
+command_file=$logfolder/run_command.txt
+
+cat > $command_file <<ENDFILE
+# The original savu_mpi command used
+$original_command
+ENDFILE
 
 # =========================== qsub =======================================
 # general arguments
