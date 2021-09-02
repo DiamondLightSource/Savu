@@ -223,8 +223,8 @@ def _rem(content, args):
     pos_sort.sort()
     counter=0
     for pos in pos_sort:
-        if ((counter>0 and pos > 0)):
-            pos-=1
+        if ((counter>0 and pos>0)):
+            pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
     _disp(content, '-q')

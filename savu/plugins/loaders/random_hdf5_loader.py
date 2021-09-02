@@ -108,10 +108,10 @@ class RandomHdf5Loader(BaseLoader):
 
         self.exp._barrier()
 
-#        try:
-#            h5file.close()
-#        except:
-#            logging.debug('There was a problem trying to close the file in random_hdf5_loader')
+        try:
+            h5file.close()
+        except:
+            logging.debug('There was a problem trying to close the file in random_hdf5_loader')
 
         return self.hdf5._open_backing_h5(fname, 'r')
 
