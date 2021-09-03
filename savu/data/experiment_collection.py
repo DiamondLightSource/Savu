@@ -109,36 +109,6 @@ class Experiment(object):
             plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
             self._add_input_data_to_nxs_file(self._get_transport())
         self._set_dataset_names_complete()
-        self._save_command_log()
-
-    def _save_command_log(self):
-        """Save the original Savu run command and a
-        modified Savu run command to a log file for reproducibility
-        """
-        folder = self.meta_data.get('out_path')
-        log_folder = f"{folder}/run_log"
-        fname = "run_command.txt"
-        filename = os.path.join(log_folder, fname)
-        modified_command = self._get_modified_command()
-        if not os.path.isfile(filename):
-            # Only write savu command if savu_mpi command has not been saved
-            with open(filename, 'w') as command_log:
-                command_log.write(f"# Original Savu run command\n")
-                command_log.write(f"{self.meta_data.get('command')}\n")
-                command_log.write(f"# A modified Savu command to use to "
-                                  f"reproduce the  obtained result\n")
-                command_log.write(f"{modified_command}\n")
-
-    def _get_modified_command(self):
-        """Modify the input Savu run command, and replace the path to the
-        process list
-        :returns modified Savu run command string
-        """
-        pl_path = self.meta_data.get('process_file')
-        new_pl_path = self.meta_data.get('process_list_path')
-        input_command = self.meta_data.get('command')
-        updated_command = input_command.replace(pl_path, new_pl_path)
-        return updated_command
 
     def _set_process_list_path(self):
         """Create the path the process list should be saved to"""
