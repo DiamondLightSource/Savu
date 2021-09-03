@@ -220,7 +220,6 @@ def get_options():
     options['run_type'] = ''
     options['verbose'] = 'True'
     options['system_params'] = _set_system_params()
-    options['command'] = ''
     return options
 
 def _set_system_params():
