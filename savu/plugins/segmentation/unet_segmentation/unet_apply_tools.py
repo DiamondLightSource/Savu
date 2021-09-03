@@ -2,8 +2,8 @@ from savu.plugins.plugin_tools import PluginTools
 
 class UnetApplyTools(PluginTools):
     """
-    A simple plugin template with one in_dataset and one out_dataset with
-    similar characteristics, e.g. median filter.
+    A plugin with one in_dataset and one out_dataset that applies segmentation
+    to the image data using a 2D U-Net model. 
     """
 
     def define_parameters(self):

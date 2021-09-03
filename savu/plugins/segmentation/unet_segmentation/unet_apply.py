@@ -13,12 +13,12 @@
 # limitations under the License.
 
 """
-.. module:: plugin_template1
+.. module:: U-net apply 1-axis
    :platform: Unix
-   :synopsis: A template to create a simple plugin that takes one dataset as\
-   input and returns a similar dataset as output.
+   :synopsis: A plugin that takes in a reconstructed dataset\
+   and returns a segmented dataset as output.
 
-.. moduleauthor:: Developer Name <email@address.ac.uk>
+.. moduleauthor:: Olly King <olly.king@diamond.ac.uk>
 
 """
 
@@ -26,13 +26,12 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 from pathlib import Path
-from fastai.vision import open_image, Image, pil2tensor
+from fastai.vision import Image, pil2tensor
 from .unet_apply_helpers import fix_odd_sides, create_model_from_zip
 import numpy as np
-from skimage import io, img_as_ubyte, img_as_float
-from zipfile import ZipFile
-import os
-import json
+from skimage import img_as_float
+import torch
+
 
 
 @register_plugin
@@ -56,6 +55,7 @@ class UnetApply(Plugin, GpuPlugin):
 
     def pre_process(self):
         model_path = Path(self.parameters['model_file_path'])
+        torch.cuda.set_device(self.parameters['GPU_index'])
         self.model = create_model_from_zip(model_path)
 
     def process_frames(self, data):
