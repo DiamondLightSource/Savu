@@ -79,6 +79,7 @@ class UnetApply(Plugin, GpuPlugin):
 
     def pre_process(self):
         model_path = Path(self.parameters['model_file_path'])
+        torch.cuda.set_device(self.parameters['GPU_index'])
         self.model = create_model_from_zip(model_path)
 
     def process_frames(self, data):
