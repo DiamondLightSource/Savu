@@ -378,7 +378,7 @@ class Content(object):
         :param value: new parameter value
         :return boolean True if parameter tuning syntax is being used
         """
-        isdict = re.findall(r"[\{\}]+", value)
+        isdict = re.findall(r"[\{\}]+", str(value))
         return (isinstance(value, str)
                 and value.count(":") >= 2
                 and not isdict
