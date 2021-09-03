@@ -156,7 +156,7 @@ class MPI_setup(object):
           to hold result files
         :return: str, directory for log files
         """
-        log_dir = f"{options['out_path']}/run_log"
+        log_dir = os.path.join(options['out_path'],"run_log")
         if not os.path.exists(log_dir):
             os.makedirs(os.path.join(log_dir))
         return log_dir
