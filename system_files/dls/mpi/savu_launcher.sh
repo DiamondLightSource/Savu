@@ -296,7 +296,7 @@ if [ ! $foldername ] ; then
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
-logfolder=$outpath/$foldername/run_log
+logfolder="$outpath/$foldername/run_log"
 
 # create the output folder
 if [ ! -d $outfolder ]; then
@@ -310,7 +310,8 @@ if [ ! -d $logfolder ]; then
 fi
 
 # create the user log
-touch $logfolder/user.log
+userlogfile="$logfolder/user.log"
+touch $userlogfile
 
 # set the intermediate folder
 arg_parse "-d" interfolder $options
