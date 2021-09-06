@@ -86,19 +86,33 @@ class UnetApply(Plugin, GpuPlugin):
         # do some processing here
         # here is how to access a parameter defined in the tools file
         data = img_as_float(data[0])
+        return self.predict_single_image(data)
+
+    def predict_single_image(self, data):
         img = Image(pil2tensor(data, dtype=np.float32))
         flags = fix_odd_sides(img)
         prediction = self.model.predict(img)[2]
+        prediction = self.revert_image_dimensions(flags, prediction)
+        prediction = self.transpose_data(prediction)
+        return prediction
+
+    def transpose_data(self, prediction):
+        prediction = torch.transpose(prediction, 0, 2)
+        if self.parameters['pattern'] in ['VOLUME_YZ', 'VOLUME_XY']:
+            prediction = torch.transpose(prediction, 1, 0)
+        else:
+            prediction = torch.transpose(prediction, 0, 1)
+        return prediction
+
+    def revert_image_dimensions(self, flags, prediction):
         if 'y' in flags:
             ymax = list(prediction.shape)[1]
             prediction = prediction[:, :ymax-1, :]
         if 'x' in flags:
             xmax = list(prediction.shape)[2]
             prediction = prediction[:, :, :xmax-1]
-        prediction = torch.transpose(prediction, 0, 2)
-        if self.parameters['pattern'] in ['VOLUME_YZ', 'VOLUME_XY']:
-            prediction = torch.transpose(prediction, 1, 0)
         return prediction
 
     def post_process(self):
         pass
+    
