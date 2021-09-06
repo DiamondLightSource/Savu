@@ -91,7 +91,6 @@ class BaseCheckpointTest(object):
         options['process'] = 0
         options['mpi'] = False
         options['inter_path'] = self.tmpdir
-        options['command'] = ''
         return options
 
     def _get_checkpoint(self, cfile=True):
