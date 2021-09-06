@@ -107,8 +107,7 @@ def __option_parser(doc=True):
 def main(in_file=None, quiet=False):
     # when calling directly from tomo_recon.py
     if in_file:
-        log_folder = f"{os.path.dirname(in_file)}/run_log/"
-        out_file = os.path.join(os.path.dirname(log_folder), 'citations.txt')
+        out_file = os.path.join(os.path.dirname(in_file), 'citations.txt')
     else:
         args = __option_parser(doc=False)
         in_file = args.in_file
