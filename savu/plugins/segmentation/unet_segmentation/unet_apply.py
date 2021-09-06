@@ -86,15 +86,21 @@ class UnetApply(Plugin, GpuPlugin):
         # do some processing here
         # here is how to access a parameter defined in the tools file
         data = img_as_float(data[0])
-        return self.predict_single_image(data)
+        prediction = self.predict_single_image(data)
+        if self.parameters['rotate_images']:
+            for k in range(1, 4):
+                data = np.rot90(data, 1)
+                rotated_pred = self.predict_single_image(np.ascontiguousarray(data))
+                unrotated_pred = torch.rot90(rotated_pred, -k)
+                prediction = torch.max(prediction, unrotated_pred)
+        return prediction
 
     def predict_single_image(self, data):
         img = Image(pil2tensor(data, dtype=np.float32))
         flags = fix_odd_sides(img)
         prediction = self.model.predict(img)[2]
         prediction = self.revert_image_dimensions(flags, prediction)
-        prediction = self.transpose_data(prediction)
-        return prediction
+        return self.transpose_data(prediction)
 
     def transpose_data(self, prediction):
         prediction = torch.transpose(prediction, 0, 2)

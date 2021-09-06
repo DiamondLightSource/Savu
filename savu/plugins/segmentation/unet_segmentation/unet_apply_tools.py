@@ -23,4 +23,9 @@ class UnetApplyTools(PluginTools):
             dtype: int
             description: Number of labels in the segmentation
             default: 2
+        rotate_images:
+            visibility: basic
+            dtype: bool
+            description: Rotate the images 4 times and combine predictions
+            default: False
         """
