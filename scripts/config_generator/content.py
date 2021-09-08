@@ -348,10 +348,41 @@ class Content(object):
             self._change_value(param_name, value, tools, parameters)
             valid_modification = True
         else:
+            value = self._catch_parameter_tuning_syntax(value, param_name)
             valid_modification = self.modify_main(
                 param_name, value, tools, parameters, dim
             )
         return valid_modification
+
+    def _catch_parameter_tuning_syntax(self, value, param_name):
+        """Check if the new parameter value seems like it is written
+        in parameter tuning syntax with colons. If it is, then append
+        a semi colon onto the end.
+
+        :param value: new parameter value
+        :param param_name:
+        :return: modified value with semi colon appended
+        """
+        if self._is_multi_parameter_syntax(value) \
+                and param_name != "preview":
+            # Assume parameter tuning syntax is being used
+            value = f"{value};"
+            print("Parameter tuning syntax applied")
+        return value
+
+    def _is_multi_parameter_syntax(self, value):
+        """If the value contains two colons, is not a dictionary,
+        and doesnt already contain a semi colon, then assume that
+        it is using parameter tuning syntax
+
+        :param value: new parameter value
+        :return boolean True if parameter tuning syntax is being used
+        """
+        isdict = re.findall(r"[\{\}]+", str(value))
+        return (isinstance(value, str)
+                and value.count(":") >= 2
+                and not isdict
+                and ";" not in value)
 
     def setup_modify(self, params, param_name, value, ref):
         """Get the parameter keys in the correct order and find
@@ -423,7 +454,7 @@ class Content(object):
         return parameter_valid
 
     def _change_value(self, param_name, value, tools, parameters):
-        """ Change the parameter "param_name" value inside the parrameters list
+        """ Change the parameter "param_name" value inside the parameters list
         Update feedback messages for various dependant parameters
 
         :param param_name: The parameter position/name
