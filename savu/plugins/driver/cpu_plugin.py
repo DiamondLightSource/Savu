@@ -29,9 +29,6 @@ _base = BasicDriver if os.environ['savu_mode'] == 'basic' else PluginDriver
 
 
 class CpuPlugin(_base):
-    """
-    The base class from which all plugins should inherit.
-    """
 
     def __init__(self):
         super(CpuPlugin, self).__init__()
