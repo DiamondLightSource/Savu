@@ -107,14 +107,15 @@ def __option_parser(doc=True):
 def main(in_file=None, quiet=False):
     # when calling directly from tomo_recon.py
     if in_file:
-        out_file = os.path.join(os.path.dirname(in_file), 'citations.txt')
+        log_folder = os.path.join(os.path.dirname(in_file),"run_log")
+        out_file = os.path.join(log_folder, "citations.txt")
     else:
         args = __option_parser(doc=False)
         in_file = args.in_file
         out_file = args.out_file
         
     infile = h5py.File(in_file, 'r')
-    citation_manager = NXciteVisitor().get_citation_manager(infile, '/')
+    citation_manager = NXciteVisitor().get_citation_manager(infile, "/")
     if citation_manager is not None:
         with open(out_file, 'w') as outfile:
             outfile.write(citation_manager.__str__())
