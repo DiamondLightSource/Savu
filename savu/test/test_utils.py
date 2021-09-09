@@ -178,6 +178,7 @@ def set_options(path, **kwargs):
     options['checkpoint'] = None
     options['system_params'] = None
     options['nPlugin'] = 0
+    options['command'] = ''
     return options
 
 
