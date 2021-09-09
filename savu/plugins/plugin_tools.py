@@ -866,9 +866,11 @@ class PluginTools(PluginParameters, PluginCitations, PluginDocumentation):
         return self.plugin_class
 
     def _find_tools(self):
-        """Using the method resolution order, find base class tools"""
+        """Using the method resolution order, find base class tools.
+        Add tools information in reverse order, to build up on base parameters
+        """
         tool_list = []
-        for tool_class in self.plugin_class.__class__.__mro__[::-1]:
+        for tool_class in reversed(self.plugin_class.__class__.__mro__[:-1]):
             plugin_tools_id = tool_class.__module__ + "_tools"
             p_tools = pu.get_tools_class(plugin_tools_id)
             if p_tools:
