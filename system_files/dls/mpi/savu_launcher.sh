@@ -1,5 +1,8 @@
 #!/bin/bash
 
+all_args=$*
+original_command="savu_mpi $all_args"
+
 # function for checking which data centre
 # assuming only gpfs03 in new data centre - to be updated
 function is_gpfs03 ()
@@ -294,14 +297,22 @@ if [ ! $foldername ] ; then
   foldername=$(date +%Y%m%d%H%M%S)"_$(basename $path)"$suffix
 fi
 outfolder=$outpath/$foldername
+logfolder="$outpath/$foldername/run_log"
 
 # create the output folder
 if [ ! -d $outfolder ]; then
   #echo -e "\t Creating the output folder "$outfolder
   create_folder $outfolder
 fi
+
+# create the log folder
+if [ ! -d $logfolder ]; then
+  create_folder $logfolder
+fi
+
 # create the user log
-touch $outfolder/user.log
+userlogfile="$logfolder/user.log"
+touch $userlogfile
 
 # set the intermediate folder
 arg_parse "-d" interfolder $options
@@ -311,7 +322,7 @@ if [ ! $interfolder ] ; then
 fi
 
 if [ ! $interfolder ] ; then
-	interfolder=$outfolder
+	interfolder=$logfolder
 else
 	interfolder=$interfolder/$foldername
 	if [ ! -d $interfolder ]; then
@@ -341,11 +352,26 @@ tput sgr0
 fi
 
 # copy process list to the intermediate folder
+orig_process_file=$process_file
 process_file=`readlink -f $process_file`
 basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+# create a modified command with the new process list path
+log_process_file=$logfolder/$basename
+# replace the original process list path with the process list resaved into the log file
+modified_command=${original_command/$orig_process_file/$log_process_file}
+
+# copy original command to the log folder
+command_file="$logfolder/run_command.txt"
+
+cat > $command_file <<ENDFILE
+# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
+$original_command
+# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
+$modified_command
+ENDFILE
 
 # =========================== qsub =======================================
 # general arguments
@@ -417,7 +443,7 @@ echo -e "\t\t   >> qstat"
 tput setaf 3
 echo -e "\n\t\t* Monitor the progression of your Savu job:"
 tput sgr0
-echo -e "\t\t   >> tail -f $outfolder/user.log"
+echo -e "\t\t   >> tail -f $logfolder/user.log"
 echo -e "\t\t   >> Ctrl+C (to quit)"
 tput setaf 6
 echo -e "\n\t For a more detailed log file see: "

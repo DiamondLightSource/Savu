@@ -30,9 +30,6 @@ from savu.data.data_structures.plugin_data import PluginData
 
 
 class PluginDatasets(object):
-    """
-    The base class from which all plugins should inherit.
-    """
 
     def __init__(self, *args, **kwargs):
         super(PluginDatasets, self).__init__()
