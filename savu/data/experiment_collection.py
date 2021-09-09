@@ -116,9 +116,8 @@ class Experiment(object):
         modified Savu run command to a log file for reproducibility
         """
         folder = self.meta_data.get('out_path')
-        log_folder = f"{folder}/run_log"
-        fname = "run_command.txt"
-        filename = os.path.join(log_folder, fname)
+        log_folder = os.path.join(folder, "run_log")
+        filename = os.path.join(log_folder, "run_command.txt")
         modified_command = self._get_modified_command()
         if not os.path.isfile(filename):
             # Only write savu command if savu_mpi command has not been saved
@@ -142,7 +141,15 @@ class Experiment(object):
 
     def _set_process_list_path(self):
         """Create the path the process list should be saved to"""
-        log_folder = f"{self.meta_data.get('out_path')}/run_log"
+        log_folder = os.path.join(self.meta_data.get('out_path'), "run_log")
+        plname = os.path.basename(self.meta_data.get('process_file'))
+        filename = os.path.join(log_folder, plname if plname
+            else "process_list.nxs")
+        self.meta_data.set('process_list_path', filename)
+
+    def _set_process_list_path(self):
+        """Create the path the process list should be saved to"""
+        log_folder = os.path.join(self.meta_data.get('out_path'),"run_log")
         plname = os.path.basename(self.meta_data.get('process_file'))
         filename = os.path.join(log_folder, plname if plname
             else "process_list.nxs")

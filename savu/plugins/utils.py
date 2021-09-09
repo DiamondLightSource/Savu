@@ -137,23 +137,18 @@ def plugin_loader(exp, plugin_dict, check=False):
 
 
 def get_tools_class(plugin_tools_id, cls=None):
+    """Load the plugin tools class
+
+    :param plugin_tools_id: plugin tools module name
+    :param cls: Class to initialise
+    :return:
+    """
     if plugin_tools_id == "savu.plugins.plugin_tools":
         plugin_tools_id = "savu.plugins.base_tools"
-
-    # determine Savu base path
-    path_name = plugin_tools_id.replace(".", "/")
-    savu_path = os.path.join(savu.__path__[0], "..")
-    if len(path_name.split("plugin_templates")) > 1:
-        file_path = os.path.join(
-            savu_path, "plugin_examples", path_name + ".py")
+    if cls:
+        return load_class(plugin_tools_id)(cls)
     else:
-        file_path = os.path.join(savu_path, path_name + ".py")
-
-    if os.path.isfile(file_path):
-        if cls:
-            return load_class(plugin_tools_id)(cls)
-        else:
-            return load_class(plugin_tools_id)
+        return load_class(plugin_tools_id)
 
 
 def get_plugins_paths(examples=True):

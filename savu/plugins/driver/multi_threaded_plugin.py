@@ -26,10 +26,6 @@ from savu.plugins.driver.plugin_driver import PluginDriver
 
 
 class MultiThreadedPlugin(PluginDriver):
-    """
-    Initiates a multi-theaded plugin on one core of each node.
-
-    """
 
     def __init__(self):
         super(MultiThreadedPlugin, self).__init__()

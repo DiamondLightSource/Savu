@@ -180,7 +180,6 @@ def _set_options(args):
     options["dosna_engine"] = args.dosna_engine
     options["dosna_connection"] = args.dosna_connection
     options["dosna_connection_options"] = args.dosna_connection_options
-
     options['checkpoint'] = args.checkpoint
 
     command_str = " ".join([str(i) for i in sys.argv[1:]])
