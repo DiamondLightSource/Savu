@@ -138,7 +138,7 @@ class MPI_setup(object):
     def __add_user_logging(self, options):
         logger = logging.getLogger()
         log_dir = self.__get_log_directory(options)
-        filename = os.path.join(log_dir, 'user.log')
+        filename = os.path.join(log_dir, "user.log")
         cu.add_user_log_handler(logger, filename)
         if 'syslog_server' in list(options.keys()):
             try:

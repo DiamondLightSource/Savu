@@ -363,6 +363,16 @@ log_process_file=$logfolder/$basename
 # replace the original process list path with the process list resaved into the log file
 modified_command=${original_command/$orig_process_file/$log_process_file}
 
+# copy original command to the log folder
+command_file="$logfolder/run_command.txt"
+
+cat > $command_file <<ENDFILE
+# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
+$original_command
+# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
+$modified_command
+ENDFILE
+
 # =========================== qsub =======================================
 # general arguments
 # openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
