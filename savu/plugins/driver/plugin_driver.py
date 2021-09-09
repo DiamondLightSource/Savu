@@ -28,9 +28,6 @@ from savu.plugins.driver.basic_driver import BasicDriver
 
 
 class PluginDriver(BasicDriver):
-    """
-    The base class from which all plugins should inherit.
-    """
 
     def __init__(self):
         super(PluginDriver, self).__init__()

@@ -24,10 +24,6 @@ from savu.plugins.plugin import Plugin
 
 
 class BaseFilter(Plugin):
-    """
-    A Plugin to apply a simple dark and flatfield correction to some
-    raw timeseries data
-    """
 
     def __init__(self, name="BaseFilter"):
         super(BaseFilter, self).__init__(name)

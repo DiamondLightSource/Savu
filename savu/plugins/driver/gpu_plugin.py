@@ -36,9 +36,6 @@ _base = BasicDriver if os.environ['savu_mode'] == 'basic' else PluginDriver
 
 
 class GpuPlugin(_base):
-    """
-    The driver for GPU plugins.
-    """
 
     def __init__(self):
         super(GpuPlugin, self).__init__()
