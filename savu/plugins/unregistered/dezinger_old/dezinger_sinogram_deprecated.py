@@ -26,7 +26,6 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 
 
-@register_plugin
 class DezingerSinogramDeprecated(Plugin, CpuPlugin):
     """
     """
@@ -74,4 +73,4 @@ class DezingerSinogramDeprecated(Plugin, CpuPlugin):
         sinogram[mat_ratio_u > nhigh] = sinogram_u[mat_ratio_u > nhigh]
         sinogram[0] = list_top
         sinogram[-1] = list_bottom
-        return sinogram 
+        return sinogram

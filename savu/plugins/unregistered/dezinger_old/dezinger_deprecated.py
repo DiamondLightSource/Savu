@@ -31,7 +31,6 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
 class DezingerDeprecated(BaseFilter, CpuPlugin):
 
     def __init__(self):

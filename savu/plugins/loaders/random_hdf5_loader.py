@@ -110,7 +110,7 @@ class RandomHdf5Loader(BaseLoader):
 
         try:
             h5file.close()
-        except:
+        except IOError as exc:
             logging.debug('There was a problem trying to close the file in random_hdf5_loader')
 
         return self.hdf5._open_backing_h5(fname, 'r')
