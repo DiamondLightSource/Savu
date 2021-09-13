@@ -275,8 +275,10 @@ class Content(object):
             else:
                 message = (
                     f"\nPLUGIN ERROR: The plugin {name} is "
-                    f"unavailable in this version of Savu. \n Type open"
-                    f" -s <process_list> to skip the broken plugin."
+                    f"unavailable in this version of Savu. \nThe plugin is "
+                    f"missing from the position {pos} in the process list. "
+                    f"\n Type open -s <process_list> to skip the broken "
+                    f"plugin."
                 )
                 raise Exception(f"Incompatible process list. {message}")
 
