@@ -363,8 +363,9 @@ class Content(object):
         :param param_name:
         :return: modified value with semi colon appended
         """
+        exempt_parameters = ["preview", "indices"]
         if self._is_multi_parameter_syntax(value) \
-                and param_name != "preview":
+                and param_name not in exempt_parameters:
             # Assume parameter tuning syntax is being used
             value = f"{value};"
             print("Parameter tuning syntax applied")
