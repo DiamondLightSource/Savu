@@ -30,7 +30,7 @@ import scipy.signal.signaltools as sig
 from savu.plugins.utils import register_plugin
 
 
-@register_plugin
+#@register_plugin
 class MedianFilterDeprecated(BaseFilter, CpuPlugin):
     """
     """
@@ -56,4 +56,3 @@ class MedianFilterDeprecated(BaseFilter, CpuPlugin):
 
     def get_plugin_pattern(self):
         return self.parameters['pattern']
-

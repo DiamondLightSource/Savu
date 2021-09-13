@@ -1,8 +1,8 @@
 from savu.plugins.plugin_tools import PluginTools
 
-class DezingerTools(PluginTools):
-    """A plugin to apply median-based dezinger to PROJECTION (raw) data. \
-    The plugin works in a 3D mode (kernel_size x kernel_size x kernel_size).
+class BaseDezingerSinogramTools(PluginTools):
+    """A base plugin to apply median-based dezinger to SINOGRAM data. \
+    The plugin works in 2D or 3D mode.
     """
     def define_parameters(self):
         """
@@ -18,4 +18,9 @@ class DezingerTools(PluginTools):
               If set too small, dezinger acts like a median filter. The value of \
               the threshold is multiplied with a variance level in data.
               default: 0.1
+        kernel_dimension:
+             visibility: intermediate
+             dtype: str
+             description: Select between 2D or 3D kernel for filtering.
+             default: 3D
         """
