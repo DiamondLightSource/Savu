@@ -38,18 +38,6 @@ class MedianFilter(BaseMedianFilter, CpuPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
-        if (self.parameters['dimension'] == '3D'):
-            if (self.parameters['pattern'] == 'VOLUME_XY'):
-                input_temp =np.swapaxes(input_temp,0,2)
-            if ((self.parameters['pattern'] == 'VOLUME_XZ') or (self.parameters['pattern'] == 'SINOGRAM')):
-                input_temp =np.swapaxes(input_temp,0,1)
+        input_temp =np.swapaxes(input_temp,0,1)
         result = MEDIAN_FILT(input_temp.copy(order='C'), self.parameters['kernel_size'])
-        if (self.parameters['dimension'] == '3D'):
-            if (self.parameters['pattern'] == 'VOLUME_XY'):
-                result =np.swapaxes(result,0,2)
-            if ((self.parameters['pattern'] == 'VOLUME_XZ') or (self.parameters['pattern'] == 'SINOGRAM')):
-                result =np.swapaxes(result,0,1)
-        return result
-
-    def set_options(self, cfg):
-        return cfg
+        return np.swapaxes(result,0,1)

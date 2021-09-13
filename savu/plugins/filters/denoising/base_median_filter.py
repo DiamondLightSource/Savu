@@ -28,24 +28,27 @@ class BaseMedianFilter(Plugin):
 
     def __init__(self, name='BaseMedianFilter'):
         super(BaseMedianFilter, self).__init__(name)
+        self.frame_limit = 1
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
 
     def set_filter_padding(self, in_data, out_data):
-        if (self.parameters['dimension'] == '3D'):
-            padding = (self.parameters['kernel_size']-1)/2
-        else:
-            padding = 0
-        in_data[0].padding = {'pad_multi_frames': padding}
-        out_data[0].padding = {'pad_multi_frames': padding}
+        # kernel size must be odd
+        ksize = self.parameters['kernel_size']
+        self.kernel_size = ksize+1 if ksize % 2 == 0 else ksize
 
-    def nInput_datasets(self):
-        return 1
+        if self.parameters['kernel_dimension'] == '3D':
+            in_data = in_data[0]
+            self.pad = (self.kernel_size - 1) // 2
+            self.data_size = in_data.get_shape()
+            in_data.padding = {'pad_multi_frames': self.pad}
+            out_data[0].padding = {'pad_multi_frames': self.pad}
 
-    def nOutput_datasets(self):
-        return 1
+    def get_max_frames(self):
+        """ Setting nFrames to multiple with an upper limit of 4 frames. """
+        return ['multiple', self.frame_limit]

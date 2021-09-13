@@ -13,16 +13,16 @@ class BaseMedianFilterTools(PluginTools):
              dtype: int
              description: Kernel size of the median filter.
              default: 3
-        dimension:
-             visibility: advanced
+        kernel_dimension:
+             visibility: intermediate
              dtype: str
-             description: Dimensionality of the filter 2D/3D.
+             description: Select between 2D or 3D kernel for filtering.
              default: 3D
         pattern:
              visibility: intermediate
              dtype: str
-             options: [PROJECTION, SINOGRAM, VOLUME_YZ, VOLUME_XZ, VOLUME_XY]
+             options: [SINOGRAM, VOLUME_XZ]
              description: Pattern to apply this to.
-             default: PROJECTION
+             default: VOLUME_XZ
 
         """

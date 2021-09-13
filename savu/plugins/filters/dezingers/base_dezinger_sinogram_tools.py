@@ -6,11 +6,6 @@ class BaseDezingerSinogramTools(PluginTools):
     """
     def define_parameters(self):
         """
-        kernel_dimension:
-             visibility: intermediate
-             dtype: str
-             description: Select between 2D or 3D kernel for filtering
-             default: 3D
         kernel_size:
              visibility: basic
              dtype: int
@@ -23,4 +18,9 @@ class BaseDezingerSinogramTools(PluginTools):
               If set too small, dezinger acts like a median filter. The value of \
               the threshold is multiplied with a variance level in data.
               default: 0.1
+        kernel_dimension:
+             visibility: intermediate
+             dtype: str
+             description: Select between 2D or 3D kernel for filtering.
+             default: 3D
         """
