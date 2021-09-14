@@ -117,8 +117,8 @@ Dezingers
 
    Dezinger <plugin_documentation/plugins/filters/dezingers/dezinger>
    Dezinger Gpu <plugin_documentation/plugins/filters/dezingers/dezinger_gpu>
-   Dezinger Simple Deprecated <plugin_documentation/plugins/filters/dezingers/dezinger_simple_deprecated>
-   Dezinger Sinogram Deprecated <plugin_documentation/plugins/filters/dezingers/dezinger_sinogram_deprecated>
+   Dezinger Sinogram <plugin_documentation/plugins/filters/dezingers/dezinger_sinogram>
+   Dezinger Sinogram Gpu <plugin_documentation/plugins/filters/dezingers/dezinger_sinogram_gpu>
 
 
 Inpainting
@@ -142,7 +142,6 @@ Denoising
    Ccpi Denoising Gpu 3D <plugin_documentation/plugins/filters/denoising/ccpi_denoising_gpu_3D>
    Denoise Bregman Filter <plugin_documentation/plugins/filters/denoising/denoise_bregman_filter>
    Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
-   Median Filter Deprecated <plugin_documentation/plugins/filters/denoising/median_filter_deprecated>
    Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
 
 

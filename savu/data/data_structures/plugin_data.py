@@ -448,17 +448,18 @@ class PluginData(object):
 
         :param str pattern: A pattern name
         :param int nFrames: How many frames to process at a time.  Choose from
-            'single', 'multiple', 'fixed_multiple' or an integer (an integer
-            should only ever be passed in exceptional circumstances)
+         'single', 'multiple', 'fixed_multiple' or an integer (an integer
+         should only ever be passed in exceptional circumstances)
         :keyword str slice_axis: An axis label associated with the fastest
-            changing (first) slice dimension.
+         changing (first) slice dimension.
         :keyword list[pattern, axis_label] getall: A list of two values.  If
-        the requested pattern doesn't exist then use all of "axis_label"
-        dimension of "pattern" as this is equivalent to one slice of the
-        original pattern.
+         the requested pattern doesn't exist then use all of "axis_label"
+         dimension of "pattern" as this is equivalent to one slice of the
+         original pattern.
         :keyword fixed_length: Data passed to the plugin is automatically
-        padded to ensure all plugin data has the same dimensions. Set this
-        value to False to turn this off.
+         padded to ensure all plugin data has the same dimensions. Set this
+         value to False to turn this off.
+
         """
 
         if pattern not in self.data_obj.get_data_patterns() and getall:

@@ -14,7 +14,6 @@ Submodules
    plugins.filters.denoising.ccpi_denoising_gpu_3D
    plugins.filters.denoising.denoise_bregman_filter
    plugins.filters.denoising.median_filter
-   plugins.filters.denoising.median_filter_deprecated
    plugins.filters.denoising.median_filter_gpu
 
 Module contents

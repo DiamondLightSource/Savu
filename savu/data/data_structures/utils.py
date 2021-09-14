@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: utils
+.. module:: data_utils
    :platform: Unix
    :synopsis: Simple data utility methods
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
