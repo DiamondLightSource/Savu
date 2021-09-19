@@ -33,8 +33,6 @@ from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
 import tomophantom
 from tomophantom import TomoP2D, TomoP3D
-import os
-import numpy as np
 
 @register_plugin
 class BaseTomophantomLoader(BaseLoader):
@@ -57,7 +55,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         data_obj.backing_file = self.__get_backing_file(data_obj, 'synth_proj_data')
         data_obj.data = data_obj.backing_file['/']['test']
-        data_obj.data.dtype # Need to do something to .data to keep the file open!
+        #data_obj.data.dtype # Need to do something to .data to keep the file open!
 
         # create a phantom file
         data_obj2 = exp.create_data_object('in_data', 'phantom')
@@ -68,7 +66,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         data_obj2.backing_file = self.__get_backing_file(data_obj2, 'phantom')
         data_obj2.data = data_obj2.backing_file['/']['test']
-        data_obj2.data.dtype # Need to do something to .data to keep the file open!
+        #data_obj2.data.dtype # Need to do something to .data to keep the file open!
 
         data_obj.set_shape(data_obj.data.shape)
         self.n_entries = data_obj.get_shape()[0]
