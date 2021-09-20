@@ -22,6 +22,8 @@
 """
 import os
 
+from itertools import chain
+
 
 def list_of_packages(base_path):
     pkg_list = []
@@ -64,6 +66,8 @@ if __name__ == "__main__":
     # open the autosummary file
     f = open(savu_base_path + 'doc/source/reference/' + rst_file, 'w')
 
+    f.write(".. _" + api_type + ":\n\n")
+
     if api_type == 'framework':
         f.write('Framework API \n===================\n')
         exclude_dir = ['__pycache__', 'test', 'plugins']
@@ -83,8 +87,10 @@ if __name__ == "__main__":
 
     for root, dirs, files in os.walk(base_path, topdown=True):
         dirs[:] = [d for d in dirs if d not in exclude_dir]
+        tools_files = [fi for fi in files if "tools" in fi]
+        exclude_files = [exclude_file, tools_files]
+        files[:] = [fi for fi in files if fi not in chain(*exclude_files)]
         files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
-        files[:] = [fi for fi in files if fi not in exclude_file]
         if '__' not in root:
             add_package_entry(f, root, dirs, files, out_folder)
 

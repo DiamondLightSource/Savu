@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: hdf5_transport_data
+.. module:: basic_transport_data
    :platform: Unix
    :synopsis: A data transport class that is inherited by Data class at \
    runtime. It organises the slice list and moves the data.
