@@ -7,6 +7,12 @@ class TomoPhantomQuantificationTools(PluginTools):
 
     def define_parameters(self):
         """
+        pattern:
+             visibility: intermediate
+             dtype: str
+             options: [SINOGRAM, PROJECTION, VOLUME_XZ]
+             description: Pattern to apply this to.
+             default: SINOGRAM
         out_datasets:
               visibility: datasets
               dtype: [list[],list[str]]
@@ -14,5 +20,3 @@ class TomoPhantomQuantificationTools(PluginTools):
               default: "['quantification_values']"
 
         """
-
-

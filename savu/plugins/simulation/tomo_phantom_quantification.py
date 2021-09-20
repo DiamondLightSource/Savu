@@ -36,8 +36,8 @@ class TomoPhantomQuantification(Plugin, CpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        in_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        in_pData[1].plugin_data_setup(self.parameters['pattern'], 'single')
 
         fullData = in_dataset[0]
         slice_dirs = list(in_dataset[0].get_slice_dimensions())
