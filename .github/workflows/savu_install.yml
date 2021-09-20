@@ -39,4 +39,5 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate /usr/share/miniconda3/envs/savu_lite
+        refresh_lists
         savu_full_tests

@@ -34,7 +34,7 @@ class TomophantomTest(unittest.TestCase):
         self.experiment = 'tomo'
 
     def test_tomophantom(self):
-        process_list = 'simulation/tomophantom/tomophant_test.nxs'
+        process_list = 'simulation/tomophantom/tomophant_artifacts_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
