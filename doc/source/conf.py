@@ -31,6 +31,7 @@ for mod_name in MOCK_MODULES:
 autodoc_mock_imports = [
     "ccpi",
     "dezing", # Dezinger Deprecated
+    "dosna",
     "fabio",
     "flupy",
     "GeodisTK",

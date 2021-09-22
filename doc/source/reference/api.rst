@@ -8,5 +8,5 @@ Information on specific functions, classes, and methods.
 .. toctree::
    :glob:
 
-   api_plugin/*
-
+   plugin_api/*
+   savu_api/*
