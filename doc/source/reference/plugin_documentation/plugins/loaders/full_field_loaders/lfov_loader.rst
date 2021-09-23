@@ -25,13 +25,13 @@ Parameter definitions
         
         dark:
             visibility: basic
-            dtype: "[list[dir, h5path, float], list[None, None, float]]"
+            dtype: "[list[filepath, h5path, float], list[None, None, float]]"
             description: Optional path to the dark field data file, nxs path and scale value.
             default: "['None', 'None', 1]"
         
         flat:
             visibility: basic
-            dtype: "[list[dir, h5path, float], list[None, None, float]]"
+            dtype: "[list[filepath, h5path, float], list[None, None, float]]"
             description: Optional path to the flat field data file, nxs path and scale value.
             default: "['None', 'None', 1]"
         

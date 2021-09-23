@@ -117,8 +117,8 @@ Dezingers
 
    Dezinger <api_plugin/plugins.filters.dezingers.dezinger>
    Dezinger Gpu <api_plugin/plugins.filters.dezingers.dezinger_gpu>
-   Dezinger Simple Deprecated <api_plugin/plugins.filters.dezingers.dezinger_simple_deprecated>
-   Dezinger Sinogram Deprecated <api_plugin/plugins.filters.dezingers.dezinger_sinogram_deprecated>
+   Dezinger Sinogram <api_plugin/plugins.filters.dezingers.dezinger_sinogram>
+   Dezinger Sinogram Gpu <api_plugin/plugins.filters.dezingers.dezinger_sinogram_gpu>
 
 
 Inpainting
@@ -142,7 +142,6 @@ Denoising
    Ccpi Denoising Gpu 3D <api_plugin/plugins.filters.denoising.ccpi_denoising_gpu_3D>
    Denoise Bregman Filter <api_plugin/plugins.filters.denoising.denoise_bregman_filter>
    Median Filter <api_plugin/plugins.filters.denoising.median_filter>
-   Median Filter Deprecated <api_plugin/plugins.filters.denoising.median_filter_deprecated>
    Median Filter Gpu <api_plugin/plugins.filters.denoising.median_filter_gpu>
 
 
@@ -189,6 +188,7 @@ Full Field Loaders
    Nxtomo Loader <api_plugin/plugins.loaders.full_field_loaders.nxtomo_loader>
    Random 3D Tomo Loader <api_plugin/plugins.loaders.full_field_loaders.random_3d_tomo_loader>
    Lfov Loader <api_plugin/plugins.loaders.full_field_loaders.lfov_loader>
+   Tomo Phantom Loader <api_plugin/plugins.loaders.full_field_loaders.tomo_phantom_loader>
 
 
 Mapping Loaders
@@ -379,7 +379,7 @@ Simulation
 .. toctree::
    :maxdepth: 1 
 
-   Tomo Phantom <api_plugin/plugins.simulation.tomo_phantom>
    Tomo Phantom Quantification <api_plugin/plugins.simulation.tomo_phantom_quantification>
+   Tomo Phantom Artifacts <api_plugin/plugins.simulation.tomo_phantom_artifacts>
 
 
