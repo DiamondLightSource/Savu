@@ -22,6 +22,7 @@
 """
 import re
 import os
+import copy
 import inspect
 
 from savu.plugins import utils as pu
@@ -154,6 +155,18 @@ class Content(object):
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 
+    def duplicate(self, dupl_pos, new):
+        """ Duplicate the plugin at position dupl_pos
+        and insert it at the new position
+
+        :param dupl_pos: Position of the plugin to duplicate
+        :param new: New plugin position
+        """
+        pos = self.find_position(dupl_pos)
+        new_pos, new_pos_str = self.convert_pos(new)
+        plugin_entry = copy.deepcopy(self.plugin_list.plugin_list[pos])
+        plugin_entry["pos"] = new_pos_str
+        self.plugin_list.plugin_list.insert(new_pos, plugin_entry)
 
     def check_for_plugin_failure(self, name):
         """Check if the plugin failed to load
@@ -168,7 +181,6 @@ class Content(object):
                     raise Exception(msg)
                 raise Exception("INPUT ERROR: Unknown plugin %s" % name)
 
-
     def plugin_in_failed_dict(self, name):
         """Check if plugin in failed dictionary
 
@@ -177,7 +189,6 @@ class Content(object):
         """
         failed_plugin_list = list(self.failed.keys()) if self.failed else []
         return True if name in failed_plugin_list else False
-
 
     def check_preview_param(self, plugin_pos):
         """ Check that the plugin position number is valid and it contains
