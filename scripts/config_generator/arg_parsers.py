@@ -200,7 +200,7 @@ def _ref_arg_parser(args=None, doc=True):
     plugin_str = "Plugin position to refresh or '*' for the whole list"
     parser.add_argument("pos", nargs='+', help=plugin_str)
     defaults_str = "Populate parameters with default values."
-    parser.add_argument("-d", "--defaults", action="store_true",
+    parser.add_argument("-d", "--defaults", "--default", action="store_true",
                         dest="defaults", help=defaults_str, default=False)
     parser.add_argument("-n", "--nodisp", action="store_true", dest="nodisp",
                         help=argparse.SUPPRESS, default=False)
