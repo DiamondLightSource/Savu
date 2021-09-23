@@ -14,7 +14,7 @@
 
 
 """
-.. module:: utils
+.. module:: core_utils
    :platform: Unix
    :synopsis: Simple core utility methods.
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>

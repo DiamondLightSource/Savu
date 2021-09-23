@@ -64,6 +64,7 @@ Table of Contents
     :maxdepth: 2
 
     reference/plugin_autosummary
+    reference/autosummary
 
 .. _citations_content:
 
