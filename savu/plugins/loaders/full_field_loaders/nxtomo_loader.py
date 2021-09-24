@@ -213,11 +213,17 @@ class NxtomoLoader(BaseLoader):
 
     def _set_rotation_angles(self, data_obj):
         angles = self.parameters['angles']
+        warn_ms = "No angles found so evenly distributing them between 0 and" \
+                  " 180 degrees"
         if angles is None:
-            angles = 'entry1/tomo_entry/data/rotation_angle'
-
-        nxs_angles = self.__get_angles_from_nxs_file(data_obj, angles)
-        if nxs_angles is None:
+            angle_key = 'entry1/tomo_entry/data/rotation_angle'
+            nxs_angles = self.__get_angles_from_nxs_file(data_obj, angle_key)
+            if nxs_angles is None:
+                self.log_warning(warn_ms)
+                angles = np.linspace(0, 180, data_obj.get_shape()[0])
+            else:
+                angles = nxs_angles
+        else:
             try:
                 angles = eval(angles)
             except Exception as e:
@@ -226,11 +232,8 @@ class NxtomoLoader(BaseLoader):
                     angles = np.loadtxt(angles)
                 except Exception as e:
                     logging.debug(e)
-                    self.log_warning("No angles found so evenly distributing them "
-                                     "between 0 and 180 degrees")
+                    self.log_warning(warn_ms)
                     angles = np.linspace(0, 180, data_obj.get_shape()[0])
-        else:
-            angles = nxs_angles
         data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)
 

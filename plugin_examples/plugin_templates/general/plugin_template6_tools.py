@@ -22,5 +22,5 @@ class PluginTemplate6Tools(PluginTools):
             visibility: basic
             dtype: str
             description: The pattern the plugin should be applied to
-            default: ['PROJECTION']
+            default: 'PROJECTION'
         """

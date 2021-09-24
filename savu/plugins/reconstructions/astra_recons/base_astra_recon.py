@@ -94,16 +94,10 @@ class BaseAstraRecon(BaseRecon):
             ratio_mask = ratio[0]
             outer_mask = ratio[1]
             if isinstance(outer_mask, str):
-                if self.parameters['outer_pad'] is True:
-                    outer_mask = 1.0
-                else:
-                    outer_mask = np.nan
+                outer_mask = np.nan
         else:
             ratio_mask = ratio
-            if self.parameters['outer_pad'] is True:
-                outer_mask = 1.0
-            else:
-                outer_mask = np.nan
+            outer_mask = np.nan
         r = (l - 1) * ratio_mask
         outer_pad = True if self.parameters['outer_pad'] and self.padding_alg\
             else False
