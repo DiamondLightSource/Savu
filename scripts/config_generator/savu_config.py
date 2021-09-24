@@ -193,6 +193,17 @@ def _add(content, args):
 
 @parse_args
 @error_catcher
+def _dupl(content, args):
+    """ Duplicate a plugin in the list"""
+    elems = content.get_positions()
+    final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
+    content.duplicate(args.orig_pos, args.new_pos if args.new_pos else str(final))
+    _disp(content, '-q')
+    return content
+
+
+@parse_args
+@error_catcher
 def _ref(content, args):
     """ Refresh a plugin (update it). """
     positions = content.get_positions() if args.pos == ['*'] else args.pos
@@ -291,6 +302,7 @@ commands = {'open': _open,
             'mod': _mod,
             'set': _set,
             'add': _add,
+            'dupl': _dupl,
             'rem': _rem,
             'move': _move,
             'ref': _ref,

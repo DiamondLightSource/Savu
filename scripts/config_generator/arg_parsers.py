@@ -182,6 +182,17 @@ def _add_arg_parser(args=None, doc=True):
     return __arg_parser(parser, args, 'add', doc)
 
 
+def _dupl_arg_parser(args=None, doc=True):
+    """ Argument parser for dupl command. """
+    desc = sc.get_description()['dupl']
+    parser = ArgumentParser(prog='dupl', description=desc)
+    orig_pos_str = "The position of the plugin to be duplicated."
+    parser.add_argument("orig_pos", help=orig_pos_str)
+    pos_str = "Position for the new plugin (defaults to end)."
+    parser.add_argument('new_pos', nargs='?', help=pos_str)
+    return __arg_parser(parser, args, 'dupl', doc)
+
+
 def _ref_arg_parser(args=None, doc=True):
     """ Argument parser for ref command. """
     desc = sc.get_description()['ref']
@@ -189,7 +200,7 @@ def _ref_arg_parser(args=None, doc=True):
     plugin_str = "Plugin position to refresh or '*' for the whole list"
     parser.add_argument("pos", nargs='+', help=plugin_str)
     defaults_str = "Populate parameters with default values."
-    parser.add_argument("-d", "--defaults", action="store_true",
+    parser.add_argument("-d", "--defaults", "--default", action="store_true",
                         dest="defaults", help=defaults_str, default=False)
     parser.add_argument("-n", "--nodisp", action="store_true", dest="nodisp",
                         help=argparse.SUPPRESS, default=False)
