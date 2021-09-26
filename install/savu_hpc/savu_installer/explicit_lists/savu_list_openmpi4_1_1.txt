@@ -242,7 +242,7 @@ https://repo.anaconda.com/pkgs/main/linux-64/pytorch-1.4.0-cuda101py37h02f0884_0
 https://conda.anaconda.org/conda-forge/linux-64/pywavelets-1.1.1-py37h161383b_3.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/scipy-1.5.3-py37h8911b10_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/setuptools-49.6.0-py37h89c1867_3.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2021.04-np115py37_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2021.09-np118py37_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/xraylib-4.0.0-py37h274ba43_5.tar.bz2
 https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/astra-toolbox-1.9.9.dev6-py37hb48bd9c_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/astroid-2.5.2-py37h89c1867_0.tar.bz2
