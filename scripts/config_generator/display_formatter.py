@@ -314,7 +314,7 @@ class DispDisplay(ParameterFormatter):
         if filter:
             longest_key = max(filter_items, key=len)
         else:
-            longest_key = max(keys, key=len)
+            longest_key = max(keys, key=len) if keys else 0
         params = ""
         keycount = 0
         prev_visibility = ""

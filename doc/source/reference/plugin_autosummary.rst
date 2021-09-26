@@ -1,7 +1,7 @@
 .. _plugin_api:
 
 **********************
-Plugin Api 
+Plugin Api
 **********************
 
 Absorption Corrections
