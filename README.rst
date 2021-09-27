@@ -42,9 +42,9 @@ Documentation
 ==============
 The full documentation is available at https://savu.readthedocs.org/en/latest/
 
-Installation (Unix systems only)
+Installation (Unix only)
 ================================
-| See all installation instructions `here <https://github.com/DiamondLightSource/Savu/tree/master/install/README.md>`_
+| See all installation instructions `here <https://savu.readthedocs.io/en/latest/howto/installation.html>`_
 
 License
 ========
