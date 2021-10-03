@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: reduction_argmax
+.. module:: reduction_amax
    :platform: Unix
-   :synopsis: reducing data by one dimension by taking argmax along the dimension
+   :synopsis: reducing data by one dimension by taking amax along the chosen dimension
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
@@ -30,26 +30,17 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 
 
 @register_plugin
-class ReductionArgmax(Plugin, CpuPlugin):
+class ReductionAmax(Plugin, CpuPlugin):
 
     def __init__(self):
-        super(ReductionArgmax, self).__init__('ReductionArgmax')
-
-    """
-    def pre_process(self):
-        in_pData = self.get_plugin_in_datasets()[0]
-        self.sum_dim = in_pData.get_data_dimension_by_axis_label('voxel_x')
-    """
+        super(ReductionAmax, self).__init__('ReductionAmax')
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
-        #print(in_dataset[0].get_data_patterns())
 
-        #rm_label = self.parameters['axis_label']
-        rm_label = 'label'
+        rm_label = self.parameters['axis_label']
         rm_dim = in_dataset[0].get_data_dimension_by_axis_label(rm_label)
-        patterns = ['VOLUME_XZ.' + str(rm_dim)]
-
+        patterns = [self.parameters['pattern'] + '.' + str(rm_dim)]
         axis_labels = copy.copy(in_dataset[0].get_axis_labels())
         del axis_labels[rm_dim]
 
@@ -61,22 +52,15 @@ class ReductionArgmax(Plugin, CpuPlugin):
                 axis_labels=axis_labels,
                 shape=tuple(shape))
 
-        pattern = self.parameters['pattern']
         in_pData, out_pData = self.get_plugin_datasets()
-        getall = ['VOLUME_XZ', 'label']
+        getall = [self.parameters['pattern'], 'label']
         in_pData[0].plugin_data_setup('VOLUME_3D', 'single', getall=getall)
-        #in_pData[0].plugin_data_setup('VOLUME_XY', 'single')
-        out_pData[0].plugin_data_setup(pattern, 'single')
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def process_frames(self, data):
-        input_data = data[0]
-        max_prob = np.amax(input_data,axis=2)
-        print(np.shape(max_prob))
-        #result = data[0].copy()
-        pass
-
-    def post_process(self):
-        pass
+        reduce_dim = np.argmin(np.shape(data[0])) # get the index of smallest dimension
+        result = np.amax(data[0].copy(),axis=reduce_dim)
+        return result
 
     def nInput_datasets(self):
         return 1
