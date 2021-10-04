@@ -10,7 +10,7 @@ performance, we recommend a fast network interconnect, such as infiniBand, and
 a high performance parallel filesystem, such as GPFS or Lustre.
 
 Requirements:
-    - A Unix system with MPI libraries installed: Savu has been test with `openMPI <https://www.open-mpi.org/>`_ (latest version 4.1.1)
+    - A Unix system with MPI libraries installed: Savu has been tested with `openMPI <https://www.open-mpi.org/>`_ (version 4.1.1)
 
 
 **Installation of Savu HPC outside Diamond Light Source (DLS) systems**
@@ -28,7 +28,7 @@ Requirements:
 
 1. Do *1-3* steps as above.
 2. >>> export explicit_file='savu_list_openmpi4_1_1.txt'
-3. >>>`bash savu_installer/savu_installer.sh
+3. >>> bash savu_installer/savu_installer.sh
 
 **Installation of Savu HPC at Diamond Light Source (DLS) systems**
 
