@@ -17,8 +17,8 @@ Requirements:
 
 1. Check that you do **NOT** have conda in your path with "which conda". Note that the installer will install its own version of conda so it is essential that conda is not in the path.
 2. Download |savu_installer| and extract the archive.
-3. Select the desired Github branch of Savu to install with **export savu_branch="master"** or specify Savu version explicitly **export savu_branch="savu_version"**
-4. Set the name of the facility **export facility='facility_name'**
+3. Select the desired Github branch of Savu to install with **export savu_branch="master"** or specify Savu version explicitly **export savu_branch="savu_version"**.
+4. Set the name of the facility **export facility='facility_name'**.
 5. >>> bash savu_installer/savu_installer.sh
 6. Check the log file /tmp/<tmpfolder>/savu_error_log.txt for installation errors (correct log file path printed to screen during installation process).
 
