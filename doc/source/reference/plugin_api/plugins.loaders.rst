@@ -18,6 +18,7 @@ Submodules
    :maxdepth: 4
 
    plugins.loaders.base_loader
+   plugins.loaders.base_tomophantom_loader
    plugins.loaders.hdf5_template_loader
    plugins.loaders.image_template_loader
    plugins.loaders.multi_savu_loader

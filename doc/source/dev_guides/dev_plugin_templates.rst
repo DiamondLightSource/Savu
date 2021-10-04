@@ -10,7 +10,7 @@ A template to create a simple plugin that takes one dataset as input and returns
 
 .. list-table::  
    :widths: 10
-   
+
    * - :ref:`plugin_template1_with_detailed_notes`
 
 Further Examples

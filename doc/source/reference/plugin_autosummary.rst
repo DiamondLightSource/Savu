@@ -1,7 +1,7 @@
 .. _plugin_api:
 
 **********************
-Plugin Api 
+Plugin API 
 **********************
 
 Absorption Corrections
@@ -188,6 +188,7 @@ Full Field Loaders
    Nxtomo Loader <plugin_api/plugins.loaders.full_field_loaders.nxtomo_loader>
    Random 3D Tomo Loader <plugin_api/plugins.loaders.full_field_loaders.random_3d_tomo_loader>
    Lfov Loader <plugin_api/plugins.loaders.full_field_loaders.lfov_loader>
+   Tomo Phantom Loader <plugin_api/plugins.loaders.full_field_loaders.tomo_phantom_loader>
 
 
 Mapping Loaders
@@ -378,7 +379,7 @@ Simulation
 .. toctree::
    :maxdepth: 1 
 
-   Tomo Phantom <plugin_api/plugins.simulation.tomo_phantom>
    Tomo Phantom Quantification <plugin_api/plugins.simulation.tomo_phantom_quantification>
+   Tomo Phantom Artifacts <plugin_api/plugins.simulation.tomo_phantom_artifacts>
 
 
