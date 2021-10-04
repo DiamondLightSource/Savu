@@ -20,9 +20,9 @@ Currently Savu-lite is built for Python 3.7 with Numpy 1.15. To install it you'l
 *This method requires cloning the repository and then installing all the dependencies from the explicit list file.*
 *After all dependencies installed, Savu-lite is installed into the existing environment. Although more hassle, this is the fastest method and also recommended for the developer.*
 
-1. Get the explicit list file |savu_conda|
-2. >>> conda create --yes --name savu --file spec-savu_lite_latest.txt
-3. >>> git clone https://github.com/DiamondLightSource/Savu.git
+1. >>> git clone https://github.com/DiamondLightSource/Savu.git
+2. Move to Savu directory
+3. >>> conda create --yes --name savu --file install/savu_lite37/spec-savu_lite_latest.txt
 4. >>> python setup.py install
 
 Savu-lite will be installed in conda environment in Miniconda folder. 
