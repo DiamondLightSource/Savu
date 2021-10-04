@@ -26,6 +26,8 @@ If you are using the command line please type ``-h`` or ``--help``.
 
 * :ref:`add`
 
+* :ref:`dupl`
+
 * :ref:`rem`
 
 * :ref:`move`
@@ -148,6 +150,19 @@ add
             :module: scripts.config_generator.arg_parsers
             :func: _add_arg_parser
             :prog: add
+
+
+.. _dupl:
+
+dupl
+----------------
+
+.. cssclass:: argstyle
+
+    .. argparse::
+            :module: scripts.config_generator.arg_parsers
+            :func: _dupl_arg_parser
+            :prog: dupl
 
 
 .. _rem:
