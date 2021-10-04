@@ -25,6 +25,13 @@ Parameter definitions
             description: Default out dataset names.
             default: "['quantification_values']"
         
+        pattern:
+            visibility: intermediate
+            dtype: str
+            options: "['SINOGRAM', 'PROJECTION', 'VOLUME_XZ']"
+            description: Pattern to apply this to.
+            default: SINOGRAM
+        
 Key
 ^^^^^^^^^^
 

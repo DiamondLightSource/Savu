@@ -1,4 +1,4 @@
-.. |miniconda| replace:: :download:`savu installer <https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh>`
+.. |miniconda| replace:: :download:`miniconda <https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh>`
 
 How to install Savu on a PC (Unix)
 ===================================
@@ -20,9 +20,9 @@ Currently Savu-lite is built for Python 3.7 with Numpy 1.15. To install it you'l
 
 **1b: Installation of Savu-lite using the explicit list of packages**
 
-*This method requires cloning the repository and then installing all the dependencies from the explicit list.*
-*Then Savu-lite is installed into the environment.*
+*This method requires cloning the repository and then installing all the dependencies from the explicit list file.*
+*After all dependencies installed, Savu-lite is installed into the existing environment.*
 
 1. Get the explicit list file from `HERE <https://github.com/DiamondLightSource/Savu/blob/master/install/savu_lite37/spec-savu_lite_latest.txt>`_
 2. >>> conda install --yes --name savu --file spec-savu_lite_latest.txt
-3. From the main Savu folder run *python setup.py install*
+3. In the main Savu folder run *python setup.py install*

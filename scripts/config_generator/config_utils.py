@@ -114,6 +114,25 @@ def error_catcher(function):
     return error_catcher_wrap_function
 
 
+def error_catcher_savu(function):
+    @wraps(function)
+    def error_catcher_wrap_function():
+        try:
+            return function()
+        except Exception as e:
+            err_msg_list = str(e).split()
+            savu_error = True if len(err_msg_list) > 1 and err_msg_list[1] == 'ERROR:' else False
+
+            if error_level == 0 and savu_error:
+                print(e)
+            elif error_level == 0:
+                print(f"{type(e).__name__}: {e}")
+            elif error_level == 1:
+                traceback.print_exc(file=sys.stdout)
+
+    return error_catcher_wrap_function
+
+
 def populate_plugins(error_mode=False, examples=False):
     # load all the plugins
     plugins_paths = pu.get_plugins_paths(examples=examples)

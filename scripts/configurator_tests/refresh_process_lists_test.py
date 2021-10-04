@@ -29,6 +29,7 @@ from colorama import Style
 import savu.test.test_process_list_utils as tplu
 import scripts.config_generator.config_utils as cu
 from scripts.config_generator.content import Content
+from scripts.config_generator.config_utils import error_catcher_savu
 
 
 def __option_parser(doc=True):
@@ -123,8 +124,11 @@ def refresh_file(f):
         print("File not found")
 
 
+@error_catcher_savu
 def refresh_lists():
-    """Refresh the directory or process list file provided"""
+    """Refresh the directory or process list file provided
+    Use a decorator to hide the error traceback
+    """
     args = __option_parser(doc=False)
     if args.directory:
         # Append a final backslash
