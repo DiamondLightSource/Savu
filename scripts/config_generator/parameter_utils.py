@@ -67,6 +67,8 @@ def _dir(value):
     valid = False
     if _str(value):
         valid = os.path.isdir(value)
+        if not valid:
+            valid = os.path.isdir(_savupath(value))
     return valid
 
 
@@ -76,7 +78,7 @@ def _filepath(value):
     if _str(value):
         valid = os.path.isfile(value)
         if not valid:
-            valid = _savufilepath(value)
+            valid = os.path.isfile(_savupath(value))
     return valid
 
 
@@ -85,17 +87,14 @@ def _h5path(value): # Extend this later as we need to know which file to apply t
     return _str(value)
 
 
-def _savufilepath(value, returnpath=False):
-    """ A file path inside the Savu directory"""
+def _savupath(value):
+    """ A path inside the Savu directory"""
     savu_base_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '../../')
-    
-    split_path = value.split('Savu')
+    split_path = value.split("Savu/")
     if len(split_path) > 1:
-        value = os.path.join(savu_base_path, split_path[1][1:])
-    if returnpath:
-        return os.path.isfile(value), value
-    return os.path.isfile(value)
+        value = os.path.join(savu_base_path, split_path[-1][:])
+    return value
 
 
 def _yamlfilepath(value):
@@ -104,8 +103,8 @@ def _yamlfilepath(value):
     if _str(value):
         if not os.path.isfile(value):
             # is it a file path in Savu folder
-            valid, value = _savufilepath(value, returnpath=True)
-            if not valid:
+            value = _savupath(value)
+            if not os.path.isfile(value):
                 return False
         return _yaml_is_valid(value)
     return False
@@ -585,6 +584,7 @@ type_error_dict = {
     "filepath": "filepath",
     "h5path" : "hdf5 path",
     "filename": "file name",
+    "dir": "directory",
     "nptype": "numpy data type",
     "int": "integer",
     "bool": "true/false",
