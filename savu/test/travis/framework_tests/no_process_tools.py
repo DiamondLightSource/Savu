@@ -202,6 +202,11 @@ class NoProcessTools(PluginTools):
             dtype: filepath
             description: Filepath required
             default: Savu/savu/plugins/loaders/templates/nexus_templates/fluo.yml
+        dir_param:
+            visibility: basic
+            dtype: dir
+            description: Directory required
+            default: Savu/savu/plugins/loaders/templates/
         regularisation_method:
             visibility: advanced
             dtype: str

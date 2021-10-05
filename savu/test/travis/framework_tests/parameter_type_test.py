@@ -284,11 +284,47 @@ class ParameterTypeTest(unittest.TestCase):
         )
         self.assertTrue(valid_modification)
 
-    def test_file_path_4(self):
+    def test_dir_path(self):
+        # Check that dir is accepted
+        pdefs = self.initial_setup()
+        key = "dir_param"
+        value = self._get_savu_base_path() + "system_files/dls/"
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertTrue(valid_modification)
+
+    def test_dir_1(self):
+        # Check that integer is not accepted
+        pdefs = self.initial_setup()
+        key = "dir_param"
+        value = 8
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_dir_2(self):
+        # Check that list is not accepted
+        pdefs = self.initial_setup()
+        key = "dir_param"
+        value = [2, 3, 4, 5]
+
+        value_check = pu._dumps(value)
+        valid_modification, error_str = param_u.is_valid(
+            key, value_check, pdefs[key]
+        )
+        self.assertFalse(valid_modification)
+
+    def test_file_path_3(self):
         # Check that incorrect filepath is not accepted
         pdefs = self.initial_setup()
-        key = "file_path_param"
-        value = self._get_savu_base_path() + "Savu/savu/plugins/loaders/templates/nexus_templates/nxtomo_loader_incorrect.yaml"
+        key = "dir_param"
+        value = self._get_savu_base_path() + "Savu/savu/plugins/loaders/tomo_loader_incorrect"
 
         value_check = pu._dumps(value)
         valid_modification, error_str = param_u.is_valid(
