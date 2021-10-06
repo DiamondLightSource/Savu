@@ -21,10 +21,12 @@
 
 """
 
+import os
 import copy
 import numpy as np
 import glob
 
+import savu.test.test_utils as tu
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.full_field_loaders.multi_nxtomo_loader import \
         MultiNxtomoLoader
@@ -104,6 +106,8 @@ class LfovLoader(MultiNxtomoLoader):
         file_list = self._get_file_list(order_list)        
         dark_folder, dark_key, dark_scale = self.parameters['dark']
         flat_folder, flat_key, flat_scale = self.parameters['flat']
+        dark_folder = self.get_conf_path(dark_folder)
+        flat_folder = self.get_conf_path(flat_folder)
         dark_list = self._find_files(dark_folder, "/*dark*")
         flat_list = self._find_files(flat_folder, "/*flat*")
         offset = self.parameters['row_offset']
@@ -126,3 +130,9 @@ class LfovLoader(MultiNxtomoLoader):
             data_obj_list.append(self.exp.index['in_data']['tomo'])
             self.exp.index['in_data'] = {}
         return data_obj_list
+
+    def get_conf_path(self, path):
+        # For Savu tests
+        if path.split(os.sep)[0] == 'Savu':
+            path = tu.get_test_data_path(path.split('/test_data/data/')[1])
+        return path
