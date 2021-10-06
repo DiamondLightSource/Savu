@@ -51,13 +51,13 @@ if [[ $HOSTNAME =~ .*com10.*  || $HOSTNAME =~ .*com14.* ]]; then
        -mca pml ucx -x UCX_NET_DEVICES=mlx4_0:1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
-       python $filename $datafile $processfile $outfile -n $CPUs -v $@
+       python $filename $datafile $processfile $outfile -n $CPUs $@
 else
    	mpirun -np ${processes} \
        -mca pml ucx -x UCX_NET_DEVICES=mlx5_0:1 \
        -x LD_LIBRARY_PATH \
        --hostfile ${TMP_FILE} \
-       python $filename $datafile $processfile $outfile -n $CPUs -v $@
+       python $filename $datafile $processfile $outfile -n $CPUs $@
 fi
 
 
