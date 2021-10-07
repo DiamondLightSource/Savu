@@ -183,9 +183,9 @@ def _preview_dimension_singular(value):
     """ Check the singular value within the preview dimension"""
     valid = False
     if _str(value):
-        string_valid = re.fullmatch("(mid|end|[^a-zA-z])+", value)
+        string_valid = re.fullmatch("(start|mid|end|[^a-zA-z])+", value)
         # Check that the string does not contain any letters [^a-zA-Z]
-        # If it does contain letters, mid and end are the only keywords allowed
+        # If it does contain letters, start, mid and end are the only keywords allowed
         if string_valid:
             try:
                 # Attempt to evaluate the provided equation
@@ -195,17 +195,20 @@ def _preview_dimension_singular(value):
                 print("There was an error with your dimension value input.")
         else:
             print('If you are trying to use an expression, '
-                  'please only use mid and end command words.')
+                  'please only use start, mid and end command words.')
     else:
         valid = _float(value)
     return valid
 
 
 def _preview_eval(value):
-    """ Evaluate with mid and end"""
+    """ Evaluate with start, mid and end"""
+    start = 0
     mid = 0
     end = 0
-    return eval(value,{"__builtins__":None},{"mid":mid,"end":end})
+    return eval(value,{"__builtins__":None},{"start":start,
+                                             "mid":mid,
+                                             "end":end})
 
 
 #Replace this with if list combination contains filepath and h5path e.g. list[filepath, h5path, int] then perform this check
