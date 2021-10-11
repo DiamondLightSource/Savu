@@ -29,15 +29,17 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
 class ImageStitchingTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737'
-    experiment = 'tomo'
+
+    def setUp(self):
+        self.data_file = 'i12_test_data/lfov/tomo_data'
+        self.experiment = None
 
     def test_image_stitching(self):
-        process_list = 'reshape/image_stitching_test.nxs'
-        #options = tu.initialise_options(data_file, experiment, process_list)
-        #run_protected_plugin_runner(options)
-        #tu.cleanup(options)
+        process_list = 'loaders/lfov_loader_and_image_stitching_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
