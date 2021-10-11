@@ -14,6 +14,7 @@ Submodules
    plugins.loaders.full_field_loaders.multi_nxtomo_loader
    plugins.loaders.full_field_loaders.nxtomo_loader
    plugins.loaders.full_field_loaders.random_3d_tomo_loader
+   plugins.loaders.full_field_loaders.tomo_phantom_loader
 
 Module contents
 ---------------
