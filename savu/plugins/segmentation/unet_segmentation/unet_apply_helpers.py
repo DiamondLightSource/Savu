@@ -46,7 +46,7 @@ def create_dummy_data_files(dummy_dir):
     
 def create_dummy_dataset(dummy_dir, codes):
     """Creates a fastai segmentation dataset."""
-    get_y_fn = lambda x: dummy_dir/f'{"seg" + x.stem[4:]}{x.suffix}'
+    get_y_fn = lambda x: dummy_dir/f'{"seg_" + x.stem[4:]}{x.suffix}'
     src = (SegmentationItemList.from_folder(dummy_dir)
                     .split_none()
                     .label_from_func(get_y_fn, classes=codes))
