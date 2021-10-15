@@ -345,10 +345,13 @@ class BaseTransport(object):
             if len(f):
                 process_frames.append(list(range(f[0]*nProc, (f[-1]+1)*nProc)))
 
-        process_frames = np.array(process_frames)
-        nframes = plugin.get_plugin_in_datasets()[0].get_total_frames()
-        process_frames[process_frames >= nframes] = nframes - 1
-        frames = process_frames[0] if process_frames.size else process_frames
+        frames = []
+        for i in range(plugin.nInput_datasets()):
+            process_frames_single = np.array([process_frames[i]])
+            nframes = plugin.get_plugin_in_datasets()[i].get_total_frames()
+            process_frames_single[process_frames_single >= nframes] = nframes - 1
+            frames.append(process_frames_single[0] if process_frames_single.size else process_frames_single)
+        
         plugin.set_global_frame_index(frames)
 
     def _set_functions(self, data_list, name):

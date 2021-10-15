@@ -560,7 +560,7 @@ class PluginData(object):
         global_index = self._plugin.get_global_frame_index()
         count = self._plugin.get_process_frames_counter()
         mfp = self.meta_data.get('max_frames_process')
-        start = global_index[count]*mfp
+        start = global_index[0][count]*mfp
         index = np.arange(start, start + mfp)
         nFrames = self.get_total_frames()
         index[index >= nFrames] = nFrames - 1
