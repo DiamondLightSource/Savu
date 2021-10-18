@@ -39,9 +39,9 @@ def add_package_entry(f, files_present, output, module_name):
         # If files are present in this directory then, depending on the
         # number of nested directories, determine which section heading
         # and title to apply
-        title = module_name.split(".")
+        title = module_name.replace("savu.", "").split(".")
 
-        if len(title) > 1:
+        if len(title) >= 1:
             f.write(set_heading(title[len(title) - 1], len(title) - 1))
 
         # For directory contents
@@ -51,16 +51,31 @@ def add_package_entry(f, files_present, output, module_name):
 
         for fi in files_present:
             mod_path = module_name + "." + fi.split(".py")[0]
-            file_path = get_path_format(mod_path, output)
-            py_module_name = "savu." + str(mod_path)
-            try:
-                # If the plugin class exists, put it's name into the contents
-                plugin_class = pu.load_class(py_module_name)
-                name = convert_title(fi.split(".py")[0])
-                f.write(f"   {name} <{output}/{file_path}>\n")
-            except Exception:
-                pass
+            if "plugin" in output:
+                try:
+                    # If the plugin class exists, put it's name into the contents
+                    plugin_class = pu.load_class(mod_path)
+                    file_path = get_path_format(mod_path.replace("savu.", ""),
+                                                output)
+                    _write_to_contents(f, fi, output, file_path)
+                except ValueError:
+                    pass
+            else:
+                file_path = get_path_format(mod_path, output)
+                _write_to_contents(f, fi, output, file_path)
         f.write("\n\n")
+
+
+def _write_to_contents(f, fi, output, file_path):
+    """Add the rst file name to the contents page
+
+    :param f: Contents file to write to
+    :param fi: file name
+    :param output: output directory at which rst files are located
+    :param file_path: path to file to include in contents page
+    """
+    name = convert_title(fi.split(".py")[0])
+    f.write(f"   {name} <{output}/{file_path}>\n")
 
 
 def set_underline(level: int, length: int) -> str:
@@ -70,7 +85,7 @@ def set_underline(level: int, length: int) -> str:
     :param length: The string length
     :return: Underline string
     """
-    underline_symbol = ["", "#", "*", "-", "^", '"', "="]
+    underline_symbol = ["`", "#", "*", "-", "^", '"', "="]
     symbol_str = underline_symbol[level] * length
     return f"\n{symbol_str}\n"
 
@@ -102,9 +117,9 @@ def get_path_format(mod_path, output):
 def create_plugin_documentation(files, output, module_name, savu_base_path):
     plugin_guide_path = "plugin_guides/"
     for fi in files:
-        mod_path = module_name + "." + fi.split(".py")[0]
-        file_path = mod_path.replace(".", "/")
-        py_module_name = "savu." + str(mod_path)
+        py_module_name = module_name + "." + fi.split(".py")[0]
+        mod_path = py_module_name.replace("savu.", "")
+        file_path = get_path_format(mod_path, output)
         try:
             plugin_class = pu.load_class(py_module_name)()
         except (ModuleNotFoundError, AttributeError) as er:
@@ -144,6 +159,7 @@ def create_plugin_documentation(files, output, module_name, savu_base_path):
 def convert_title(original_title):
     """Remove underscores from string"""
     new_title = original_title.replace("_", " ").title()
+    new_title = new_title.replace("Api", "API")
     return new_title
 
 
@@ -335,33 +351,87 @@ def create_documentation_directory(savu_base_path,
     pu.create_dir(image_dir)
 
 
+def _select_relevant_files(api_type):
+    """ Select the folder related to the api_type
+    Exclude certain files and directories based on api_type
+
+    :param api_type: framework or plugin api
+    :return: The base file path for the api files to document
+       The list of files to exclude from api
+    """
+    if api_type == 'framework':
+        base_path = savu_base_path + "savu"
+        exclude_dir = ["__pycache__",
+                       "test",
+                       "plugins"]
+        exclude_file = ["__init__.py", "win_readline.py"]
+    elif api_type == 'plugin':
+        base_path = savu_base_path + "savu/plugins"
+        exclude_file = [
+            "__init__.py",
+            "docstring_parser.py",
+            "plugin.py",
+            "plugin_datasets.py",
+            "plugin_datasets_notes.py",
+            "utils.py",
+            "plugin_tools.py",
+        ]
+        exclude_dir = ["driver",
+                       "utils",
+                       "unregistered",
+                       "under_revision",
+                       "templates",
+                       "__pycache__",
+                       "test"
+                       ]
+    else:
+        raise Exception('Unknown API type', api_type)
+    return base_path, exclude_file, exclude_dir
+
+
+def _create_api_content(savu_base_path, out_folder, api_type,
+                        base_path, exclude_file, exclude_dir, f):
+    """Populate API contents pages"""
+    for root, dirs, files in os.walk(base_path, topdown=True):
+        tools_files = [fi for fi in files if "tools" in fi]
+        template_files = [fi for fi in files if "template" in fi]
+        base_files = [fi for fi in files if fi.startswith("base")]
+        driver_files = [fi for fi in files if "driver" in fi]
+        exclude_files = [
+            exclude_file,
+            tools_files,
+            base_files,
+            driver_files,
+            template_files
+        ]
+        dirs[:] = [d for d in dirs if d not in exclude_dir]
+        files[:] = [fi for fi in files if fi not in chain(*exclude_files)]
+        files[:] = [fi for fi in files if fi.split('.')[-1] == 'py']
+
+        # Exclude the tools files from html view sidebar
+        if "__" not in root:
+            pkg_path = root.split("Savu/")[1]
+            module_name = pkg_path.replace("/", ".")
+            if "plugins" in module_name and api_type == 'plugin':
+                add_package_entry(f, files, out_folder, module_name)
+                if out_folder == "plugin_documentation":
+                    create_plugin_documentation(
+                        files, out_folder, module_name, savu_base_path
+                    )
+            elif api_type == 'framework':
+                add_package_entry(f, files, out_folder, module_name)
+
+
 if __name__ == "__main__":
-    out_folder, rst_file = sys.argv[1:]
+    out_folder, rst_file, api_type = sys.argv[1:]
 
     # determine Savu base path
     main_dir = \
         os.path.dirname(os.path.realpath(__file__)).split("/Savu/")[0]
     savu_base_path = f"{main_dir}/Savu/"
 
-    base_path = savu_base_path + "savu/plugins"
-    # create entries in the autosummary for each package
+    base_path, exclude_file, exclude_dir = _select_relevant_files(api_type)
 
-    exclude_file = [
-        "__init__.py",
-        "docstring_parser.py",
-        "plugin.py",
-        "plugin_datasets.py",
-        "plugin_datasets_notes.py",
-        "utils.py",
-        "plugin_tools.py",
-    ]
-    exclude_dir = ["driver",
-                   "utils",
-                   "unregistered",
-                   "under_revision",
-                   "templates",
-                   ]
-    # Only document the plugin python files
     # Create the directory if it does not exist
     pu.create_dir(f"{savu_base_path}doc/source/reference/{out_folder}")
 
@@ -373,28 +443,5 @@ if __name__ == "__main__":
         f.write(f"{set_underline(2,22)}{document_title} "
                 f"{set_underline(2,22)}\n")
 
-        for root, dirs, files in os.walk(base_path, topdown=True):
-            tools_files = [fi for fi in files if "tools" in fi]
-            template_files = [fi for fi in files if "template" in fi]
-            base_files = [fi for fi in files if fi.startswith("base")]
-            driver_files = [fi for fi in files if "driver" in fi]
-            exclude_files = [
-                exclude_file,
-                tools_files,
-                base_files,
-                driver_files,
-                template_files
-            ]
-            dirs[:] = [d for d in dirs if d not in exclude_dir]
-            files[:] = [fi for fi in files if fi not in chain(*exclude_files)]
-            # Exclude the tools files fron html view sidebar
-            if "__" not in root:
-                pkg_path = root.split("Savu/")[1]
-                module_name = pkg_path.replace("/", ".")
-                module_name = module_name.replace("savu.", "")
-                if "plugins" in module_name:
-                    add_package_entry(f, files, out_folder, module_name)
-                    if out_folder == "plugin_documentation":
-                        create_plugin_documentation(
-                            files, out_folder, module_name, savu_base_path
-                        )
+        _create_api_content(savu_base_path, out_folder, api_type, base_path,
+                            exclude_file, exclude_dir, f)
