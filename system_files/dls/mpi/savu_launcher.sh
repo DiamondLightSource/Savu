@@ -358,6 +358,15 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+if [ -n "${infile+set}" ]; then
+    # copy infile to the intermediate folder
+    orig_in_file=$infile
+    infile=`readlink -f $infile`
+    basename=`basename $infile`
+    cp $infile $interfolder
+    infile=$interfolder/$basename
+fi
+
 # create a modified command with the new process list path
 log_process_file=$logfolder/$basename
 # replace the original process list path with the process list resaved into the log file
