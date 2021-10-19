@@ -159,9 +159,6 @@ else
 			arch=${type%_*}
 			num=${type##*_}
 		fi
-		echo "The following computing configuration is requested: '$type'"
-		echo "GPU type: $arch"
-		echo "Number of nodes: $num"
 		case $arch in
 			'Kepler')
 			  gpu_arch=Kepler ;
@@ -190,9 +187,6 @@ else
 			arch=${type%_*}
 			num=${type##*_}
 		fi
-		echo "The following computing configuration is requested: '$type'"
-		echo "GPU type: $arch"
-		echo "Number of nodes: $num"
 		case $arch in
 			'Volta')
 			  gpu_arch=$arch ;
