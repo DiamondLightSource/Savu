@@ -106,7 +106,7 @@ else
 	nargs=${#args[@]}
 
 	if [ $nargs != 3 ] ; then
-	    tput setaf 1    
+	    tput setaf 1
 	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
 	    tput setaf 6
 	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
@@ -149,34 +149,66 @@ else
 
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
-		# determine cluster setup based on type
-		case $type in
-			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
-			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
-			'') type="STANDARD"; gpu_arch=Kepler ; nNodes=4 ;;
-			 *) echo -e "\nUnknown 'type' optional argument"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
-				exit 1 ;;
+		# determine cluster setup based on the provided variable "type"
+		if [[ -z "${type}" ]]; then
+			# define STANDARD resources
+  			type="STANDARD"
+  			arch='Kepler'
+  			num=2
+		else
+			arch=${type%_*}
+			num=${type##*_}
+		fi
+		case $arch in
+			'Kepler')
+			  gpu_arch=Kepler ;
+			  nNodes=$num
+			  ;;
+			'Pascal')
+			  gpu_arch=Pascal ;
+			  nNodes=$num
+			  ;;
+			*)
+			  echo -e "\nUnknown 'type' optional argument"
+			  echo -e "Please use the following syntax '<GPU_arch>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
+			  exit 1
+			  ;;
 		esac
 
 	else
 		cluster='hamilton'
-		# determine cluster setup based on type
-
-		case $project in
-			"k11") gpu_arch='Volta' ;;
-			*) gpu_arch='Pascal' ;;
+		# determine cluster setup based on the provided variable "type"
+		if [[ -z "${type}" ]]; then
+			# define STANDARD resources
+  			type="STANDARD"
+  			arch='Pascal'
+  			num=2
+		else
+			arch=${type%_*}
+			num=${type##*_}
+		fi
+		case $arch in
+			'Volta')
+			  gpu_arch=$arch ;
+			  nNodes=$num
+			  ;;
+			'Pascal')
+			  gpu_arch=$arch ;
+			  nNodes=$num
+			  ;;
+			 *)
+			  echo -e "\nUnknown 'type' optional argument\n"
+			  echo -e "Please use the following syntax '<GPU_arch>_<number_of_nodes>'. Example: 'Volta_2', 'Pascal_2'"
+				exit 1
+				;;
 		esac
-
-		case $type in
-			'AUTO') nNodes=1 ;;
-			'PREVIEW') nNodes=1 ;;
-			'BIG') nNodes=4 ;;
-			'') type="STANDARD"; nNodes=2 ;;
-			 *) echo -e "\nUnknown 'type' optional argument\n"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
-				exit 1 ;;
+		case $project in
+			"k11")
+			  gpu_arch='Volta'
+			  ;;
+			*)
+			  gpu_arch='Pascal'
+			  ;;
 		esac
 	fi
 
@@ -245,7 +277,7 @@ if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
 	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
 	exit 1
 fi
-	
+
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -282,7 +314,7 @@ savupath=${savupath%/savu}
 # set the suffix
 arg_parse "-suffix" suffix $options
 options=${options//"-suffix $suffix"/}
-if [ ! $suffix ] ; then 
+if [ ! $suffix ] ; then
   suffix=""
 else
   suffix=_$suffix
@@ -328,7 +360,7 @@ else
 	if [ ! -d $interfolder ]; then
 		create_folder $interfolder
 	fi
-    if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] && [ ! $keep == true ] ; then
+    if [ ! $keep == true ] ; then
 		delete=$interfolder
 	fi
 fi
@@ -440,7 +472,8 @@ ln -s $interpath/savu.o$jobnumber /dls/tmp/savu/savu.o$jobnumber
 echo -e "\n\t************************************************************************"
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
-echo -e "\n\t Your job has been submitted to the cluster with job number "$jobnumber"."
+echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
+echo -e "\t The computing configuration is $type with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
@@ -462,4 +495,3 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
-
