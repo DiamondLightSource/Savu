@@ -460,8 +460,8 @@ ln -s $interpath/savu.o$jobnumber /dls/tmp/savu/savu.o$jobnumber
 echo -e "\n\t************************************************************************"
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
-echo -e "\n\t Your job has been submitted to the cluster with job number "$jobnumber"."
-echo -e "\t The computing configuration is "$type" with "$arch" GPU and "$num" node(s)."
+echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
+echo -e "\t The computing configuration is $type with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
