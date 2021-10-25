@@ -190,9 +190,12 @@ class Preview(object):
         """
         dobj = self.get_data_obj()
         shape = dobj.get_shape()
+        start = 0
         mid = np.clip(np.ceil(shape[dim] / 2.0).astype('int') - 1, 0, None)
         end = shape[dim]
-        idx = [eval(equ, {"builtins": None}, {'mid': mid, 'end': end}) for equ in idx]
+        idx = [eval(equ, {"builtins": None}, {"start": start,
+                                              "mid": mid,
+                                              "end": end}) for equ in idx]
         idx = [idx[i] if idx[i] > -1 else shape[dim]+1+idx[i] for i in
                range(len(idx))]
         return idx

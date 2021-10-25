@@ -390,20 +390,19 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+if [ -n "${infile+set}" ]; then
+    # copy infile to the intermediate folder
+    orig_in_file=$infile
+    infile=`readlink -f $infile`
+    basename=`basename $infile`
+    cp $infile $interfolder
+    infile=$interfolder/$basename
+fi
+
 # create a modified command with the new process list path
 log_process_file=$logfolder/$basename
 # replace the original process list path with the process list resaved into the log file
 modified_command=${original_command/$orig_process_file/$log_process_file}
-
-# copy original command to the log folder
-command_file="$logfolder/run_command.txt"
-
-cat > $command_file <<ENDFILE
-# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
-$original_command
-# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
-$modified_command
-ENDFILE
 
 # =========================== qsub =======================================
 # general arguments
@@ -436,19 +435,32 @@ args="${qsub_args} ${mpijob_args} ${savu_args}"
 
 case $cluster in
 	"test_cluster")
-		qsub -l infiniband $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -l infiniband $args" ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
-		-l infiniband $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -l infiniband $args" ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -l m_mem_free=7G $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -l m_mem_free=7G $args" ;;
 esac
 
+$sbmt_cmd > /dls/tmp/savu/$USER.out
+
 # =========================== end qsub ===================================
+
+# copy original command to the log folder
+command_file="$logfolder/run_command.txt"
+
+cat > $command_file <<ENDFILE
+# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
+$original_command
+# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
+$modified_command
+# The qsub run command is the following:
+$sbmt_cmd
+ENDFILE
 
 # get the job number here
 filename=`echo $outname.o`

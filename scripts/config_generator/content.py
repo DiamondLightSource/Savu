@@ -896,7 +896,7 @@ class Content(object):
                 raise ValueError(
                     "Invalid preview dimension slice value. Please "
                     "enter a float, an integer or a string including "
-                    "only mid and end keywords."
+                    "only start, mid and end keywords."
                 )
         else:
             # If the entered value is a valid dimension value
