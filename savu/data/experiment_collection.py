@@ -115,6 +115,7 @@ class Experiment(object):
         """Save the original Savu run command and a
         modified Savu run command to a log file for reproducibility
         """
+        current_path = os.getcwd()
         folder = self.meta_data.get('out_path')
         log_folder = os.path.join(folder, "run_log")
         filename = os.path.join(log_folder, "run_command.txt")
@@ -122,6 +123,8 @@ class Experiment(object):
         if not os.path.isfile(filename):
             # Only write savu command if savu_mpi command has not been saved
             with open(filename, 'w') as command_log:
+                command_log.write(f"# The directory the command was executed from\n")
+                command_log.write(f"{current_path}\n")
                 command_log.write(f"# Original Savu run command\n")
                 command_log.write(f"{self.meta_data.get('command')}\n")
                 command_log.write(f"# A modified Savu command to use to "
