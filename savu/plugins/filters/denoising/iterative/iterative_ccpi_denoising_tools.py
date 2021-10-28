@@ -9,7 +9,7 @@ class IterativeCcpiDenoisingTools(PluginTools):
              visibility: basic
              dtype: int
              description:
-               summary: "The number of plugin iterations"
+               summary: "The number of Savu's plugin outer iterations"
              default: 5
 
         method:
@@ -139,11 +139,6 @@ class IterativeCcpiDenoisingTools(PluginTools):
             description: Tolerance constant to stop iterations earlier.
             default: 0.0
 
-        pattern:
-            visibility: advanced
-            dtype: str
-            description: Pattern to apply this to.
-            default: 'VOLUME_XZ'
         """
 
     def citation1(self):
