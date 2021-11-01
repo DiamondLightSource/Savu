@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-.. module:: testing_iterative_plugin
+.. module:: iterative_ccpi_denoising
    :platform: Unix
    :synopsis: Iterative plugin example
 .. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
@@ -26,7 +26,7 @@ from savu.plugins.driver.iterative_plugin import IterativePlugin
 
 
 @register_plugin
-class TestingIterativePlugin(BaseFilter, IterativePlugin):
+class IterativeCcpiDenoising(BaseFilter, IterativePlugin):
     """
     A plugin to test the iterative plugin driver
     
@@ -35,7 +35,7 @@ class TestingIterativePlugin(BaseFilter, IterativePlugin):
     """
 
     def __init__(self):
-        super(TestingIterativePlugin, self).__init__("TestingIterativePlugin")
+        super(IterativeCcpiDenoising, self).__init__("IterativeCcpiDenoising")
 
     def pre_process(self):
         self.set_iterations(self.parameters['nIterations'])
