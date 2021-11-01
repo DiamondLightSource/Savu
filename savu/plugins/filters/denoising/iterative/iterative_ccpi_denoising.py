@@ -38,7 +38,7 @@ class IterativeCcpiDenoising(BaseFilter, IterativePlugin):
         super(IterativeCcpiDenoising, self).__init__("IterativeCcpiDenoising")
 
     def pre_process(self):
-        self.set_iterations(self.parameters['nIterations'])
+        self.set_iterations(self.parameters['plugin_iterations'])
 
     def process_frames(self, data):
         # A random example function
