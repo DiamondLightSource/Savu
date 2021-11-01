@@ -172,6 +172,17 @@ class IterativePlugin(PluginDriver):
                 temp = obsolete
                 self.exp.index['out_data'][name] = final_dataset
                 self.exp.index['out_data'][s2.get_name()] = temp
+                # One last thing to do in this case is to set the "name"
+                # inside the Data object that final_result is set to.
+                #
+                # This is because, in this case, the CLONED dataset is in
+                # final_result, and the "name" within the Data object will
+                # be some value like "itr_0".
+                #
+                # However, the name within the Data object needs to be the
+                # name of the ORIGINAL Data object in order for the creation
+                # of the output NeXuS file to work.
+                final_dataset._set_name(name)
 
     def set_processing_complete(self):
         self._ip_complete = True
