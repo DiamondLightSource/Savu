@@ -833,8 +833,8 @@ class PluginDocumentation(object):
 
         """
         # determine Savu base path
-        savu_base_path = \
-            os.path.dirname(os.path.realpath(__file__)).split("savu")[0]
+        savu_base_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), '../../')
 
         # Locate documentation file
         doc_folder = savu_base_path + "doc/source/plugin_guides"

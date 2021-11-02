@@ -15,11 +15,11 @@
 
 
 """
-.. module:: image_stitching_test
+.. module:: tomopy_recon_test
    :platform: Unix
-   :synopsis: unittest for image_stitching
+   :synopsis: unittest for the tomopy 'gridrec' reconstruction
 
-.. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
+.. moduleauthor:: Nicola Wadeson <scientificsoftware@diamond.ac.uk>
 
 """
 
@@ -28,16 +28,16 @@ import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
 
-class ImageStitchingTest(unittest.TestCase):
-    global data_file, experiment
-    data_file = '24737'
-    experiment = 'tomo'
+class MinAndMaxTest(unittest.TestCase):
+    def setUp(self):
+        self.data_file = '24737.nxs'
+        self.experiment = 'tomo'
 
-    def test_image_stitching(self):
-        process_list = 'reshape/image_stitching_test.nxs'
-        #options = tu.initialise_options(data_file, experiment, process_list)
-        #run_protected_plugin_runner(options)
-        #tu.cleanup(options)
+    def test_min_and_max(self):
+        process_list = 'stats/min_and_max_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
