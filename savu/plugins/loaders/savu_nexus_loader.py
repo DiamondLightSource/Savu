@@ -115,7 +115,7 @@ class SavuNexusLoader(BaseLoader):
         for key, value in nxsfile.items():
             if self._is_nxdata(value):
                 datasets.append(self._get_dataset_info(key, value))
-            elif isinstance(value, h5py.Group) and key != 'input_data':
+            elif isinstance(value, h5py.Group) and key not in ['input_data', 'entry1']:     #ignore groups called 'input_data' or 'entry1'
                 self._read_nexus_file(value, datasets)
         return datasets
 
