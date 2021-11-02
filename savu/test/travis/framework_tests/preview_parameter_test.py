@@ -286,6 +286,14 @@ class PreviewParameterTest(unittest.TestCase):
         value = [":"]
         self.assertTrue(self.check_modification(value, key, pdefs))
 
+    def test_34(self):
+        # Check that start keyword is allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = ["start:65"]
+        self.assertTrue(self.check_modification(value, key, pdefs))
+
     def test_dict_1(self):
         # Check that key value dict is not accepted if preview is invalid
         pdefs = self.initial_setup()

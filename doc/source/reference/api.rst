@@ -9,4 +9,4 @@ Information on specific functions, classes, and methods.
    :glob:
 
    plugin_api/*
-   savu_api/*
+   framework_api/*

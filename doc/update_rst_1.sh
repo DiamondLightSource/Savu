@@ -18,11 +18,11 @@ python -m doc.create_plugin_template_doc
 rm -rf $DIR/source/reference/plugin_documentation/
 
 # Create contents for plugin api and plugin tools documentation
-python -m doc.create_plugin_doc plugin_api plugin_autosummary.rst
-python -m doc.create_plugin_doc plugin_documentation plugin_documentation.rst
+python -m doc.create_plugin_doc plugin_api plugin_autosummary.rst plugin
+python -m doc.create_plugin_doc plugin_documentation plugin_documentation.rst plugin
 
 # Create contents for savu framework api
-python -m doc.create_autosummary savu_api autosummary.rst framework
+python -m doc.create_plugin_doc framework_api autosummary.rst framework
 
 # Remove the directory containing all plugin guide tests
 rm -rf $DIR/doc_tests/plugins/
