@@ -1,4 +1,4 @@
-.. |savu_installer| replace:: :download:`savu installer <../../../install/savu_hpc/savu_installer.tar.gz>`
+.. |savu_installer| replace:: :download:`savu installer <../../../../../install/savu_hpc/savu_installer.tar.gz>`
 
 How to install Savu for a HPC cluster
 ======================================
