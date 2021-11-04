@@ -473,7 +473,7 @@ echo -e "\n\t*******************************************************************
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
 echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
-echo -e "\t The computing configuration is $GPU_architecture with $arch GPU and $num node(s)."
+echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
