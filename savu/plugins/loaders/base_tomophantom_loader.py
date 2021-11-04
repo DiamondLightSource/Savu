@@ -59,6 +59,10 @@ class BaseTomophantomLoader(BaseLoader):
 
 
         data_obj.backing_file = self.__get_backing_file(data_obj, 'synth_proj_data')
+<<<<<<< HEAD
+=======
+        #data_obj.data = data_obj.backing_file['/']['test']
+>>>>>>> 3626385a739cb18e809955e10ef213d3262abf7e
         data_obj.data = data_obj.backing_file['/']['entry1']['tomo_entry']['data']['data']
         #data_obj.data.dtype # Need to do something to .data to keep the file open!
 
@@ -68,7 +72,12 @@ class BaseTomophantomLoader(BaseLoader):
         self.__convert_patterns(data_obj2, 'phantom')
         self.__parameter_checks(data_obj2)
 
+        #data_obj2.data_path = 'phantom/input_data'
         data_obj2.backing_file = self.__get_backing_file(data_obj2, 'phantom')
+<<<<<<< HEAD
+=======
+        # data_obj2.data = data_obj2.backing_file['/']['test']
+>>>>>>> 3626385a739cb18e809955e10ef213d3262abf7e
         data_obj2.data = data_obj2.backing_file['/']['phantom']['data']
         #data_obj2.data.dtype # Need to do something to .data to keep the file open!
         data_obj.set_shape(data_obj.data.shape)
@@ -111,10 +120,20 @@ class BaseTomophantomLoader(BaseLoader):
 
         h5file = self.hdf5._open_backing_h5(fname, 'w')
 
+<<<<<<< HEAD
+=======
+        #dset = h5file.create_dataset('test', proj_data_dims, chunks=chunks)
+
+>>>>>>> 3626385a739cb18e809955e10ef213d3262abf7e
         if file_name == 'phantom':
             group = h5file.create_group('/phantom', track_order=None)
         else:
             group = h5file.create_group('/entry1/tomo_entry/data', track_order=None)
+<<<<<<< HEAD
+=======
+        #group.attrs['NX_class'] = 'NXdata'
+        #group.attrs['signal'] = 'data'
+>>>>>>> 3626385a739cb18e809955e10ef213d3262abf7e
 
         dset = self.hdf5.create_dataset_nofill(group, "data", proj_data_dims, data_obj.dtype, chunks = chunks)
 
@@ -204,6 +223,20 @@ class BaseTomophantomLoader(BaseLoader):
         data_obj.meta_data.set(['rotation_angle'], self.angles)
         data_obj.meta_data.set(['centre_of_rotation'], self.cor)
 
+<<<<<<< HEAD
+=======
+        """
+        stats = MetaData()
+
+        stats.set(["stats", "min"], [0]*180)
+        stats.set(["stats", "max"], [5]*180)
+        stats.set(["stats", "RMSE"], [1, 7])
+        
+        data_obj.meta_data.set(["stats", "min", "PROJECTION"], [0] * 150)
+        data_obj.meta_data.set(["stats", "max", "PROJECTION"], [5] * 140)
+        data_obj.meta_data.set(["stats", "RMSE", "VOLUME_XZ"], [3] * 120)
+        """
+>>>>>>> 3626385a739cb18e809955e10ef213d3262abf7e
     def __parameter_checks(self, data_obj):
         if not self.parameters['proj_data_dims']:
             raise Exception(
