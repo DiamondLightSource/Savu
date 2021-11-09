@@ -38,15 +38,6 @@ Table of Contents
     dev_guides/dev_savu_overview
     dev_guides/dev_plugin_overview
 
-.. _tutorials_content:
-
-.. toctree::
-    :caption: Tutorials
-    :glob:
-
-    tutorials/training_example
-    tutorials/confluence_pages
-
 .. _reference_content:
 
 .. toctree::
@@ -56,15 +47,16 @@ Table of Contents
     reference/savu_commands
     reference/savu_config_commands
     reference/plugin_documentation
+    reference/framework_contents
 
-.. _api_content:
+.. _tutorials_content:
 
 .. toctree::
-    :caption: API
-    :maxdepth: 2
+    :caption: Tutorials
+    :glob:
 
-    reference/plugin_autosummary
-    reference/autosummary
+    tutorials/training_example
+    tutorials/confluence_pages
 
 .. _citations_content:
 
