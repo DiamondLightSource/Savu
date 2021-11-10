@@ -244,11 +244,11 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         for i in range(0,angles_rad.size):
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix2D(theta),s0)
-            vectors[i,0:2] = vec_temp[:] # ray position
+            vectors[i, 0:2] = vec_temp[:] # ray position
             vec_temp = np.dot(self.rotation_matrix2D(theta),d0)
-            vectors[i,2:4] = vec_temp[:] # center of detector position
+            vectors[i, 2:4] = vec_temp[:] # center of detector position
             vec_temp = np.dot(self.rotation_matrix2D(theta),u0)
-            vectors[i,4:6] = vec_temp[:] # detector pixel (0,0) to (0,1).
+            vectors[i, 4:6] = vec_temp[:] # detector pixel (0,0) to (0,1).
         return vectors
 
     def vec_geom_init3D(self, angles_rad, DetectorSpacingX, DetectorSpacingY, CenterRotOffset):
@@ -259,15 +259,15 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         v0 = [0.0, 0.0, DetectorSpacingY] # detector coordinates
 
         vectors = np.zeros([angles_rad.size,12])
-        for i in range(0,angles_rad.size):
+        for i in range(0, angles_rad.size):
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix3D(theta),s0)
-            vectors[i,0:3] = vec_temp[:] # ray position
+            vectors[i, 0:3] = vec_temp[:] # ray position
             vec_temp = np.dot(self.rotation_matrix3D(theta),d0)
-            vectors[i,3:6] = vec_temp[:] # center of detector position
+            vectors[i, 3:6] = vec_temp[:] # center of detector position
             vec_temp = np.dot(self.rotation_matrix3D(theta),u0)
-            vectors[i,6:9] = vec_temp[:] # detector pixel (0,0) to (0,1).
+            vectors[i, 6:9] = vec_temp[:] # detector pixel (0,0) to (0,1).
             vec_temp = np.dot(self.rotation_matrix3D(theta),v0)
-            vectors[i,9:12] = vec_temp[:] # Vector from detector pixel (0,0) to (1,0)
+            vectors[i, 9:12] = vec_temp[:] # Vector from detector pixel (0,0) to (1,0)
         return vectors
 

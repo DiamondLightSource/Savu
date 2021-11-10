@@ -200,7 +200,10 @@ class BaseTransport(object):
             for j in pDict['nOut']:
                 if res is not None:
                     out_sl = pDict['out_sl']['process'][i][j]
-                    result[j][out_sl] = res[j]
+                    if np.ndim(res) == 2:
+                        result[j][out_sl] = res[0][j, ]
+                    else:
+                        result[j][out_sl] = res[j]
                 else:
                     result[j] = None
         return result, kill_signal
@@ -305,7 +308,10 @@ class BaseTransport(object):
         unpad_sl = self.pDict['out_sl']['unpad'][count]
         result = result if isinstance(result, list) else [result]
         for j in self.pDict['nOut']:
-            result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
+            if np.ndim(result) == 2:
+                result[0][j, ] = self.pDict['expand'][j](result[0][j, ])[unpad_sl[j]]
+            else:
+                result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
         return result
 
     def _return_all_data(self, count, result, end):
