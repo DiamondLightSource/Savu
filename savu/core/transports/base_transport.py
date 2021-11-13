@@ -200,7 +200,9 @@ class BaseTransport(object):
             for j in pDict['nOut']:
                 if res is not None:
                     out_sl = pDict['out_sl']['process'][i][j]
-                    if np.ndim(res) == 2:
+                    if any("res_norm" in s for s in self.data_flow):
+                        # an exception when the metadata is created automatically by a parameters in the plugin
+                        # this is to fix CGLS_CUDA with a res_norm metadata
                         result[j][out_sl] = res[0][j, ]
                     else:
                         result[j][out_sl] = res[j]
@@ -308,7 +310,9 @@ class BaseTransport(object):
         unpad_sl = self.pDict['out_sl']['unpad'][count]
         result = result if isinstance(result, list) else [result]
         for j in self.pDict['nOut']:
-            if np.ndim(result) == 2:
+            if any("res_norm" in s for s in self.data_flow):
+                # an exception when the metadata is created automatically by a parameters in the plugin
+                # this is to fix CGLS_CUDA with a res_norm metadata
                 result[0][j, ] = self.pDict['expand'][j](result[0][j, ])[unpad_sl[j]]
             else:
                 result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
