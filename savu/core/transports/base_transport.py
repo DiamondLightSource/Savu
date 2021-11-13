@@ -368,7 +368,7 @@ class BaseTransport(object):
         function = {'expand': self.__create_expand_function,
                     'squeeze': self.__create_squeeze_function}
         ddict = {}
-        for i in range(len(data_list)):
+        for i, item in enumerate(data_list):
             ddict[i] = {i: str_name + str(i)}
             ddict[i] = function[name](data_list[i])
         return ddict
