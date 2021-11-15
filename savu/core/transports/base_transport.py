@@ -60,14 +60,12 @@ class BaseTransport(object):
         This method provides an opportunity to add or remove items from the
         plugin list before plugin list check.
         """
-        pass
 
     def _transport_pre_plugin_list_run(self):
         """
         This method is called after all datasets have been created but BEFORE
         the plugin list is processed.
         """
-        pass
 
     def _transport_load_plugin(self, exp, plugin_dict):
         """ This method is called before each plugin is loaded """
@@ -78,26 +76,22 @@ class BaseTransport(object):
         This method is called directly BEFORE each plugin is executed, but \
         after the plugin is loaded.
         """
-        pass
 
     def _transport_post_plugin(self):
         """
         This method is called directly AFTER each plugin is executed.
         """
-        pass
 
     def _transport_post_plugin_list_run(self):
         """
         This method is called AFTER the full plugin list has been processed.
         """
-        pass
 
     def _transport_terminate_dataset(self, data):
         """ A dataset that will subequently be removed by the framework.
 
         :param Data data: A data object to finalise.
         """
-        pass
 
     def process_setup(self, plugin):
         pDict = {}
@@ -200,7 +194,12 @@ class BaseTransport(object):
             for j in pDict['nOut']:
                 if res is not None:
                     out_sl = pDict['out_sl']['process'][i][j]
-                    result[j][out_sl] = res[j]
+                    if any("res_norm" in s for s in self.data_flow):
+                        # an exception when the metadata is created automatically by a parameters in the plugin
+                        # this is to fix CGLS_CUDA with a res_norm metadata
+                        result[j][out_sl] = res[0][j, ]
+                    else:
+                        result[j][out_sl] = res[j]
                 else:
                     result[j] = None
         return result, kill_signal
@@ -280,9 +279,9 @@ class BaseTransport(object):
             slice_list = [slice(None)]*len(pDict['nIn'])
 
         section = []
-        for idx in range(len(data_list)):
-            section.append(data_list[idx]._get_transport_data().
-                           _get_padded_data(slice_list[idx]))
+        for i, item in enumerate(data_list):
+            section.append(data_list[i]._get_transport_data().
+                           _get_padded_data(slice_list[i]))
         return section
 
     def _get_input_data(self, plugin, trans_data, nproc, ntrans):
@@ -305,7 +304,12 @@ class BaseTransport(object):
         unpad_sl = self.pDict['out_sl']['unpad'][count]
         result = result if isinstance(result, list) else [result]
         for j in self.pDict['nOut']:
-            result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
+            if any("res_norm" in s for s in self.data_flow):
+                # an exception when the metadata is created automatically by a parameters in the plugin
+                # this is to fix CGLS_CUDA with a res_norm metadata
+                result[0][j, ] = self.pDict['expand'][j](result[0][j, ])[unpad_sl[j]]
+            else:
+                result[j] = self.pDict['expand'][j](result[j])[unpad_sl[j]]
         return result
 
     def _return_all_data(self, count, result, end):
@@ -327,14 +331,14 @@ class BaseTransport(object):
 
         result = [result] if type(result) is not list else result
 
-        for idx in range(len(data_list)):
-            if result[idx] is not None:
+        for i, item in enumerate(data_list):
+            if result[i] is not None:
                 if slice_list:
                     temp = self._remove_excess_data(
-                            data_list[idx], result[idx], slice_list[idx])
-                    data_list[idx].data[slice_list[idx]] = temp
+                            data_list[i], result[i], slice_list[i])
+                    data_list[i].data[slice_list[i]] = temp
                 else:
-                    data_list[idx].data = result[idx]
+                    data_list[i].data = result[i]
 
     def _set_global_frame_index(self, plugin, frame_list, nProc):
         """ Convert the transfer global frame index to a process global frame
@@ -364,7 +368,7 @@ class BaseTransport(object):
         function = {'expand': self.__create_expand_function,
                     'squeeze': self.__create_squeeze_function}
         ddict = {}
-        for i in range(len(data_list)):
+        for i, item in enumerate(data_list):
             ddict[i] = {i: str_name + str(i)}
             ddict[i] = function[name](data_list[i])
         return ddict
@@ -559,7 +563,7 @@ class BaseTransport(object):
             else:
                 self.__output_data(gp, value, key)
 
-        for i in range(len(args)):
+        for i, item in enumerate(args):
             gp = entry.require_group('args')
             self.__output_data(gp, args[i], ''.join(['args', str(i)]))
 
