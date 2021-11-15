@@ -25,14 +25,14 @@ import os
 import h5py
 import logging
 import numpy as np
+from mpi4py import MPI
 
 from savu.data.chunking import Chunking
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
-from savu.data.meta_data import MetaData
-from savu.core.transports.base_transport import BaseTransport
+from savu.data.plugin_list import PluginList
 
 import tomophantom
 from tomophantom import TomoP2D, TomoP3D
@@ -79,8 +79,7 @@ class BaseTomophantomLoader(BaseLoader):
         self.cor=np.linspace(cor_val, cor_val, self.parameters['proj_data_dims'][1], dtype='float32')
         self._set_metadata(data_obj, self._get_n_entries())
 
-        self._link_nexus_file(data_obj, 'synth_proj_data')
-        self._link_nexus_file(data_obj2, 'phantom')
+
         return data_obj, data_obj2
 
     def __get_backing_file(self, data_obj, file_name):
@@ -116,7 +115,8 @@ class BaseTomophantomLoader(BaseLoader):
         else:
             group = h5file.create_group('/entry1/tomo_entry/data', track_order=None)
 
-        dset = self.hdf5.create_dataset_nofill(group, "data", proj_data_dims, data_obj.dtype, chunks = chunks)
+        data_obj.dtype = np.dtype('<f4')
+        dset = self.hdf5.create_dataset_nofill(group, "data", proj_data_dims, data_obj.dtype, chunks=chunks)
 
         self.exp._barrier()
 
@@ -212,7 +212,9 @@ class BaseTomophantomLoader(BaseLoader):
     def _get_n_entries(self):
         return self.n_entries
 
-    def _link_nexus_file(self, data_obj, name):
+
+    def post_process(self, data_obj, data_obj2):
+
         filename = self.exp.meta_data.get('nxs_filename')
         fsplit = filename.split('/')
         plugin_number = len(self.exp.meta_data.plugin_list.plugin_list)
@@ -222,6 +224,19 @@ class BaseTomophantomLoader(BaseLoader):
             fsplit[-1] = 'synthetic_data_processed.nxs'
         filename = '/'.join(fsplit)
         self.exp.meta_data.set('nxs_filename', filename)
+
+        plugin_list = PluginList()
+        #plugin_list._save_plugin_list(filename)
+        self.exp._finalise_setup(plugin_list)
+        self._link_nexus_file(data_obj2, 'phantom', plugin_list)
+        self._link_nexus_file(data_obj, 'synth_proj_data', plugin_list)
+
+
+
+    def _link_nexus_file(self, data_obj, name, plugin_list):
+        """Link phantom + synthetic projection data h5 files to a single nexus file containing both."""
+
+
         if name == 'phantom':
             data_obj.exp.meta_data.set(['group_name', 'phantom'], 'phantom')
             data_obj.exp.meta_data.set(['link_type', 'phantom'], 'final_result')
@@ -236,15 +251,22 @@ class BaseTomophantomLoader(BaseLoader):
 
 
     def _populate_nexus_file(self, data):
+        """"""
+
         filename = self.exp.meta_data.get('nxs_filename')
         name = data.data_info.get('name')
-        with h5py.File(filename, 'a') as nxs_file:
+        #driver = "mpio", comm = MPI.COMM_WORLD
+        with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
+        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
 
             group_name = self.exp.meta_data.get(['group_name', name])
             link_type = self.exp.meta_data.get(['link_type', name])
 
             if name == 'phantom':
-                nxs_entry = nxs_file.create_group('entry')
+                if 'entry' not in list(nxs_file.keys()):
+                    nxs_entry = nxs_file.create_group('entry')
+                else:
+                    nxs_entry = nxs_file['entry']
                 if link_type == 'final_result':
                     group_name = 'final_result_' + data.get_name()
                 else:
@@ -265,7 +287,6 @@ class BaseTomophantomLoader(BaseLoader):
             self._output_metadata_dict(plugin_entry, data.meta_data.get_dictionary())
             self.__output_axis_labels(data, plugin_entry)
 
-
             plugin_entry.attrs['NX_class'] = 'NXdata'
 
 
@@ -275,13 +296,20 @@ class BaseTomophantomLoader(BaseLoader):
 
         axes = []
         count = 0
+        dims_temp = self.parameters['proj_data_dims'].copy()
+        if data.data_info.get('name') == 'phantom':
+            dims_temp[0] = dims_temp[1]
+            dims_temp[2] = dims_temp[1]
+        dims = tuple(dims_temp)
+
         for labels in axis_labels:
             name = list(labels.keys())[0]
             axes.append(name)
             entry.attrs[name + '_indices'] = count
 
             mData = ddict[name] if name in list(ddict.keys()) \
-                else np.arange(self.parameters['proj_data_dims'][count])
+                else np.arange(dims[count])
+
             if isinstance(mData, list):
                 mData = np.array(mData)
 
@@ -345,7 +373,8 @@ class BaseTomophantomLoader(BaseLoader):
     def _link_datafile_to_nexus_file(self, data):
         filename = self.exp.meta_data.get('nxs_filename')
 
-        with h5py.File(filename, 'a') as nxs_file:
+        with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
+        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
             # entry path in nexus file
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])
