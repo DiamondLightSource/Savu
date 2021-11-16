@@ -133,18 +133,21 @@ class BaseTomophantomLoader(BaseLoader):
             self.__get_start_slice_list(slice_dirs, dset.shape, total_frames)
         # calculate the first slice
         for i in range(total_frames):
-            if (file_name == 'synth_proj_data'):
-                #generate projection data
-                gen_data = TomoP3D.ModelSinoSub(self.tomo_model, proj_data_dims[1], proj_data_dims[2], proj_data_dims[1], (i, i+1), -self.angles, self.path_library3D)
-            else:
-                #generate phantom data
-                gen_data = TomoP3D.ModelSub(self.tomo_model, proj_data_dims[1], (i, i+1), self.path_library3D)
-            dset[tuple(sl)] = np.swapaxes(gen_data,0,1)
             if sl[slice_dirs[idx]].stop == dset.shape[slice_dirs[idx]]:
                 idx += 1
                 if idx == len(slice_dirs):
                     break
             tmp = sl[slice_dirs[idx]]
+            if (file_name == 'synth_proj_data'):
+                #generate projection data
+                gen_data = TomoP3D.ModelSinoSub(self.tomo_model, proj_data_dims[1], proj_data_dims[2],
+                                                proj_data_dims[1], (tmp.start, tmp.start + 1), -self.angles,
+                                                self.path_library3D)
+            else:
+                #generate phantom data
+                gen_data = TomoP3D.ModelSub(self.tomo_model, proj_data_dims[1], (tmp.start, tmp.start + 1),
+                                            self.path_library3D)
+            dset[tuple(sl)] = np.swapaxes(gen_data,0,1)
             sl[slice_dirs[idx]] = slice(tmp.start+1, tmp.stop+1)
 
         self.exp._barrier()
