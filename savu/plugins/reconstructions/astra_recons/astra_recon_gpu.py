@@ -122,7 +122,6 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         half_det_width = 0.5*sino.shape[self.sino_dim_detX]
         cor_astra = half_det_width - cor[0]
 
-        sslice = [slice(None)]*self.nDims
         recon = np.zeros(vol_shape)
         recon = np.expand_dims(recon, axis=self.slice_dir)
         if self.res:
@@ -131,16 +130,6 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         # create volume geometry
         vol_geom = \
             astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
-        # pad the sinogram
-        # Don't pad the sinogram if 3d
-        # Originally in pad_sino:
-        # centre_pad = (0, 0) if '3D' in self.alg else \
-        # self.array_pad(cor, sino.shape[self.dim_detX])
-
-        #pad_sino = self.pad_sino(self.slice_func(sino, sslice), cors)
-        #nDets = pad_sino.shape[self.slice_dir]
-        #trans = (self.slice_dir, self.det_rot, self.sino_dim_detX)
-        #pad_sino = np.transpose(pad_sino, trans)
 
         # create projection geom
         #vectors3D = self.create_3d_vector_geom(angles, cor, sino.shape[self.sino_dim_detX])
@@ -192,36 +181,6 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
             return [recon, res]
         else:
             return recon
-
-    def create_3d_vector_geom(self, angles, cors, detX):
-        # add tilt for detector
-        # make sure output volume is the correct way
-        # add res_norm
-        # add a mask
-        angles = np.deg2rad(angles)
-        vectors3D = np.zeros((len(angles), 12))
-        shift = detX/2.0 - cors[0] # temporary
-        for i in range(len(angles)):
-            # ray direction
-            vectors3D[i, 0] = np.cos(angles[i])
-            vectors3D[i, 1] = -np.sin(angles[i])
-            vectors3D[i, 2] = 0
-
-            # center of detector
-            vectors3D[i, 3] = -shift*np.sin(angles[i])
-            vectors3D[i, 4] = -shift*np.cos(angles[i])
-            vectors3D[i, 5] = 0
-
-            # vector from detector pixel (0,0) to (0,1)
-            vectors3D[i, 6] = -np.sin(angles[i])
-            vectors3D[i, 7] = -np.cos(angles[i])
-            vectors3D[i, 8] = 0
-
-            # vector from detector pixel (0,0) to (1,0)
-            vectors3D[i, 9] = 0
-            vectors3D[i, 10] = 0
-            vectors3D[i, 11] = 1
-        return vectors3D
 
     def rotation_matrix2D(self, theta):
         #define 2D rotation matrix
