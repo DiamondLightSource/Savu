@@ -23,19 +23,25 @@
 
 import numpy as np
 from savu.plugins.plugin import Plugin
+from savu.plugins.driver.cpu_iterative_plugin import CpuIterativePlugin
 
-class BaseMedianFilter(Plugin):
+class BaseMedianFilter(Plugin, CpuIterativePlugin):
 
     def __init__(self, name='BaseMedianFilter'):
         super(BaseMedianFilter, self).__init__(name)
         self.frame_limit = 1
 
     def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
+        if self._is_iterative:
+            self.setup_iterative_plugin()
+        else:
+            in_dataset, out_dataset = self.get_datasets()
+            out_dataset[0].create_dataset(in_dataset[0])
+            in_pData, out_pData = self.get_plugin_datasets()
+            in_pData[0].plugin_data_setup(self.parameters['pattern'],
+                                          self.get_max_frames())
+            out_pData[0].plugin_data_setup(self.parameters['pattern'],
+                                           self.get_max_frames())
 
     def set_filter_padding(self, in_data, out_data):
         # kernel size must be odd
@@ -49,6 +55,24 @@ class BaseMedianFilter(Plugin):
             in_data.padding = {'pad_multi_frames': self.pad}
             out_data[0].padding = {'pad_multi_frames': self.pad}
 
+            if self._is_iterative:
+                # set the padding for the cloned dataset as well
+                out_data[1].padding = {'pad_multi_frames': self.pad}
+
     def get_max_frames(self):
         """ Setting nFrames to multiple with an upper limit of 4 frames. """
         return ['multiple', self.frame_limit]
+
+    # total number of output datasets
+    def nOutput_datasets(self):
+        if self._is_iterative:
+            return 2
+        else:
+            return 1
+
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        if self._is_iterative:
+            return 1
+        else:
+            return 0
