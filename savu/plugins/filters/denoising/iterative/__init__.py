@@ -19,3 +19,4 @@ All the plugin architecture for Savu is contained here
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
 """
+
