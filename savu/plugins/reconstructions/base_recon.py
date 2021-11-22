@@ -44,6 +44,7 @@ class BaseRecon(Plugin):
         self.br_vol_shape = None
         self.frame_angles = None
         self.frame_cors = None
+        self.proj_shifts = None
         self.frame_init_data = None
         self.centre = None
         self.base_pad_amount = None
@@ -62,9 +63,11 @@ class BaseRecon(Plugin):
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
         self.set_centre_of_rotation(in_data[0], out_data[0], in_meta_data)
+        self.set_projection_shifts(in_data[0], out_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
+
         if len(self.angles.shape) != 1:
             self.scan_dim = in_data[0].get_data_dimension_by_axis_label('scan')
         self.slice_dirs = out_data[0].get_slice_dimensions()
@@ -96,12 +99,19 @@ class BaseRecon(Plugin):
     def get_vol_shape(self):
         return self.br_vol_shape
 
+    def set_projection_shifts(self, inData, outData, mData):
+        if 'projection_shifts' in list(mData.get_dictionary().keys()):
+            self.proj_shifts = mData.get('projection_shifts')
+        else:
+            self.proj_shifts = 2.0
+        outData.meta_data.set("projection_shifts", copy.deepcopy(self.proj_shifts))
+
     def set_centre_of_rotation(self, inData, outData, mData):
         # if cor has been passed as a dataset then do nothing
         if isinstance(self.parameters['centre_of_rotation'], str):
             return
         if 'centre_of_rotation' in list(mData.get_dictionary().keys()):
-            cor = self.__set_cor_from_meta_data(mData, inData)
+            cor = self.__set_param_from_meta_data(mData, inData, 'centre_of_rotation')
         else:
             val = self.parameters['centre_of_rotation']
             if isinstance(val, dict):
@@ -119,22 +129,21 @@ class BaseRecon(Plugin):
         outData.meta_data.set("centre_of_rotation", copy.deepcopy(self.cor))
         self.centre = self.cor[0]
 
-    def populate_metadata_to_output(self, inData, outData, mData):
+    def populate_metadata_to_output(self, inData, outData, mData, metastring):
         # writing  rotation angles into the metadata associated with the output (reconstruction)
-        self.angles = mData.get('rotation_angle')
-        outData.meta_data.set("rotation_angle", copy.deepcopy(self.angles))
+        outData.meta_data.set(metastring, copy.deepcopy(mData.get(metastring)))
 
         xDim = inData.get_data_dimension_by_axis_label('x', contains=True)
         det_length = inData.get_shape()[xDim]
         outData.meta_data.set("detector_x_length", copy.deepcopy(det_length))
 
-    def __set_cor_from_meta_data(self, mData, inData):
-        cor = mData.get('centre_of_rotation')
+    def __set_param_from_meta_data(self, mData, inData, meta_string):
+        meta_param = mData.get(meta_string)
         sdirs = inData.get_slice_dimensions()
         total_frames = np.prod([inData.get_shape()[i] for i in sdirs])
-        if total_frames > len(cor):
-            cor = np.tile(cor, total_frames // len(cor))
-        return cor
+        if total_frames > len(meta_param):
+            meta_param = np.tile(meta_param, total_frames // len(meta_param))
+        return meta_param
 
     def __polyfit_cor(self, cor_dict, inData):
         if 'detector_y' in list(inData.meta_data.get_dictionary().keys()):
@@ -317,6 +326,14 @@ class BaseRecon(Plugin):
         """
         return self.frame_angles
 
+    def get_proj_shifts(self):
+        """ Get the 2D (X-Y) shifts associated with every projection frame
+
+        :returns: projecton shifts for the current frames.
+        :rtype: np.ndarray
+        """
+        return self.proj_shifts
+
     def get_cors(self):
         """
         Get the centre of rotations associated with the current sinogram(s).
@@ -344,6 +361,9 @@ class BaseRecon(Plugin):
         params = [self.get_cors(), self.get_angles(), self.get_vol_shape(),
                   self.get_initial_data()]
         return params
+
+    def get_frame_shifts(self):
+        return self.get_proj_shifts()
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -390,7 +410,7 @@ class BaseRecon(Plugin):
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
         # metadata output populator
         in_meta_data = self.get_in_meta_data()[0]
-        self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data)
+        self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data, 'rotation_angle')
 
     def _get_axis_labels(self, in_dataset):
         """
