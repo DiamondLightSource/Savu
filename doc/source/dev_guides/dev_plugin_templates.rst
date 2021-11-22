@@ -46,6 +46,9 @@ Further Examples
    * - :ref:`plugin_template8`
      - A plugin template that dynamically determines the number of output datasets based on the number of entries in the out_datasets parameter list. 
 
+   * - :ref:`plugin_template9`
+     - A plugin template that dynamically determines the number of output datasets based on a parameter. 
+
    * - :ref:`plugin_template10`
      - A plugin template that dynamically determines the number of input datasets based on the number of entries in the in_datasets parameter list. 
 

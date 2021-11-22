@@ -58,15 +58,18 @@ class BaseAstraVectorRecon(BaseRecon):
             shape = (in_data.get_shape()[dim_detX], max(nIts))
 
             label = ['vol_y.voxel', 'iteration.number']
-            pattern = {'name': 'SINOGRAM', 'slice_dims': (0,),
-                       'core_dims': (1,)}
+            #pattern = {'name': 'SINOGRAM', 'slice_dims': (0,),
+            #           'core_dims': (1,)}
 
             out_dataset[1].create_dataset(axis_labels=label, shape=shape)
+            """
             out_dataset[1].add_pattern(pattern['name'],
                                        slice_dims=pattern['slice_dims'],
                                        core_dims=pattern['core_dims'])
-            out_pData[1].plugin_data_setup(
-                    pattern['name'], self.get_max_frames())
+            """
+            out_dataset[1].add_pattern(
+                "METADATA", core_dims=(1,), slice_dims=(0,))
+            out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 
     def pre_process(self):
         self.alg = self.parameters['algorithm']

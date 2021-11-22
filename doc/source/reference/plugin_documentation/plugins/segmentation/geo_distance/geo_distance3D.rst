@@ -6,7 +6,7 @@ Description
 
 3D geodesic transformation of volumes with mask initialisation. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

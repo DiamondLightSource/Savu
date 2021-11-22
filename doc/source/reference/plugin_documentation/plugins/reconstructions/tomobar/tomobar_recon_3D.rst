@@ -6,7 +6,7 @@ Description
 
 A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

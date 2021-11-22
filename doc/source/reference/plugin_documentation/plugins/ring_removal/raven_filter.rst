@@ -6,7 +6,7 @@ Description
 
 FFT-based method for removing ring artifacts. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

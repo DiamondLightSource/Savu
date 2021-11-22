@@ -6,7 +6,7 @@ Description
 
 A class to load tomography data from a hdf5 file 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

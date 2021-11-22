@@ -31,11 +31,24 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class TomophantomHdf5LoaderTest(unittest.TestCase):
     def setUp(self):
         self.data_file = '24737.nxs'
+        self.data_file2 = 'synthetic_data/synthetic_data.nxs'
         self.experiment = 'tomo'
 
     def test_tomophantom_loader(self):
         process_list = 'loaders/tomophantom_loader.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_loading_synth_proj_with_nxtomoloader(self):
+        process_list = 'loaders/nxtomo_loading_synth_proj.nxs'
+        options = tu.initialise_options(self.data_file2, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_loading_phantom_with_savunexusloader(self):
+        process_list = 'loaders/savu_nexus_loading_phantom.nxs'
+        options = tu.initialise_options(self.data_file2, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

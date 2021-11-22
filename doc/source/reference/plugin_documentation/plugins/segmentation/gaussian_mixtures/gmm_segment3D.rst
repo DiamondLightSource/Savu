@@ -6,7 +6,7 @@ Description
 
 A Plugin to segment data using Gaussian Mixtures from scikit 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

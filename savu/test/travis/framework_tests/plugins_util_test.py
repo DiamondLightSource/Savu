@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
     def test_get_plugin_external_path(self):
         savu_path = os.path.split(savu.__path__[0])[0]
         mod = os.path.join(
-                savu_path, "plugin_examples", "example_median_filter.py")
+                savu_path, "examples/plugin_examples", "example_median_filter.py")
         pu.get_plugins_paths()
         plugin = pu.load_class(mod)()
         self.assertEqual(plugin.name, "ExampleMedianFilter")
@@ -67,7 +67,7 @@ class Test(unittest.TestCase):
 
     def test_get_plugins_path_and_load(self):
         savu_path = os.path.split(savu.__path__[0])[0]
-        plugin_path = os.path.join(savu_path, "plugin_examples")
+        plugin_path = os.path.join(savu_path, "examples/plugin_examples")
         os.environ["SAVU_PLUGINS_PATH"] = plugin_path
         pu.get_plugins_paths()
         plugin = pu.load_class("example_median_filter")()

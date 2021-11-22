@@ -6,7 +6,7 @@ Description
 
 A Plugin to calculate stage motion from motion positions. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

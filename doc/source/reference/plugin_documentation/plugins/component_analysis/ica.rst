@@ -6,7 +6,7 @@ Description
 
 This plugin performs independent component analysis on XRD/XRF spectra. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 A Plugin to segment the data by providing two scalar values for lower and upper intensities 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

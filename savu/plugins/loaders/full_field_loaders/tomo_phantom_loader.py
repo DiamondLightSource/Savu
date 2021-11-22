@@ -47,6 +47,8 @@ class TomoPhantomLoader(BaseTomophantomLoader):
         data_obj2.set_shape(data_obj2.data.shape)
         self.set_data_reduction_params(data_obj2)
 
+        super(TomoPhantomLoader, self).post_process(data_obj, data_obj2)
+
     def __set_image_key(self, data_obj):
         proj_slice = \
             data_obj.get_data_patterns()['PROJECTION']['slice_dims'][0]

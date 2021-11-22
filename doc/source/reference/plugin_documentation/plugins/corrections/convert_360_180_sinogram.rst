@@ -9,7 +9,7 @@ Method to convert a 360-degree sinogram to a 180-degree sinogram in a half-acqui
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/convert_360_180_sinogram_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

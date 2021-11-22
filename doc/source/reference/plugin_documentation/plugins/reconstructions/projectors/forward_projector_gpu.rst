@@ -6,7 +6,7 @@ Description
 
 This plugin uses ToMoBAR software and GPU Astra projector to generate parallel-beam projection data. The plugin will project the given object using the available metadata OR user-provided geometry. In case when angles set to None, the metadata projection geometry will be used. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

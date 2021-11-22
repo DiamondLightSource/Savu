@@ -6,7 +6,7 @@ Description
 
 A plugin to extract slices in each direction of a 3D reconstructed volume. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

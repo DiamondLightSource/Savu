@@ -6,7 +6,7 @@ Description
 
 A class to save tomography data to a hdf5 file 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

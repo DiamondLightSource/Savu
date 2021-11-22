@@ -6,7 +6,7 @@ Description
 
 1D azimuthal integrator by pyFAI 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
