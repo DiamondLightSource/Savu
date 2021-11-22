@@ -34,7 +34,7 @@ import os
 
 class DezingerGpuTest(unittest.TestCase):
     global data_file, experiment
-    data_file = '24737.nxs'
+    data_file = 'tomo_standard.nxs'
     experiment = 'tomo'
 
     def test_dezinger_gpu(self):
