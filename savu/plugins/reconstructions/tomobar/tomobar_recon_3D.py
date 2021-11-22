@@ -113,7 +113,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.Rectools = RecToolsIR(DetectorsDimH = self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                     DetectorsDimV = self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
                     CenterRotOffset = cor_astra.item() - 0.5, # The center of rotation (CoR) scalar or a vector
-                    AnglesVec = self.anglesRAD, # the vector of angles in radians
+                    AnglesVec = -self.anglesRAD, # the vector of angles in radians
                     ObjSize = self.vol_shape[0], # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
                     device_projector='gpu')

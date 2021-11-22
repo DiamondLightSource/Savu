@@ -169,7 +169,7 @@ def get_plugins_paths(examples=True):
     # get user, environment and example plugin paths
     user_path = [os.path.join(os.path.expanduser("~"), "savu_plugins")]
     env_paths = os.getenv("SAVU_PLUGINS_PATH", "").replace(" ", "").split(":")
-    templates = "../plugin_examples/plugin_templates"
+    templates = "../examples/plugin_examples/plugin_templates"
     eg_path = [os.path.join(savu.__path__[0], templates)] if examples else []
 
     for ppath in env_paths + user_path + eg_path:

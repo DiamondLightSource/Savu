@@ -32,7 +32,7 @@ keep=false
 cpu=false
 while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
-		t ) type=$OPTARG ;;
+		t ) GPUarch_nodes=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
         z ) zocalo=$OPTARG ;;
@@ -62,7 +62,7 @@ outname=savu
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
     dev_mode=true
-    type=STANDARD
+    GPUarch_nodes=STANDARD
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -149,15 +149,15 @@ else
 
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
-		# determine cluster setup based on the provided variable "type"
-		if [[ -z "${type}" ]]; then
+		# determine cluster setup based on the provided variable "GPUarch_nodes"
+		if [[ -z "${GPUarch_nodes}" ]]; then
 			# define STANDARD resources
-  			type="STANDARD"
+  			GPUarch_nodes="STANDARD"
   			arch='Kepler'
   			num=2
 		else
-			arch=${type%_*}
-			num=${type##*_}
+			arch=${GPUarch_nodes%_*}
+			num=${GPUarch_nodes##*_}
 		fi
 		case $arch in
 			'Kepler')
@@ -169,23 +169,23 @@ else
 			  nNodes=$num
 			  ;;
 			*)
-			  echo -e "\nUnknown 'type' optional argument"
-			  echo -e "Please use the following syntax '<GPU_arch>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
+			  echo -e "\nUnknown 'GPUarch_nodes' optional argument"
+			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
 			  exit 1
 			  ;;
 		esac
 
 	else
 		cluster='hamilton'
-		# determine cluster setup based on the provided variable "type"
-		if [[ -z "${type}" ]]; then
+		# determine cluster setup based on the provided variable "GPUarch_nodes"
+		if [[ -z "${GPUarch_nodes}" ]]; then
 			# define STANDARD resources
-  			type="STANDARD"
+  			GPUarch_nodes="STANDARD"
   			arch='Pascal'
   			num=2
 		else
-			arch=${type%_*}
-			num=${type##*_}
+			arch=${GPUarch_nodes%_*}
+			num=${GPUarch_nodes##*_}
 		fi
 		case $arch in
 			'Volta')
@@ -197,8 +197,8 @@ else
 			  nNodes=$num
 			  ;;
 			 *)
-			  echo -e "\nUnknown 'type' optional argument\n"
-			  echo -e "Please use the following syntax '<GPU_arch>_<number_of_nodes>'. Example: 'Volta_2', 'Pascal_2'"
+			  echo -e "\nUnknown 'GPUarch_nodes' optional argument\n"
+			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Volta_2', 'Pascal_2'"
 				exit 1
 				;;
 		esac
@@ -477,7 +477,7 @@ echo -e "\n\t*******************************************************************
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
 echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
-echo -e "\t The computing configuration is $type with $arch GPU and $num node(s)."
+echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
