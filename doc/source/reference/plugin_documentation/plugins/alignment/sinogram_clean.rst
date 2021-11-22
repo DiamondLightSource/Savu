@@ -6,7 +6,7 @@ Description
 
 Clean the sinogram by applying a mask in Fourier space. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

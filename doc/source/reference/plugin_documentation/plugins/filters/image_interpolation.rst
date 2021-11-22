@@ -6,7 +6,7 @@ Description
 
 A plugin to interpolate an image by a factor 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

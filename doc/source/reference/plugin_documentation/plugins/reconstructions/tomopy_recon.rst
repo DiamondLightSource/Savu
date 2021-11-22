@@ -6,7 +6,7 @@ Description
 
 A wrapper to the tomopy reconstruction library. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

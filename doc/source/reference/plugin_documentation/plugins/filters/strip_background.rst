@@ -6,7 +6,7 @@ Description
 
 1D background removal. PyMca magic function 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

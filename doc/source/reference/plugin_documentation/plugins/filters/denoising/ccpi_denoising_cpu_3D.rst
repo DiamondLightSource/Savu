@@ -6,7 +6,7 @@ Description
 
 Wrapper for CCPi-Regularisation Toolkit (CPU) for efficient 2D/3D denoising. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

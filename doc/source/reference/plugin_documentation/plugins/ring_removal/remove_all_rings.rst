@@ -9,7 +9,7 @@ Combination of methods working in the sinogram space to remove most types of rin
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_all_rings_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

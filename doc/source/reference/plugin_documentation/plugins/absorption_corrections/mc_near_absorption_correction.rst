@@ -6,7 +6,7 @@ Description
 
 McNears absorption correction, takes in a normalised absorption sinogram and xrf sinogram stack. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

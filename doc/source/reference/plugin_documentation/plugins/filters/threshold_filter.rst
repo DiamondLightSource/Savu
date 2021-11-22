@@ -6,7 +6,7 @@ Description
 
 A plugin to quantise an image into discrete levels. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

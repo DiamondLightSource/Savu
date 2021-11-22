@@ -6,7 +6,7 @@ Description
 
 A Plugin to run the CCPi implementation of the CGLS reconstruction algorithm. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

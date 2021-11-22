@@ -6,7 +6,7 @@ Description
 
 A Plugin to perform morphological operations on grayscale images (use: erosion, dilation, opening, closing) or binary images (use: binary_erosion, binary_dilation, binary_opening, binary_closing) 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

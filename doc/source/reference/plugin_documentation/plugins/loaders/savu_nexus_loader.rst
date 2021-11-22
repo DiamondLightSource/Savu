@@ -6,7 +6,7 @@ Description
 
 A class to load datasets, and associated metadata, from a Savu output nexus file. By default, the last instance of each unique dataset name will be loaded. Opt instead to load a subset of these datasets, or individual datasets by populating the parameters. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
