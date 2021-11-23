@@ -27,6 +27,7 @@ import numpy as np
 
 import savu.plugins.utils as pu
 from savu.plugins.plugin_datasets import PluginDatasets
+from savu.plugins.stats.statistics import Statistics
 
 
 class Plugin(PluginDatasets):
@@ -66,6 +67,7 @@ class Plugin(PluginDatasets):
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
+        self.stats = Statistics(self)
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -132,6 +134,7 @@ class Plugin(PluginDatasets):
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
+        self.stats.set_slice_stats(frames)
         self.pcount += 1
         return frames
 
@@ -160,6 +163,7 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
+        self.stats.set_volume_stats()
         pass
 
     def set_preview(self, data, params):
