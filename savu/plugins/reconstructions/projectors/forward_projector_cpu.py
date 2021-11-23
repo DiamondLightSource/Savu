@@ -79,9 +79,9 @@ class ForwardProjectorCpu(Plugin, CpuPlugin):
         image = data[0].astype(np.float32)
         image = np.where(np.isfinite(image), image, 0)
         image_size = np.shape(image)[0]
-        vert_size = None # 2D case
+        vert_size = None  # 2D case
         # dealing with 3D case
-        if np.shape(image)[1] > 1:
+        if image.ndim == 3:
             vert_size = np.shape(image)[1]
             self.angles_rad = -self.angles_rad
         RectoolsDIR = RecToolsDIR(DetectorsDimH=self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
