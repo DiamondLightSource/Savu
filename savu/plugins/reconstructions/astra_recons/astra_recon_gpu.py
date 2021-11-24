@@ -116,7 +116,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         proj_data3d = data[0] # get 3d block of projection data
         cor, angles, vol_shape, init = self.get_frame_params()
         projection_shifts2d = self.get_frame_shifts()
-        print(np.shape(projection_shifts2d))
+        print(projection_shifts2d)
         half_det_width = 0.5*proj_data3d.shape[self.sino_dim_detX]
         cor_astra_scalar = half_det_width - np.mean(cor)
 

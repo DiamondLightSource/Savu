@@ -38,8 +38,14 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         in_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
         in_pData[1].plugin_data_setup('PROJECTION', self.get_max_frames())
 
-        out_dataset[0].create_dataset(in_dataset[0])
-        out_pData[0].plugin_data_setup('PROJECTION', self.get_max_frames())
+        # create a metadata for storing shift vectors
+        slice_dirs = list(in_dataset[0].get_slice_dimensions())
+        new_shape = (in_dataset[0].get_shape()[slice_dirs[0]], 2)
+        out_dataset[0].create_dataset(shape=new_shape,
+                                      axis_labels=['x.shifts', 'y.shifts'],
+                                      remove=True)
+        out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
+        out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
 
     def process_frames(self, data):
         projection = data[0]  # extract a projection
@@ -47,11 +53,26 @@ class Projection2dAlignment(Plugin, CpuPlugin):
 
         shift, error, diffphase = phase_cross_correlation(
                     projection, projection_align, upsample_factor=self.parameters['upsample_factor'])
-        print(shift)
+        return shift
 
-        #sx[m] += shift[0]
-        #sy[m] += shift[1]
-        return projection
+    def post_process(self):
+        in_dataset, out_dataset = self.get_datasets()
+        in_pData, out_pData = self.get_plugin_datasets()
+
+        out_data = self.get_out_datasets()[0]
+        shift_vector = out_data.data[:, :]  # get a shift vector
+        in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data.set('projection_shifts', shift_vector)
+        self.exp.meta_data.set('projection_shifts', shift_vector)
+        #self.exp.index[in_dataset[0]].meta_data.set('projection_shifts', shift_vector)
+        #self.exp.index[in_dataset[0]].meta_data.set('projection_shifts', shift_vector)
+        #for name in in_dataset:
+        #    self.exp.index['in_data'][name].meta_data.set('projection_shifts', shift_vector)
+
+        #for name in datasets:
+        #    self.exp.index['in_data'][name].meta_data.set(key, value)
+        #self.get_in_datasets()[0].meta_data.set('projection_shifts', out_data.data[:, :])
+        #out_dataset[0].meta_data.set('rotation_angle', angles_meta_deg)
 
     def get_max_frames(self):
         return 'single'
