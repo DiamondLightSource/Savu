@@ -56,23 +56,11 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         return shift
 
     def post_process(self):
-        in_dataset, out_dataset = self.get_datasets()
-        in_pData, out_pData = self.get_plugin_datasets()
-
         out_data = self.get_out_datasets()[0]
         shift_vector = out_data.data[:, :]  # get a shift vector
         in_meta_data = self.get_in_meta_data()[0]
         in_meta_data.set('projection_shifts', shift_vector)
         self.exp.meta_data.set('projection_shifts', shift_vector)
-        #self.exp.index[in_dataset[0]].meta_data.set('projection_shifts', shift_vector)
-        #self.exp.index[in_dataset[0]].meta_data.set('projection_shifts', shift_vector)
-        #for name in in_dataset:
-        #    self.exp.index['in_data'][name].meta_data.set('projection_shifts', shift_vector)
-
-        #for name in datasets:
-        #    self.exp.index['in_data'][name].meta_data.set(key, value)
-        #self.get_in_datasets()[0].meta_data.set('projection_shifts', out_data.data[:, :])
-        #out_dataset[0].meta_data.set('rotation_angle', angles_meta_deg)
 
     def get_max_frames(self):
         return 'single'

@@ -411,8 +411,13 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
-        # metadata output populator
-        meta_list = ['rotation_angle', 'projection_shifts']
+        meta_list = []  # metadata list to populate
+        # get experimental metadata about the projection_shifts (if it's been populated previously)
+        if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+            self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
+            meta_list.append('projection_shifts')
+
+        meta_list.append('rotation_angle')
         in_meta_data = self.get_in_meta_data()[0]
         self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data, meta_list)
 

@@ -66,7 +66,6 @@ class NxtomoLoader(BaseLoader):
                 self.__setup_4d(data_obj)
             data_obj.set_original_shape(data_obj.data.shape)
         self._set_rotation_angles(data_obj)
-        self._set_projection_shifts(data_obj)
 
         try:
             control = self._get_h5_path(
@@ -238,10 +237,6 @@ class NxtomoLoader(BaseLoader):
         data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)
 
-    def _set_projection_shifts(self, data_obj):
-        proj_shifts = np.zeros((data_obj.get_shape()[0], 2)) # a 2d array of x-y shifts for every projection
-        data_obj.meta_data.set("projection_shifts", proj_shifts)
-        return len(proj_shifts)
 
     def __get_angles_from_nxs_file(self, data_obj, path):
         if path in data_obj.backing_file:
