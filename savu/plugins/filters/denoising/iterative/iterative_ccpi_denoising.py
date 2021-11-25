@@ -119,10 +119,7 @@ class IterativeCcpiDenoising(BaseFilter, IterativePlugin):
         return self.pars
 
     def process_frames(self, data):
-        if self.get_iteration() == 0:
-            input_temp = np.nan_to_num(data[0])
-        else:
-            input_temp = np.nan_to_num(data[1])
+        input_temp = np.nan_to_num(data[0])
         input_temp[input_temp > 10 ** 15] = 0.0
         self.pars['input'] = input_temp
 

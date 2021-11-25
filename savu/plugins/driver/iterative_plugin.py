@@ -43,18 +43,27 @@ class IterativePlugin(PluginDriver):
         # 1 key refers to the 1st iteration
         # The values of the 0 key is a list containing two lists (both with only
         # one element in them):
-        # - a list contining the input NeXuS file
+        # - a list containing the Data object whose backing file is the input
+        # file for the very first iteration of the plugin
         # - a list containing the Data object used as an input AND output dataset
         # (depending on the iteration number) with the "original" backing file
         # (ie, NOT the "cloned" backing file)
         # The value of the 1 key is a list containing two lists (one containing
         # one element, one containing two elements):
-        # - a list containing the input NeXuS file, and also the Data object
-        #   with the "original" backing file
+        # - a list containing the Data object whose backing file is the input
+        # file for the very first iteration of the plugin, and also the Data
+        # object with the "original" backing file
         # - a list containing the Data object with the "clone" backing file
         self._ip_data_dict = {}
-        self._ip_pattern_dict = {}
+        # The dict value of the 'iterating' key contains only one key-value
+        # pair throughout all iterations:
+        # - the key is the "original" Data object
+        # - the value is the "cloned" Data object
         self._ip_data_dict['iterating'] = {}
+
+        # similar to _ip_data_dict, but for the pattern of the original &
+        # cloned datasets, depending on the current iteration number
+        self._ip_pattern_dict = {}
         self._ip_pattern_dict['iterating'] = {}
 
     def _run_plugin(self, exp, transport):
@@ -96,7 +105,11 @@ class IterativePlugin(PluginDriver):
             # input or output (depending on the particular iteration) can be
             # swapped WITHOUT having to define a key-value pair in
             # _ip_data_dict for EVERY SINGLE ITERATION
-            params['in_datasets'] = self._ip_data_dict[self._ip_iteration][0]
+
+            # this line isn't changing anything about the input datasets for
+            # iteration 0, but it is setting the input dataset for iteration 1
+            # to be the output dataset from iteration 0
+            params['in_datasets'] = [self._ip_data_dict[self._ip_iteration][0][-1]]
             params['out_datasets'] = self._ip_data_dict[self._ip_iteration][1]
         elif self._ip_iteration > 0:
             # If on an iteration greater than 1 (since the if statement catches
@@ -111,9 +124,27 @@ class IterativePlugin(PluginDriver):
             #   write the output of the current iteration that is about to be
             #   performed
             p = [params['in_datasets'], params['out_datasets']]
-            for s1, s2 in self._ip_data_dict['iterating'].items():
-                a = [0, p[0].index(s1)] if s1 in p[0] else [1, p[1].index(s1)]
-                b = [0, p[0].index(s2)] if s2 in p[0] else [1, p[1].index(s2)]
+            for original, clone in self._ip_data_dict['iterating'].items():
+                # The definition of a is based on if the "original" dataset was
+                # an input or output dataset for the previous iteration.
+                #
+                # - the if branch is used when the "original" was the input
+                # dataset for the previous iteration
+                # - the else branch is used when the "original" was the output
+                # dataset for the previous iteration
+                a = [0, p[0].index(original)] if original in p[0] else \
+                    [1, p[1].index(original)]
+                # The definition of b is based on if the "clone" dataset was
+                # an input or output dataset for the previous iteration
+                #
+                # Similarly to the definition of a:
+                # - the if branch is used when the "clone" was the input
+                # dataset for the previous iteration
+                # - the else branch is used when the "clone" was the output
+                # dataset for the previous iteration
+                b = [0, p[0].index(clone)] if clone in p[0] else \
+                    [1, p[1].index(clone)]
+                # this is swapping the input and output datasets
                 p[a[0]][a[1]], p[b[0]][b[1]] = p[b[0]][b[1]], p[a[0]][a[1]]
 
 #    def __set_patterns(self):

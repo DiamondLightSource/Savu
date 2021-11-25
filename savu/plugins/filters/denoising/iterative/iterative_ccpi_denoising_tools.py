@@ -139,6 +139,11 @@ class IterativeCcpiDenoisingTools(PluginTools):
             description: Tolerance constant to stop iterations earlier.
             default: 0.0
 
+        pattern:
+            visibility: advanced
+            dtype: str
+            description: Pattern to apply this to.
+            default: 'VOLUME_XZ'
         """
 
     def citation1(self):
