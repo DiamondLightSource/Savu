@@ -26,7 +26,7 @@ from savu.plugins.utils import register_plugin
 
 from tomobar.methodsDIR import RecToolsDIR
 import numpy as np
-
+import copy
 
 @register_plugin
 class ForwardProjectorGpu(Plugin, GpuPlugin):
@@ -34,10 +34,10 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         super(ForwardProjectorGpu, self).__init__('ForwardProjectorGpu')
 
     def pre_process(self):
-        # getting metadata
+        # getting metadata for CoR
         in_meta_data = self.get_in_meta_data()[0]
         self.cor = in_meta_data.get('centre_of_rotation')
-        self.cor = self.cor[0]
+        self.cor = np.mean(self.cor)  # CoR must be a scalar for 3D geometry 
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -74,7 +74,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                    slice_dims=pattern2['slice_dims'],
                                    core_dims=pattern2['core_dims'])
         out_pData[0].plugin_data_setup(pattern['name'], self.get_max_frames())
-        out_dataset[0].meta_data.set('rotation_angle', angles_meta_deg)
+        out_dataset[0].meta_data.set('rotation_angle', copy.deepcopy(angles_meta_deg))               
 
     def process_frames(self, data):
         image = data[0].astype(np.float32)
@@ -103,6 +103,14 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         new_shape_sino_orig = list(full_shape)
         new_shape_sino = (self.angles_total, new_shape_sino_orig[1], self.detectors_horiz)
         return tuple(new_shape_sino)
+
+    def post_process(self):
+        # populate CoR value
+        in_datasets, out_datasets = self.get_datasets()
+        sdirs = in_datasets[0].get_slice_dimensions()
+        cor_vect = np.ones(np.prod([in_datasets[0].get_shape()[i] for i in sdirs]))
+        self.cor *= cor_vect
+        out_datasets[0].meta_data.set('centre_of_rotation', copy.deepcopy(self.cor)) 
 
     def get_max_frames(self):
         return 'multiple'

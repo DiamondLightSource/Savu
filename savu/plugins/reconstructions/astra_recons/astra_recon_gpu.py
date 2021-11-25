@@ -115,10 +115,11 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
     def astra_3D_vector_recon(self, data):
         proj_data3d = data[0] # get 3d block of projection data
         cor, angles, vol_shape, init = self.get_frame_params()
-        projection_shifts2d = self.get_frame_shifts()
+        projection_shifts2d = self.get_frame_shifts()   
+        np.shape(proj_data3d)     
         print(projection_shifts2d)
         half_det_width = 0.5*proj_data3d.shape[self.sino_dim_detX]
-        cor_astra_scalar = half_det_width - np.mean(cor)
+        cor_astra_scalar = half_det_width - np.mean(cor) # works with scalar CoR only atm
 
         recon = np.zeros(vol_shape)
         recon = np.expand_dims(recon, axis=self.slice_dir)
@@ -130,7 +131,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
             astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
 
         # define astra vector geometry for 3d case
-        vectors3d = self.vec_geom_init3D(np.deg2rad(angles+90.0), 1.0, 1.0, cor_astra_scalar-0.5)
+        vectors3d = self.vec_geom_init3D(np.deg2rad(angles+90.0), 1.0, 1.0, cor_astra_scalar-0.5, projection_shifts2d)
         proj_geom = astra.create_proj_geom('parallel3d_vec',
                                            proj_data3d.shape[self.sino_dim_detY],
                                            proj_data3d.shape[self.sino_dim_detX],
@@ -207,15 +208,15 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
             vectors[i, 4:6] = vec_temp[:] # detector pixel (0,0) to (0,1).
         return vectors
 
-    def vec_geom_init3D(self, angles_rad, DetectorSpacingX, DetectorSpacingY, CenterRotOffset):
+    def vec_geom_init3D(self, angles_rad, DetectorSpacingX, DetectorSpacingY, CenterRotOffset, projection_shifts2d):
         #define 3D vector geometry
-        s0 = [0.0, -1.0, 0.0] # source
-        d0 = [CenterRotOffset, 0.0, 0.0]  # detector
+        s0 = [0.0, -1.0, 0.0] # source        
         u0 = [DetectorSpacingX, 0.0, 0.0] # detector coordinates
         v0 = [0.0, 0.0, DetectorSpacingY] # detector coordinates
 
         vectors = np.zeros([angles_rad.size, 12])
         for i in range(0, angles_rad.size):
+            d0 = [CenterRotOffset - projection_shifts2d[i,1], 0.0, CenterRotOffset - projection_shifts2d[i,0]] # detector
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix3D(theta), s0)
             vectors[i, 0:3] = vec_temp[:] # ray position
