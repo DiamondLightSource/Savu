@@ -32,8 +32,6 @@ from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 
-from savu.data.plugin_list import PluginList
-
 import tomophantom
 from tomophantom import TomoP2D, TomoP3D
 
@@ -227,18 +225,13 @@ class BaseTomophantomLoader(BaseLoader):
             fsplit[-1] = 'synthetic_data_processed.nxs'
         filename = '/'.join(fsplit)
         self.exp.meta_data.set('nxs_filename', filename)
-
-        plugin_list = PluginList()
-        #plugin_list._save_plugin_list(filename)
-        self.exp._finalise_setup(plugin_list)
-        self._link_nexus_file(data_obj2, 'phantom', plugin_list)
-        self._link_nexus_file(data_obj, 'synth_proj_data', plugin_list)
+        self._link_nexus_file(data_obj2, 'phantom')
+        self._link_nexus_file(data_obj, 'synth_proj_data')
 
 
 
-    def _link_nexus_file(self, data_obj, name, plugin_list):
+    def _link_nexus_file(self, data_obj, name):
         """Link phantom + synthetic projection data h5 files to a single nexus file containing both."""
-
 
         if name == 'phantom':
             data_obj.exp.meta_data.set(['group_name', 'phantom'], 'phantom')
@@ -258,9 +251,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         filename = self.exp.meta_data.get('nxs_filename')
         name = data.data_info.get('name')
-        #driver = "mpio", comm = MPI.COMM_WORLD
         with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
-        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
 
             group_name = self.exp.meta_data.get(['group_name', name])
             link_type = self.exp.meta_data.get(['link_type', name])
@@ -377,7 +368,6 @@ class BaseTomophantomLoader(BaseLoader):
         filename = self.exp.meta_data.get('nxs_filename')
 
         with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
-        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
             # entry path in nexus file
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])
