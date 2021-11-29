@@ -13,8 +13,8 @@ import h5py as h5
 import numpy as np
 import os
 
-class Statistics(object):
 
+class Statistics(object):
     has_setup = False
 
     def __init__(self, plugin_self):
@@ -26,24 +26,31 @@ class Statistics(object):
         except KeyError:
             self.pattern = 'VOLUME_XZ'
         self.stats = {'max': [], 'min': [], 'mean': [], 'standard_deviation': []}
-        if not self.has_setup:
-            Statistics._setup(self.plugin.exp)
+        #if not Statistics.has_setup:
+        #    Statistics._setup(self.plugin.exp)
 
     @classmethod
-    def _setup(cls, exp):
+    def setup(cls, exp):
         cls.count = 1
         cls.data_stats = {}
         cls.volume_stats = {}
         n_plugins = exp.meta_data.plugin_list.n_plugins
-        for n in range(n_plugins):
-            cls.data_stats[n + 1] = [None, None, None, None, None]
-            cls.volume_stats[n + 1] = [None, None, None, None, None]
-        cls.path = f"{exp.meta_data['out_path']}/stats"
+        # for n in range(n_plugins):
+        #    cls.data_stats[n + 1] = [None, None, None, None, None]
+        #    cls.volume_stats[n + 1] = [None, None, None, None, None]
+        cls.path = exp.meta_data['out_path']
+        print(cls.path)
+        if cls.path[-1] == '/':
+            cls.path = cls.path[0:-1]
+
+        cls.path = f"{cls.path}/stats"
+        #if not os.path.exists(cls.path):
         os.mkdir(cls.path)
         cls.has_setup = True
 
     def set_slice_stats(self, slice1):
         slice_num = self.plugin.pcount
+        slice1 = self._de_list(slice1)
         slice1 = self._unpad_slice(slice1)
         self.stats['max'].append(slice1.max())
         self.stats['min'].append(slice1.min())
@@ -56,6 +63,8 @@ class Statistics(object):
     def set_volume_stats(self):
         Statistics.count += 1
         p_num = Statistics.count
+        Statistics.data_stats[p_num] = [None, None, None, None, None]
+        Statistics.volume_stats[p_num] = [None, None, None, None, None]
         if self.pattern in ['PROJECTION', 'SINOGRAM', 'TANGENTOGRAM']:
             Statistics.data_stats[p_num][0] = max(self.stats['max'])
             Statistics.data_stats[p_num][1] = min(self.stats['min'])
@@ -71,8 +80,8 @@ class Statistics(object):
         slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
                                 self.stats['standard_deviation']])
         self._write_stats_to_file(slice_stats, p_num)
-        if p_num == self.plugin.exp.meta_data.plugin_list.n_plugins:
-            Statistics._post_chain()
+        #if p_num == self.plugin.exp.meta_data.plugin_list.n_plugins +1:
+        #    Statistics._post_chain()
 
     def get_data_stats(self):
         return Statistics.data_stats
@@ -98,29 +107,38 @@ class Statistics(object):
             standard_deviation_ds[::] = slice_stats[3]
 
     def _unpad_slice(self, slice1):
-        if len(self.plugin.slice_list[0]) == len(slice1.shape):
-            if self.plugin.pcount == 0:
-                self.slice_list = self._get_unpadded_slice_list(slice1)
+        if self.plugin.pcount == 0:
+            self.slice_list, self.pad = self._get_unpadded_slice_list(slice1)
+        if self.pad:
             return slice1[self.slice_list]
         else:
             return slice1
 
     def _get_unpadded_slice_list(self, slice1):
+        pad = False
         pad_width = {}
         slice_list = list(self.plugin.slice_list[0])
         if len(slice_list) == len(slice1.shape):
             for i in range(len(self.plugin.slice_list[0])):
                 dim_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
                 if dim_width != slice1.shape[i]:
+                    pad = True
                     self.pad_dims.append(i)
-                    pad_width[i] = (slice1.shape[i] - dim_width)//2
+                    pad_width[i] = (slice1.shape[i] - dim_width) // 2  # Assuming symmetrical padding
                     slice_list[i] = slice(pad_width[i], pad_width[i] + 1, 1)
-            return tuple(slice_list)
+            return tuple(slice_list), pad
         else:
-            return self.plugin.slice_list[0]
+            return self.plugin.slice_list[0], pad
+
+    def _de_list(self, slice1):
+        if type(slice1) == list:
+            if len(slice1) != 0:
+                slice1 = slice1[0]
+                slice1 = self._de_list(slice1)
+        return slice1
 
     @classmethod
-    def _post_chain(cls):
+    def post_chain(cls):
         print(cls.data_stats)
         print(cls.volume_stats)
         cls.has_setup = False

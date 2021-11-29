@@ -24,6 +24,7 @@ import logging
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
+from savu.plugins.stats.statistics import Statistics
 
 
 class PluginRunner(object):
@@ -47,6 +48,7 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._setup(self)
+        Statistics.setup(self.exp)
 
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
@@ -94,6 +96,7 @@ class PluginRunner(object):
         if self.exp.meta_data.get('email'):
             cu.send_email(self.exp.meta_data.get('email'))
 
+        Statistics.post_chain()
         return self.exp
 
     def __output_final_message(self):
