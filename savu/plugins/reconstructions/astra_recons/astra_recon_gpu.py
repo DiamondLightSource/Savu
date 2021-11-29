@@ -116,10 +116,9 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         proj_data3d = data[0] # get 3d block of projection data
         cor, angles, vol_shape, init = self.get_frame_params()
         projection_shifts2d = self.get_frame_shifts()   
-        np.shape(proj_data3d)     
         print(projection_shifts2d)
         half_det_width = 0.5*proj_data3d.shape[self.sino_dim_detX]
-        cor_astra_scalar = half_det_width - np.mean(cor) # works with scalar CoR only atm
+        cor_astra_scalar = half_det_width - np.mean(cor)  # works with scalar CoR only atm
 
         recon = np.zeros(vol_shape)
         recon = np.expand_dims(recon, axis=self.slice_dir)
@@ -216,7 +215,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
 
         vectors = np.zeros([angles_rad.size, 12])
         for i in range(0, angles_rad.size):
-            d0 = [CenterRotOffset - projection_shifts2d[i,1], 0.0, CenterRotOffset - projection_shifts2d[i,0]] # detector
+            d0 = [CenterRotOffset - projection_shifts2d[i, 1], 0.0, CenterRotOffset - projection_shifts2d[i, 0]]  #detector
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix3D(theta), s0)
             vectors[i, 0:3] = vec_temp[:] # ray position

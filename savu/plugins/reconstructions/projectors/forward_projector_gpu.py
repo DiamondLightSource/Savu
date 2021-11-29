@@ -44,18 +44,21 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
 
-        if (self.parameters['angles_deg'] is None):
-            # data extracted geometry parameters
-            in_meta_data = self.get_in_meta_data()[0]
+        in_meta_data = self.get_in_meta_data()[0]
+
+        # deal with user-defined parameters
+        if (self.parameters['angles_deg'] is not None):
+            angles_list = self.parameters['angles_deg']
+            self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
+        elif (self.parameters['centre_of_rotation'] is not None):
+            self.cor = self.parameters['centre_of_rotation']
+        elif (self.parameters['det_horiz'] is not None):
+            self.detectors_horiz = self.parameters['det_horiz']
+        else:
+            # extracted parameters from metadata
             angles_meta_deg = in_meta_data.get('rotation_angle')
             self.angles_rad = np.deg2rad(angles_meta_deg)
             self.detectors_horiz = in_meta_data.get('detector_x_length')
-        else:
-            # user-set parameters
-            angles_list = self.parameters['angles_deg']
-            self.cor = self.parameters['centre_of_rotation']
-            self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-            self.detectors_horiz = self.parameters['det_horiz']
 
         self.det_horiz_half = 0.5 * self.detectors_horiz
         self.angles_total = len(self.angles_rad)
