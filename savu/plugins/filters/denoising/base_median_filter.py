@@ -23,18 +23,29 @@
 
 import numpy as np
 from savu.plugins.plugin import Plugin
-from savu.plugins.driver.cpu_iterative_plugin import CpuIterativePlugin
+from savu.plugins.driver.cpu_plugin import CpuPlugin
+from savu.core.iterate_plugin_group_utils import \
+    setup_iterative_plugin_out_datasets
 
-class BaseMedianFilter(Plugin, CpuIterativePlugin):
+class BaseMedianFilter(Plugin, CpuPlugin):
 
     def __init__(self, name='BaseMedianFilter'):
         super(BaseMedianFilter, self).__init__(name)
         self.frame_limit = 1
 
     def setup(self):
-        if self._is_iterative:
-            self.setup_iterative_plugin()
+        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
+            patterns = {
+                'plugin_in_dataset': self.parameters['pattern'],
+                'plugin_out_datasets': self.parameters['pattern']
+            }
+            in_dataset, out_dataset = self.get_datasets()
+            in_pData, out_pData = self.get_plugin_datasets()
+            setup_iterative_plugin_out_datasets(in_dataset, out_dataset,
+                in_pData, out_pData, patterns, self.get_max_frames())
         else:
+            # the plugin is not the end plugin in an iterative loop, so its
+            # output datasets can be set normally
             in_dataset, out_dataset = self.get_datasets()
             out_dataset[0].create_dataset(in_dataset[0])
             in_pData, out_pData = self.get_plugin_datasets()
@@ -55,7 +66,7 @@ class BaseMedianFilter(Plugin, CpuIterativePlugin):
             in_data.padding = {'pad_multi_frames': self.pad}
             out_data[0].padding = {'pad_multi_frames': self.pad}
 
-            if self._is_iterative:
+            if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
                 # set the padding for the cloned dataset as well
                 out_data[1].padding = {'pad_multi_frames': self.pad}
 
@@ -65,14 +76,14 @@ class BaseMedianFilter(Plugin, CpuIterativePlugin):
 
     # total number of output datasets
     def nOutput_datasets(self):
-        if self._is_iterative:
+        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
             return 2
         else:
             return 1
 
     # total number of output datasets that are clones
     def nClone_datasets(self):
-        if self._is_iterative:
+        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
             return 1
         else:
             return 0

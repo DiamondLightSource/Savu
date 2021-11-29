@@ -216,13 +216,15 @@ class Experiment(object):
     def _get_collection(self):
         return self.collection
 
-    def _set_experiment_for_current_plugin(self, count):
+    def _set_experiment_for_current_plugin(self, count, is_end_plugin=False):
         datasets_list = self.meta_data.plugin_list._get_datasets_list()[count:]
         exp_coll = self._get_collection()
         self.index['out_data'] = exp_coll['datasets'][count]
         if datasets_list:
             self._get_current_and_next_patterns(datasets_list)
         self.meta_data.set('nPlugin', count)
+        # for iterative plugin groups
+        self.meta_data.set('is_end_plugin_in_iterate_group', is_end_plugin)
 
     def _get_current_and_next_patterns(self, datasets_lists):
         """ Get the current and next patterns associated with a dataset

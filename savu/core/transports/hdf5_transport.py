@@ -82,10 +82,24 @@ class Hdf5Transport(BaseTransport):
                 if self.exp.meta_data.get('process') == \
                         len(self.exp.meta_data.get('processes'))-1:
                     self._populate_nexus_file(data)
-                    self.hdf5._link_datafile_to_nexus_file(data)
+                    # check what iteration number we are on
+                    if self.exp.meta_data.get('iteration_number') == 0:
+                        # link output h5 file as normal
+                        self.hdf5._link_datafile_to_nexus_file(data)
+                    else:
+                        # don't link output h5 file, because it has already been
+                        # linked when iteration 0 was completed
+                        info_msg = f"Not linking intermediate h5 file, on " \
+                            f"iteration" \
+                            f"{self.exp.meta_data.get('iteration_number')}"
+                        print(info_msg)
                 self.exp._barrier(msg=msg)
-                # reopen file as read-only
-                self.hdf5._reopen_file(data, 'r')
+                if self.exp.meta_data.get('is_in_iterative_loop'):
+                    # reopen file with write permissiosn still present
+                    self.hdf5._reopen_file(data, 'r+')
+                else:
+                    # reopen file as read-only
+                    self.hdf5._reopen_file(data, 'r')
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)

@@ -24,6 +24,7 @@ import logging
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
+from savu.core.iterative_plugin_runner import IteratePluginGroup
 
 
 class PluginRunner(object):
@@ -42,6 +43,8 @@ class PluginRunner(object):
         # add all relevent locations to the path
         pu.get_plugins_paths()
         self.exp = Experiment(options)
+        # list to keep track of all groups of plugins to iterate over
+        self.iterate_plugin_groups = []
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
@@ -62,10 +65,74 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         checkpoint_plugin = cp.get_checkpoint_plugin()
         for i in range(checkpoint_plugin, n_plugins):
-            self.exp._set_experiment_for_current_plugin(i)
+            # need to check if we're at a plugin index that corresponds to a
+            # plugin inside the group to iterate over or not
+            current_iterate_plugin_group = None
+            for iterate_plugin_group in self.iterate_plugin_groups:
+                if i >= iterate_plugin_group['start_plugin_index'] and \
+                    i <= iterate_plugin_group['end_plugin_index']:
+                    current_iterate_plugin_group = iterate_plugin_group
+
+            # check if plugin index is one that is the end of a group of plugins
+            # to iterate over
+            is_end_plugin = False
+            if current_iterate_plugin_group is not None and \
+                i == current_iterate_plugin_group['end_plugin_index']:
+                is_end_plugin = True
+
+            self.exp._set_experiment_for_current_plugin(i,
+                is_end_plugin=is_end_plugin)
             memory_before = cu.get_memory_usage_linux()
 
-            plugin_name = self.__run_plugin(exp_coll['plugin_dict'][i])
+            # attempting to iterate over a group of plugins in a process list
+            # assuming the process list to be:
+            # 1. TomoPhantomLoader
+            # 2. TomoPhantomArtifacts
+            # 3. AstraReconCpu
+            # 4. MedianFilter <- start of group of plugins to iterate over
+            # 5. MedianFilter <- end of group of plugins to iterate over
+            # and we're wanting to iterate over the two MedianFilters
+            if current_iterate_plugin_group is not None and \
+                i == current_iterate_plugin_group['start_plugin_index'] and \
+                current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                print(f"Iteration {current_iterate_plugin_group['iterate_plugin_group']._ip_iteration}")
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][i],
+                    clean_up_plugin=False)
+                current_iterate_plugin_group['iterate_plugin_group'].set_start_plugin(plugin)
+                current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
+            elif current_iterate_plugin_group is not None and \
+                i == current_iterate_plugin_group['end_plugin_index'] and \
+                current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                # set metadata to indicate that this plugin is at the end of a
+                # group of plugins to iterate over
+                #
+                # this is important to indicate to the framework because it
+                # means that this plugin needs to have a CLONED dataset, and
+                # thus it'll need two OUTPUT datasets
+                #
+                # this is handled by the nOut_datasets() method in a plugin, but
+                # it needs some way of knowing that the plugin needs two output
+                # datasets BEFORE the plugin gets too far along in its setup
+                #
+                # if the var to control whether one or two output datasets are
+                # created in a plugin is set too late into the setup, then the
+                # number of output datasets isn't able to be changed; try to set
+                # that var in the self.exp.meta_data object
+                #
+                # also, do something a bit special for running the end plugin on
+                # iteration 0...
+                plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
+                    current_iterate_plugin_group['iterate_plugin_group'],
+                    current_iterate_plugin_group['end_plugin_index'])
+                plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
+            else:
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
+                plugin_name = plugin.name
+                if current_iterate_plugin_group is not None and \
+                    i >= current_iterate_plugin_group['start_plugin_index'] and \
+                    i <= current_iterate_plugin_group['end_plugin_index'] and \
+                    current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                    current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
@@ -105,8 +172,100 @@ class PluginRunner(object):
         cu.user_message("* Processing " + msg + " *")
         cu.user_message("*" * stars)
 
-    def __run_plugin(self, plugin_dict):
+    def __run_end_plugin_in_iterate_group_on_iteration_0(self,
+                                                         iterate_plugin_group,
+                                                         end_plugin_index):
+        '''
+        Hacky solution to be able to run the end plugin on iteration 0 and still
+        be able to change its output datasets to be only one of the original or
+        the cloned dataset.
+
+        This is done by copying a large amount of code from
+        PluginRunner.__run_plugin(), and then adding a few things to change the
+        ouput datasets of the end plugin in the group of plugins to iterate
+        over.
+
+        Note that this functionality probably could also be achieved by
+        modifying PluginRunner.__run_plugin().
+        '''
+        exp_coll = self.exp._get_collection()
+        plugin_dict = exp_coll['plugin_dict'][end_plugin_index]
+        # manually load the plugin, so then the output datasets can be modified
+        # before running the plugin
         plugin = self._transport_load_plugin(self.exp, plugin_dict)
+        # add the end plugin to IteratePluginGroup
+        iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
+        # set the end plugin in IteratePluginGroup
+        iterate_plugin_group.set_end_plugin(plugin)
+        # setup the datasets for iteration 0 and 1 inside the
+        # IteratePluginGroup object
+        iterate_plugin_group.setup_datasets()
+        # set the output datasets of the end plugin
+        iterate_plugin_group._IteratePluginGroup__set_datasets()
+
+        # START of stuff copied from __run_plugin()
+
+        #  ********* transport function ***********
+        self._transport_pre_plugin()
+        cu.user_message("*Running the %s plugin*" % plugin.name)
+        plugin._run_plugin(self.exp, self)
+
+        # don't clean up the end plugin on iteration 0 (just like we're not
+        # cleaning up any of the other plugins in the group to iterate over on
+        # iteration 0), so then the PluginData objects associated to the plugin
+        # objects remain intact
+        info_msg = f"Not cleaning up plugin {plugin.name}, as it is the end " \
+            f"plugin in a group to iterate over"
+        print(info_msg)
+
+        # ADDITIONAL stuff for running iterations
+
+        # since the end plugin has now been run, the group of plugins to
+        # iterate over has been executed once, and this counts as having done
+        # one iteration (ie, at this point, iteration 0 is complete)
+        iterate_plugin_group.increment_ip_iteration()
+
+        # kick off all subsequent iterations
+        while iterate_plugin_group._ip_iteration < \
+            iterate_plugin_group._ip_fixed_iterations:
+            iterate_plugin_group._execute_iteration(self.exp, self)
+
+        # set which output dataset to keep, and which to remove
+        iterate_plugin_group._finalise_iterated_datasets()
+
+        # END of additional stuff for running iterations
+
+        self.exp._barrier(msg="Plugin returned from driver in Plugin Runner")
+        cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
+        finalise = self.exp._finalise_experiment_for_current_plugin()
+
+        # set metadata to indicate to BaseTransport._transport_post_process() to
+        # open intermediate h5 files as read-only once more
+        self.exp.meta_data.set('is_in_iterative_loop', False)
+
+        #  ********* transport function ***********
+        self._transport_post_plugin()
+
+        for data in finalise['remove'] + finalise['replace']:
+            #  ********* transport function ***********
+            self._transport_terminate_dataset(data)
+
+        self.exp._reorganise_datasets(finalise)
+
+        # END of stuff copied from __run_plugin()
+
+        # set the iteration number back to 0
+        self.exp.meta_data.set('iteration_number', 0)
+
+        # TODO: for now, return the name of the start plugin of the group to
+        # iterate over
+        return iterate_plugin_group.start_plugin.name
+
+    def __run_plugin(self, plugin_dict, clean_up_plugin=True, plugin=None):
+        # allow plugin objects to be reused for running iteratively
+        if plugin is None:
+            plugin = self._transport_load_plugin(self.exp, plugin_dict)
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
@@ -117,7 +276,21 @@ class PluginRunner(object):
 
         self.exp._barrier(msg="Plugin returned from driver in Plugin Runner")
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
-        plugin._clean_up()
+
+        # if NOT in an iterative loop, clean up the PluginData associated with
+        # the Data objects in the plugin object as normal
+        #
+        # if in an iterative loop, do not clean up the PluginData object
+        # associated with the Data objects of the plugin, apart from for the
+        # last iteration
+        if clean_up_plugin:
+            print(f"Cleaning up plugin {plugin.name}")
+            plugin._clean_up()
+        else:
+            info_msg = f"Not cleaning up plugin {plugin.name}, as it is in a " \
+                f"group to iterate over"
+            print(info_msg)
+
         finalise = self.exp._finalise_experiment_for_current_plugin()
 
         #  ********* transport function ***********
@@ -128,7 +301,8 @@ class PluginRunner(object):
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)
-        return plugin.name
+
+        return plugin
 
     def _run_plugin_list_setup(self, plugin_list):
         """ Run the plugin list through the framework without executing the
@@ -149,7 +323,80 @@ class PluginRunner(object):
         # run all plugin setup methods and store information in experiment
         # collection
         count = 0
+
+        # set metadata that is for indicating if the current plugin is the end
+        # plugin of a group of plugins to iterate over
+        self.exp.meta_data.set('is_end_plugin_in_iterate_group', False)
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
+
+            # need to catch if the plugin is part of a group of plugins to
+            # iterate over
+            #
+            # this is because the info of if a plugin is at the END of a group
+            # of plugins to iterate is being set in the Experiment object's
+            # MetaData (self.exp.meta_data)
+
+            # TODO: need some sort of marker (that will likely come from
+            # savu_config) that defines the indices of
+            # - the plugin that starts the group of plugins to iterate
+            # - the plugin that ends the group of plugins to iterate
+            #
+            # Also, it needs to be relative to the arithmetic that removes any
+            # loaders from the loop counter here
+            #
+            # So there needs to be a check in this loop, on every iteration, for
+            # if there is this "marker" that indicates the start of a group of
+            # plugins to iterate
+            # Pseudocode:
+            # if PLUGIN_IS_START_OF_ITERATIVE_GROUP:
+            #    set start_plugin_index (from value in savu_config or something)
+            #    set end_plugin_index (from value in savu_config or something)
+            #    create IteratePluginGroup object
+            #
+            # can hardcode that flag for now, to be set to true when the nPlugin
+            # value gets to 2
+
+            if self.exp.meta_data.dict['nPlugin'] == 1:
+                start_plugin_index = 1
+                end_plugin_index = 2
+                iterate_plugin_group = IteratePluginGroup(self)
+                # add this IteratePluginGroup object to
+                # self.iterate_plugin_groups
+                #
+                # TODO:for some reason, self.exp.meta_data.dict.get('nPlugin')
+                # for a plugins is 1 more in PluginRunner._run_plugin_list()
+                # than in this method; figure out why, because this hardcoded
+                # stuff down below is bad
+                iterate_plugin_groups_entry = {
+                    'start_plugin_index': start_plugin_index + 1,
+                    'end_plugin_index': end_plugin_index + 1,
+                    'iterate_plugin_group': iterate_plugin_group
+                }
+                self.iterate_plugin_groups.append(iterate_plugin_groups_entry)
+
+            # need to check if we're at a plugin index that corresponds to a
+            # plugin inside the group to iterate over or not
+            current_iterate_plugin_group = None
+            for iterate_plugin_group in self.iterate_plugin_groups:
+                if count >= iterate_plugin_group['start_plugin_index'] and \
+                    count <= iterate_plugin_group['end_plugin_index']:
+                    current_iterate_plugin_group = iterate_plugin_group
+
+            if current_iterate_plugin_group is not None and \
+                count == current_iterate_plugin_group['start_plugin_index']:
+                info_msg = f"Plugin index {count} isn't at the end of a " \
+                    f"group to iterate over, so leaving its metadata alone"
+                print(info_msg)
+                # set metadata that indicates to
+                # BaseTransport._transport_post_process() that processing is
+                # currently within an iterative loop, to then keep write
+                # permissions on intermediate files
+                self.exp.meta_data.set('is_in_iterative_loop', True)
+                self.exp.meta_data.set('iteration_number', 0)
+            elif current_iterate_plugin_group is not None and \
+                count == current_iterate_plugin_group['end_plugin_index']:
+                self.exp.meta_data.set('is_end_plugin_in_iterate_group', True)
+
             self.__plugin_setup(plugin_dict, count)
             count += 1
 
