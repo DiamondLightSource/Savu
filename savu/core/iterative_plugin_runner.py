@@ -335,3 +335,12 @@ class IteratePluginGroup():
         Signal that the final iteration has been executed.
         '''
         self._ip_complete = True
+
+    def set_alternating_datasets(self):
+        d1 = self.end_plugin.parameters['out_datasets'][0]
+        d2 = self.end_plugin.parameters['out_datasets'][1]
+        names = [d1.get_name(), d2.get_name()]
+        if not any([True if 'itr_clone' in i else False for i in names]):
+            raise Exception('Alternating datasets must contain a clone.  These'
+                            ' are found at the end of the out_datasets list')
+        self._ip_data_dict['iterating'][d1] = d2

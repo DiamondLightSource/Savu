@@ -212,6 +212,8 @@ class PluginRunner(object):
 
         # set the end plugin in IteratePluginGroup
         iterate_plugin_group.set_end_plugin(plugin)
+        # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
+        iterate_plugin_group.set_alternating_datasets()
         # setup the datasets for iteration 0 and 1 inside the
         # IteratePluginGroup object
         iterate_plugin_group.setup_datasets()
