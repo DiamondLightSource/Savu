@@ -89,50 +89,65 @@ class PluginRunner(object):
             # 1. TomoPhantomLoader
             # 2. TomoPhantomArtifacts
             # 3. AstraReconCpu
-            # 4. MedianFilter <- start of group of plugins to iterate over
-            # 5. MedianFilter <- end of group of plugins to iterate over
-            # and we're wanting to iterate over the two MedianFilters
+            # 4. MedianFilter <- start and end of group of plugins to iterate
+            # over
+
+            # check if plugin is both the start and end plugin, so then it can
+            # be run correctly
             if current_iterate_plugin_group is not None and \
-                i == current_iterate_plugin_group['start_plugin_index'] and \
-                current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                print(f"Iteration {current_iterate_plugin_group['iterate_plugin_group']._ip_iteration}")
-                plugin = self.__run_plugin(exp_coll['plugin_dict'][i],
-                    clean_up_plugin=False)
-                current_iterate_plugin_group['iterate_plugin_group'].set_start_plugin(plugin)
-                current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
-            elif current_iterate_plugin_group is not None and \
+                current_iterate_plugin_group['start_plugin_index'] == \
+                current_iterate_plugin_group['end_plugin_index'] and \
                 i == current_iterate_plugin_group['end_plugin_index'] and \
                 current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                # set metadata to indicate that this plugin is at the end of a
-                # group of plugins to iterate over
-                #
-                # this is important to indicate to the framework because it
-                # means that this plugin needs to have a CLONED dataset, and
-                # thus it'll need two OUTPUT datasets
-                #
-                # this is handled by the nOut_datasets() method in a plugin, but
-                # it needs some way of knowing that the plugin needs two output
-                # datasets BEFORE the plugin gets too far along in its setup
-                #
-                # if the var to control whether one or two output datasets are
-                # created in a plugin is set too late into the setup, then the
-                # number of output datasets isn't able to be changed; try to set
-                # that var in the self.exp.meta_data object
-                #
-                # also, do something a bit special for running the end plugin on
-                # iteration 0...
+                # same as for when the end plugin is different to the start
+                # plugin, do something a bit special for the end plugin
                 plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
-                    current_iterate_plugin_group['iterate_plugin_group'],
-                    current_iterate_plugin_group['end_plugin_index'])
+                    current_iterate_plugin_group)
                 plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
             else:
-                plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
-                plugin_name = plugin.name
+                # group of plugins to iterate over is more than one plugin
                 if current_iterate_plugin_group is not None and \
-                    i >= current_iterate_plugin_group['start_plugin_index'] and \
-                    i <= current_iterate_plugin_group['end_plugin_index'] and \
+                    i == current_iterate_plugin_group['start_plugin_index'] and \
                     current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                    print(f"Iteration {current_iterate_plugin_group['iterate_plugin_group']._ip_iteration}")
+                    plugin = self.__run_plugin(exp_coll['plugin_dict'][i],
+                        clean_up_plugin=False)
+                    current_iterate_plugin_group['iterate_plugin_group'].set_start_plugin(plugin)
                     current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
+                elif current_iterate_plugin_group is not None and \
+                    i == current_iterate_plugin_group['end_plugin_index'] and \
+                    current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                    # set metadata to indicate that this plugin is at the end of
+                    # a group of plugins to iterate over
+                    #
+                    # this is important to indicate to the framework because it
+                    # means that this plugin needs to have a CLONED dataset, and
+                    # thus it'll need two OUTPUT datasets
+                    #
+                    # this is handled by the nOut_datasets() method in a plugin,
+                    # but it needs some way of knowing that the plugin needs two
+                    # output datasets BEFORE the plugin gets too far along in
+                    # its setup
+                    #
+                    # if the var to control whether one or two output datasets
+                    # are created in a plugin is set too late into the setup,
+                    # then the number of output datasets isn't able to be
+                    # changed; try to set that var in the self.exp.meta_data
+                    # object
+                    #
+                    # also, do something a bit special for running the end
+                    # plugin on iteration 0...
+                    plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
+                        current_iterate_plugin_group)
+                    plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
+                else:
+                    plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
+                    plugin_name = plugin.name
+                    if current_iterate_plugin_group is not None and \
+                        i >= current_iterate_plugin_group['start_plugin_index'] and \
+                        i <= current_iterate_plugin_group['end_plugin_index'] and \
+                        current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
+                        current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
@@ -173,8 +188,7 @@ class PluginRunner(object):
         cu.user_message("*" * stars)
 
     def __run_end_plugin_in_iterate_group_on_iteration_0(self,
-                                                         iterate_plugin_group,
-                                                         end_plugin_index):
+                                                         iterate_plugin_group_dict):
         '''
         Hacky solution to be able to run the end plugin on iteration 0 and still
         be able to change its output datasets to be only one of the original or
@@ -188,6 +202,10 @@ class PluginRunner(object):
         Note that this functionality probably could also be achieved by
         modifying PluginRunner.__run_plugin().
         '''
+        start_plugin_index = iterate_plugin_group_dict['start_plugin_index']
+        end_plugin_index = iterate_plugin_group_dict['end_plugin_index']
+        iterate_plugin_group = iterate_plugin_group_dict['iterate_plugin_group']
+
         exp_coll = self.exp._get_collection()
         plugin_dict = exp_coll['plugin_dict'][end_plugin_index]
         # manually load the plugin, so then the output datasets can be modified
@@ -195,6 +213,10 @@ class PluginRunner(object):
         plugin = self._transport_load_plugin(self.exp, plugin_dict)
         # add the end plugin to IteratePluginGroup
         iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
+        # check if this end plugin is ALSO the start plugin
+        if start_plugin_index == end_plugin_index:
+            iterate_plugin_group.set_start_plugin(plugin)
 
         # set the end plugin in IteratePluginGroup
         iterate_plugin_group.set_end_plugin(plugin)
@@ -352,13 +374,11 @@ class PluginRunner(object):
             #    set start_plugin_index (from value in savu_config or something)
             #    set end_plugin_index (from value in savu_config or something)
             #    create IteratePluginGroup object
-            #
-            # can hardcode that flag for now, to be set to true when the nPlugin
-            # value gets to 2
 
             if self.exp.meta_data.dict['nPlugin'] == 1:
                 start_plugin_index = 1
-                end_plugin_index = 2
+                end_plugin_index = 1
+                #end_plugin_index = 2
                 iterate_plugin_group = IteratePluginGroup(self)
                 # add this IteratePluginGroup object to
                 # self.iterate_plugin_groups
@@ -393,8 +413,11 @@ class PluginRunner(object):
                 # permissions on intermediate files
                 self.exp.meta_data.set('is_in_iterative_loop', True)
                 self.exp.meta_data.set('iteration_number', 0)
-            elif current_iterate_plugin_group is not None and \
+
+            if current_iterate_plugin_group is not None and \
                 count == current_iterate_plugin_group['end_plugin_index']:
+                # set the metadata indicating the end plugin in the group to
+                # iterate over
                 self.exp.meta_data.set('is_end_plugin_in_iterate_group', True)
 
             self.__plugin_setup(plugin_dict, count)
