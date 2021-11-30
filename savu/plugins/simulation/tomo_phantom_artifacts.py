@@ -39,8 +39,8 @@ class TomoPhantomArtifacts(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
-        out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
+        in_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
+        out_pData[0].plugin_data_setup(self.parameters['pattern'], self.get_max_frames())
 
     def process_frames(self, data):
         sinogram = data[0]

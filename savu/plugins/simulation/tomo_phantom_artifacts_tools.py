@@ -5,8 +5,13 @@ class TomoPhantomArtifactsTools(PluginTools):
     """A plugin to add artifacts to the generated synthetic data using TomoPhantom
     """
 
-    def define_parameters(self):
+    def define_parameters(self):        
         """
+        pattern:
+             visibility: advanced
+             dtype: str
+             description: Pattern to apply this to.
+             default: 'SINOGRAM'
         artifacts_noise_type:
               visibility: intermediate
               dtype: str
