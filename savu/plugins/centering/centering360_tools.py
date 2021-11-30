@@ -17,12 +17,12 @@ class Centering360Tools(PluginTools):
                 [angles, detZ, detY]. If the data is four dimensional, include
                 a time parameter.'
         win_width:
-             visibility: intermediate
+             visibility: basic
              dtype: int
              description: Width of window used for finding the overlap area
              default: 100
         side:
-             visibility: intermediate
+             visibility: basic
              dtype: [None,int]
              description: Overlap size. "None" corresponding to fully automated
                determination. "0" corresponding to the left side.
@@ -30,17 +30,17 @@ class Centering360Tools(PluginTools):
              default: None
              options: [None, 1, 0]
         denoise:
-             visibility: advanced
+             visibility: intermediate
              dtype: bool
              description: Apply the gaussian filter if True
              default: True
         norm:
-             visibility: advanced
+             visibility: intermediate
              dtype: bool
              description: Apply the normalisation if True
              default: True
         use_overlap:
-             visibility: advanced
+             visibility: intermediate
              dtype: bool
              description: Use the combination of images in the overlap area for calculating
                correlation coefficients if True.
@@ -48,7 +48,7 @@ class Centering360Tools(PluginTools):
 
 
         broadcast_method:
-             visibility: advanced
+             visibility: intermediate
              dtype: str
              options: [median, mean, nearest, linear_fit]
              description:
@@ -60,12 +60,6 @@ class Centering360Tools(PluginTools):
                    nearest:
                    linear_fit:
              default: median
-        average_radius:
-             visibility: advanced
-             dtype: int
-             description: Averaging sinograms around a required sinogram to
-               improve signal-to-noise ratio
-             default: 5
         datasets_to_populate:
              visibility: intermediate
              dtype: [list[],list[str]]

@@ -270,11 +270,6 @@ class Centering360(BaseFilter, CpuPlugin):
                 height_dsp, dsp_fact0, width_dsp, dsp_fact1).mean(-1).mean(1)
         return image_dsp
 
-    def set_filter_padding(self, in_data, out_data):
-        padding = np.int16(self.parameters['average_radius'])
-        if padding > 0:
-            in_data[0].padding = {'pad_multi_frames': padding}
-
     def pre_process(self):
         self.win_width = np.int16(self.parameters['win_width'])
         self.side = self.parameters['side']
@@ -337,10 +332,7 @@ class Centering360(BaseFilter, CpuPlugin):
         ----------
         .. [1] https://doi.org/10.1364/OE.418448
         """
-        if len(data[0].shape) > 2:
-            sino = np.mean(data[0], axis=1)
-        else:
-            sino = data[0]
+        sino = data[0]
         (nrow, ncol) = sino.shape
         nrow_180 = nrow // 2 + 1
         sino_top = sino[0:nrow_180, :]
