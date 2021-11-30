@@ -253,7 +253,7 @@ class IteratePluginGroup():
             # input or output (depending on the particular iteration) can be
             # swapped WITHOUT having to define a key-value pair in
             # _ip_data_dict for EVERY SINGLE ITERATION
-            self.start_plugin.parameters['in_datasets'] = self._ip_data_dict[self._ip_iteration][0]
+            self.start_plugin.parameters['in_datasets'] = [self._ip_data_dict[self._ip_iteration][0][-1]]
             self.end_plugin.parameters['out_datasets'] = self._ip_data_dict[self._ip_iteration][1]
         elif self._ip_iteration > 0:
             # If on an iteration greater than 1 (since the if statement catches

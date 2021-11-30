@@ -84,14 +84,6 @@ class PluginRunner(object):
                 is_end_plugin=is_end_plugin)
             memory_before = cu.get_memory_usage_linux()
 
-            # attempting to iterate over a group of plugins in a process list
-            # assuming the process list to be:
-            # 1. TomoPhantomLoader
-            # 2. TomoPhantomArtifacts
-            # 3. AstraReconCpu
-            # 4. MedianFilter <- start and end of group of plugins to iterate
-            # over
-
             # check if plugin is both the start and end plugin, so then it can
             # be run correctly
             if current_iterate_plugin_group is not None and \
@@ -377,8 +369,8 @@ class PluginRunner(object):
 
             if self.exp.meta_data.dict['nPlugin'] == 1:
                 start_plugin_index = 1
-                end_plugin_index = 1
-                #end_plugin_index = 2
+                #end_plugin_index = 1
+                end_plugin_index = 2
                 iterate_plugin_group = IteratePluginGroup(self)
                 # add this IteratePluginGroup object to
                 # self.iterate_plugin_groups
