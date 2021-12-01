@@ -29,7 +29,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class TomobarGpuTest(unittest.TestCase):
     def setUp(self):
-        self.data_file = '24737.nxs'
+        self.data_file = 'tomo_standard.nxs'
         self.experiment = 'tomo'
 
     def test_tomobar_2drecon(self):

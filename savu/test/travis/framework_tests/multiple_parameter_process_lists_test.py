@@ -32,7 +32,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class MultipleParameterProcessListTests(unittest.TestCase):
 
     def test_multi_params_tomo(self):
-        data_file = tu.get_test_data_path('24737.nxs')
+        data_file = tu.get_test_data_path('tomo_standard.nxs')
         process_file = tu.get_test_process_path(
             'basic_tomo_process_preview_params_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,

@@ -41,7 +41,7 @@ class CheckpointTest(BaseCheckpointTest, unittest.TestCase):
         return plist
 
     def set_data_options(self):
-        options = tu.set_options(tu.get_test_data_path('24737.nxs'))
+        options = tu.set_options(tu.get_test_data_path('tomo_standard.nxs'))
         options['process_file'] = \
             tu.get_test_process_path('checkpoint_process2.nxs')
         return options
