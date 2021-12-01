@@ -25,7 +25,7 @@ View the simple_tomo_pipeline_cpu.nxs process list inside the configurator
     >>> disp -v
     >>> exit
 
-Run the single-threaded version of Savu with the data file `data/24737.nxs`.
+Run the single-threaded version of Savu with the data file `data/tomo_standard.nxs`.
 and the process list `process_lists/simple_tomo_pipeline_cpu.nxs` and output to the current directory.
 
     >>> savu <data_file> <process_list> .
@@ -90,7 +90,7 @@ Example 1
     >>> save process_lists/test.nxs
     >>> exit
 
-Now run `savu_mpi_preview` with `data/24737.nxs' and the new process list 'process_lists/test.nxs` and
+Now run `savu_mpi_preview` with `data/tomo_standard.nxs' and the new process list 'process_lists/test.nxs` and
 view the output in DAWN.
 
 .. _eg2:
@@ -114,7 +114,7 @@ Example 2
     >>> save process_lists/test2.nxs
     >>> exit
 
-Now run `savu_mpi_preview` with `data/24737.nxs` and the new process list `process_lists/test2.nxs` and
+Now run `savu_mpi_preview` with `data/tomo_standard.nxs` and the new process list `process_lists/test2.nxs` and
 view the output in DAWN.
 
 
