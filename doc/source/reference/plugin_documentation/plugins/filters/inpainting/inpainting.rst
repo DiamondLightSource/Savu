@@ -6,7 +6,7 @@ Description
 
 A plugin to apply 2D/3D inpainting technique to data. If there is a chunk of data missing or one needs to inpaint some data features. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

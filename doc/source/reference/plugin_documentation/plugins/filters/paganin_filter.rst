@@ -9,7 +9,7 @@ A plugin to apply the Paganin filter (for denoising or contrast enhancement) on 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/paganin_filter_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

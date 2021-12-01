@@ -6,7 +6,7 @@ Description
 
 Collects data global statistcs (max, min, sum, mean) and put it in metadata. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 Sum over a dimension of the data. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

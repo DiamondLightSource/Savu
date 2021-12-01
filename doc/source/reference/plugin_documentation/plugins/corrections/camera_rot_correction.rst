@@ -6,7 +6,7 @@ Description
 
 A plugin to apply a rotation to projection images, for example to correct for missing camera alignment. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

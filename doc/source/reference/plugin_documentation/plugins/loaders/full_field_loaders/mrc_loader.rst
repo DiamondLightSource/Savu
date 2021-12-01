@@ -6,7 +6,7 @@ Description
 
 Load Medical Research Council (MRC) formatted image data. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

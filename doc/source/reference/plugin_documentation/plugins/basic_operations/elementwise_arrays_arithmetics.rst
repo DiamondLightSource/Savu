@@ -6,7 +6,7 @@ Description
 
 Basic arithmetic operations on two input datasets: addition, subtraction, multiplication and division. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 The module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value, based on the condition the data values will be replaced by the provided new value 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

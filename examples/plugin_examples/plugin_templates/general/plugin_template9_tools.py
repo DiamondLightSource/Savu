@@ -1,6 +1,6 @@
 from savu.plugins.plugin_tools import PluginTools
 
-class PluginTemplate6Tools(PluginTools):
+class PluginTemplate9Tools(PluginTools):
     """
     A plugin template that dynamically determines the number of output
     datasets based on a parameter.

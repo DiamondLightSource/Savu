@@ -115,7 +115,7 @@ Below is the template plugin class.
     :language: python
 
 You can download it :download:`here <../files_and_images/plugin_guides/plugin_name_example.py>`.
-An extended version is available :download:`here <../../../plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
+An extended version is available :download:`here <../../../examples/plugin_examples/plugin_templates/general/plugin_template1_with_detailed_notes.py>`.
 
 All template downloads are available here: :ref:`plugin_templates`.
 
@@ -914,7 +914,7 @@ Save the file as "your_module_name.py"
     This example recreates one of the core plugins, a median filter.  The code is
     available in the main Savu repository under the plugin_examples folder.
 
-    .. literalinclude:: ../../../plugin_examples/example_median_filter.py
+    .. literalinclude:: ../../../examples/plugin_examples/example_median_filter.py
        :linenos:
 
     As you can see this is a pretty small implementation, and the key features of
@@ -930,4 +930,4 @@ Save the file as "your_module_name.py"
 
     .. code:: bash
 
-       python $SAVU_HOME/savu/test/framework_test.py -p $SAVU_HOME/plugin_examples/example_median_filter /tmp/savu_output/
+       python $SAVU_HOME/savu/test/framework_test.py -p $SAVU_HOME/examples/plugin_examples/example_median_filter /tmp/savu_output/
