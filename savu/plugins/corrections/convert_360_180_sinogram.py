@@ -95,17 +95,23 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             np.ones((self.new_height, self.width), dtype=np.float32)
 
     def _set_cor_per_frame(self):
-        """ Locate the index for the current slice being processed.
-        Set the centre of rotation, and related values, for the
-        current frame/slice.
+        """ Locate the index for the current frame/slice being processed.
+        Set the centre of rotation (cor) for the current frame.
         """
-        count = self.get_process_frames_counter()
-        current_idx = self.get_global_frame_index()[count]
-        self.frame_center = self.center[current_idx]
+        if isinstance(self.center, list):
+            count = self.get_process_frames_counter()
+            current_idx = self.get_global_frame_index()[count]
+            self.frame_center = self.center[current_idx]
+        else:
+            self.frame_center = self.center
 
+    def _calculate_overlap(self):
+        """ Use the centre of rotation for the current frame to
+        calculate the overlap and shift values.
+        """
         if (self.frame_center <= 0) or (self.frame_center > self.width):
             self.frame_center = self.mid_width
-        center_int = np.int16(np.floor(self.frame_center)) # center_int = int(np.floor(self.frame_center))
+        center_int = np.int16(np.floor(self.frame_center))
         self.subpixel_shift = self.frame_center - center_int
         if self.frame_center < self.mid_width:
             self.overlap = 2 * center_int
@@ -120,6 +126,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
 
     def process_frames(self, data):
         self._set_cor_per_frame()
+        self._calculate_overlap()
 
         sinogram = np.copy(data[0])
         sinogram = ndi.interpolation.shift(sinogram, (0, -self.subpixel_shift),
