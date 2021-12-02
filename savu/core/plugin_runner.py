@@ -344,27 +344,14 @@ class PluginRunner(object):
             #    set end_plugin_index (from value in savu_config or something)
             #    create IteratePluginGroup object
 
+            # hardcode/artificially enforce plugin at nPlugin=1 to be the start
+            # of an iterative loop
             if self.exp.meta_data.dict['nPlugin'] == 1:
                 start_plugin_index = 1
                 #end_plugin_index = 1
                 end_plugin_index = 2
-                iterate_plugin_group = IteratePluginGroup(self)
-                # add this IteratePluginGroup object to iterate_groups key in
-                # self.exp.meta_data
-                #
-                # TODO:for some reason, self.exp.meta_data.dict.get('nPlugin')
-                # for a plugins is 1 more in PluginRunner._run_plugin_list()
-                # than in this method; figure out why, because this hardcoded
-                # stuff down below is bad
-                iterate_plugin_groups_entry = {
-                    'start_plugin_index': start_plugin_index + 1,
-                    'end_plugin_index': end_plugin_index + 1,
-                    'iterate_plugin_group': iterate_plugin_group
-                }
-                iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
-                iterate_plugin_groups.append(iterate_plugin_groups_entry)
-                # reset the value in the metadata?
-                self.exp.meta_data.set('iterate_groups', iterate_plugin_groups)
+                self._add_iterate_plugin_group(start_plugin_index,
+                    end_plugin_index)
 
             # need to check if we're at a plugin index that corresponds to a
             # plugin inside the group to iterate over or not
@@ -404,6 +391,23 @@ class PluginRunner(object):
         self.exp._finalise_setup(plugin_list)
         cu.user_message("Plugin list check complete!")
 
+    def _add_iterate_plugin_group(self, start_index, end_index):
+        iterate_plugin_group = IteratePluginGroup(self)
+        # add this IteratePluginGroup object to iterate_groups key in
+        # self.exp.meta_data
+        #
+        # TODO:for some reason, self.exp.meta_data.dict.get('nPlugin') for a
+        # plugins is 1 more in PluginRunner._run_plugin_list() than in this
+        # method; figure out why, because this hardcoded stuff down below is bad
+        iterate_plugin_groups_entry = {
+            'start_plugin_index': start_index + 1,
+            'end_plugin_index': end_index + 1,
+            'iterate_plugin_group': iterate_plugin_group
+        }
+        iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
+        iterate_plugin_groups.append(iterate_plugin_groups_entry)
+        # reset the value in the metadata?
+        self.exp.meta_data.set('iterate_groups', iterate_plugin_groups)
 
     def __plugin_setup(self, plugin_dict, count):
         self.exp.meta_data.set("nPlugin", count)
