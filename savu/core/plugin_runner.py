@@ -43,8 +43,6 @@ class PluginRunner(object):
         # add all relevent locations to the path
         pu.get_plugins_paths()
         self.exp = Experiment(options)
-        # list to keep track of all groups of plugins to iterate over
-        self.iterate_plugin_groups = []
 
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
@@ -68,7 +66,8 @@ class PluginRunner(object):
             # need to check if we're at a plugin index that corresponds to a
             # plugin inside the group to iterate over or not
             current_iterate_plugin_group = None
-            for iterate_plugin_group in self.iterate_plugin_groups:
+            iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
+            for iterate_plugin_group in iterate_plugin_groups:
                 if i >= iterate_plugin_group['start_plugin_index'] and \
                     i <= iterate_plugin_group['end_plugin_index']:
                     current_iterate_plugin_group = iterate_plugin_group
@@ -109,26 +108,8 @@ class PluginRunner(object):
                 elif current_iterate_plugin_group is not None and \
                     i == current_iterate_plugin_group['end_plugin_index'] and \
                     current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                    # set metadata to indicate that this plugin is at the end of
-                    # a group of plugins to iterate over
-                    #
-                    # this is important to indicate to the framework because it
-                    # means that this plugin needs to have a CLONED dataset, and
-                    # thus it'll need two OUTPUT datasets
-                    #
-                    # this is handled by the nOut_datasets() method in a plugin,
-                    # but it needs some way of knowing that the plugin needs two
-                    # output datasets BEFORE the plugin gets too far along in
-                    # its setup
-                    #
-                    # if the var to control whether one or two output datasets
-                    # are created in a plugin is set too late into the setup,
-                    # then the number of output datasets isn't able to be
-                    # changed; try to set that var in the self.exp.meta_data
-                    # object
-                    #
-                    # also, do something a bit special for running the end
-                    # plugin on iteration 0...
+                    # do something a bit special for running the end plugin on
+                    # iteration 0...
                     plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
                         current_iterate_plugin_group)
                     plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
@@ -256,10 +237,6 @@ class PluginRunner(object):
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
         finalise = self.exp._finalise_experiment_for_current_plugin()
 
-        # set metadata to indicate to BaseTransport._transport_post_process() to
-        # open intermediate h5 files as read-only once more
-        self.exp.meta_data.set('is_in_iterative_loop', False)
-
         #  ********* transport function ***********
         self._transport_post_plugin()
 
@@ -270,9 +247,6 @@ class PluginRunner(object):
         self.exp._reorganise_datasets(finalise)
 
         # END of stuff copied from __run_plugin()
-
-        # set the iteration number back to 0
-        self.exp.meta_data.set('iteration_number', 0)
 
         # TODO: for now, return the name of the start plugin of the group to
         # iterate over
@@ -374,8 +348,8 @@ class PluginRunner(object):
                 #end_plugin_index = 1
                 end_plugin_index = 2
                 iterate_plugin_group = IteratePluginGroup(self)
-                # add this IteratePluginGroup object to
-                # self.iterate_plugin_groups
+                # add this IteratePluginGroup object to iterate_groups key in
+                # self.exp.meta_data
                 #
                 # TODO:for some reason, self.exp.meta_data.dict.get('nPlugin')
                 # for a plugins is 1 more in PluginRunner._run_plugin_list()
@@ -386,12 +360,16 @@ class PluginRunner(object):
                     'end_plugin_index': end_plugin_index + 1,
                     'iterate_plugin_group': iterate_plugin_group
                 }
-                self.iterate_plugin_groups.append(iterate_plugin_groups_entry)
+                iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
+                iterate_plugin_groups.append(iterate_plugin_groups_entry)
+                # reset the value in the metadata?
+                self.exp.meta_data.set('iterate_groups', iterate_plugin_groups)
 
             # need to check if we're at a plugin index that corresponds to a
             # plugin inside the group to iterate over or not
             current_iterate_plugin_group = None
-            for iterate_plugin_group in self.iterate_plugin_groups:
+            iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
+            for iterate_plugin_group in iterate_plugin_groups:
                 if count >= iterate_plugin_group['start_plugin_index'] and \
                     count <= iterate_plugin_group['end_plugin_index']:
                     current_iterate_plugin_group = iterate_plugin_group
@@ -405,8 +383,6 @@ class PluginRunner(object):
                 # BaseTransport._transport_post_process() that processing is
                 # currently within an iterative loop, to then keep write
                 # permissions on intermediate files
-                self.exp.meta_data.set('is_in_iterative_loop', True)
-                self.exp.meta_data.set('iteration_number', 0)
 
             if current_iterate_plugin_group is not None and \
                 count == current_iterate_plugin_group['end_plugin_index']:

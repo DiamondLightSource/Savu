@@ -46,3 +46,19 @@ def create_clone(clone, data):
     '''
     clone.create_dataset(data)
     clone.data_info.set('clone', data.get_name())
+
+def check_if_in_iterative_loop(exp):
+    '''
+    Inspect the metadata inside the Experiment object to determine if current
+    processing is inside an iterative loop
+    '''
+    current_plugin_index = exp.meta_data.get('nPlugin')
+    for group in exp.meta_data.get('iterate_groups'):
+        if group['start_plugin_index'] <= current_plugin_index and \
+            group['end_plugin_index'] >= current_plugin_index:
+            return group
+
+    # never hit an instance of IteratePluginGroup where the current plugin
+    # index was within the start and end plugin indices, so processing is
+    # not inside an iterative loop
+    return None

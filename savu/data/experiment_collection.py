@@ -73,6 +73,7 @@ class Experiment(object):
             self.meta_data.plugin_list._populate_plugin_list(process_file,
                                                              template=template)
         self.meta_data.set("nPlugin", 0) # initialise
+        self.meta_data.set('iterate_groups', [])
 
     def create_data_object(self, dtype, name, override=True):
         """ Create a data object.

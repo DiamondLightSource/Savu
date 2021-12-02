@@ -27,6 +27,7 @@ import logging
 from savu.core.transport_setup import MPI_setup
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.core.transports.base_transport import BaseTransport
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 
 
 class Hdf5Transport(BaseTransport):
@@ -75,6 +76,7 @@ class Hdf5Transport(BaseTransport):
         self._set_file_details(self.files[count])
 
     def _transport_post_plugin(self):
+        iterate_group = check_if_in_iterative_loop(self.exp)
         for data in list(self.exp.index['out_data'].values()):
             if not data.remove:
                 msg = self.__class__.__name__ + "_transport_post_plugin."
@@ -83,18 +85,21 @@ class Hdf5Transport(BaseTransport):
                         len(self.exp.meta_data.get('processes'))-1:
                     self._populate_nexus_file(data)
                     # check what iteration number we are on
-                    if self.exp.meta_data.get('iteration_number') == 0:
-                        # link output h5 file as normal
-                        self.hdf5._link_datafile_to_nexus_file(data)
+                    if iterate_group is not None:
+                        if iterate_group['iterate_plugin_group']._ip_iteration == 0:
+                            # link output h5 file as normal
+                            self.hdf5._link_datafile_to_nexus_file(data)
+                        elif iterate_group['iterate_plugin_group']._ip_iteration > 0:
+                            # don't link output h5 file, because it has already
+                            # been linked when iteration 0 was completed
+                            info_msg = f"Not linking intermediate h5 file, " \
+                                f"on iteration" \
+                                f"{iterate_group['iterate_plugin_group']._ip_iteration}"
+                            print(info_msg)
                     else:
-                        # don't link output h5 file, because it has already been
-                        # linked when iteration 0 was completed
-                        info_msg = f"Not linking intermediate h5 file, on " \
-                            f"iteration" \
-                            f"{self.exp.meta_data.get('iteration_number')}"
-                        print(info_msg)
+                        print(f"Not within an iterative loop")
                 self.exp._barrier(msg=msg)
-                if self.exp.meta_data.get('is_in_iterative_loop'):
+                if iterate_group is not None:
                     # reopen file with write permissiosn still present
                     self.hdf5._reopen_file(data, 'r+')
                 else:
