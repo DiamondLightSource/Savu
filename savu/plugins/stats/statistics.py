@@ -64,7 +64,6 @@ class Statistics(object):
         p_num = Statistics.count
         Statistics.data_stats[p_num] = [None, None, None, None, None]
         Statistics.volume_stats[p_num] = [None, None, None, None, None]
-        in_datasets, self.plugin.out_datasets = self.plugin.get_datasets()
         if len(self.stats['max']) != 0:
             if self.pattern in ['PROJECTION', 'SINOGRAM', 'TANGENTOGRAM']:
                 Statistics.data_stats[p_num][0] = max(self.stats['max'])
@@ -78,11 +77,7 @@ class Statistics(object):
                 Statistics.volume_stats[p_num][2] = np.mean(self.stats['mean'])
                 Statistics.volume_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
                 Statistics.volume_stats[p_num][4] = np.median(self.stats['standard_deviation'])
-            self.plugin.out_datasets[0].meta_data.set(["stats", "max"], max(self.stats['max']))
-            self.plugin.out_datasets[0].meta_data.set(["stats", "min"], min(self.stats['min']))
-            self.plugin.out_datasets[0].meta_data.set(["stats", "mean"], np.mean(self.stats['mean']))
-            self.plugin.out_datasets[0].meta_data.set(["stats", "mean_std_dev"], np.mean(self.stats['standard_deviation']))
-            self.plugin.out_datasets[0].meta_data.set(["stats", "median_std_dev"], np.median(self.stats['standard_deviation']))
+
         slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
                                 self.stats['standard_deviation']])
         self._write_stats_to_file(slice_stats, p_num)
@@ -100,11 +95,11 @@ class Statistics(object):
         self.hdf5 = Hdf5Utils(self.plugin.exp)
         with h5.File(filename, "a") as h5file:
             i = 1
-            group = "/stats"
-            while group in h5file:
-                group = f"/stats{i}"
+            group_name = "/stats"
+            while group_name in h5file:
+                group_name = f"/stats{i}"
                 i += 1
-            group = h5file.create_group(group, track_order=None)
+            group = h5file.create_group(group_name, track_order=None)
             max_ds = self.hdf5.create_dataset_nofill(group, "max", slice_stats_dim, slice_stats.dtype)
             min_ds = self.hdf5.create_dataset_nofill(group, "min", slice_stats_dim, slice_stats.dtype)
             mean_ds = self.hdf5.create_dataset_nofill(group, "mean", slice_stats_dim, slice_stats.dtype)
@@ -114,6 +109,19 @@ class Statistics(object):
             min_ds[::] = slice_stats[1]
             mean_ds[::] = slice_stats[2]
             standard_deviation_ds[::] = slice_stats[3]
+
+        in_datasets, out_datasets = self.plugin.get_datasets()
+        i = 1
+        meta_name = "stats"
+        while meta_name in list(out_datasets[0].meta_data.get_dictionary().keys()):
+            meta_name = f"stats{i}"
+            i += 1
+        out_datasets[0].meta_data.set([meta_name, "max"], max(self.stats['max']))
+        out_datasets[0].meta_data.set([meta_name, "min"], min(self.stats['min']))
+        out_datasets[0].meta_data.set([meta_name, "mean"], np.mean(self.stats['mean']))
+        out_datasets[0].meta_data.set([meta_name, "mean_std_dev"], np.mean(self.stats['standard_deviation']))
+        out_datasets[0].meta_data.set([meta_name, "median_std_dev"],
+                                      np.median(self.stats['standard_deviation']))
 
     def _unpad_slice(self, slice1):
         if self.plugin.pcount == 0:
