@@ -25,6 +25,7 @@ import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
 from savu.core.iterative_plugin_runner import IteratePluginGroup
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 
 
 class PluginRunner(object):
@@ -367,12 +368,8 @@ class PluginRunner(object):
 
             # need to check if we're at a plugin index that corresponds to a
             # plugin inside the group to iterate over or not
-            current_iterate_plugin_group = None
-            iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
-            for iterate_plugin_group in iterate_plugin_groups:
-                if count >= iterate_plugin_group['start_plugin_index'] and \
-                    count <= iterate_plugin_group['end_plugin_index']:
-                    current_iterate_plugin_group = iterate_plugin_group
+            current_iterate_plugin_group = check_if_in_iterative_loop(self.exp,
+                'setup')
 
             if current_iterate_plugin_group is not None and \
                 count == current_iterate_plugin_group['start_plugin_index']:

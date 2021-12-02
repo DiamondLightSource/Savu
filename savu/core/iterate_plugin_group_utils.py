@@ -47,12 +47,23 @@ def create_clone(clone, data):
     clone.create_dataset(data)
     clone.data_info.set('clone', data.get_name())
 
-def check_if_in_iterative_loop(exp):
+def check_if_in_iterative_loop(exp, stage):
     '''
     Inspect the metadata inside the Experiment object to determine if current
     processing is inside an iterative loop
     '''
-    current_plugin_index = exp.meta_data.get('nPlugin')
+    # for every plugin, the value of the nPlugin metadata has a difference of 1
+    # between PluginRunner._run_plugin_list_setup() and
+    # PluginRunner._run_plugin_list(), so that needs to be taken into account
+    # here
+    if stage == 'setup':
+        current_plugin_index = exp.meta_data.get('nPlugin') + 1
+    elif stage == 'run':
+        current_plugin_index = exp.meta_data.get('nPlugin')
+    else:
+        err_msg = f"Invalid stage {stage} given for checking plugin index"
+        raise Exception(err_msg)
+
     for group in exp.meta_data.get('iterate_groups'):
         if group['start_plugin_index'] <= current_plugin_index and \
             group['end_plugin_index'] >= current_plugin_index:

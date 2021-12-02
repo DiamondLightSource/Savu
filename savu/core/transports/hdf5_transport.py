@@ -76,7 +76,7 @@ class Hdf5Transport(BaseTransport):
         self._set_file_details(self.files[count])
 
     def _transport_post_plugin(self):
-        iterate_group = check_if_in_iterative_loop(self.exp)
+        iterate_group = check_if_in_iterative_loop(self.exp, 'run')
         for data in list(self.exp.index['out_data'].values()):
             if not data.remove:
                 msg = self.__class__.__name__ + "_transport_post_plugin."
