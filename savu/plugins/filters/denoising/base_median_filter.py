@@ -24,8 +24,7 @@
 import numpy as np
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.core.iterate_plugin_group_utils import \
-    setup_iterative_plugin_out_datasets
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop
 
 class BaseMedianFilter(Plugin, CpuPlugin):
 
@@ -33,26 +32,15 @@ class BaseMedianFilter(Plugin, CpuPlugin):
         super(BaseMedianFilter, self).__init__(name)
         self.frame_limit = 1
 
+    @enable_iterative_loop
     def setup(self):
-        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
-            patterns = {
-                'plugin_in_dataset': self.parameters['pattern'],
-                'plugin_out_datasets': self.parameters['pattern']
-            }
-            in_dataset, out_dataset = self.get_datasets()
-            in_pData, out_pData = self.get_plugin_datasets()
-            setup_iterative_plugin_out_datasets(in_dataset, out_dataset,
-                in_pData, out_pData, patterns, self.get_max_frames())
-        else:
-            # the plugin is not the end plugin in an iterative loop, so its
-            # output datasets can be set normally
-            in_dataset, out_dataset = self.get_datasets()
-            out_dataset[0].create_dataset(in_dataset[0])
-            in_pData, out_pData = self.get_plugin_datasets()
-            in_pData[0].plugin_data_setup(self.parameters['pattern'],
-                                          self.get_max_frames())
-            out_pData[0].plugin_data_setup(self.parameters['pattern'],
-                                           self.get_max_frames())
+        in_dataset, out_dataset = self.get_datasets()
+        out_dataset[0].create_dataset(in_dataset[0])
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup(self.parameters['pattern'],
+                                        self.get_max_frames())
+        out_pData[0].plugin_data_setup(self.parameters['pattern'],
+                                        self.get_max_frames())
 
     def set_filter_padding(self, in_data, out_data):
         # kernel size must be odd
