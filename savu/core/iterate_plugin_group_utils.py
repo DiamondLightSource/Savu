@@ -54,8 +54,8 @@ def check_if_in_iterative_loop(exp):
     '''
     current_plugin_index = exp.meta_data.get('nPlugin')
     for group in exp.meta_data.get('iterate_groups'):
-        if group['start_plugin_index'] <= current_plugin_index and \
-            group['end_plugin_index'] >= current_plugin_index:
+        if group.start_index <= current_plugin_index and \
+            group.end_index >= current_plugin_index:
             return group
 
     # never hit an instance of IteratePluginGroup where the current plugin
@@ -72,6 +72,6 @@ def check_if_end_plugin_in_iterate_group(exp):
         return False
 
     is_end_plugin = \
-        iterate_plugin_group['end_plugin_index'] == exp.meta_data.get('nPlugin')
+        iterate_plugin_group.end_index == exp.meta_data.get('nPlugin')
 
     return is_end_plugin

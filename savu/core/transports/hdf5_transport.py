@@ -86,15 +86,14 @@ class Hdf5Transport(BaseTransport):
                     self._populate_nexus_file(data)
                     # check what iteration number we are on
                     if iterate_group is not None:
-                        if iterate_group['iterate_plugin_group']._ip_iteration == 0:
+                        if iterate_group._ip_iteration == 0:
                             # link output h5 file as normal
                             self.hdf5._link_datafile_to_nexus_file(data)
-                        elif iterate_group['iterate_plugin_group']._ip_iteration > 0:
+                        elif iterate_group._ip_iteration > 0:
                             # don't link output h5 file, because it has already
                             # been linked when iteration 0 was completed
                             info_msg = f"Not linking intermediate h5 file, " \
-                                f"on iteration" \
-                                f"{iterate_group['iterate_plugin_group']._ip_iteration}"
+                                f"on iteration {iterate_group._ip_iteration}"
                             print(info_msg)
                     else:
                         print(f"Not within an iterative loop")

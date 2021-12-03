@@ -3,12 +3,17 @@ class IteratePluginGroup():
     Class for iterating a set/group of plugins in a process list
     '''
 
-    def __init__(self, plugin_runner):
+    def __init__(self, plugin_runner, start_index, end_index):
         self.in_data = None
         self.out_data = None
         # PluginRunner object for running the individual plugns in the group of
         # pluigns to iterate over
         self.plugin_runner = plugin_runner
+
+        # nPlugin index of plugin that is at the start of group to iterate over
+        self.start_index = start_index
+        # nPlugin index of plugin that is at the end of group to iterate over
+        self.end_index = end_index
 
         # dict of plugins needed to run the plugins using
         # PluginRunner.__run_plugin()

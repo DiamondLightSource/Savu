@@ -110,13 +110,12 @@ class PluginRunner(object):
 
         return self.exp
 
-    def __run_iterative_loop(self, ipg_dict):
+    def __run_iterative_loop(self, iterate_plugin_group):
         '''
         Run the plugins in an iterative loop
         '''
-        start = ipg_dict['start_plugin_index']
-        end = ipg_dict['end_plugin_index']
-        iterate_plugin_group = ipg_dict['iterate_plugin_group']
+        start = iterate_plugin_group.start_index
+        end = iterate_plugin_group.end_index
 
         nPlugin = self.exp.meta_data.get('nPlugin')
         if start == end and nPlugin == end and \
@@ -127,7 +126,7 @@ class PluginRunner(object):
             # same as for when the end plugin is different to the start
             # plugin, do something a bit special for the end plugin
             plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
-                ipg_dict)
+                iterate_plugin_group)
             plugin_name = iterate_plugin_group.end_plugin.name
         else:
             # start != end -> group of plugins to iterate over is more than one
@@ -148,7 +147,7 @@ class PluginRunner(object):
                 # iteration 0...
                 plugin_name = \
                     self.__run_end_plugin_in_iterate_group_on_iteration_0(
-                        ipg_dict)
+                        iterate_plugin_group)
             elif nPlugin >= start and nPlugin <= end and \
                     iterate_plugin_group._ip_iteration == 0:
                 # a "middle" plugin is being run on iteration 0
@@ -172,7 +171,7 @@ class PluginRunner(object):
         cu.user_message("*" * stars)
 
     def __run_end_plugin_in_iterate_group_on_iteration_0(self,
-                                                         iterate_plugin_group_dict):
+                                                         iterate_plugin_group):
         '''
         Hacky solution to be able to run the end plugin on iteration 0 and still
         be able to change its output datasets to be only one of the original or
@@ -186,9 +185,8 @@ class PluginRunner(object):
         Note that this functionality probably could also be achieved by
         modifying PluginRunner.__run_plugin().
         '''
-        start_plugin_index = iterate_plugin_group_dict['start_plugin_index']
-        end_plugin_index = iterate_plugin_group_dict['end_plugin_index']
-        iterate_plugin_group = iterate_plugin_group_dict['iterate_plugin_group']
+        start_plugin_index = iterate_plugin_group.start_index
+        end_plugin_index = iterate_plugin_group.end_index
 
         exp_coll = self.exp._get_collection()
         plugin_dict = exp_coll['plugin_dict'][end_plugin_index]
@@ -369,20 +367,16 @@ class PluginRunner(object):
         cu.user_message("Plugin list check complete!")
 
     def _add_iterate_plugin_group(self, start_index, end_index):
-        iterate_plugin_group = IteratePluginGroup(self)
+        iterate_plugin_group = IteratePluginGroup(self, start_index + 1,
+            end_index + 1)
         # add this IteratePluginGroup object to iterate_groups key in
         # self.exp.meta_data
         #
         # TODO:for some reason, self.exp.meta_data.dict.get('nPlugin') for a
         # plugins is 1 more in PluginRunner._run_plugin_list() than in this
         # method; figure out why, because this hardcoded stuff down below is bad
-        iterate_plugin_groups_entry = {
-            'start_plugin_index': start_index + 1,
-            'end_plugin_index': end_index + 1,
-            'iterate_plugin_group': iterate_plugin_group
-        }
         iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
-        iterate_plugin_groups.append(iterate_plugin_groups_entry)
+        iterate_plugin_groups.append(iterate_plugin_group)
         # reset the value in the metadata?
         self.exp.meta_data.set('iterate_groups', iterate_plugin_groups)
 
