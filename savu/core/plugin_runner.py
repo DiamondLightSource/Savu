@@ -72,44 +72,14 @@ class PluginRunner(object):
             # iterate over or not
             current_iterate_plugin_group = check_if_in_iterative_loop(self.exp)
 
-            # check if plugin is both the start and end plugin, so then it can
-            # be run correctly
-            if current_iterate_plugin_group is not None and \
-                current_iterate_plugin_group['start_plugin_index'] == \
-                current_iterate_plugin_group['end_plugin_index'] and \
-                i == current_iterate_plugin_group['end_plugin_index'] and \
-                current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                # same as for when the end plugin is different to the start
-                # plugin, do something a bit special for the end plugin
-                plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
-                    current_iterate_plugin_group)
-                plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
+            if current_iterate_plugin_group is None:
+                # not in an iterative loop, run as normal
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
+                plugin_name = plugin.name
             else:
-                # group of plugins to iterate over is more than one plugin
-                if current_iterate_plugin_group is not None and \
-                    i == current_iterate_plugin_group['start_plugin_index'] and \
-                    current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                    print(f"Iteration {current_iterate_plugin_group['iterate_plugin_group']._ip_iteration}")
-                    plugin = self.__run_plugin(exp_coll['plugin_dict'][i],
-                        clean_up_plugin=False)
-                    current_iterate_plugin_group['iterate_plugin_group'].set_start_plugin(plugin)
-                    current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
-                elif current_iterate_plugin_group is not None and \
-                    i == current_iterate_plugin_group['end_plugin_index'] and \
-                    current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                    # do something a bit special for running the end plugin on
-                    # iteration 0...
-                    plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
-                        current_iterate_plugin_group)
-                    plugin_name = current_iterate_plugin_group['iterate_plugin_group'].end_plugin.name
-                else:
-                    plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
-                    plugin_name = plugin.name
-                    if current_iterate_plugin_group is not None and \
-                        i >= current_iterate_plugin_group['start_plugin_index'] and \
-                        i <= current_iterate_plugin_group['end_plugin_index'] and \
-                        current_iterate_plugin_group['iterate_plugin_group']._ip_iteration == 0:
-                        current_iterate_plugin_group['iterate_plugin_group'].add_plugin_to_iterate_group(plugin)
+                # in an iterative loop, run differently
+                plugin_name = \
+                    self.__run_iterative_loop(current_iterate_plugin_group)
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
@@ -139,6 +109,49 @@ class PluginRunner(object):
             cu.send_email(self.exp.meta_data.get('email'))
 
         return self.exp
+
+    def __run_iterative_loop(self, ipg_dict):
+        '''
+        Run the plugins in an iterative loop
+        '''
+        start = ipg_dict['start_plugin_index']
+        end = ipg_dict['end_plugin_index']
+        iterate_plugin_group = ipg_dict['iterate_plugin_group']
+
+        # check if plugin is both the start and end plugin, so then it can
+        # be run correctly
+        nPlugin = self.exp.meta_data.get('nPlugin')
+        if start == end and nPlugin == end and \
+            iterate_plugin_group._ip_iteration == 0:
+            # same as for when the end plugin is different to the start
+            # plugin, do something a bit special for the end plugin
+            plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
+                ipg_dict)
+            plugin_name = iterate_plugin_group.end_plugin.name
+        else:
+            exp_coll = self.exp._get_collection()
+            # group of plugins to iterate over is more than one plugin
+            if nPlugin == start and iterate_plugin_group._ip_iteration == 0:
+                print(f"Iteration {iterate_plugin_group._ip_iteration}")
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][nPlugin],
+                    clean_up_plugin=False)
+                plugin_name = plugin.name
+                iterate_plugin_group.set_start_plugin(plugin)
+                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+            elif nPlugin == end and iterate_plugin_group._ip_iteration == 0:
+                # do something a bit special for running the end plugin on
+                # iteration 0...
+                plugin_name = \
+                    self.__run_end_plugin_in_iterate_group_on_iteration_0(
+                        ipg_dict)
+            else:
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][nPlugin])
+                plugin_name = plugin.name
+                if nPlugin >= start and nPlugin <= end and \
+                    iterate_plugin_group._ip_iteration == 0:
+                    iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
+        return plugin_name
 
     def __output_final_message(self):
         kill = True if 'killsignal' in \
