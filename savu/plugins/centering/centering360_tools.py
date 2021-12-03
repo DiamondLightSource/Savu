@@ -76,8 +76,7 @@ class Centering360Tools(PluginTools):
 
     def citation(self):
         """
-        The center of rotation for this reconstruction was calculated
-        automatically using the method described in this work
+        The center of rotation was calculated automatically using the method described in this work
         bibtex:
                 @article{Vo:21,
                 author = {Nghia T. Vo and Robert C. Atwood and Michael Drakopoulos and Thomas Connolley},
