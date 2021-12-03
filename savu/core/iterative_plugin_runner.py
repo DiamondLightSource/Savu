@@ -23,8 +23,6 @@ class IteratePluginGroup():
         #  False, to signify that the default number of iterations is just 1?
         # self._ip_fixed_iterations = False
         self._ip_fixed_iterations = 3
-        # a bool describing if all iterations have been completed
-        self._ip_complete = False
         # The _ip_data_dict value eventually holds 3 keys:
         # - 'iterating'
         # - 0
@@ -105,9 +103,10 @@ class IteratePluginGroup():
         # all remaining iterations i.e. output becomes input and input becomes
         # output.
 
-    def _execute_iteration(self, exp, transport):
+    def _execute_iterations(self, exp, transport):
         '''
-        Execute a single iteration.
+        Execute all iterations from iteration 1 onwards (iteration 0 is
+        currently handled by methods in PluginRunner).
         '''
         # The docstring of this method in IterativePlugin is the following:
         #
@@ -120,9 +119,7 @@ class IteratePluginGroup():
         # description of what this method SHOULD do, but doesn't yet do,
         # in IterativePlugin)
 
-        if self._ip_complete:
-            return
-        else:
+        while self._ip_iteration < self._ip_fixed_iterations:
             print(f"Iteration {self._ip_iteration}...")
             # set iteration number in experiment metadata; not great to do, but
             # am just testing to see if this is even possible
@@ -148,12 +145,6 @@ class IteratePluginGroup():
                     clean_up_plugin=clean_up_plugin,
                     plugin=plugin)
 
-            # transport.no_processing is related to the nTrans variable that
-            # is seen in various places in the "transport layer"
-            # TODO: figure out what nTrans is/means
-            if transport.no_processing:
-                self.set_processing_complete()
-
             # if self._ip_fixed_iterations has been set to something other
             # than its original value of False, and if the current iteration
             # (the one that has just been completed) is the LAST iteration,
@@ -163,9 +154,6 @@ class IteratePluginGroup():
             # but _ip_fixed_iterations starts counting at 1, so if you have
             # reached _ip_iteration=n, then this means that n+1 iterations
             # have been performed
-            if self._ip_fixed_iterations and \
-                    self._ip_iteration == self._ip_fixed_iterations - 1:
-                self.set_processing_complete()
             self.increment_ip_iteration()
 
     def increment_ip_iteration(self):
@@ -329,12 +317,6 @@ class IteratePluginGroup():
                 # name of the ORIGINAL Data object in order for the creation
                 # of the output NeXuS file to work.
                 final_dataset._set_name(name)
-
-    def set_processing_complete(self):
-        '''
-        Signal that the final iteration has been executed.
-        '''
-        self._ip_complete = True
 
     def set_alternating_datasets(self):
         d1 = self.end_plugin.parameters['out_datasets'][0]

@@ -235,9 +235,7 @@ class PluginRunner(object):
         iterate_plugin_group.increment_ip_iteration()
 
         # kick off all subsequent iterations
-        while iterate_plugin_group._ip_iteration < \
-            iterate_plugin_group._ip_fixed_iterations:
-            iterate_plugin_group._execute_iteration(self.exp, self)
+        iterate_plugin_group._execute_iterations(self.exp, self)
 
         # set which output dataset to keep, and which to remove
         iterate_plugin_group._finalise_iterated_datasets()
