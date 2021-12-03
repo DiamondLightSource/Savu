@@ -24,7 +24,8 @@
 import numpy as np
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
-from savu.core.iterate_plugin_group_utils import enable_iterative_loop
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 
 class BaseMedianFilter(Plugin, CpuPlugin):
 
@@ -54,7 +55,7 @@ class BaseMedianFilter(Plugin, CpuPlugin):
             in_data.padding = {'pad_multi_frames': self.pad}
             out_data[0].padding = {'pad_multi_frames': self.pad}
 
-            if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
+            if check_if_end_plugin_in_iterate_group(self.exp):
                 # set the padding for the cloned dataset as well
                 out_data[1].padding = {'pad_multi_frames': self.pad}
 
@@ -64,14 +65,14 @@ class BaseMedianFilter(Plugin, CpuPlugin):
 
     # total number of output datasets
     def nOutput_datasets(self):
-        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
+        if check_if_end_plugin_in_iterate_group(self.exp):
             return 2
         else:
             return 1
 
     # total number of output datasets that are clones
     def nClone_datasets(self):
-        if self.exp.meta_data.get('is_end_plugin_in_iterate_group'):
+        if check_if_end_plugin_in_iterate_group(self.exp):
             return 1
         else:
             return 0

@@ -9,7 +9,7 @@ def enable_iterative_loop(setup_fn):
         setup_fn(*args, **kwargs)
         plugin = args[0]
 
-        if plugin.exp.meta_data.get('is_end_plugin_in_iterate_group'):
+        if check_if_end_plugin_in_iterate_group(plugin.exp):
             # do the other setup required for the plugin to be the end plugin of
             # an iterative group
 
@@ -47,23 +47,12 @@ def create_clone(clone, data):
     clone.create_dataset(data)
     clone.data_info.set('clone', data.get_name())
 
-def check_if_in_iterative_loop(exp, stage):
+def check_if_in_iterative_loop(exp):
     '''
     Inspect the metadata inside the Experiment object to determine if current
     processing is inside an iterative loop
     '''
-    # for every plugin, the value of the nPlugin metadata has a difference of 1
-    # between PluginRunner._run_plugin_list_setup() and
-    # PluginRunner._run_plugin_list(), so that needs to be taken into account
-    # here
-    if stage == 'setup':
-        current_plugin_index = exp.meta_data.get('nPlugin') + 1
-    elif stage == 'run':
-        current_plugin_index = exp.meta_data.get('nPlugin')
-    else:
-        err_msg = f"Invalid stage {stage} given for checking plugin index"
-        raise Exception(err_msg)
-
+    current_plugin_index = exp.meta_data.get('nPlugin')
     for group in exp.meta_data.get('iterate_groups'):
         if group['start_plugin_index'] <= current_plugin_index and \
             group['end_plugin_index'] >= current_plugin_index:
@@ -73,3 +62,16 @@ def check_if_in_iterative_loop(exp, stage):
     # index was within the start and end plugin indices, so processing is
     # not inside an iterative loop
     return None
+
+def check_if_end_plugin_in_iterate_group(exp):
+    '''
+    Determines if the current plugin is at the end of an iterative loop
+    '''
+    iterate_plugin_group = check_if_in_iterative_loop(exp)
+    if iterate_plugin_group is None:
+        return False
+
+    is_end_plugin = \
+        iterate_plugin_group['end_plugin_index'] == exp.meta_data.get('nPlugin')
+
+    return is_end_plugin

@@ -64,25 +64,13 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         checkpoint_plugin = cp.get_checkpoint_plugin()
         for i in range(checkpoint_plugin, n_plugins):
-            # need to check if we're at a plugin index that corresponds to a
-            # plugin inside the group to iterate over or not
-            current_iterate_plugin_group = None
-            iterate_plugin_groups = self.exp.meta_data.get('iterate_groups')
-            for iterate_plugin_group in iterate_plugin_groups:
-                if i >= iterate_plugin_group['start_plugin_index'] and \
-                    i <= iterate_plugin_group['end_plugin_index']:
-                    current_iterate_plugin_group = iterate_plugin_group
-
-            # check if plugin index is one that is the end of a group of plugins
-            # to iterate over
-            is_end_plugin = False
-            if current_iterate_plugin_group is not None and \
-                i == current_iterate_plugin_group['end_plugin_index']:
-                is_end_plugin = True
-
-            self.exp._set_experiment_for_current_plugin(i,
-                is_end_plugin=is_end_plugin)
+            self.exp._set_experiment_for_current_plugin(i)
             memory_before = cu.get_memory_usage_linux()
+
+            # now that nPlugin has been reset, need to check if we're at a
+            # plugin index that corresponds to a plugin inside the group to
+            # iterate over or not
+            current_iterate_plugin_group = check_if_in_iterative_loop(self.exp)
 
             # check if plugin is both the start and end plugin, so then it can
             # be run correctly
@@ -315,17 +303,7 @@ class PluginRunner(object):
         # collection
         count = 0
 
-        # set metadata that is for indicating if the current plugin is the end
-        # plugin of a group of plugins to iterate over
-        self.exp.meta_data.set('is_end_plugin_in_iterate_group', False)
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
-
-            # need to catch if the plugin is part of a group of plugins to
-            # iterate over
-            #
-            # this is because the info of if a plugin is at the END of a group
-            # of plugins to iterate is being set in the Experiment object's
-            # MetaData (self.exp.meta_data)
 
             # TODO: need some sort of marker (that will likely come from
             # savu_config) that defines the indices of
@@ -352,27 +330,6 @@ class PluginRunner(object):
                 end_plugin_index = 2
                 self._add_iterate_plugin_group(start_plugin_index,
                     end_plugin_index)
-
-            # need to check if we're at a plugin index that corresponds to a
-            # plugin inside the group to iterate over or not
-            current_iterate_plugin_group = check_if_in_iterative_loop(self.exp,
-                'setup')
-
-            if current_iterate_plugin_group is not None and \
-                count == current_iterate_plugin_group['start_plugin_index']:
-                info_msg = f"Plugin index {count} isn't at the end of a " \
-                    f"group to iterate over, so leaving its metadata alone"
-                print(info_msg)
-                # set metadata that indicates to
-                # BaseTransport._transport_post_process() that processing is
-                # currently within an iterative loop, to then keep write
-                # permissions on intermediate files
-
-            if current_iterate_plugin_group is not None and \
-                count == current_iterate_plugin_group['end_plugin_index']:
-                # set the metadata indicating the end plugin in the group to
-                # iterate over
-                self.exp.meta_data.set('is_end_plugin_in_iterate_group', True)
 
             self.__plugin_setup(plugin_dict, count)
             count += 1
