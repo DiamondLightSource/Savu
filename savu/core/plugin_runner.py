@@ -118,20 +118,23 @@ class PluginRunner(object):
         end = ipg_dict['end_plugin_index']
         iterate_plugin_group = ipg_dict['iterate_plugin_group']
 
-        # check if plugin is both the start and end plugin, so then it can
-        # be run correctly
         nPlugin = self.exp.meta_data.get('nPlugin')
         if start == end and nPlugin == end and \
             iterate_plugin_group._ip_iteration == 0:
+            # start == end -> group of plugins to iterate over is a single
+            # plugin
+
             # same as for when the end plugin is different to the start
             # plugin, do something a bit special for the end plugin
             plugin_name = self.__run_end_plugin_in_iterate_group_on_iteration_0(
                 ipg_dict)
             plugin_name = iterate_plugin_group.end_plugin.name
         else:
+            # start != end -> group of plugins to iterate over is more than one
+            # plugin
             exp_coll = self.exp._get_collection()
-            # group of plugins to iterate over is more than one plugin
             if nPlugin == start and iterate_plugin_group._ip_iteration == 0:
+                # start plugin is being run, on iteration 0
                 print(f"Iteration {iterate_plugin_group._ip_iteration}")
                 plugin = self.__run_plugin(exp_coll['plugin_dict'][nPlugin],
                     clean_up_plugin=False)
@@ -139,17 +142,23 @@ class PluginRunner(object):
                 iterate_plugin_group.set_start_plugin(plugin)
                 iterate_plugin_group.add_plugin_to_iterate_group(plugin)
             elif nPlugin == end and iterate_plugin_group._ip_iteration == 0:
+                # end plugin is being run, on iteration 0
+
                 # do something a bit special for running the end plugin on
                 # iteration 0...
                 plugin_name = \
                     self.__run_end_plugin_in_iterate_group_on_iteration_0(
                         ipg_dict)
-            else:
+            elif nPlugin >= start and nPlugin <= end and \
+                    iterate_plugin_group._ip_iteration == 0:
+                # a "middle" plugin is being run on iteration 0
                 plugin = self.__run_plugin(exp_coll['plugin_dict'][nPlugin])
                 plugin_name = plugin.name
-                if nPlugin >= start and nPlugin <= end and \
-                    iterate_plugin_group._ip_iteration == 0:
-                    iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+            else:
+                err_str = f"Encountered an unknown case when running inside " \
+                    f"an iterative loop. IteratePluginGroup info: {ipg_dict}"
+                raise Exception(err_str)
 
         return plugin_name
 
