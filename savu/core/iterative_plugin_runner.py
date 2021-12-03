@@ -108,6 +108,61 @@ class IteratePluginGroup():
         # all remaining iterations i.e. output becomes input and input becomes
         # output.
 
+    def _execute_iteration_0(self, exp, transport):
+        '''
+        Run plugins for iteration 0
+        '''
+        start = self.start_index
+        end = self.end_index
+
+        nPlugin = exp.meta_data.get('nPlugin')
+        if start == end and nPlugin == end:
+            # start == end -> group of plugins to iterate over is a single
+            # plugin
+
+            # same as for when the end plugin is different to the start plugin,
+            # do something a bit special for the end plugin
+            plugin_name = self.plugin_runner._PluginRunner__run_end_plugin_in_iterate_group_on_iteration_0(
+                self)
+            plugin_name = self.end_plugin.name
+        else:
+            # start != end -> group of plugins to iterate over is more than one
+            # plugin
+            exp_coll = exp._get_collection()
+            if nPlugin == start:
+                # start plugin is being run, on iteration 0
+                print(f"Iteration {self._ip_iteration}")
+                plugin = self.plugin_runner._PluginRunner__run_plugin(
+                    exp_coll['plugin_dict'][nPlugin],
+                    clean_up_plugin=False)
+                plugin_name = plugin.name
+                self.set_start_plugin(plugin)
+                self.add_plugin_to_iterate_group(plugin)
+            elif nPlugin == end:
+                # end plugin is being run, on iteration 0
+
+                # do something a bit special for running the end plugin on
+                # iteration 0...
+                plugin_name = \
+                    self.plugin_runner._PluginRunner__run_end_plugin_in_iterate_group_on_iteration_0(
+                        self)
+            elif nPlugin >= start and nPlugin <= end:
+                # a "middle" plugin is being run on iteration 0
+                plugin = self.plugin_runner._PluginRunner__run_plugin(
+                    exp_coll['plugin_dict'][nPlugin])
+                plugin_name = plugin.name
+                self.add_plugin_to_iterate_group(plugin)
+            else:
+                info_dict = {
+                    'start_index': self.start_index,
+                    'end_index': self.end_index
+                }
+                err_str = f"Encountered an unknown case when running inside " \
+                    f"an iterative loop. IteratePluginGroup info: {info_dict}"
+                raise Exception(err_str)
+
+        return plugin_name
+
     def _execute_iterations(self, exp, transport):
         '''
         Execute all iterations from iteration 1 onwards (iteration 0 is
