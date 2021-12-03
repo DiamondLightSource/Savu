@@ -51,6 +51,7 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         projection = data[0]  # extract a projection
         projection_align = data[1]  # extract a projection for alignment
 
+        # perform alignment
         shift, error, diffphase = phase_cross_correlation(
                     projection, projection_align, upsample_factor=self.parameters['upsample_factor'])
         return shift
@@ -58,9 +59,13 @@ class Projection2dAlignment(Plugin, CpuPlugin):
     def post_process(self):
         out_data = self.get_out_datasets()[0]
         shift_vector = out_data.data[:, :]  # get a shift vector
+        shift_vector[:, [0, 1]] = shift_vector[:, [1, 0]]  # swap axis in shift vector
+        # get previous projection shifts first from experimental metadata
+        shift_vector_prev = self.exp.meta_data.dict['projection_shifts']
+        shift_vector_prev += shift_vector
+        self.exp.meta_data.set('projection_shifts', shift_vector_prev.copy())
         in_meta_data = self.get_in_meta_data()[0]
-        in_meta_data.set('projection_shifts', shift_vector)
-        self.exp.meta_data.set('projection_shifts', shift_vector)
+        in_meta_data.set('projection_shifts', shift_vector_prev.copy())
 
     def get_max_frames(self):
         return 'single'

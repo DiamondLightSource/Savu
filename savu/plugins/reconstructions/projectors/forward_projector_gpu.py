@@ -45,20 +45,23 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
 
         in_meta_data = self.get_in_meta_data()[0]
+        # extracting parameters from metadata
+        angles_meta_deg = in_meta_data.get('rotation_angle')
+        self.angles_rad = np.deg2rad(angles_meta_deg)
+        self.detectors_horiz = in_meta_data.get('detector_x_length')
+
+        # get experimental metadata of projection_shifts
+        if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+            self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
 
         # deal with user-defined parameters
         if (self.parameters['angles_deg'] is not None):
             angles_list = self.parameters['angles_deg']
             self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-        elif (self.parameters['centre_of_rotation'] is not None):
+        if (self.parameters['centre_of_rotation'] is not None):
             self.cor = self.parameters['centre_of_rotation']
-        elif (self.parameters['det_horiz'] is not None):
+        if (self.parameters['det_horiz'] is not None):
             self.detectors_horiz = self.parameters['det_horiz']
-        else:
-            # extracted parameters from metadata
-            angles_meta_deg = in_meta_data.get('rotation_angle')
-            self.angles_rad = np.deg2rad(angles_meta_deg)
-            self.detectors_horiz = in_meta_data.get('detector_x_length')
 
         self.det_horiz_half = 0.5 * self.detectors_horiz
         self.angles_total = len(self.angles_rad)
@@ -88,9 +91,12 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         if image.ndim == 3:
             vert_size = np.shape(image)[1]
             self.angles_rad = -self.angles_rad
+            cor = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts
+        else:
+            cor = (-self.cor + self.det_horiz_half - 0.5)
         RectoolsDIR = RecToolsDIR(DetectorsDimH=self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
-                                  DetectorsDimV=vert_size,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                  CenterRotOffset=-self.cor + self.det_horiz_half - 0.5, # Center of Rotation (CoR) scalar
+                                  DetectorsDimV=vert_size,  # DetectorsDimV # detector dimension (vertical)
+                                  CenterRotOffset=cor,  # Center of Rotation
                                   AnglesVec=self.angles_rad,  # array of angles in radians
                                   ObjSize=image_size,  # a scalar to define reconstructed object dimensions
                                   device_projector='gpu')

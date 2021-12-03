@@ -103,6 +103,9 @@ class BaseRecon(Plugin):
         # get experimental metadata of projection_shifts 
         if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
             self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
+        else:
+            proj_shifts = np.zeros((inData.get_shape()[0], 2))  # initialise a 2d array of projection shifts
+            self.exp.meta_data.set('projection_shifts', proj_shifts)
         outData.meta_data.set("projection_shifts", copy.deepcopy(self.projection_shifts))
 
     def set_centre_of_rotation(self, inData, outData, mData):
