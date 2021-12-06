@@ -51,10 +51,10 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         out_dataset[0].create_dataset(in_dataset[0])
         out_pData[0].plugin_data_setup(pattern_type, 'single')
 
-        self.slice_dir = list(in_dataset[0].get_slice_dimensions())
+        slice_dir = list(in_dataset[0].get_slice_dimensions())
         procs = self.exp.meta_data.get("processes")
         procs = len([i for i in procs if 'GPU' in i])
-        nSlices = int(np.ceil(in_dataset[0].get_shape()[self.slice_dir[0]] / float(procs)))
+        nSlices = int(np.ceil(in_dataset[0].get_shape()[slice_dir[0]] / float(procs)))
         core_dims_index = list(in_dataset[0].get_core_dimensions())
         core_dims_size = 1
         for core_index in core_dims_index:

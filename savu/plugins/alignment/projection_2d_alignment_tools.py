@@ -24,5 +24,5 @@ class Projection2dAlignmentTools(PluginTools):
               visibility: datasets
               dtype: [list[],list[str]]
               description: Default out dataset names.
-              default: []
+              default: ['shifts']
         """
