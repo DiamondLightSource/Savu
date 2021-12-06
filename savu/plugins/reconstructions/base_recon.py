@@ -24,6 +24,8 @@
 import math
 import copy
 import numpy as np
+import subprocess as sp
+import os
 np.seterr(divide='ignore', invalid='ignore')
 
 import savu.core.utils as cu
@@ -534,3 +536,9 @@ class BaseRecon(Plugin):
         if len(summary) > 0:
             return summary
         return ["Nothing to Report"]
+
+    def get_gpu_memory(self):
+        command = "nvidia-smi --query-gpu=memory.free --format=csv"
+        memory_free_info = sp.check_output(command.split()).decode('ascii').split('\n')[:-1][1:]
+        memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)]
+        return memory_free_values
