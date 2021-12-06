@@ -66,37 +66,6 @@ class IteratePluginGroup():
         # get the in and out datasets, like in IterativeCcpiDenosing.setup()
         in_dataset, out_dataset = self.get_original_datasets()
 
-        # Not needing any of this when trying to let the clone be created via
-        # iterate_plugin_group_utils.py
-#        # get the PluginData objcts, like in IterativeCcpiDenosing.setup()
-#        in_pData, out_pData = self.get_plugin_datasets()
-#
-#        # set the pattern for the single input dataset
-#        in_pData[0].plugin_data_setup(self.start_plugin.parameters['pattern'], 'single')
-#
-#        # Cloned datasets are at the end of the out_dataset list
-#        out_dataset[0].create_dataset(in_dataset[0])
-#
-#        # What is a cloned dataset?
-#        # Since each dataset in Savu has its own backing hdf5 file, a dataset
-#        # cannot be used for input and output at the same time.  So, in the
-#        # case of iterative plugins, if a dataset is used as output and then
-#        # as input on the next iteration, the subsequent output must be a
-#        # different file.
-#        # A cloned dataset is a copy of another dataset but with a different
-#        # backing file.  It doesn't have a name, is not accessible as a dataset
-#        # in the framework and is only used in alternation with another
-#        # dataset to allow it to be used as both input and output
-#        # simultaneously.
-#
-#        # This is a cloned dataset (of out_dataset[0])
-#        self.create_clone(out_dataset[1], out_dataset[0])
-#
-#        # set the pattern for the PluginData objects associated with the two
-#        # ouptut datasets (original and clone)
-#        out_pData[0].plugin_data_setup(self.end_plugin.parameters['pattern'], 'single')
-#        out_pData[1].plugin_data_setup(self.end_plugin.parameters['pattern'], 'single')
-
         # set the input and output datasets for the first iteration
         self.set_iteration_datasets(0, [in_dataset[0]], [out_dataset[0]],
                                     self.start_plugin.parameters['pattern'])
