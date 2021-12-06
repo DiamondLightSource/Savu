@@ -30,6 +30,8 @@ from savu.data.chunking import Chunking
 #from savu.data.data_structures.data_types.data_plus_darks_and_flats \
 #    import NoImageKey
 from savu.data.data_structures.data_types.base_type import BaseType
+from savu.core.iterate_plugin_group_utils import \
+    check_if_end_plugin_in_iterate_group
 
 
 NX_CLASS = 'NX_class'
@@ -77,7 +79,15 @@ class Hdf5Utils(object):
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])
             link = self.exp.meta_data.get(['link_type', name])
-            name = data.get_name(orig=True)
+            if check_if_end_plugin_in_iterate_group(self.exp):
+                # TODO: for now, for iterative groups of plugins, allow the
+                # cloned dataset to be linked in the output NeXuS file (by
+                # letting its "clone name" be the value of the name variable,
+                # rather than the name of the original dataset that it was
+                # cloned from)
+                name = data.get_name(orig=False)
+            else:
+                name = data.get_name(orig=True)
             nxs_entry = self.__add_nxs_entry(nxs_file, link, group_name, name)
             self.__add_nxs_data(nxs_file, nxs_entry, link, group_name, data)
 

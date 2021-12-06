@@ -116,19 +116,29 @@ class IteratePluginGroup():
         end = self.end_index
 
         nPlugin = exp.meta_data.get('nPlugin')
+        exp_coll = exp._get_collection()
         if start == end and nPlugin == end:
             # start == end -> group of plugins to iterate over is a single
             # plugin
 
-            # same as for when the end plugin is different to the start plugin,
-            # do something a bit special for the end plugin
-            plugin_name = self.plugin_runner._PluginRunner__run_end_plugin_in_iterate_group_on_iteration_0(
-                self)
-            plugin_name = self.end_plugin.name
+            plugin_name = \
+                self.plugin_runner._PluginRunner__run_plugin(
+                    exp_coll['plugin_dict'][nPlugin],
+                    clean_up_plugin=False)
+
+            # since the end plugin has now been run, the group of plugins to
+            # iterate over has been executed once, and this counts as having
+            # done one iteration (ie, at this point, iteration 0 is
+            # complete)
+            self.increment_ip_iteration()
+            # kick off all subsequent iterations
+            self._execute_iterations(exp, transport)
+            # finished all iterations, set which output dataset to keep, and
+            # which to remove
+            self._finalise_iterated_datasets()
         else:
             # start != end -> group of plugins to iterate over is more than one
             # plugin
-            exp_coll = exp._get_collection()
             if nPlugin == start:
                 # start plugin is being run, on iteration 0
                 print(f"Iteration {self._ip_iteration}")
@@ -141,11 +151,21 @@ class IteratePluginGroup():
             elif nPlugin == end:
                 # end plugin is being run, on iteration 0
 
-                # do something a bit special for running the end plugin on
-                # iteration 0...
                 plugin_name = \
-                    self.plugin_runner._PluginRunner__run_end_plugin_in_iterate_group_on_iteration_0(
-                        self)
+                    self.plugin_runner._PluginRunner__run_plugin(
+                        exp_coll['plugin_dict'][nPlugin],
+                        clean_up_plugin=False)
+
+                # since the end plugin has now been run, the group of plugins to
+                # iterate over has been executed once, and this counts as having
+                # done one iteration (ie, at this point, iteration 0 is
+                # complete)
+                self.increment_ip_iteration()
+                # kick off all subsequent iterations
+                self._execute_iterations(exp, transport)
+                # finished all iterations, set which output dataset to keep, and
+                # which to remove
+                self._finalise_iterated_datasets()
             elif nPlugin >= start and nPlugin <= end:
                 # a "middle" plugin is being run on iteration 0
                 plugin = self.plugin_runner._PluginRunner__run_plugin(

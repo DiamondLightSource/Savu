@@ -25,7 +25,8 @@ import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
 from savu.core.iterative_plugin_runner import IteratePluginGroup
-from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 
 
 class PluginRunner(object):
@@ -120,99 +121,35 @@ class PluginRunner(object):
         cu.user_message("* Processing " + msg + " *")
         cu.user_message("*" * stars)
 
-    def __run_end_plugin_in_iterate_group_on_iteration_0(self,
-                                                         iterate_plugin_group):
-        '''
-        Hacky solution to be able to run the end plugin on iteration 0 and still
-        be able to change its output datasets to be only one of the original or
-        the cloned dataset.
-
-        This is done by copying a large amount of code from
-        PluginRunner.__run_plugin(), and then adding a few things to change the
-        ouput datasets of the end plugin in the group of plugins to iterate
-        over.
-
-        Note that this functionality probably could also be achieved by
-        modifying PluginRunner.__run_plugin().
-        '''
-        start_plugin_index = iterate_plugin_group.start_index
-        end_plugin_index = iterate_plugin_group.end_index
-
-        exp_coll = self.exp._get_collection()
-        plugin_dict = exp_coll['plugin_dict'][end_plugin_index]
-        # manually load the plugin, so then the output datasets can be modified
-        # before running the plugin
-        plugin = self._transport_load_plugin(self.exp, plugin_dict)
-        # add the end plugin to IteratePluginGroup
-        iterate_plugin_group.add_plugin_to_iterate_group(plugin)
-
-        # check if this end plugin is ALSO the start plugin
-        if start_plugin_index == end_plugin_index:
-            iterate_plugin_group.set_start_plugin(plugin)
-
-        # set the end plugin in IteratePluginGroup
-        iterate_plugin_group.set_end_plugin(plugin)
-        # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
-        iterate_plugin_group.set_alternating_datasets()
-        # setup the datasets for iteration 0 and 1 inside the
-        # IteratePluginGroup object
-        iterate_plugin_group.setup_datasets()
-        # set the output datasets of the end plugin
-        iterate_plugin_group._IteratePluginGroup__set_datasets()
-
-        # START of stuff copied from __run_plugin()
-
-        #  ********* transport function ***********
-        self._transport_pre_plugin()
-        cu.user_message("*Running the %s plugin*" % plugin.name)
-        plugin._run_plugin(self.exp, self)
-
-        # don't clean up the end plugin on iteration 0 (just like we're not
-        # cleaning up any of the other plugins in the group to iterate over on
-        # iteration 0), so then the PluginData objects associated to the plugin
-        # objects remain intact
-        info_msg = f"Not cleaning up plugin {plugin.name}, as it is the end " \
-            f"plugin in a group to iterate over"
-        print(info_msg)
-
-        # ADDITIONAL stuff for running iterations
-
-        # since the end plugin has now been run, the group of plugins to
-        # iterate over has been executed once, and this counts as having done
-        # one iteration (ie, at this point, iteration 0 is complete)
-        iterate_plugin_group.increment_ip_iteration()
-
-        # kick off all subsequent iterations
-        iterate_plugin_group._execute_iterations(self.exp, self)
-
-        # set which output dataset to keep, and which to remove
-        iterate_plugin_group._finalise_iterated_datasets()
-
-        # END of additional stuff for running iterations
-
-        self.exp._barrier(msg="Plugin returned from driver in Plugin Runner")
-        cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
-        finalise = self.exp._finalise_experiment_for_current_plugin()
-
-        #  ********* transport function ***********
-        self._transport_post_plugin()
-
-        for data in finalise['remove'] + finalise['replace']:
-            #  ********* transport function ***********
-            self._transport_terminate_dataset(data)
-
-        self.exp._reorganise_datasets(finalise)
-
-        # END of stuff copied from __run_plugin()
-
-        # TODO: for now, return the name of the start plugin of the group to
-        # iterate over
-        return iterate_plugin_group.start_plugin.name
-
     def __run_plugin(self, plugin_dict, clean_up_plugin=True, plugin=None):
         # allow plugin objects to be reused for running iteratively
         if plugin is None:
             plugin = self._transport_load_plugin(self.exp, plugin_dict)
+
+        is_end_plugin_in_iterative_loop = check_if_end_plugin_in_iterate_group(
+            self.exp)
+
+        if is_end_plugin_in_iterative_loop:
+            iterate_plugin_group = check_if_in_iterative_loop(self.exp)
+
+            if iterate_plugin_group._ip_iteration == 0:
+                # add the end plugin to IteratePluginGroup
+                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
+                # check if this end plugin is ALSO the start plugin
+                if iterate_plugin_group.start_index == \
+                    iterate_plugin_group.end_index:
+                    iterate_plugin_group.set_start_plugin(plugin)
+
+                # set the end plugin in IteratePluginGroup
+                iterate_plugin_group.set_end_plugin(plugin)
+                # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
+                iterate_plugin_group.set_alternating_datasets()
+                # setup the datasets for iteration 0 and 1 inside the
+                # IteratePluginGroup object
+                iterate_plugin_group.setup_datasets()
+                # set the output datasets of the end plugin
+                iterate_plugin_group._IteratePluginGroup__set_datasets()
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
