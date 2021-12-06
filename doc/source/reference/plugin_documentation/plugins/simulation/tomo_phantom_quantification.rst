@@ -6,7 +6,7 @@ Description
 
 A plugin to calculate some standard image quality metrics 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

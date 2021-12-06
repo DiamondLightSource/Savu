@@ -6,7 +6,7 @@ Description
 
 A hdf5 dataset of a specified size is created at runtime using Tomophantom to generate synthetic data , saved with relevant meta_data to a NeXus file, and used as input. It recreates the behaviour of the nxtomo loader but with synthetic data.  The input file path passed to Savu will be ignored (use a dummy). 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
@@ -21,7 +21,7 @@ Parameter definitions
             visibility: basic
             dtype: "[list[float], list[]]"
             description: "A list specifiying the sizes of dimensions of the generated 3D               projection data in the following format [Angles, DetectorsY, DetectorsX]."
-            default: "[]"
+            default: "[180, 128, 160]"
         
         axis_labels:
             visibility: basic
@@ -33,7 +33,7 @@ Parameter definitions
             visibility: basic
             dtype: int
             description: Select a model number from the library (see TomoPhantom dat files).
-            default: "11"
+            default: "13"
         
         patterns:
             visibility: hidden

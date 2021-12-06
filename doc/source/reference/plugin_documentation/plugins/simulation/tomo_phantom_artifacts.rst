@@ -6,7 +6,7 @@ Description
 
 A plugin to add artifacts to the generated synthetic data using TomoPhantom 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

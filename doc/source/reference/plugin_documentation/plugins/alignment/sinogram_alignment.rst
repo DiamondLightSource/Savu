@@ -6,7 +6,7 @@ Description
 
 The centre of mass of each row is determined and then a sine function fit through these to determine the centre of rotation.  The residual between each centre of mass and the sine function is then used to align each row. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

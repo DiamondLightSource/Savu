@@ -6,7 +6,7 @@ Description
 
 A class to load tomography data from an NXFluo file. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 A class to load 2 scans in Nexus/hdf format into one dataset. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
@@ -25,14 +25,14 @@ Parameter definitions
         
         dark:
             visibility: basic
-            dtype: "[list[filepath, h5path, float], list[None, None, float]]"
-            description: Optional path to the dark field data file, nxs path and scale value.
+            dtype: "[list[[dir, filepath], h5path, float], list[None, None, float]]"
+            description: Optional path to the dark field data folder, nxs path and scale value.
             default: "['None', 'None', 1]"
         
         flat:
             visibility: basic
-            dtype: "[list[filepath, h5path, float], list[None, None, float]]"
-            description: Optional path to the flat field data file, nxs path and scale value.
+            dtype: "[list[[dir,filepath], h5path, float], list[None, None, float]]"
+            description: Optional path to the flat field data folder, nxs path and scale value.
             default: "['None', 'None', 1]"
         
         range:

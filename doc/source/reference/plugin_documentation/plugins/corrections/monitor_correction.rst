@@ -6,7 +6,7 @@ Description
 
 Corrects the data to the monitor counts. This plugin corrects data[0] from data[1] by dividing. We allow a scale and offset due to I18's uncalibrated ic 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

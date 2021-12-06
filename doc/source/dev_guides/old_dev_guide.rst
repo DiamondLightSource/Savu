@@ -91,17 +91,17 @@ http://docs.cython.org/src/tutorial/clibraries.html
 
 1) A C interface: A \*.pxd file, which is similar to a C header file, providing C function definitions required in the python code. For example, cdexing.pxd:
 
-.. literalinclude:: ../../../extension_examples/cdezing.pyd
+.. literalinclude:: ../../../examples/extension_examples/cdezing.pyd
    :linenos:
 
 2) A python wrapper: A \*.pyx file that must have a different name to the \*.pyd file above. For example, dezing.pyx:
 
-.. literalinclude:: ../../../extension_examples/dezing.pyx
+.. literalinclude:: ../../../examples/extension_examples/dezing.pyx
    :linenos:
 
 3) Makefile: In python this is a setup.py file.  For example, setup.py:
 
-.. literalinclude:: ../../../extension_examples/setup.py
+.. literalinclude:: ../../../examples/extension_examples/setup.py
    :linenos:
 
 Compile this file, passing appropriate C compiler flags if necessary, to obtain a \*.so file.
@@ -121,17 +121,17 @@ Boost.python aims to expose C++ classes/functions to python, without changing th
 
 1) A python wrapper: Create the python module and define the external function names.  For example, example_wrapper.cpp
 
-.. literalinclude:: ../../../extension_examples/example_wrapper.cpp
+.. literalinclude:: ../../../examples/extension_examples/example_wrapper.cpp
    :linenos:
 
 2) A makefile: A standard C++ makefile, incorporating Boost.Python path, to build a shared object library (\*.so).  For example, example_makefile
 
-.. literalinclude:: ../../../extension_examples/example_makefile
+.. literalinclude:: ../../../examples/extension_examples/example_makefile
    :linenos:
 
 The output file for this example is a example.so file.  Transfer this file to \lib and import as a python module, e.g. import example, then simply access a function from within your python code as example.example_function1(...).
 
 The class file example.cpp (below) along with example_wrapper.cpp, illustrate how to incorporate numpy arrays into the extension.
 
-.. literalinclude:: ../../../extension_examples/example.cpp
+.. literalinclude:: ../../../examples/extension_examples/example.cpp
    :linenos:

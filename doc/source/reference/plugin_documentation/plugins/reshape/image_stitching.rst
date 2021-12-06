@@ -6,7 +6,7 @@ Description
 
 Method to stitch images of two tomo-datasets including flat-field correction. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

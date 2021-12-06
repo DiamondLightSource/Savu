@@ -9,7 +9,7 @@ Method to correct the point-spread-function effect. Working on raw     projectio
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/mtf_deconvolution_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

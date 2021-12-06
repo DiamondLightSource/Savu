@@ -6,7 +6,7 @@ Description
 
 A class to load multiple savu datasets in Nexus format into one dataset. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

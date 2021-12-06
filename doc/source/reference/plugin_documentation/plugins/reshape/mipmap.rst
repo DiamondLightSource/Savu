@@ -6,7 +6,7 @@ Description
 
 A plugin to downsample multidimensional data successively by powers of 2. The output is multiple 'mipmapped' datasets, each a power of 2 smaller in each dimension than the previous dataset. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

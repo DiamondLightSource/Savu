@@ -6,7 +6,7 @@ Description
 
 A plugin to downsample and rescale data volume including options of flipping and rotating images 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

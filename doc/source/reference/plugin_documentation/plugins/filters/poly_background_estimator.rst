@@ -6,7 +6,7 @@ Description
 
 This plugin uses peakutils to find peaks in spectra. This is then metadata. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
