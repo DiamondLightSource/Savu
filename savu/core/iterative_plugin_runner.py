@@ -147,7 +147,6 @@ class IteratePluginGroup():
                     clean_up_plugin=False)
                 plugin_name = plugin.name
                 self.set_start_plugin(plugin)
-                self.add_plugin_to_iterate_group(plugin)
             elif nPlugin == end:
                 # end plugin is being run, on iteration 0
 
@@ -171,7 +170,6 @@ class IteratePluginGroup():
                 plugin = self.plugin_runner._PluginRunner__run_plugin(
                     exp_coll['plugin_dict'][nPlugin])
                 plugin_name = plugin.name
-                self.add_plugin_to_iterate_group(plugin)
             else:
                 info_dict = {
                     'start_index': self.start_index,

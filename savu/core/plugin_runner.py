@@ -126,30 +126,33 @@ class PluginRunner(object):
         if plugin is None:
             plugin = self._transport_load_plugin(self.exp, plugin_dict)
 
+        iterate_plugin_group = check_if_in_iterative_loop(self.exp)
+
+        if iterate_plugin_group is not None and \
+            iterate_plugin_group._ip_iteration == 0:
+                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
         is_end_plugin_in_iterative_loop = check_if_end_plugin_in_iterate_group(
             self.exp)
 
-        if is_end_plugin_in_iterative_loop:
-            iterate_plugin_group = check_if_in_iterative_loop(self.exp)
+        if iterate_plugin_group is not None and \
+            is_end_plugin_in_iterative_loop and \
+            iterate_plugin_group._ip_iteration == 0:
 
-            if iterate_plugin_group._ip_iteration == 0:
-                # add the end plugin to IteratePluginGroup
-                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+            # check if this end plugin is ALSO the start plugin
+            if iterate_plugin_group.start_index == \
+                iterate_plugin_group.end_index:
+                iterate_plugin_group.set_start_plugin(plugin)
 
-                # check if this end plugin is ALSO the start plugin
-                if iterate_plugin_group.start_index == \
-                    iterate_plugin_group.end_index:
-                    iterate_plugin_group.set_start_plugin(plugin)
-
-                # set the end plugin in IteratePluginGroup
-                iterate_plugin_group.set_end_plugin(plugin)
-                # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
-                iterate_plugin_group.set_alternating_datasets()
-                # setup the datasets for iteration 0 and 1 inside the
-                # IteratePluginGroup object
-                iterate_plugin_group.setup_datasets()
-                # set the output datasets of the end plugin
-                iterate_plugin_group._IteratePluginGroup__set_datasets()
+            # set the end plugin in IteratePluginGroup
+            iterate_plugin_group.set_end_plugin(plugin)
+            # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
+            iterate_plugin_group.set_alternating_datasets()
+            # setup the datasets for iteration 0 and 1 inside the
+            # IteratePluginGroup object
+            iterate_plugin_group.setup_datasets()
+            # set the output datasets of the end plugin
+            iterate_plugin_group._IteratePluginGroup__set_datasets()
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
