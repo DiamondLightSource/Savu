@@ -168,9 +168,6 @@ class IteratePluginGroup():
 
         while self._ip_iteration < self._ip_fixed_iterations:
             print(f"Iteration {self._ip_iteration}...")
-            # set iteration number in experiment metadata; not great to do, but
-            # am just testing to see if this is even possible
-            exp.meta_data.set('iteration_number', self._ip_iteration)
             self.__set_datasets()
             # replace this with the PluginRunner.__run_plugin() method to run
             # the individual plugins in the group of plugins to iterate
