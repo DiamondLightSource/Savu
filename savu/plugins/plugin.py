@@ -134,7 +134,8 @@ class Plugin(PluginDatasets):
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
-        self.stats.set_slice_stats(frames)
+        if not self.stats.is_meta_data:
+            self.stats.set_slice_stats(frames)
         self.pcount += 1
         return frames
 
@@ -163,7 +164,8 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
-        self.stats.set_volume_stats()
+        if not self.stats.is_meta_data:
+            self.stats.set_volume_stats()
         pass
 
     def set_preview(self, data, params):
