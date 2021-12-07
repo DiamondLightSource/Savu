@@ -84,8 +84,12 @@ class Hdf5Transport(BaseTransport):
                 if self.exp.meta_data.get('process') == \
                         len(self.exp.meta_data.get('processes'))-1:
                     self._populate_nexus_file(data)
-                    # check what iteration number we are on
-                    if iterate_group is not None:
+                    if iterate_group is None:
+                        # currently not in an iterative loop, link output h5
+                        # file as normal
+                        self.hdf5._link_datafile_to_nexus_file(data)
+                    else:
+                        # check what iteration number we are on
                         if iterate_group._ip_iteration == 0:
                             # link output h5 file as normal
                             self.hdf5._link_datafile_to_nexus_file(data)
@@ -95,8 +99,6 @@ class Hdf5Transport(BaseTransport):
                             info_msg = f"Not linking intermediate h5 file, " \
                                 f"on iteration {iterate_group._ip_iteration}"
                             print(info_msg)
-                    else:
-                        print(f"Not within an iterative loop")
                 self.exp._barrier(msg=msg)
                 if iterate_group is not None:
                     # reopen file with write permissiosn still present
