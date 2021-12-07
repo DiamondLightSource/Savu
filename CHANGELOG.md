@@ -4,6 +4,7 @@ All notable changes to this project are documented in this file.
 
 ## _Core_
 * Statistics (TODO) 
+* Iterative plugins (TODO) 
 
 ## _Existing Plugins_
 
@@ -28,6 +29,10 @@ All notable changes to this project are documented in this file.
   * *projection_2d_alignment* - works with 2 sets of 3D projection data by comparing projection images and estimating vertical-horizontal shifts in data. The vector shifts then stored in experimental data to be used later in 3D vector geometry.
 ### Filters
   * *wavelet_denoising_gpu* - a GPU plugin for denoising using Wavelets. Highly optimised for GPU performance. 
+
+## _Updated and new packages as dependencies_
+  * A new [pypwt](https://github.com/pierrepaleo/pypwt "pypwt") GPU wavelet package added through Jenkins build and savu-dep channel 
+  * ToMoBAR and TomoPhantom packages have been updated
 
 ## _Configurator_ 
 
