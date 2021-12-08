@@ -48,7 +48,7 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._setup(self)
-        Statistics.setup(self.exp)
+        Statistics._setup(self.exp)
 
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
@@ -81,6 +81,7 @@ class PluginRunner(object):
                 self._transport_cleanup(i + 1)
                 break
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
+            Statistics._count()
             cp.output_plugin_checkpoint()
 
         #  ********* transport function ***********
@@ -96,7 +97,7 @@ class PluginRunner(object):
         if self.exp.meta_data.get('email'):
             cu.send_email(self.exp.meta_data.get('email'))
 
-        Statistics.post_chain()
+        Statistics._post_chain()
         return self.exp
 
     def __output_final_message(self):
