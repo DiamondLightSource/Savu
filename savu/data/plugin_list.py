@@ -60,6 +60,7 @@ class PluginList(object):
         self.saver_plugin_status = True
         self._template = None
         self.version = None
+        self.iterate_plugin_groups = []
 
     def add_template(self, create=False):
         self._template = Template(self)
@@ -130,6 +131,21 @@ class PluginList(object):
                             )
                     self.plugin_list.append(plugin)
 
+            # add info about groups of plugins to iterate over into
+            # self.iterate_plugin_groups
+            try:
+                iterate_groups = plugin_file['entry/iterate_plugin_groups']
+                for key in list(iterate_groups.keys()):
+                    iterate_group_dict = {
+                        'start_index': iterate_groups[key]['start'][()],
+                        'end_index': iterate_groups[key]['end'][()]
+                    }
+                    self.iterate_plugin_groups.append(iterate_group_dict)
+            except Exception as e:
+                err_str = f"Process list file {filename} doesn't have the " \
+                          f"iterate_plugin_groups internal hdf5 path"
+                print(err_str)
+
             if template:
                 self.add_template()
                 self._template.update_process_list(template)
@@ -171,6 +187,9 @@ class PluginList(object):
                 )
                 self.__populate_plugins_group(plugin_group, plugin)
 
+            self.__save_iterate_plugin_groups(self._overwrite_group(
+                entry, 'iterate_plugin_groups', 'NXnote'))
+
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + ".savu"
             self._template._output_template(fname, out_filename)
@@ -181,6 +200,19 @@ class PluginList(object):
         group = entry.create_group(name.encode("ascii"))
         group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
+
+    def __save_iterate_plugin_groups(self, group):
+        '''
+        Save information regarding the groups of plugins to iterate over
+        '''
+        for count, iterate_group in enumerate(self.iterate_plugin_groups):
+            grp_name = str(count)
+            grp = group.create_group(grp_name.encode('ascii'))
+            shape = () # scalar data
+            grp.create_dataset('start'.encode('ascii'), shape, 'i',
+                iterate_group['start_index'])
+            grp.create_dataset('end'.encode('ascii'), shape, 'i',
+                iterate_group['end_index'])
 
     def __save_savu_notes(self, notes):
         """ Save the version number
