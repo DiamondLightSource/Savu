@@ -138,7 +138,8 @@ class PluginList(object):
                 for key in list(iterate_groups.keys()):
                     iterate_group_dict = {
                         'start_index': iterate_groups[key]['start'][()],
-                        'end_index': iterate_groups[key]['end'][()]
+                        'end_index': iterate_groups[key]['end'][()],
+                        'iterations': iterate_groups[key]['iterations'][()]
                     }
                     self.iterate_plugin_groups.append(iterate_group_dict)
             except Exception as e:
@@ -213,6 +214,8 @@ class PluginList(object):
                 iterate_group['start_index'])
             grp.create_dataset('end'.encode('ascii'), shape, 'i',
                 iterate_group['end_index'])
+            grp.create_dataset('iterations'.encode('ascii'), shape, 'i',
+                iterate_group['iterations'])
 
     def __save_savu_notes(self, notes):
         """ Save the version number

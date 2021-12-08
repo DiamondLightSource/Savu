@@ -110,7 +110,8 @@ class Experiment(object):
         for group in iterate_group_dicts:
             iterate_plugin_group = IteratePluginGroup(transport,
                 group['start_index'],
-                group['end_index'])
+                group['end_index'],
+                group['iterations'])
             iterate_plugin_groups.append(iterate_plugin_group)
 
         self.meta_data.set('iterate_groups', iterate_plugin_groups)

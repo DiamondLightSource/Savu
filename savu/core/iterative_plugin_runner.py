@@ -6,7 +6,7 @@ class IteratePluginGroup():
     Class for iterating a set/group of plugins in a process list
     '''
 
-    def __init__(self, plugin_runner, start_index, end_index):
+    def __init__(self, plugin_runner, start_index, end_index, iterations):
         self.in_data = None
         self.out_data = None
         # PluginRunner object for running the individual plugns in the group of
@@ -27,10 +27,7 @@ class IteratePluginGroup():
         # the current iteration: starts counting at 0 (zero-based)
         self._ip_iteration = 0
         # the number of iterations to perform: starts counting at 1 (one-based)
-        # TODO: should this have a starting/default value of 1 rather than
-        #  False, to signify that the default number of iterations is just 1?
-        # self._ip_fixed_iterations = False
-        self._ip_fixed_iterations = 3
+        self._ip_fixed_iterations = iterations
         # The _ip_data_dict value eventually holds 3 keys:
         # - 'iterating'
         # - 0
