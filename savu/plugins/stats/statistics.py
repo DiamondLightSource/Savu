@@ -14,8 +14,13 @@ import numpy as np
 import os
 
 
+
+
+
 class Statistics(object):
     has_setup = False
+    index_dict = {"max": 0, "min": 1, "mean": 2, "mean_std_dev": 3, "median_std_dev": 4}
+    key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"]
 
     def __init__(self, plugin_self):
         self.plugin = plugin_self
@@ -26,15 +31,16 @@ class Statistics(object):
         self._set_pattern_info()
 
     @classmethod
-    def setup(cls, exp):
+    def _setup(cls, exp):
         """Sets up the statistics class for the whole experiment (only called once)"""
-        cls.count = 1
+        cls.count = 2
         cls.data_stats = {}
         cls.volume_stats = {}
+        cls.global_stats = {}
         n_plugins = len(exp.meta_data.plugin_list.plugin_list)
-        for n in range(n_plugins):
-            cls.data_stats[n + 1] = [None, None, None, None, None]
-            cls.volume_stats[n + 1] = [None, None, None, None, None]
+        # for n in range(n_plugins):
+        #    cls.data_stats[n + 1] = [None, None, None, None, None]
+        #    cls.volume_stats[n + 1] = [None, None, None, None, None]
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -43,8 +49,9 @@ class Statistics(object):
             os.mkdir(cls.path)
         cls.has_setup = True
 
+
     def set_slice_stats(self, slice1):
-        """Appends arrays containing stats, with the stats parameters of the current slice"""
+        """Appends slice stats arrays with the stats parameters of the current slice"""
         if slice1 is not None:
             slice_num = self.plugin.pcount
             slice1 = self._de_list(slice1)
@@ -58,9 +65,15 @@ class Statistics(object):
         return self.stats[stat][slice_num]
 
     def set_volume_stats(self):
-        """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values."""
-        Statistics.count += 1
+        """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values.
+        Links volume stats with the output dataset and writes slice stats to file.
+        """
         p_num = Statistics.count
+        name = self.plugin_name
+        i = 2
+        while name in list(Statistics.global_stats.keys()):
+            name = self.plugin_name + str(i)
+            i += 1
         Statistics.data_stats[p_num] = [None, None, None, None, None]
         Statistics.volume_stats[p_num] = [None, None, None, None, None]
         if len(self.stats['max']) != 0:
@@ -70,17 +83,79 @@ class Statistics(object):
                 Statistics.data_stats[p_num][2] = np.mean(self.stats['mean'])
                 Statistics.data_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
                 Statistics.data_stats[p_num][4] = np.median(self.stats['standard_deviation'])
+                Statistics.global_stats[p_num] = Statistics.data_stats[p_num]
+
             elif self.pattern in ['VOLUME_XZ', 'VOLUME_XY', 'VOLUME_YZ']:
                 Statistics.volume_stats[p_num][0] = max(self.stats['max'])
                 Statistics.volume_stats[p_num][1] = min(self.stats['min'])
                 Statistics.volume_stats[p_num][2] = np.mean(self.stats['mean'])
                 Statistics.volume_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
                 Statistics.volume_stats[p_num][4] = np.median(self.stats['standard_deviation'])
-
+                Statistics.global_stats[p_num] = Statistics.volume_stats[p_num]
+            Statistics.global_stats[name] = Statistics.global_stats[p_num]
         self._link_stats_to_datasets()
         slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
                                 self.stats['standard_deviation']])
         self._write_stats_to_file(slice_stats, p_num)
+
+    def get_stats(self, plugin_name, n=None, stat=None):
+        """Returns stats associated with a certain plugin.
+
+        :param plugin_name: name of the plugin whose associated stats are being fetched.
+        :param n: In a case where there are multiple instances of <plugin_name> in the process list,
+            specify the nth instance. Not specifying will select the first (or only) instance.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': ,'min': ,'mean': ,'mean_std_dev': ,'median_std_dev': }
+        """
+        name = plugin_name
+        if n is not None and n not in (0, 1):
+            name = name + str(n)
+        if stat is not None:
+            i = Statistics.index_dict[stat]
+            return Statistics.global_stats[name][i]
+        else:
+            stats = dict(zip(Statistics.key_list, Statistics.global_stats[name]))
+            return stats
+
+    def get_stats_from_num(self, p_num, stat=None):
+        """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
+
+        :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
+            If p_num <= 0, it is relative to the plugin number of the current plugin being run.
+            E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': ,'min': ,'mean': ,'mean_std_dev': ,'median_std_dev': }
+        """
+        if p_num <= 0:
+            p_num = Statistics.count + p_num
+        if stat is not None:
+            i = Statistics.index_dict[stat]
+            return Statistics.global_stats[p_num][i]
+        else:
+            stats = dict(zip(Statistics.key_list, Statistics.global_stats[p_num]))
+            return stats
+
+    def get_stats_from_dataset(self, dataset, stat=None, set_num=None):
+        """Returns stats associated with a dataset.
+
+        :param dataset: The dataset whose associated stats are being fetched.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': ,'min': ,'mean': ,'mean_std_dev': ,'median_std_dev': }
+        :param set_num: In the (rare) case that there are multiple sets of stats associated with the dataset,
+            specify which set to return.
+        """
+        key = "stats"
+        if set_num is not None:
+            key = key + str(set_num)
+        if key in list(dataset.meta_data.dict.keys()):
+            stats = dataset.meta_data.get(key)
+        if stat is not None:
+            return stats[stat]
+        else:
+            return stats
 
     def get_data_stats(self):
         return Statistics.data_stats
@@ -123,7 +198,7 @@ class Statistics(object):
                                           np.median(self.stats['standard_deviation']))
 
     def _write_stats_to_file(self, slice_stats, p_num):
-        """Writes slice-wide statistics to a h5 file"""
+        """Writes slice statistics to a h5 file"""
         path = Statistics.path
         filename = f"{path}/stats_p{p_num}_{self.plugin_name}.h5"
         slice_stats_dim = (slice_stats.shape[1],)
@@ -189,7 +264,12 @@ class Statistics(object):
         return slice1
 
     @classmethod
-    def post_chain(cls):
+    def _count(cls):
+        cls.count += 1
+
+    @classmethod
+    def _post_chain(cls):
         print(cls.data_stats)
         print(cls.volume_stats)
+        print(cls.global_stats)
         cls.has_setup = False
