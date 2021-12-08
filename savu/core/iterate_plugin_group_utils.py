@@ -54,8 +54,10 @@ def check_if_in_iterative_loop(exp):
     '''
     current_plugin_index = exp.meta_data.get('nPlugin')
     for group in exp.meta_data.get('iterate_groups'):
-        if group.start_index <= current_plugin_index and \
-            group.end_index >= current_plugin_index:
+        start_index = shift_plugin_index(exp, group.start_index)
+        end_index = shift_plugin_index(exp, group.end_index)
+        if start_index <= current_plugin_index and \
+            end_index >= current_plugin_index:
             return group
 
     # never hit an instance of IteratePluginGroup where the current plugin
@@ -71,7 +73,24 @@ def check_if_end_plugin_in_iterate_group(exp):
     if iterate_plugin_group is None:
         return False
 
-    is_end_plugin = \
-        iterate_plugin_group.end_index == exp.meta_data.get('nPlugin')
+    end_index = shift_plugin_index(exp, iterate_plugin_group.end_index)
+    is_end_plugin = end_index == exp.meta_data.get('nPlugin')
 
     return is_end_plugin
+
+def shift_plugin_index(exp, index):
+    '''
+    The indices used for plugins when editing a process list in the
+    configurator, and the indices used by PluginRunner._run_plugin_list(),
+    differ based on a few different things, such as:
+    - zero-based indexing internally in Savu, but one-based indexing in the
+      configurator
+    - the number of loaders in the process list
+
+    This function is for shifting the one-based plugin index as would be seen in
+    the configurator, to the nPlugin experimental metadata value as would be
+    seen for the same plugin in the for loop in PluginRunner._run_plugin_list().
+    '''
+    n_loaders = exp.meta_data.plugin_list._get_n_loaders()
+    SHIFT_TO_ZERO_BASED = 1
+    return index - SHIFT_TO_ZERO_BASED - n_loaders

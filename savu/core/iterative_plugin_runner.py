@@ -1,3 +1,6 @@
+from savu.core.iterate_plugin_group_utils import shift_plugin_index
+
+
 class IteratePluginGroup():
     '''
     Class for iterating a set/group of plugins in a process list
@@ -81,8 +84,8 @@ class IteratePluginGroup():
         '''
         Run plugins for iteration 0
         '''
-        start = self.start_index
-        end = self.end_index
+        start = shift_plugin_index(exp, self.start_index)
+        end = shift_plugin_index(exp, self.end_index)
 
         nPlugin = exp.meta_data.get('nPlugin')
         exp_coll = exp._get_collection()
