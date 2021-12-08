@@ -14,9 +14,6 @@ import numpy as np
 import os
 
 
-
-
-
 class Statistics(object):
     has_setup = False
     index_dict = {"max": 0, "min": 1, "mean": 2, "mean_std_dev": 3, "median_std_dev": 4}
@@ -51,7 +48,10 @@ class Statistics(object):
 
 
     def set_slice_stats(self, slice1):
-        """Appends slice stats arrays with the stats parameters of the current slice"""
+        """Appends slice stats arrays with the stats parameters of the current slice.
+
+        :param slice1: The slice whose stats are being calculated.
+        """
         if slice1 is not None:
             slice_num = self.plugin.pcount
             slice1 = self._de_list(slice1)
@@ -62,6 +62,7 @@ class Statistics(object):
             self.stats['standard_deviation'].append(np.std(slice1))
 
     def get_slice_stats(self, stat, slice_num):
+        """Returns array of stats associated with the processed slices of the current plugin."""
         return self.stats[stat][slice_num]
 
     def set_volume_stats(self):
@@ -84,7 +85,7 @@ class Statistics(object):
                 Statistics.data_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
                 Statistics.data_stats[p_num][4] = np.median(self.stats['standard_deviation'])
                 Statistics.global_stats[p_num] = Statistics.data_stats[p_num]
-
+                Statistics.global_stats[name] = Statistics.global_stats[p_num]
             elif self.pattern in ['VOLUME_XZ', 'VOLUME_XY', 'VOLUME_YZ']:
                 Statistics.volume_stats[p_num][0] = max(self.stats['max'])
                 Statistics.volume_stats[p_num][1] = min(self.stats['min'])
@@ -92,8 +93,8 @@ class Statistics(object):
                 Statistics.volume_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
                 Statistics.volume_stats[p_num][4] = np.median(self.stats['standard_deviation'])
                 Statistics.global_stats[p_num] = Statistics.volume_stats[p_num]
-            Statistics.global_stats[name] = Statistics.global_stats[p_num]
-        self._link_stats_to_datasets()
+                Statistics.global_stats[name] = Statistics.global_stats[p_num]
+            self._link_stats_to_datasets()
         slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
                                 self.stats['standard_deviation']])
         self._write_stats_to_file(slice_stats, p_num)
@@ -148,6 +149,7 @@ class Statistics(object):
             specify which set to return.
         """
         key = "stats"
+        stats = {}
         if set_num is not None:
             key = key + str(set_num)
         if key in list(dataset.meta_data.dict.keys()):
@@ -163,6 +165,9 @@ class Statistics(object):
     def get_volume_stats(self):
         return Statistics.volume_stats
 
+    def get_global_stats(self):
+        return Statistics.global_stats
+
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
         out_datasets = self.plugin.get_out_datasets()
@@ -171,11 +176,14 @@ class Statistics(object):
             if self.pattern == None:
                 raise KeyError
         except KeyError:
-            patterns = out_datasets[0].data_info["data_patterns"]
-            for pattern in patterns:
-                if 1 in patterns.get(pattern)["slice_dims"]:
-                    self.pattern = pattern
-                    break
+            if not out_datasets:
+                self.pattern = None
+            else:
+                patterns = out_datasets[0].data_info["data_patterns"]
+                for pattern in patterns:
+                    if 1 in patterns.get(pattern)["slice_dims"]:
+                        self.pattern = pattern
+                        break
         for dataset in out_datasets:
             if "METADATA" not in dataset.data_info.get("data_patterns"):
                 self.is_meta_data = False
@@ -221,7 +229,7 @@ class Statistics(object):
             standard_deviation_ds[::] = slice_stats[3]
 
     def _unpad_slice(self, slice1):
-        """If data is padded in the slice dimension, removes this pad"""
+        """If data is padded in the slice dimension, removes this pad."""
         out_datasets = self.plugin.get_out_datasets()
         if len(out_datasets) == 1:
             out_dataset = out_datasets[0]
@@ -241,7 +249,7 @@ class Statistics(object):
         return slice1
 
     def _get_unpadded_slice_list(self, slice1, slice_dims):
-        """Creates slice object(s) for un-padded slices in the slice dimension(s)"""
+        """Creates slice object(s) to un-pad slices in the slice dimension(s)."""
         slice_list = list(self.plugin.slice_list[0])
         pad = False
         if len(slice_list) == len(slice1.shape):
@@ -256,7 +264,7 @@ class Statistics(object):
             return self.plugin.slice_list[0], pad
 
     def _de_list(self, slice1):
-        """If the slice is in a list, remove it from that list"""
+        """If the slice is in a list, remove it from that list."""
         if type(slice1) == list:
             if len(slice1) != 0:
                 slice1 = slice1[0]
