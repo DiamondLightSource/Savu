@@ -220,6 +220,20 @@ class PluginList(object):
         """
         self.iterate_plugin_groups = []
 
+    def print_iterative_loops(self):
+        if len(self.iterate_plugin_groups) == 0:
+            print('There are no iterative loops in the current process list')
+        else:
+            print('Iterative loops in the current process list are:')
+            for count, group in enumerate(self.iterate_plugin_groups, 1):
+                number = f"({count}) "
+                start_str = f"start: {group['start_index']}"
+                end_str = f"end: {group['end_index']}"
+                iterations_str = f"iterations: {group['iterations']}"
+                full_str = number + start_str + ', ' + end_str + ', ' + \
+                    iterations_str
+                print(full_str)
+
     def __save_iterate_plugin_groups(self, group):
         '''
         Save information regarding the groups of plugins to iterate over

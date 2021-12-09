@@ -1040,3 +1040,6 @@ class Content(object):
     @property
     def size(self):
         return len(self.plugin_list.plugin_list)
+
+    def display_iterative_loops(self):
+        self.plugin_list.print_iterative_loops()

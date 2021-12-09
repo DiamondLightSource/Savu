@@ -198,10 +198,15 @@ def _iterate(content, args):
     # TODO: note the lack of use of _disp(); maybe will need this for
     # visually displaying the iterative loops in the terminal window?
     # TODO: no error-checking is performed by this command yet
-    start = args.start
-    end = args.end
-    iterations = args.iterations
-    content.add_iterate_plugin_group(start, end, iterations)
+    if args.set is None:
+        # display all iterative loops
+        content.display_iterative_loops()
+    elif len(args.set) == 3:
+        # create a dict representing a group of plugins to iterate over
+        start = args.set[0]
+        end = args.set[1]
+        iterations = args.set[2]
+        content.add_iterate_plugin_group(start, end, iterations)
     return content
     # TODO: the commented-out code below is associated with the TODO in
     # arg_parsers._iterate_arg_parser()

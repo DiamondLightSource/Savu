@@ -186,12 +186,8 @@ def _iterate_arg_parser(args=None, doc=True):
     """ Argument parser for iterate command. """
     desc = sc.get_description()['iterate']
     parser = ArgumentParser(prog='iterate', description=desc)
-    start_arg_help = 'The plugin index to begin the iterative loop.'
-    parser.add_argument('start', type=int, help=start_arg_help)
-    end_arg_help = 'The plugin index to end the iterative loop.'
-    parser.add_argument('end', type=int, help=end_arg_help)
-    iterations_arg_help = 'The number of iterations to perform'
-    parser.add_argument('iterations', type=int, help=iterations_arg_help)
+    set_arg_help = 'Set the start index, end index, and number of iterations'
+    parser.add_argument('--set', nargs=3, type=int, help=set_arg_help)
     # TODO: Trying to allow it to be passed only a start index, and if so, to
     # set the end index the same as the given start index.
     # It's buggy though: passing more than 3 values causes the plugin_indices
