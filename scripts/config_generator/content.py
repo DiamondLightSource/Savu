@@ -127,6 +127,7 @@ class Content(object):
         if check.lower() == "y":
             self.expand_dim = None
             self.plugin_list.plugin_list = []
+            self.plugin_list.clear_iterate_plugin_group_dicts()
 
     def check_plugin_list_exists(self):
         """ Check if plugin list is populated. """
@@ -141,6 +142,13 @@ class Content(object):
         plugin.get_plugin_tools()._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
+
+    def add_iterate_plugin_group(self, start, end, iterations):
+        '''
+        Add a dict to PluginList that represents a group of plugins in the
+        process list to iterate over
+        '''
+        self.plugin_list.add_iterate_plugin_group_dict(start, end, iterations)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)

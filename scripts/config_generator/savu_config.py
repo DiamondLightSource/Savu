@@ -193,6 +193,36 @@ def _add(content, args):
 
 @parse_args
 @error_catcher
+def _iterate(content, args):
+    """ Set a plugin (or group of plugins) to run iteratively. """
+    # TODO: note the lack of use of _disp(); maybe will need this for
+    # visually displaying the iterative loops in the terminal window?
+    # TODO: no error-checking is performed by this command yet
+    start = args.start
+    end = args.end
+    iterations = args.iterations
+    content.add_iterate_plugin_group(start, end, iterations)
+    return content
+    # TODO: the commented-out code below is associated with the TODO in
+    # arg_parsers._iterate_arg_parser()
+#    plugin_indices = args.indices
+#    iterations = args.iterations
+#
+#    start = plugin_indices[0]
+#    if len(plugin_indices) == 1:
+#        # only the start index has been given, so there is only one element in
+#        # the list
+#        end = plugin_indices[0]
+#    else:
+#        # both the start and end index has been given, so there are two elements
+#        # in the list
+#        end = plugin_indices[1]
+#
+#    content.add_iterate_plugin_group(start, end, iterations[0])
+
+
+@parse_args
+@error_catcher
 def _dupl(content, args):
     """ Duplicate a plugin in the list"""
     elems = content.get_positions()
@@ -312,7 +342,8 @@ commands = {'open': _open,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
-            'history': _history}
+            'history': _history,
+            'iterate': _iterate}
 
 def get_description():
     """ For each command, enter the function and save the docstring to a

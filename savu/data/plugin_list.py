@@ -133,6 +133,7 @@ class PluginList(object):
 
             # add info about groups of plugins to iterate over into
             # self.iterate_plugin_groups
+            self.clear_iterate_plugin_group_dicts()
             try:
                 iterate_groups = plugin_file['entry/iterate_plugin_groups']
                 for key in list(iterate_groups.keys()):
@@ -201,6 +202,23 @@ class PluginList(object):
         group = entry.create_group(name.encode("ascii"))
         group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
+
+    def add_iterate_plugin_group_dict(self, start, end, iterations):
+        '''
+        Add an element to self.iterate_plugin_groups
+        '''
+        group = {
+            'start_index': start,
+            'end_index': end,
+            'iterations': iterations
+        }
+        self.iterate_plugin_groups.append(group)
+
+    def clear_iterate_plugin_group_dicts(self):
+        """
+        Reset the list of dicts representing groups of plugins to iterate over
+        """
+        self.iterate_plugin_groups = []
 
     def __save_iterate_plugin_groups(self, group):
         '''
