@@ -214,6 +214,14 @@ class PluginList(object):
         }
         self.iterate_plugin_groups.append(group)
 
+    def remove_iterate_plugin_group_dict(self, number):
+        """ Remove a specific element from self.iterate_plugin_groups """
+        try:
+            # convert the one-based index to a zero-based index
+            del self.iterate_plugin_groups[number - 1]
+        except IndexError as e:
+            print(f"There doesn't exist an iterative loop with number {number}")
+
     def clear_iterate_plugin_group_dicts(self):
         """
         Reset the list of dicts representing groups of plugins to iterate over

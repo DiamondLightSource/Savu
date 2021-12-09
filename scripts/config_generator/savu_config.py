@@ -198,7 +198,9 @@ def _iterate(content, args):
     # TODO: note the lack of use of _disp(); maybe will need this for
     # visually displaying the iterative loops in the terminal window?
     # TODO: no error-checking is performed by this command yet
-    if args.set is None:
+    if args.remove is not None:
+        content.remove_iterate_plugin_group(args.remove)
+    elif args.set is None:
         # display all iterative loops
         content.display_iterative_loops()
     elif len(args.set) == 3:
