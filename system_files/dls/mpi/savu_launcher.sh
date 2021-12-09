@@ -454,6 +454,10 @@ $sbmt_cmd > /dls/tmp/savu/$USER.out
 command_file="$logfolder/run_command.txt"
 
 cat > $command_file <<ENDFILE
+# The script location
+$(dirname $0)
+# The directory the script was executed from
+$PWD
 # The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
 $original_command
 # Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
@@ -473,7 +477,7 @@ echo -e "\n\t*******************************************************************
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
 echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
-echo -e "\t The computing configuration is $GPU_architecture with $arch GPU and $num node(s)."
+echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0

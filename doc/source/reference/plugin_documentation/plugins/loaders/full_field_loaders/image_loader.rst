@@ -6,7 +6,7 @@ Description
 
 Load tomographic data in image format (tiff) 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

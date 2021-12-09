@@ -9,7 +9,7 @@ Normalization-based method working in the sinogram space to remove ring artifact
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_normalization_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

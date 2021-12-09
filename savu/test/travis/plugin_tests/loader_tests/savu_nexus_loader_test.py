@@ -28,7 +28,7 @@ import os
 
 class SavuNexusLoaderTest(unittest.TestCase):
     global data_file, experiment
-    data_file = '24737.nxs'
+    data_file = 'tomo_standard.nxs'
     experiment = None
 
     def test_reload(self):

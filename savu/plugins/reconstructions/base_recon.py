@@ -46,6 +46,7 @@ class BaseRecon(Plugin):
         self.br_vol_shape = None
         self.frame_angles = None
         self.frame_cors = None
+        self.projection_shifts = None
         self.frame_init_data = None
         self.centre = None
         self.base_pad_amount = None
@@ -64,6 +65,7 @@ class BaseRecon(Plugin):
         self.exp.log(self.name + " End")
         self.br_vol_shape = out_pData[0].get_shape()
         self.set_centre_of_rotation(in_data[0], out_data[0], in_meta_data)
+        self.set_projection_shifts(in_data[0], out_data[0], in_meta_data)
 
         self.main_dir = in_data[0].get_data_patterns()['SINOGRAM']['main_dir']
         self.angles = in_meta_data.get('rotation_angle')
@@ -98,6 +100,15 @@ class BaseRecon(Plugin):
 
     def get_vol_shape(self):
         return self.br_vol_shape
+
+    def set_projection_shifts(self, inData, outData, mData):
+        # get experimental metadata of projection_shifts 
+        if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+            self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
+        else:
+            proj_shifts = np.zeros((inData.get_shape()[0], 2))  # initialise a 2d array of projection shifts
+            self.exp.meta_data.set('projection_shifts', proj_shifts)
+        outData.meta_data.set("projection_shifts", copy.deepcopy(self.projection_shifts))
 
     def set_centre_of_rotation(self, inData, outData, mData):
         # if cor has been passed as a dataset then do nothing

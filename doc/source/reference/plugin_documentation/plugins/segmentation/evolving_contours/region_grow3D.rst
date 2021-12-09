@@ -6,7 +6,7 @@ Description
 
 Fast 3D segmentation by evolving the user-given mask, the initialised mask should be set in the central part of the object to be segmented. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -9,7 +9,7 @@ A class to save tomography data to image files.  Run the MaxAndMin plugin before
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/savers/image_saver_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 A class to load tomography data from an NXxrd file. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

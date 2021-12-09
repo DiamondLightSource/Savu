@@ -30,28 +30,28 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class VoCenterTest(unittest.TestCase):
 
     def test_vo_centering(self):
-        data_file = tu.get_test_data_path('24737.nxs')
+        data_file = tu.get_test_data_path('tomo_standard.nxs')
         plist = 'vo_centering_test/vo_centering_test.nxs'
         process_file = tu.get_test_process_path(plist)
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
     def test_vo_centering_single_sino_loader(self):
-        data_file = tu.get_test_data_path('24737.nxs')
+        data_file = tu.get_test_data_path('tomo_standard.nxs')
         plist = 'vo_centering_test/vo_centering_single_sino_loader_test.nxs'
         process_file = tu.get_test_process_path(plist)
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
     def test_vo_centering_single_sino_centering(self):
-        data_file = tu.get_test_data_path('24737.nxs')
+        data_file = tu.get_test_data_path('tomo_standard.nxs')
         plist = 'vo_centering_test/vo_centering_single_sino_centering_test.nxs'
         process_file = tu.get_test_process_path(plist)
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 
     def test_vo_centering_single_sinos(self):
-        data_file = tu.get_test_data_path('24737.nxs')
+        data_file = tu.get_test_data_path('tomo_standard.nxs')
         plist = 'vo_centering_test/vo_centering_single_sinos_test.nxs'
         process_file = tu.get_test_process_path(plist)
         run_protected_plugin_runner(tu.set_options(data_file,

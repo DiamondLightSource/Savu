@@ -6,7 +6,7 @@ Description
 
 The plugin performs stretching or shrinking the data intensity levels based on skimage rescale_intensity module. Min-max scalars for rescaling can be passed with METADATA OR by providing as an input. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

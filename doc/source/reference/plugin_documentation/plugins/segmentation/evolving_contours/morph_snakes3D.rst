@@ -6,7 +6,7 @@ Description
 
 A Plugin to 3D segment reconstructed data using Morphsnakes module. When initialised with a mask, the active contour propagates to find the minimum of energy (a possible edge countour). 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

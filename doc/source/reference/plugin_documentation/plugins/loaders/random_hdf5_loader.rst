@@ -6,7 +6,7 @@ Description
 
 A hdf5 dataset of a specified size is created at runtime using numpy random sampling (numpy.random) and saved to file. This created dataset will be used as the input file, and the input file path passed to Savu will be ignored (use a dummy). 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

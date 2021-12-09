@@ -6,7 +6,7 @@ Description
 
 A Plugin to run the astra reconstruction 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

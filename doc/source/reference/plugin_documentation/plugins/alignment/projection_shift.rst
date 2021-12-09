@@ -9,7 +9,7 @@ Horizontal and vertical shift are calculated using a chosen method and added to 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/alignment/projection_shift_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 Interpolation-based method working in the sinogram space to remove ring artifacts. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
