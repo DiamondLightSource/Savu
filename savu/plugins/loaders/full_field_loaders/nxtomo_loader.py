@@ -171,8 +171,8 @@ class NxtomoLoader(BaseLoader):
             image_key = data_obj.backing_file[image_key_path][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-        except:
-            self.log_warning("An image key was not found.")
+        except KeyError as Argument:
+            self.log_warning("An image key was not found due to following error:"+str(Argument))
             try:
                 data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
