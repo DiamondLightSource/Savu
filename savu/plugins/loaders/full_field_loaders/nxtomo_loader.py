@@ -163,12 +163,12 @@ class NxtomoLoader(BaseLoader):
     def __find_dark_and_flat(self, data_obj, flat=None, dark=None):
         ignore = self.parameters['ignore_flats'] if \
             self.parameters['ignore_flats'] else None
-        try:
+        if self.parameters['image_key_path'] is not None:
             image_key = data_obj.backing_file[
                 self.parameters['image_key_path']][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-        except KeyError:
+        else:
             self.log_warning("An image key was not found.")
             try:
                 data_obj.data = NoImageKey(data_obj, None, 0)
