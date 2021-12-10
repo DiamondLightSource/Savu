@@ -414,13 +414,16 @@ class BaseRecon(Plugin):
         # set pattern_name and nframes to process for all datasets
         out_pData[0].plugin_data_setup('VOLUME_XZ', self.get_max_frames())
 
-        meta_list = []  # metadata list to populate
+        meta_list = ['rotation_angle']  # metadata list to populate
         in_meta_data = self.get_in_meta_data()[0]
-        # get experimental metadata about the projection_shifts (if it's been populated previously)
-        if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):            
-            meta_list.append('projection_shifts')
 
-        meta_list.append('rotation_angle')        
+        if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+            self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
+        else:
+            self.projection_shifts = np.zeros((in_dataset[0].get_shape()[self.volX], 2))  # initialise a 2d array of projection shifts
+            self.exp.meta_data.set('projection_shifts', copy.deepcopy(self.projection_shifts))
+
+        out_dataset[0].meta_data.set("projection_shifts", copy.deepcopy(self.projection_shifts))
         self.populate_metadata_to_output(in_dataset[0], out_dataset[0], in_meta_data, meta_list)
 
     def _get_axis_labels(self, in_dataset):

@@ -163,13 +163,16 @@ class NxtomoLoader(BaseLoader):
     def __find_dark_and_flat(self, data_obj, flat=None, dark=None):
         ignore = self.parameters['ignore_flats'] if \
             self.parameters['ignore_flats'] else None
+        if self.parameters['image_key_path'] is None:
+            image_key_path = 'dummypath/'
+        else:
+            image_key_path = self.parameters['image_key_path']
         try:
-            image_key = data_obj.backing_file[
-                self.parameters['image_key_path']][...]
+            image_key = data_obj.backing_file[image_key_path][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-        except KeyError:
-            self.log_warning("An image key was not found.")
+        except KeyError as Argument:
+            self.log_warning("An image key was not found due to following error:"+str(Argument))
             try:
                 data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
