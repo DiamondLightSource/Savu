@@ -67,7 +67,7 @@ class Plugin(PluginDatasets):
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
-        self.stats = Statistics(self)
+        self.stats_obj = Statistics(self)
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -134,8 +134,8 @@ class Plugin(PluginDatasets):
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
-        if not self.stats.is_meta_data:
-            self.stats.set_slice_stats(frames)
+        if self.stats_obj.calc_stats:
+            self.stats_obj.set_slice_stats(frames)
         self.pcount += 1
         return frames
 
@@ -164,8 +164,8 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
-        if not self.stats.is_meta_data:
-            self.stats.set_volume_stats()
+        if self.stats_obj.calc_stats:
+            self.stats_obj.set_volume_stats()
         pass
 
     def set_preview(self, data, params):
