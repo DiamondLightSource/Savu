@@ -6,7 +6,7 @@ Description
 
 Testing the mmloader plugin 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

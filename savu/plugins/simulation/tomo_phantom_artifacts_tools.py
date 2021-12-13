@@ -2,11 +2,16 @@ from savu.plugins.plugin_tools import PluginTools
 
 
 class TomoPhantomArtifactsTools(PluginTools):
-    """A plugin to add artifacts to the generated synthetic data using TomoPhantom
+    """A plugin to add artifacts to real or generated synthetic data using TomoPhantom
     """
 
-    def define_parameters(self):
+    def define_parameters(self):        
         """
+        pattern:
+             visibility: advanced
+             dtype: str
+             description: Pattern to apply this to.
+             default: 'SINOGRAM'
         artifacts_noise_type:
               visibility: intermediate
               dtype: str
@@ -19,10 +24,15 @@ class TomoPhantomArtifactsTools(PluginTools):
               default: 100000
               dependency:
                 artifacts_noise_type
-        artifacts_misalignment_maxamplitude:
+        datashifts_maxamplitude_pixel:
               visibility: advanced
               dtype: [None,int]
-              description: Incorporate misalignment into projections (in pixels).
+              description: Incorporate misalignment into projections (in pixels), requires PROJECTION pattern.
+              default: None
+        datashifts_maxamplitude_subpixel:
+              visibility: advanced
+              dtype: [None,float]
+              description: Incorporate misalignment into projections (in subpixel resolution), requires PROJECTION pattern.
               default: None
         artifacts_zingers_percentage:
               visibility: intermediate
@@ -39,7 +49,7 @@ class TomoPhantomArtifactsTools(PluginTools):
         artifacts_stripes_percentage:
               visibility: intermediate
               dtype: [None,float]
-              description: The amount of stripes in the data (percent-wise)
+              description: The amount of stripes in the data (percent-wise), applied to SINOGRAM data.
               default: None
         artifacts_stripes_maxthickness:
               visibility: advanced

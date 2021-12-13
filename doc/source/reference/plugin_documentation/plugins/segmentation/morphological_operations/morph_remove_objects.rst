@@ -6,7 +6,7 @@ Description
 
 A Plugin to remove objects smaller than the specified size. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

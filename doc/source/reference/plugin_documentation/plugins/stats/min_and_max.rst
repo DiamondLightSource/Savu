@@ -6,7 +6,7 @@ Description
 
 A plugin to calculate the min and max values of each slice (as determined by the pattern parameter) 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

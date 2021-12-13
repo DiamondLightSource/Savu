@@ -6,7 +6,7 @@ Description
 
 A class to save tomography data to tiff files 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

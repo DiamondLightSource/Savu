@@ -6,7 +6,7 @@ Description
 
 A class to remove any unwanted data from the specified pattern frame. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

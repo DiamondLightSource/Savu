@@ -6,7 +6,7 @@ Description
 
 Uses pymca to fit spectral data 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

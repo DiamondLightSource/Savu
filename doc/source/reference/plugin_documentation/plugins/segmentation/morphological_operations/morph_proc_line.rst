@@ -6,7 +6,7 @@ Description
 
 A Larix morphological processing module using line segments to remove inconsistent gaps 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

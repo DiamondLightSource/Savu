@@ -15,29 +15,31 @@
 
 
 """
-.. module:: image_stitching_test
+.. module:: wavelet_denoising_test
    :platform: Unix
-   :synopsis: unittest for image_stitching
+   :synopsis: unittest test for wavelet denoising
 
-.. moduleauthor:: Jessica Vershoyle <jessica.verschoyle@diamond.ac.uk>
+.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
 
 """
-
 import unittest
+
 import savu.test.test_utils as tu
 from savu.test.travis.framework_tests.plugin_runner_test import \
         run_protected_plugin_runner
+import savu.test.base_checkpoint_test
+import tempfile
+import os
 
-class ImageStitchingTest(unittest.TestCase):
 
+class WaveletDenoisingGpuTest(unittest.TestCase):
     def setUp(self):
-        self.data_file = 'i12_test_data/lfov/tomo_data'
-        self.experiment = None
+        self.data_file = 'tomo_standard.nxs'
+        self.experiment = 'tomo'
 
-    def test_image_stitching(self):
-        process_list = 'loaders/lfov_loader_and_image_stitching_test.nxs'
-        options = tu.initialise_options(self.data_file, self.experiment,
-                                        process_list)
+    def test_wavelet_gpu_denoising(self):
+        process_list = 'filters/denoise/wavelets_denoise_gpu_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 

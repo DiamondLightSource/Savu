@@ -65,7 +65,7 @@ def get_process_list_path(name):
 def get_experiment_types():
     exp_dict = {}
     exp_dict['tomoRaw'] = {'func': 'set_tomoRaw_experiment',
-                           'filename': '24737.nxs'}
+                           'filename': 'tomo_standard.nxs'}
     exp_dict['tomo'] = {'func': 'set_tomo_experiment',
                         'filename': '24737_processed.nxs'}
     exp_dict['fluo'] = {'func': 'set_fluo_experiment',
@@ -195,7 +195,7 @@ def _add_loader_to_plugin_list(options, params={}):
 
 
 def load_random_data(loader, params, system_params=None, fake=False):
-    options = set_options(get_test_data_path('24737.nxs'))
+    options = set_options(get_test_data_path('tomo_standard.nxs'))
     options['loader'] = 'savu.plugins.loaders.' + str(loader)
     options['system_params'] = system_params
     _add_loader_to_plugin_list(options, params=params)

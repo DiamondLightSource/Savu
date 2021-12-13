@@ -85,29 +85,50 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         if center_manu != 0.0:
             self.center = center_manu
         self.mid_width = self.width / 2.0
-        if (self.center <= 0) or (self.center > self.width):
-            self.center = self.mid_width
-        center_int = np.int16(np.floor(self.center))
-        self.subpixel_shift = self.center - center_int
-        if self.center < self.mid_width:
+
+        self.new_height = np.int16(np.ceil(self.height / 2.0))
+        list_angle = in_dataset.meta_data.get("rotation_angle")
+        list_angle = list_angle[0:self.new_height]
+        out_dataset.meta_data.set("rotation_angle", list_angle)
+
+        self.mat_wedge_left = \
+            np.ones((self.new_height, self.width), dtype=np.float32)
+
+    def _set_cor_per_frame(self):
+        """ Locate the index for the current frame/slice being processed.
+        Set the centre of rotation (cor) for the current frame.
+        """
+        if isinstance(self.center, list) or \
+                isinstance(self.center, np.ndarray):
+            count = self.get_process_frames_counter()
+            current_idx = self.get_global_frame_index()[count]
+            self.frame_center = self.center[current_idx]
+        else:
+            self.frame_center = self.center
+
+    def _calculate_overlap(self):
+        """ Use the centre of rotation for the current frame to
+        calculate the overlap and shift values.
+        """
+        if (self.frame_center <= 0) or (self.frame_center > self.width):
+            self.frame_center = self.mid_width
+        center_int = np.int16(np.floor(self.frame_center))
+        self.subpixel_shift = self.frame_center - center_int
+        if self.frame_center < self.mid_width:
             self.overlap = 2 * center_int
             self.cor = self.width + center_int
         else:
             self.overlap = 2 * (self.width - center_int)
             self.cor = center_int
 
-        self.new_height = np.int16(np.ceil(self.height / 2.0))
-        list_angle = in_dataset.meta_data.get("rotation_angle")
-        list_angle = list_angle[0:self.new_height]
-
-        out_dataset.meta_data.set("rotation_angle", list_angle)
         list_wedge = np.linspace(1.0, 0.0, self.overlap)
-        self.mat_wedge_left = \
-            np.ones((self.new_height, self.width), dtype=np.float32)
         self.mat_wedge_left[:, -self.overlap:] = np.float32(list_wedge)
         self.mat_wedge_right = np.fliplr(self.mat_wedge_left)
 
     def process_frames(self, data):
+        self._set_cor_per_frame()
+        self._calculate_overlap()
+
         sinogram = np.copy(data[0])
         sinogram = ndi.interpolation.shift(sinogram, (0, -self.subpixel_shift),
                                            prefilter=False, mode='nearest')
@@ -115,7 +136,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         sinogram2 = np.fliplr(sinogram[-self.new_height:])
         sinocombine = np.zeros((self.new_height, 2 * self.width),
                                dtype=np.float32)
-        if self.center < self.mid_width:
+        if self.frame_center < self.mid_width:
             num1 = np.mean(np.abs(sinogram1[:, :self.overlap]))
             num2 = np.mean(np.abs(sinogram2[:, -self.overlap:]))
             sinogram2 = sinogram2 * num1 / num2

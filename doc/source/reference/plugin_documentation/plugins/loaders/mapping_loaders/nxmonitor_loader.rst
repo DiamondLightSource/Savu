@@ -6,7 +6,7 @@ Description
 
 A class to load tomography data from an NXmonitor file 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
