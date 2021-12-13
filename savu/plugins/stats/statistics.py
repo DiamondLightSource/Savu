@@ -15,17 +15,20 @@ import os
 
 
 class Statistics(object):
-    has_setup = False
     index_dict = {"max": 0, "min": 1, "mean": 2, "mean_std_dev": 3, "median_std_dev": 4}
     key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"]
+    pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
+    no_stats_plugins = ["BasicOperations", "Mipmap"]
 
     def __init__(self, plugin_self):
         self.plugin = plugin_self
         self.plugin_name = plugin_self.name
         self.pad_dims = []
         self.stats = {'max': [], 'min': [], 'mean': [], 'standard_deviation': []}
-        self.is_meta_data = True
+        self.calc_stats = False
         self._set_pattern_info()
+        if self.plugin_name in Statistics.no_stats_plugins:
+            self.calc_stats = False
 
     @classmethod
     def _setup(cls, exp):
@@ -44,8 +47,6 @@ class Statistics(object):
         cls.path = f"{cls.path}/stats"
         if not os.path.exists(cls.path):
             os.mkdir(cls.path)
-        cls.has_setup = True
-
 
     def set_slice_stats(self, slice1):
         """Appends slice stats arrays with the stats parameters of the current slice.
@@ -78,7 +79,7 @@ class Statistics(object):
         Statistics.data_stats[p_num] = [None, None, None, None, None]
         Statistics.volume_stats[p_num] = [None, None, None, None, None]
         if len(self.stats['max']) != 0:
-            if self.pattern in ['PROJECTION', 'SINOGRAM', 'TANGENTOGRAM']:
+            if self.pattern in ['PROJECTION', 'SINOGRAM', 'TANGENTOGRAM', 'SINOMOVIE', '4D_SCAN']:
                 Statistics.data_stats[p_num][0] = max(self.stats['max'])
                 Statistics.data_stats[p_num][1] = min(self.stats['min'])
                 Statistics.data_stats[p_num][2] = np.mean(self.stats['mean'])
@@ -86,7 +87,8 @@ class Statistics(object):
                 Statistics.data_stats[p_num][4] = np.median(self.stats['standard_deviation'])
                 Statistics.global_stats[p_num] = Statistics.data_stats[p_num]
                 Statistics.global_stats[name] = Statistics.global_stats[p_num]
-            elif self.pattern in ['VOLUME_XZ', 'VOLUME_XY', 'VOLUME_YZ']:
+                self._link_stats_to_datasets(Statistics.global_stats[name])
+            elif self.pattern in ['VOLUME_XZ', 'VOLUME_XY', 'VOLUME_YZ', 'VOLUME_3D']:
                 Statistics.volume_stats[p_num][0] = max(self.stats['max'])
                 Statistics.volume_stats[p_num][1] = min(self.stats['min'])
                 Statistics.volume_stats[p_num][2] = np.mean(self.stats['mean'])
@@ -94,7 +96,7 @@ class Statistics(object):
                 Statistics.volume_stats[p_num][4] = np.median(self.stats['standard_deviation'])
                 Statistics.global_stats[p_num] = Statistics.volume_stats[p_num]
                 Statistics.global_stats[name] = Statistics.global_stats[p_num]
-            self._link_stats_to_datasets()
+                self._link_stats_to_datasets(Statistics.global_stats[name])
         slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
                                 self.stats['standard_deviation']])
         self._write_stats_to_file(slice_stats, p_num)
@@ -170,7 +172,7 @@ class Statistics(object):
 
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
-        out_datasets = self.plugin.get_out_datasets()
+        in_datasets, out_datasets = self.plugin.get_datasets()
         try:
             self.pattern = self.plugin.parameters['pattern']
             if self.pattern == None:
@@ -179,31 +181,30 @@ class Statistics(object):
             if not out_datasets:
                 self.pattern = None
             else:
-                patterns = out_datasets[0].data_info["data_patterns"]
+                patterns = out_datasets[0].get_data_patterns()
                 for pattern in patterns:
                     if 1 in patterns.get(pattern)["slice_dims"]:
                         self.pattern = pattern
                         break
         for dataset in out_datasets:
-            if "METADATA" not in dataset.data_info.get("data_patterns"):
-                self.is_meta_data = False
+            if bool(set(Statistics.pattern_list) & set(dataset.data_info.get("data_patterns"))):
+                self.calc_stats = True
 
-    def _link_stats_to_datasets(self):
+    def _link_stats_to_datasets(self, stats):
         """Links the volume wide statistics to the output dataset(s)"""
         out_datasets = self.plugin.get_out_datasets()
-        nOutput_datasets = self.plugin.nOutput_datasets()
+        n_datasets = self.plugin.nOutput_datasets()
         i = 1
-        meta_name = "stats"
-        if nOutput_datasets == 1:
-            while meta_name in list(out_datasets[0].meta_data.get_dictionary().keys()):
-                meta_name = f"stats{i}"
+        group_name = "stats"
+        if n_datasets == 1:
+            while group_name in list(out_datasets[0].meta_data.get_dictionary().keys()):
+                group_name = f"stats{i}"
                 i += 1
-            out_datasets[0].meta_data.set([meta_name, "max"], max(self.stats['max']))
-            out_datasets[0].meta_data.set([meta_name, "min"], min(self.stats['min']))
-            out_datasets[0].meta_data.set([meta_name, "mean"], np.mean(self.stats['mean']))
-            out_datasets[0].meta_data.set([meta_name, "mean_std_dev"], np.mean(self.stats['standard_deviation']))
-            out_datasets[0].meta_data.set([meta_name, "median_std_dev"],
-                                          np.median(self.stats['standard_deviation']))
+            out_datasets[0].data_info.set([group_name, "max"], stats[0])
+            out_datasets[0].data_info.set([group_name, "min"], stats[1])
+            out_datasets[0].data_info.set([group_name, "mean"], stats[2])
+            out_datasets[0].data_info.set([group_name, "mean_std_dev"], stats[3])
+            out_datasets[0].data_info.set([group_name, "median_std_dev"], stats[4])
 
     def _write_stats_to_file(self, slice_stats, p_num):
         """Writes slice statistics to a h5 file"""
@@ -280,4 +281,3 @@ class Statistics(object):
         print(cls.data_stats)
         print(cls.volume_stats)
         print(cls.global_stats)
-        cls.has_setup = False
