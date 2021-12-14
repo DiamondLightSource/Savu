@@ -56,6 +56,11 @@ class IteratePluginGroup():
         # cloned datasets, depending on the current iteration number
         self._ip_pattern_dict = {}
         self._ip_pattern_dict['iterating'] = {}
+        # dict for holding the different PluginData objects involved
+        self._ip_plugin_data_dict = {
+            'original': {},
+            'clone': {}
+        }
 
     def setup_datasets(self):
         '''
@@ -309,6 +314,65 @@ class IteratePluginGroup():
                 b = [0, p[0].index(s2)] if s2 in p[0] else [1, p[1].index(s2)]
                 p[a[0]][a[1]], p[b[0]][b[1]] = p[b[0]][b[1]], p[a[0]][a[1]]
 
+        self.set_plugin_datasets()
+
+
+    def set_plugin_datasets(self):
+        """
+        Set the PluginData objects for the original and cloned Data objects,
+        based on the current iteration.
+        """
+        p = [
+            self.start_plugin.parameters['in_datasets'],
+            self.end_plugin.parameters['out_datasets']
+        ]
+
+        for s1, s2 in self._ip_data_dict['iterating'].items():
+            # change the PluginData obejcts for the in and out datasets, to take
+            # care of the potential switching of patterns
+            if s1 in p[0]:
+                new_original_data_pData = \
+                    self._ip_plugin_data_dict['original']['start_plugin']
+                self.start_plugin.parameters['plugin_in_datasets'] = \
+                    [new_original_data_pData]
+                p[0][0]._set_plugin_data(new_original_data_pData)
+            elif s1 in p[1]:
+                new_original_data_pData = \
+                    self._ip_plugin_data_dict['original']['end_plugin']
+                self.end_plugin.parameters['plugin_out_datasets'] = \
+                    [new_original_data_pData]
+                p[1][0]._set_plugin_data(new_original_data_pData)
+            else:
+                info_str = f"s1 {s1.backing_file} wasn't in either the start " \
+                           f"plugin's plugin_in_datasets, nor the end " \
+                           f"plugin's plugin_out_datasets"
+                print(info_str)
+
+            if s2 in p[0]:
+                new_cloned_data_pData = \
+                    self._ip_plugin_data_dict['clone']['start_plugin']
+                self.start_plugin.parameters['plugin_in_datasets'] = \
+                    [new_cloned_data_pData]
+                p[0][0]._set_plugin_data(new_cloned_data_pData)
+            elif s2 in p[1]:
+                new_cloned_data_pData = \
+                    self._ip_plugin_data_dict['clone']['end_plugin']
+                self.end_plugin.parameters['plugin_out_datasets'] = \
+                    [new_cloned_data_pData]
+                p[1][0]._set_plugin_data(new_cloned_data_pData)
+            else:
+                info_str = f"s2 {s2.backing_file} wasn't in either the start " \
+                           f"plugin's plugin_in_datasets, nor the end " \
+                           f"plugin's plugin_out_datasets"
+                print(info_str)
+
+        # reset the values inside Data.data_info that have an effect on how the
+        # value of core_slice in SliceLists comes out
+        self.start_plugin._finalise_datasets()
+        self.start_plugin._finalise_plugin_datasets()
+        self.end_plugin._finalise_datasets()
+        self.end_plugin._finalise_plugin_datasets()
+
     def _finalise_iterated_datasets(self):
         '''
         Inspect the two Data objects that are used to contain the input and
@@ -370,3 +434,17 @@ class IteratePluginGroup():
             raise Exception('Alternating datasets must contain a clone.  These'
                             ' are found at the end of the out_datasets list')
         self._ip_data_dict['iterating'][d1] = d2
+
+    def set_alternating_plugin_datasets(self):
+        """
+        Setup the PluginData objects for the original and cloned Data objects
+        """
+        self._ip_plugin_data_dict['original']['start_plugin'] = \
+            self.start_plugin.parameters['plugin_in_datasets'][1]
+        self._ip_plugin_data_dict['clone']['start_plugin'] = \
+            self.start_plugin.parameters['plugin_in_datasets'][2]
+
+        self._ip_plugin_data_dict['original']['end_plugin'] = \
+            self.end_plugin.parameters['plugin_out_datasets'][0]
+        self._ip_plugin_data_dict['clone']['end_plugin'] = \
+            self.end_plugin.parameters['plugin_out_datasets'][1]

@@ -1,3 +1,6 @@
+from savu.data.data_structures.plugin_data import PluginData
+
+
 def enable_iterative_loop(setup_fn):
     '''
     Decorator that can be applied to a plugin's setup() method. Doing so
@@ -21,22 +24,45 @@ def enable_iterative_loop(setup_fn):
                 'plugin_out_datasets': plugin.parameters['pattern']
             }
 
-            max_frames = plugin.get_max_frames()
+            try:
+                max_frames = plugin.get_max_frames()
+            except AttributeError:
+                # the plugin has no get_max_frames() method, so assume it to be
+                # 'single
+                max_frames = 'single'
 
-            # set the pattern for the single input dataset
-            in_pData[0].plugin_data_setup(patterns['plugin_in_dataset'],
-                max_frames)
             out_dataset[0].create_dataset(in_dataset[0])
 
             # create the cloned dataset
             create_clone(out_dataset[1], out_dataset[0])
 
-            # set the pattern for the PluginData objects associated with the two
-            # output datasets (original and clone)
-            out_pData[0].plugin_data_setup(patterns['plugin_out_datasets'],
-                max_frames)
+            # set the pattern for the PluginData objects associated with the
+            # newly created cloned dataset
             out_pData[1].plugin_data_setup(patterns['plugin_out_datasets'],
                 max_frames)
+
+            try:
+                iterate_plugin_group = check_if_in_iterative_loop(plugin.exp)
+                start_plugin = iterate_plugin_group.start_plugin
+
+                # create PluginData object for original and cloned Data objects,
+                # that have the pattern of the start plugin, and append to the
+                # start plugin's 'plugin_in_datasets'
+                orig_start_pData = PluginData(out_dataset[0], start_plugin)
+                orig_start_pData.plugin_data_setup(
+                    start_plugin.parameters['pattern'],
+                    'single')
+                start_plugin.parameters['plugin_in_datasets'].append(orig_start_pData)
+                clone_start_pData = PluginData(out_dataset[1], start_plugin)
+                clone_start_pData.plugin_data_setup(
+                    start_plugin.parameters['pattern'],
+                    'single')
+                start_plugin.parameters['plugin_in_datasets'].append(clone_start_pData)
+                # "re-finalise" the plugin datasets for the start plugin, now
+                # that these new PluginData obejcts have been added
+                start_plugin._finalise_plugin_datasets()
+            except AttributeError as e:
+                print('In plugin setup, will not create new PluginData objects')
 
     return wrapper
 
