@@ -66,6 +66,34 @@ def enable_iterative_loop(setup_fn):
 
     return wrapper
 
+def setup_extra_plugin_data_padding(padding_fn):
+    """
+    Decorator that can be applied to a filter plugin's set_filter_padding()
+    method. Doing so modifies/extends the filter plugin's padding function
+    slightly to also set the padding for the additional PluginData objects that
+    are created when an iterative loop is defined.
+    """
+
+    def wrapper(*args, **kwargs):
+        # run the plugin's original set_filter_padding() method
+        padding_fn(*args, **kwargs)
+        plugin = args[0]
+
+        try:
+            iterate_plugin_group = check_if_in_iterative_loop(plugin.exp)
+            in_pData, out_pData = plugin.get_plugin_datasets()
+            start_plugin_in_pData, start_plugin_out_pData = \
+                iterate_plugin_group.start_plugin.get_plugin_datasets()
+            padding = out_pData[0].padding
+            for plugin_data in start_plugin_in_pData:
+                if plugin_data.padding is None:
+                    plugin_data.padding = padding
+
+            iterate_plugin_group.start_plugin._finalise_plugin_datasets()
+        except AttributeError as e:
+            print('In plugin setup, will not create new PluginData objects')
+    return wrapper
+
 def create_clone(clone, data):
     '''
     Create a clone of a Data object
