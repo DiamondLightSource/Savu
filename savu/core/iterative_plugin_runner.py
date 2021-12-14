@@ -314,7 +314,13 @@ class IteratePluginGroup():
                 b = [0, p[0].index(s2)] if s2 in p[0] else [1, p[1].index(s2)]
                 p[a[0]][a[1]], p[b[0]][b[1]] = p[b[0]][b[1]], p[a[0]][a[1]]
 
-        self.set_plugin_datasets()
+        if self.start_index != self.end_index:
+            self.set_plugin_datasets()
+        else:
+            info_str = f"Not setting plugin datasets for " \
+                       f"{self.start_plugin.name}, since iterating only a "\
+                       f"single plugin"
+            print(info_str)
 
 
     def set_plugin_datasets(self):
@@ -439,12 +445,18 @@ class IteratePluginGroup():
         """
         Setup the PluginData objects for the original and cloned Data objects
         """
-        self._ip_plugin_data_dict['original']['start_plugin'] = \
-            self.start_plugin.parameters['plugin_in_datasets'][1]
-        self._ip_plugin_data_dict['clone']['start_plugin'] = \
-            self.start_plugin.parameters['plugin_in_datasets'][2]
+        if self.start_index != self.end_index:
+            self._ip_plugin_data_dict['original']['start_plugin'] = \
+                self.start_plugin.parameters['plugin_in_datasets'][1]
+            self._ip_plugin_data_dict['clone']['start_plugin'] = \
+                self.start_plugin.parameters['plugin_in_datasets'][2]
 
-        self._ip_plugin_data_dict['original']['end_plugin'] = \
-            self.end_plugin.parameters['plugin_out_datasets'][0]
-        self._ip_plugin_data_dict['clone']['end_plugin'] = \
-            self.end_plugin.parameters['plugin_out_datasets'][1]
+            self._ip_plugin_data_dict['original']['end_plugin'] = \
+                self.end_plugin.parameters['plugin_out_datasets'][0]
+            self._ip_plugin_data_dict['clone']['end_plugin'] = \
+                self.end_plugin.parameters['plugin_out_datasets'][1]
+        else:
+            info_str = f"Not setting up alternating plugin datasets for " \
+                       f"{self.start_plugin.name}, since iterating only a "\
+                       f"single plugin"
+            print(info_str)
