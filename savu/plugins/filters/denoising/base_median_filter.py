@@ -56,10 +56,6 @@ class BaseMedianFilter(Plugin, CpuPlugin):
             in_data.padding = {'pad_multi_frames': self.pad}
             out_data[0].padding = {'pad_multi_frames': self.pad}
 
-            if check_if_end_plugin_in_iterate_group(self.exp):
-                # set the padding for the cloned dataset as well
-                out_data[1].padding = {'pad_multi_frames': self.pad}
-
     def get_max_frames(self):
         """ Setting nFrames to multiple with an upper limit of 4 frames. """
         return ['multiple', self.frame_limit]

@@ -77,6 +77,13 @@ def setup_extra_plugin_data_padding(padding_fn):
         padding_fn(*args, **kwargs)
         plugin = args[0]
 
+        if check_if_end_plugin_in_iterate_group(plugin.exp):
+            # check for any padding on the original output data, and apply it to
+            # the cloned data
+            in_pData, out_pData = plugin.get_plugin_datasets()
+            if out_pData[0].padding is not None:
+                out_pData[1].padding = out_pData[0].padding
+
         try:
             iterate_plugin_group = check_if_in_iterative_loop(plugin.exp)
             in_pData, out_pData = plugin.get_plugin_datasets()
