@@ -52,10 +52,6 @@ class IteratePluginGroup():
         # - the value is the "cloned" Data object
         self._ip_data_dict['iterating'] = {}
 
-        # similar to _ip_data_dict, but for the pattern of the original &
-        # cloned datasets, depending on the current iteration number
-        self._ip_pattern_dict = {}
-        self._ip_pattern_dict['iterating'] = {}
         # dict for holding the different PluginData objects involved
         self._ip_plugin_data_dict = {
             'original': {},
@@ -72,12 +68,10 @@ class IteratePluginGroup():
         in_dataset, out_dataset = self.get_original_datasets()
 
         # set the input and output datasets for the first iteration
-        self.set_iteration_datasets(0, [in_dataset[0]], [out_dataset[0]],
-                                    self.start_plugin.parameters['pattern'])
+        self.set_iteration_datasets(0, [in_dataset[0]], [out_dataset[0]])
         # set the input and output datasets for subsequent iterations
         self.set_iteration_datasets(1, [in_dataset[0], out_dataset[0]],
-                                    [out_dataset[1]],
-                                    self.end_plugin.parameters['pattern'])
+                                    [out_dataset[1]])
         # out_dataset[0] and out_dataset[1] will continue to alternate for
         # all remaining iterations i.e. output becomes input and input becomes
         # output.
@@ -242,9 +236,8 @@ class IteratePluginGroup():
                             ' are found at the end of the out_datasets list')
         self._ip_data_dict['iterating'][d1] = d2
 
-    def set_iteration_datasets(self, itr, in_data, out_data, pattern=None):
+    def set_iteration_datasets(self, itr, in_data, out_data):
         self._ip_data_dict[itr] = [in_data, out_data]
-        self._ip_pattern_dict[itr] = pattern
 
     def set_start_plugin(self, plugin):
         '''
