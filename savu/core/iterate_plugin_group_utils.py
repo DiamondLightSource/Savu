@@ -26,8 +26,6 @@ def enable_iterative_loop(setup_fn):
                 # 'single
                 max_frames = 'single'
 
-            out_dataset[0].create_dataset(in_dataset[0])
-
             # create the cloned dataset
             create_clone(out_dataset[1], out_dataset[0])
 
