@@ -66,6 +66,7 @@ class NxtomoLoader(BaseLoader):
                 self.__setup_4d(data_obj)
             data_obj.set_original_shape(data_obj.data.shape)
         self._set_rotation_angles(data_obj)
+        self._set_projection_shifts(data_obj)
 
         try:
             control = self._get_h5_path(
@@ -162,13 +163,16 @@ class NxtomoLoader(BaseLoader):
     def __find_dark_and_flat(self, data_obj, flat=None, dark=None):
         ignore = self.parameters['ignore_flats'] if \
             self.parameters['ignore_flats'] else None
+        if self.parameters['image_key_path'] is None:
+            image_key_path = 'dummypath/'
+        else:
+            image_key_path = self.parameters['image_key_path']
         try:
-            image_key = data_obj.backing_file[
-                self.parameters['image_key_path']][...]
+            image_key = data_obj.backing_file[image_key_path][...]
             data_obj.data = \
                 ImageKey(data_obj, image_key, 0, ignore=ignore)
-        except KeyError:
-            self.log_warning("An image key was not found.")
+        except KeyError as Argument:
+            self.log_warning("An image key was not found due to following error:"+str(Argument))
             try:
                 data_obj.data = NoImageKey(data_obj, None, 0)
                 entry = 'entry1/tomo_entry/instrument/detector/'
@@ -236,6 +240,12 @@ class NxtomoLoader(BaseLoader):
                     angles = np.linspace(0, 180, data_obj.get_shape()[0])
         data_obj.meta_data.set("rotation_angle", angles)
         return len(angles)
+
+    def _set_projection_shifts(self, data_obj):
+        proj_shifts = np.zeros((data_obj.get_shape()[0], 2)) # initialise a 2d array of projection shifts
+        self.exp.meta_data.set('projection_shifts', proj_shifts)
+        data_obj.meta_data.set("projection_shifts", proj_shifts)
+        return len(proj_shifts)
 
     def __get_angles_from_nxs_file(self, data_obj, path):
         if path in data_obj.backing_file:
