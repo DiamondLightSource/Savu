@@ -48,7 +48,7 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._setup(self)
-        Statistics._setup(self.exp)
+        Statistics._setup_class(self.exp)
 
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')

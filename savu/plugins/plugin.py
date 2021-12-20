@@ -63,11 +63,13 @@ class Plugin(PluginDatasets):
         """
         self._set_plugin_datasets()
         self._reset_process_frames_counter()
+        self.stats_obj = Statistics()
         self.setup()
+        self.stats_obj.setup(self)
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
-        self.stats_obj = Statistics(self)
+
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -165,7 +167,9 @@ class Plugin(PluginDatasets):
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
         if self.stats_obj.calc_stats:
-            self.stats_obj.set_volume_stats()
+            if not self.stats_obj._already_called:
+                self.stats_obj.set_volume_stats()
+            self.stats_obj._already_called = False
         pass
 
     def set_preview(self, data, params):
