@@ -12,7 +12,7 @@ class AstraReconGpuTools(PluginTools):
               (Error in the solution)
             default: False
             dependency:
-              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
+              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA, CGLS3D_CUDA, SIRT3D_CUDA]
         algorithm:
             visibility: basic
             dtype: str
@@ -71,7 +71,9 @@ class AstraReconGpuTools(PluginTools):
                 flat-top:
                 kaiser:
                 parzen:
-            default: 'ram-lak'            
+            default: 'ram-lak'
+            dependency:
+                algorithm: [FBP_CUDA]
         outer_pad:
              dependency:
                algorithm: [FBP_CUDA, BP_CUDA]
