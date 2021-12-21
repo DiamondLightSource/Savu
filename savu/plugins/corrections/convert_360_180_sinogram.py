@@ -155,6 +155,10 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
             sinocombine[:, self.width - self.overlap:
                         2 * self.width - self.overlap] += sinogram2
             sinocombine[:, -self.overlap:] = sinogram2[:, -1:]
+
+        out_dataset = self.get_out_datasets()[0]
+        out_dataset.meta_data.set("centre_of_rotation", np.array([self.cor]))
+
         return [sinocombine, np.array([self.cor])]
 
     def nOutput_datasets(self):
