@@ -22,18 +22,19 @@ class Statistics(object):
 
     def __init__(self):
         self.calc_stats = True
+        self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RMSD': []}
+        self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
 
     def setup(self, plugin_self):
+        if plugin_self.name in Statistics.no_stats_plugins:
+            self.calc_stats = False
         if self.calc_stats:
             self.plugin = plugin_self
             self.plugin_name = plugin_self.name
             self.pad_dims = []
-            self.stats = {'max': [], 'min': [], 'mean': [], 'standard_deviation': []}
-            self.calc_stats = False
             self._already_called = False
             self._set_pattern_info()
-            if self.plugin_name in Statistics.no_stats_plugins:
-                self.calc_stats = False
+
 
     @classmethod
     def _setup_class(cls, exp):
@@ -42,6 +43,7 @@ class Statistics(object):
         cls.data_stats = {}
         cls.volume_stats = {}
         cls.global_stats = {}
+        cls.global_residuals = {}
         n_plugins = len(exp.meta_data.plugin_list.plugin_list)
         # for n in range(n_plugins):
         #    cls.data_stats[n + 1] = [None, None, None, None, None]
@@ -53,19 +55,59 @@ class Statistics(object):
         if not os.path.exists(cls.path):
             os.mkdir(cls.path)
 
-    def set_slice_stats(self, slice1):
-        """Appends slice stats arrays with the stats parameters of the current slice.
+    def calc_slice_stats(self, my_slice, base_slice=None):
+        """Calculates and returns slice stats for the current slice.
 
         :param slice1: The slice whose stats are being calculated.
         """
-        if slice1 is not None:
+        if my_slice is not None:
             slice_num = self.plugin.pcount
-            slice1 = self._de_list(slice1)
-            slice1 = self._unpad_slice(slice1)
-            self.stats['max'].append(slice1.max())
-            self.stats['min'].append(slice1.min())
-            self.stats['mean'].append(np.mean(slice1))
-            self.stats['standard_deviation'].append(np.std(slice1))
+            my_slice = self._de_list(my_slice)
+            my_slice = self._unpad_slice(my_slice)
+            slice_stats = {'max': np.amax(my_slice).astype('float64'), 'min': np.amin(my_slice).astype('float64'),
+                           'mean': np.mean(my_slice), 'std_dev': np.std(my_slice)}
+            if base_slice is not None:
+                base_slice = self._de_list(base_slice)
+                base_slice = self._unpad_slice(base_slice)
+                rmsd = self.calc_rmsd(my_slice, base_slice)
+            else:
+                rmsd = None
+            slice_stats['RMSD'] = rmsd
+            return slice_stats
+        return None
+
+    def calc_rmsd(self, array1, array2):
+        rmsd = None
+        if array1.shape == array2.shape:
+            residuals = np.subtract(array1, array2)
+            total = 0
+            for value in np.nditer(residuals):
+                total += value**2
+            rmsd = np.sqrt(total/residuals.size)
+        return rmsd
+
+    def set_slice_stats(self, slice_stats):
+        """Appends slice stats arrays with the stats parameters of the current slice.
+
+        :param slice_stats: The stats for the current slice.
+        """
+        self.stats['max'].append(slice_stats['max'])
+        self.stats['min'].append(slice_stats['min'])
+        self.stats['mean'].append(slice_stats['mean'])
+        self.stats['std_dev'].append(slice_stats['std_dev'])
+        self.stats['RMSD'].append(slice_stats['RMSD'])
+
+    def calc_stats_residuals(self, stats_before, stats_after):
+        residuals = {'max': None, 'min': None, 'mean': None, 'std_dev': None}
+        for key in list(residuals.keys()):
+            residuals[key] = stats_after[key] - stats_before[key]
+        return residuals
+
+    def set_residuals(self, residuals):
+        self.residuals['max'].append(residuals['max'])
+        self.residuals['min'].append(residuals['min'])
+        self.residuals['mean'].append(residuals['mean'])
+        self.residuals['std_dev'].append(residuals['std_dev'])
 
     def get_slice_stats(self, stat, slice_num):
         """Returns array of stats associated with the processed slices of the current plugin."""
@@ -88,8 +130,8 @@ class Statistics(object):
                 Statistics.data_stats[p_num][0] = max(self.stats['max'])
                 Statistics.data_stats[p_num][1] = min(self.stats['min'])
                 Statistics.data_stats[p_num][2] = np.mean(self.stats['mean'])
-                Statistics.data_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
-                Statistics.data_stats[p_num][4] = np.median(self.stats['standard_deviation'])
+                Statistics.data_stats[p_num][3] = np.mean(self.stats['std_dev'])
+                Statistics.data_stats[p_num][4] = np.median(self.stats['std_dev'])
                 Statistics.global_stats[p_num] = Statistics.data_stats[p_num]
                 Statistics.global_stats[name] = Statistics.global_stats[p_num]
                 self._link_stats_to_datasets(Statistics.global_stats[name])
@@ -97,15 +139,25 @@ class Statistics(object):
                 Statistics.volume_stats[p_num][0] = max(self.stats['max'])
                 Statistics.volume_stats[p_num][1] = min(self.stats['min'])
                 Statistics.volume_stats[p_num][2] = np.mean(self.stats['mean'])
-                Statistics.volume_stats[p_num][3] = np.mean(self.stats['standard_deviation'])
-                Statistics.volume_stats[p_num][4] = np.median(self.stats['standard_deviation'])
+                Statistics.volume_stats[p_num][3] = np.mean(self.stats['std_dev'])
+                Statistics.volume_stats[p_num][4] = np.median(self.stats['std_dev'])
                 Statistics.global_stats[p_num] = Statistics.volume_stats[p_num]
                 Statistics.global_stats[name] = Statistics.global_stats[p_num]
                 self._link_stats_to_datasets(Statistics.global_stats[name])
-        slice_stats = np.array([self.stats['max'], self.stats['min'], self.stats['mean'],
-                                self.stats['standard_deviation']])
-        self._write_stats_to_file(slice_stats, p_num)
+        slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
+        if None not in self.stats['RMSD']:
+            slice_stats_array = np.append(slice_stats_array, [self.stats['RMSD']], 0)
+        self._write_stats_to_file(slice_stats_array, p_num)
+        self.set_volume_residuals()
         self._already_called = True
+
+    def set_volume_residuals(self):
+        p_num = Statistics.count
+        Statistics.global_residuals[p_num] = {}
+        Statistics.global_residuals[p_num]['max'] = np.mean(self.residuals['max'])
+        Statistics.global_residuals[p_num]['min'] = np.mean(self.residuals['min'])
+        Statistics.global_residuals[p_num]['mean'] = np.mean(self.residuals['mean'])
+        Statistics.global_residuals[p_num]['std_dev'] = np.mean(self.residuals['std_dev'])
 
     def get_stats(self, plugin_name, n=None, stat=None):
         """Returns stats associated with a certain plugin.
@@ -192,6 +244,7 @@ class Statistics(object):
                     if 1 in patterns.get(pattern)["slice_dims"]:
                         self.pattern = pattern
                         break
+        self.calc_stats = False
         for dataset in out_datasets:
             if bool(set(Statistics.pattern_list) & set(dataset.data_info.get("data_patterns"))):
                 self.calc_stats = True
@@ -212,11 +265,11 @@ class Statistics(object):
             out_dataset.meta_data.set([group_name, "mean_std_dev"], stats[3])
             out_dataset.meta_data.set([group_name, "median_std_dev"], stats[4])
 
-    def _write_stats_to_file(self, slice_stats, p_num):
+    def _write_stats_to_file(self, slice_stats_array, p_num):
         """Writes slice statistics to a h5 file"""
         path = Statistics.path
         filename = f"{path}/stats_p{p_num}_{self.plugin_name}.h5"
-        slice_stats_dim = (slice_stats.shape[1],)
+        slice_stats_dim = (slice_stats_array.shape[1],)
         self.hdf5 = Hdf5Utils(self.plugin.exp)
         with h5.File(filename, "a") as h5file:
             i = 2
@@ -225,15 +278,18 @@ class Statistics(object):
                 group_name = f"/stats{i}"
                 i += 1
             group = h5file.create_group(group_name, track_order=None)
-            max_ds = self.hdf5.create_dataset_nofill(group, "max", slice_stats_dim, slice_stats.dtype)
-            min_ds = self.hdf5.create_dataset_nofill(group, "min", slice_stats_dim, slice_stats.dtype)
-            mean_ds = self.hdf5.create_dataset_nofill(group, "mean", slice_stats_dim, slice_stats.dtype)
-            standard_deviation_ds = self.hdf5.create_dataset_nofill(group, "standard_deviation",
-                                                                    slice_stats_dim, slice_stats.dtype)
-            max_ds[::] = slice_stats[0]
-            min_ds[::] = slice_stats[1]
-            mean_ds[::] = slice_stats[2]
-            standard_deviation_ds[::] = slice_stats[3]
+            max_ds = self.hdf5.create_dataset_nofill(group, "max", slice_stats_dim, slice_stats_array.dtype)
+            min_ds = self.hdf5.create_dataset_nofill(group, "min", slice_stats_dim, slice_stats_array.dtype)
+            mean_ds = self.hdf5.create_dataset_nofill(group, "mean", slice_stats_dim, slice_stats_array.dtype)
+            std_dev_ds = self.hdf5.create_dataset_nofill(group, "standard_deviation",
+                                                         slice_stats_dim, slice_stats_array.dtype)
+            if slice_stats_array.shape[0] == 5:
+                rmsd_ds = self.hdf5.create_dataset_nofill(group, "RMSD", slice_stats_dim, slice_stats_array.dtype)
+                rmsd_ds[::] = slice_stats_array[4]
+            max_ds[::] = slice_stats_array[0]
+            min_ds[::] = slice_stats_array[1]
+            mean_ds[::] = slice_stats_array[2]
+            std_dev_ds[::] = slice_stats_array[3]
 
     def _unpad_slice(self, slice1):
         """If data is padded in the slice dimension, removes this pad."""
@@ -287,3 +343,4 @@ class Statistics(object):
         print(cls.data_stats)
         print(cls.volume_stats)
         print(cls.global_stats)
+        print(cls.global_residuals)

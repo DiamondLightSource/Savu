@@ -136,8 +136,13 @@ class Plugin(PluginDatasets):
     def plugin_process_frames(self, data):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
+
         if self.stats_obj.calc_stats:
-            self.stats_obj.set_slice_stats(frames)
+            slice_stats_before = self.stats_obj.calc_slice_stats(data)
+            slice_stats_after = self.stats_obj.calc_slice_stats(frames, data)
+            self.stats_obj.set_slice_stats(slice_stats_after)
+            stats_residuals = self.stats_obj.calc_stats_residuals(slice_stats_before, slice_stats_after)
+            self.stats_obj.set_residuals(stats_residuals)
         self.pcount += 1
         return frames
 
