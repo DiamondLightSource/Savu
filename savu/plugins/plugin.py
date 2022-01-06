@@ -134,15 +134,16 @@ class Plugin(PluginDatasets):
         return data
 
     def plugin_process_frames(self, data):
+        data_copy = data.copy() # is it ok to copy every frame like this? Enough memory?
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
 
         if self.stats_obj.calc_stats:
-            slice_stats_before = self.stats_obj.calc_slice_stats(data)
-            slice_stats_after = self.stats_obj.calc_slice_stats(frames, data)
+            slice_stats_before = self.stats_obj.calc_slice_stats(data_copy)
+            slice_stats_after = self.stats_obj.calc_slice_stats(frames, data_copy)
             self.stats_obj.set_slice_stats(slice_stats_after)
             stats_residuals = self.stats_obj.calc_stats_residuals(slice_stats_before, slice_stats_after)
-            self.stats_obj.set_residuals(stats_residuals)
+            self.stats_obj.set_stats_residuals(stats_residuals)
         self.pcount += 1
         return frames
 

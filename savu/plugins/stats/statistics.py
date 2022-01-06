@@ -22,7 +22,7 @@ class Statistics(object):
 
     def __init__(self):
         self.calc_stats = True
-        self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RMSD': []}
+        self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
 
     def setup(self, plugin_self):
@@ -65,25 +65,36 @@ class Statistics(object):
             my_slice = self._de_list(my_slice)
             my_slice = self._unpad_slice(my_slice)
             slice_stats = {'max': np.amax(my_slice).astype('float64'), 'min': np.amin(my_slice).astype('float64'),
-                           'mean': np.mean(my_slice), 'std_dev': np.std(my_slice)}
+                           'mean': np.mean(my_slice), 'std_dev': np.std(my_slice), 'data_points': my_slice.size}
             if base_slice is not None:
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
-                rmsd = self.calc_rmsd(my_slice, base_slice)
+                rss = self._calc_rss(my_slice, base_slice)
             else:
-                rmsd = None
-            slice_stats['RMSD'] = rmsd
+                rss = None
+            slice_stats['RSS'] = rss
             return slice_stats
         return None
 
-    def calc_rmsd(self, array1, array2):
-        rmsd = None
+    def _calc_rss(self, array1, array2): # residual sum of squares
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
-            total = 0
-            for value in np.nditer(residuals):
-                total += value**2
-            rmsd = np.sqrt(total/residuals.size)
+            rss = sum(value**2 for value in np.nditer(residuals))
+        else:
+            print("Warning: cannot calculate RSS, arrays different sizes.")  # need to make this an actual warning
+            rss = None
+        return rss
+
+    def _rmsd_from_rss(self, rss, n):
+        return np.sqrt(rss/n)
+
+    def calc_rmsd(self, array1, array2):
+        if array1.shape == array2.shape:
+            rss = self._calc_rss(array1, array2)
+            rmsd = self._rmsd_from_rss(rss, array1.size)
+        else:
+            print("Warning: cannot calculate RMSD, arrays different sizes.")  # need to make this an actual warning
+            rmsd = None
         return rmsd
 
     def set_slice_stats(self, slice_stats):
@@ -95,7 +106,8 @@ class Statistics(object):
         self.stats['min'].append(slice_stats['min'])
         self.stats['mean'].append(slice_stats['mean'])
         self.stats['std_dev'].append(slice_stats['std_dev'])
-        self.stats['RMSD'].append(slice_stats['RMSD'])
+        self.stats['RSS'].append(slice_stats['RSS'])
+        self.stats['data_points'].append(slice_stats['data_points'])
 
     def calc_stats_residuals(self, stats_before, stats_after):
         residuals = {'max': None, 'min': None, 'mean': None, 'std_dev': None}
@@ -103,7 +115,7 @@ class Statistics(object):
             residuals[key] = stats_after[key] - stats_before[key]
         return residuals
 
-    def set_residuals(self, residuals):
+    def set_stats_residuals(self, residuals):
         self.residuals['max'].append(residuals['max'])
         self.residuals['min'].append(residuals['min'])
         self.residuals['mean'].append(residuals['mean'])
@@ -123,30 +135,27 @@ class Statistics(object):
         while name in list(Statistics.global_stats.keys()):
             name = self.plugin_name + str(i)
             i += 1
-        Statistics.data_stats[p_num] = [None, None, None, None, None]
-        Statistics.volume_stats[p_num] = [None, None, None, None, None]
+        Statistics.global_stats[p_num] = {}
         if len(self.stats['max']) != 0:
-            if self.pattern in ['PROJECTION', 'SINOGRAM', 'TANGENTOGRAM', 'SINOMOVIE', '4D_SCAN']:
-                Statistics.data_stats[p_num][0] = max(self.stats['max'])
-                Statistics.data_stats[p_num][1] = min(self.stats['min'])
-                Statistics.data_stats[p_num][2] = np.mean(self.stats['mean'])
-                Statistics.data_stats[p_num][3] = np.mean(self.stats['std_dev'])
-                Statistics.data_stats[p_num][4] = np.median(self.stats['std_dev'])
-                Statistics.global_stats[p_num] = Statistics.data_stats[p_num]
-                Statistics.global_stats[name] = Statistics.global_stats[p_num]
-                self._link_stats_to_datasets(Statistics.global_stats[name])
-            elif self.pattern in ['VOLUME_XZ', 'VOLUME_XY', 'VOLUME_YZ', 'VOLUME_3D']:
-                Statistics.volume_stats[p_num][0] = max(self.stats['max'])
-                Statistics.volume_stats[p_num][1] = min(self.stats['min'])
-                Statistics.volume_stats[p_num][2] = np.mean(self.stats['mean'])
-                Statistics.volume_stats[p_num][3] = np.mean(self.stats['std_dev'])
-                Statistics.volume_stats[p_num][4] = np.median(self.stats['std_dev'])
-                Statistics.global_stats[p_num] = Statistics.volume_stats[p_num]
-                Statistics.global_stats[name] = Statistics.global_stats[p_num]
-                self._link_stats_to_datasets(Statistics.global_stats[name])
+            Statistics.global_stats[p_num]['max'] = max(self.stats['max'])
+            Statistics.global_stats[p_num]['min'] = min(self.stats['min'])
+            Statistics.global_stats[p_num]['mean'] = np.mean(self.stats['mean'])
+            Statistics.global_stats[p_num]['mean_std_dev'] = np.mean(self.stats['std_dev'])
+            Statistics.global_stats[p_num]['median_std_dev'] = np.median(self.stats['std_dev'])
+            if None not in self.stats['RSS']:
+                total_rss = sum(self.stats['RSS'])
+                n = sum(self.stats['data_points'])
+                Statistics.global_stats[p_num]['RMSD'] = self._rmsd_from_rss(total_rss, n)
+            else:
+                Statistics.global_stats[p_num]['RMSD'] = None
+
+            Statistics.global_stats[name] = Statistics.global_stats[p_num]
+            self._link_stats_to_datasets(Statistics.global_stats[name])
+
         slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
-        if None not in self.stats['RMSD']:
-            slice_stats_array = np.append(slice_stats_array, [self.stats['RMSD']], 0)
+
+        #if None not in self.stats['RMSD']:
+        #    slice_stats_array = np.append(slice_stats_array, self.stats['RMSD'], 0)
         self._write_stats_to_file(slice_stats_array, p_num)
         self.set_volume_residuals()
         self._already_called = True
@@ -173,11 +182,9 @@ class Statistics(object):
         if n is not None and n not in (0, 1):
             name = name + str(n)
         if stat is not None:
-            i = Statistics._index_dict[stat]
-            return Statistics.global_stats[name][i]
+            return Statistics.global_stats[name][stat]
         else:
-            stats = dict(zip(Statistics._key_list, Statistics.global_stats[name]))
-            return stats
+            return Statistics.global_stats[name]
 
     def get_stats_from_num(self, p_num, stat=None):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
@@ -192,11 +199,9 @@ class Statistics(object):
         if p_num <= 0:
             p_num = Statistics.count + p_num
         if stat is not None:
-            i = Statistics._index_dict[stat]
-            return Statistics.global_stats[p_num][i]
+            return Statistics.global_stats[p_num][stat]
         else:
-            stats = dict(zip(Statistics._key_list, Statistics.global_stats[p_num]))
-            return stats
+            return Statistics.global_stats[p_num]
 
     def get_stats_from_dataset(self, dataset, stat=None, set_num=None):
         """Returns stats associated with a dataset.
@@ -259,11 +264,13 @@ class Statistics(object):
             while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
                 group_name = f"stats{i}"
                 i += 1
-            out_dataset.meta_data.set([group_name, "max"], stats[0])
-            out_dataset.meta_data.set([group_name, "min"], stats[1])
-            out_dataset.meta_data.set([group_name, "mean"], stats[2])
-            out_dataset.meta_data.set([group_name, "mean_std_dev"], stats[3])
-            out_dataset.meta_data.set([group_name, "median_std_dev"], stats[4])
+            out_dataset.meta_data.set([group_name, "max"], stats["max"])
+            out_dataset.meta_data.set([group_name, "min"], stats["min"])
+            out_dataset.meta_data.set([group_name, "mean"], stats["mean"])
+            out_dataset.meta_data.set([group_name, "mean_std_dev"], stats["mean_std_dev"])
+            out_dataset.meta_data.set([group_name, "median_std_dev"], stats["median_std_dev"])
+            if stats["RMSD"] is not None:
+                out_dataset.meta_data.set([group_name, "RMSD"], stats["RMSD"])
 
     def _write_stats_to_file(self, slice_stats_array, p_num):
         """Writes slice statistics to a h5 file"""
