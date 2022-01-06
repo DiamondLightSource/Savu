@@ -1,15 +1,12 @@
-Threshold Filter
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Threshold Filter{% endblock %}
 
+{% block description %}
 A plugin to quantise an image into discrete levels. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameters
             description: Threshold for black/white quantisation.
             default: "32768"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.threshold_filter.rst{% endblock %}

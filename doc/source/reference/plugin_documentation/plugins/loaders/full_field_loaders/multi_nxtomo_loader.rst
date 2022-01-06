@@ -1,15 +1,12 @@
-Multi Nxtomo Loader
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Multi Nxtomo Loader{% endblock %}
 
+{% block description %}
 A class to load multiple scans in Nexus format into one dataset. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -77,8 +74,10 @@ Parameters
             description: "New axis label, if required, in the form 'name.units'"
             default: scan.number
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.multi_nxtomo_loader.rst{% endblock %}

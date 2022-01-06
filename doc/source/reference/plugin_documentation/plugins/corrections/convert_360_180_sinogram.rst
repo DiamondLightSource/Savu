@@ -1,18 +1,16 @@
-Convert 360 180 Sinogram
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Convert 360 180 Sinogram{% endblock %}
 
+{% block description %}
 Method to convert a 360-degree sinogram to a 180-degree sinogram in a half-acquisition scan. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/convert_360_180_sinogram_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -34,8 +32,10 @@ Parameters
             description: Center of rotation.
             default: "0.0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.convert_360_180_sinogram.rst{% endblock %}

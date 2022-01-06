@@ -1,15 +1,12 @@
-Dezinger Sinogram Gpu
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Dezinger Sinogram Gpu{% endblock %}
 
+{% block description %}
 A GPU plugin to apply median-based dezinger to SINOGRAM data.     The plugin works in 2D or 3D mode. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,8 +42,10 @@ Parameters
             description: Select between 2D or 3D kernel for filtering.
             default: 3D
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.filters.dezingers.dezinger_sinogram_gpu.rst{% endblock %}

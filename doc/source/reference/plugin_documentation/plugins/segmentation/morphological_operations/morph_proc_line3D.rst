@@ -1,15 +1,12 @@
-Morph Proc Line3D
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Proc Line3D{% endblock %}
 
+{% block description %}
 A Larix morphological processing module using line segments to remove inconsistent gaps in 3D mask. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,8 +42,10 @@ Parameters
             description: the number of iterations for segmentation.
             default: "3"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.morphological_operations.morph_proc_line3D.rst{% endblock %}

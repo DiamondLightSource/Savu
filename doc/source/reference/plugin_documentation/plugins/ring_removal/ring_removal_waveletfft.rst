@@ -1,18 +1,16 @@
-Ring Removal Waveletfft
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ring Removal Waveletfft{% endblock %}
 
+{% block description %}
 Wavelet-FFt-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_waveletfft_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -54,8 +52,10 @@ Parameters
             description: Padding for Fourier transform
             default: "20"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.ring_removal_waveletfft.rst{% endblock %}

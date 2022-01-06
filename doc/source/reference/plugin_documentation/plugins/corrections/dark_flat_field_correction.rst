@@ -1,15 +1,12 @@
-Dark Flat Field Correction
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Dark Flat Field Correction{% endblock %}
 
+{% block description %}
 A Plugin to apply a simple dark and flat field correction to data. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -52,8 +49,10 @@ Parameters
             description: Output a warning if this proportion of values, or greater, are below and/or above the lower/upper bounds. E.g. Enter 0.05 for 5%.
             default: "0.05"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.dark_flat_field_correction.rst{% endblock %}

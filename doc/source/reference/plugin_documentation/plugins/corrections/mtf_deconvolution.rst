@@ -1,18 +1,16 @@
-Mtf Deconvolution
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mtf Deconvolution{% endblock %}
 
+{% block description %}
 Method to correct the point-spread-function effect. Working on raw     projections and flats. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/mtf_deconvolution_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -42,52 +40,49 @@ Parameters
             description: Pad the image before the deconvolution.
             default: "128"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Preprocessing techniques for removing artifacts in synchrotron-based tomographic images by Vo, Nghia T et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @inproceedings{vo2019preprocessing,
+              title={Preprocessing techniques for removing artifacts in synchrotron-based tomographic images},
+              author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+              booktitle={Developments in X-Ray Tomography XII},
+              volume={11113},
+              pages={111131I},
+              year={2019},
+              organization={International Society for Optics and Photonics}
+              publisher = {SPIE},
+              pages = {309 -- 328},
+              year = {2019},
+              doi = {10.1117/12.2530324},
+              URL = {https://doi.org/10.1117/12.2530324}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Conference Proceedings
+            %T Preprocessing techniques for removing artifacts in synchrotron-based tomographic images
+            %A Vo, Nghia T
+            %A Atwood, Robert C
+            %A Drakopoulos, Michael
+            %B Developments in X-Ray Tomography XII
+            %V 11113
+            %P 111131I
+            %D 2019
+            %I International Society for Optics and Photonics
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Preprocessing techniques for removing artifacts in synchrotron-based tomographic images by Vo, Nghia T et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @inproceedings{vo2019preprocessing,
-      title={Preprocessing techniques for removing artifacts in synchrotron-based tomographic images},
-      author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
-      booktitle={Developments in X-Ray Tomography XII},
-      volume={11113},
-      pages={111131I},
-      year={2019},
-      organization={International Society for Optics and Photonics}
-      publisher = {SPIE},
-      pages = {309 -- 328},
-      year = {2019},
-      doi = {10.1117/12.2530324},
-      URL = {https://doi.org/10.1117/12.2530324}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Conference Proceedings
-    %T Preprocessing techniques for removing artifacts in synchrotron-based tomographic images
-    %A Vo, Nghia T
-    %A Atwood, Robert C
-    %A Drakopoulos, Michael
-    %B Developments in X-Ray Tomography XII
-    %V 11113
-    %P 111131I
-    %D 2019
-    %I International Society for Optics and Photonics
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.corrections.mtf_deconvolution.rst{% endblock %}

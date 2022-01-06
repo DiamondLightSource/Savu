@@ -1,15 +1,12 @@
-Monitor Correction
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Monitor Correction{% endblock %}
 
+{% block description %}
 Corrects the data to the monitor counts. This plugin corrects data[0] from data[1] by dividing. We allow a scale and offset due to I18's uncalibrated ic 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -55,8 +52,10 @@ Parameters
             description: The pattern to apply to it.
             default: PROJECTION
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.monitor_correction.rst{% endblock %}

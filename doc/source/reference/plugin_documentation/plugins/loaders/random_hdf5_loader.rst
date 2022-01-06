@@ -1,15 +1,12 @@
-Random Hdf5 Loader
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Random Hdf5 Loader{% endblock %}
 
+{% block description %}
 A hdf5 dataset of a specified size is created at runtime using numpy random sampling (numpy.random) and saved to file. This created dataset will be used as the input file, and the input file path passed to Savu will be ignored (use a dummy). 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -71,8 +68,10 @@ Parameters
             description: Set the distribution interval.
             default: "[1, 10]"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.loaders.random_hdf5_loader.rst{% endblock %}

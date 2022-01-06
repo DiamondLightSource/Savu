@@ -1,15 +1,12 @@
-Nxmonitor Loader
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Nxmonitor Loader{% endblock %}
 
+{% block description %}
 A class to load tomography data from an NXmonitor file 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -23,8 +20,10 @@ Parameters
             description: The name assigned to the dataset.
             default: monitor
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.mapping_loaders.nxmonitor_loader.rst{% endblock %}

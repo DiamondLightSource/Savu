@@ -1,15 +1,12 @@
-Multi Savu Loader
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Multi Savu Loader{% endblock %}
 
+{% block description %}
 A class to load multiple savu datasets in Nexus format into one dataset. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -59,8 +56,10 @@ Parameters
             description: Name associated with the data set.
             default: tomo
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.loaders.multi_savu_loader.rst{% endblock %}

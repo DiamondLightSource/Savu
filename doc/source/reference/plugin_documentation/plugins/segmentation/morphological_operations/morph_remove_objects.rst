@@ -1,15 +1,12 @@
-Morph Remove Objects
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Remove Objects{% endblock %}
 
+{% block description %}
 A Plugin to remove objects smaller than the specified size. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,8 +42,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.morphological_operations.morph_remove_objects.rst{% endblock %}

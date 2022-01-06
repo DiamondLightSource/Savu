@@ -1,18 +1,16 @@
-Remove Unresponsive And Fluctuating Rings
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Remove Unresponsive And Fluctuating Rings{% endblock %}
 
+{% block description %}
 Method working in the sinogram space to remove ring artifacts caused by dead pixels. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_unresponsive_and_fluctuating_rings_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -48,49 +46,46 @@ Parameters
             description: Removing residual stripes if True.
             default: "True"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Superior techniques for eliminating ring artifacts in X-ray micro-tomography by Vo, Nghia T et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{vo2018superior,
+            title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
+            author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+            journal={Optics express},
+            volume={26},
+            number={22},
+            pages={28396--28412},
+            year={2018},
+            publisher={Optical Society of America}}
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
+            %A Vo, Nghia T
+            %A Atwood, Robert C
+            %A Drakopoulos, Michael
+            %J Optics express
+            %V 26
+            %N 22
+            %P 28396-28412
+            %@ 1094-4087
+            %D 2018
+            %I Optical Society of America
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Superior techniques for eliminating ring artifacts in X-ray micro-tomography by Vo, Nghia T et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{vo2018superior,
-    title = {Superior techniques for eliminating ring artifacts in X-ray micro-tomography},
-    author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
-    journal={Optics express},
-    volume={26},
-    number={22},
-    pages={28396--28412},
-    year={2018},
-    publisher={Optical Society of America}}
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
-    %A Vo, Nghia T
-    %A Atwood, Robert C
-    %A Drakopoulos, Michael
-    %J Optics express
-    %V 26
-    %N 22
-    %P 28396-28412
-    %@ 1094-4087
-    %D 2018
-    %I Optical Society of America
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.remove_unresponsive_and_fluctuating_rings.rst{% endblock %}

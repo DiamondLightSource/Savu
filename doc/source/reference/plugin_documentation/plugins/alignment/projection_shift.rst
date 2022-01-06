@@ -1,18 +1,16 @@
-Projection Shift
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Projection Shift{% endblock %}
 
+{% block description %}
 Horizontal and vertical shift are calculated using a chosen method and added to the metadata.  The vertical and horizontal shifts can be corrected using the ProjectionVerticalAlignment and SinogramAlignment (in 'shift' mode) plugins respectively. Method: Uses either skimage template_matching or orb feature tracking plus robust ransac matching to calculate the translation between different combinations of 10 consecutive projection images. A least squares solution to the shift values between images is calculated and returned for the middle 8 images. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/alignment/projection_shift_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -55,8 +53,10 @@ Parameters
             description: Number of keypoints to use in ORB feature detector.
             default: "20"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.alignment.projection_shift.rst{% endblock %}

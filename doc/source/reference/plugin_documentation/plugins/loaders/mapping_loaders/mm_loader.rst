@@ -1,15 +1,12 @@
-Mm Loader
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mm Loader{% endblock %}
 
+{% block description %}
 Testing the mmloader plugin 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -41,8 +38,10 @@ Parameters
             description: Path to the calibration file
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.mapping_loaders.mm_loader.rst{% endblock %}

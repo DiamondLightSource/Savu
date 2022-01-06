@@ -1,15 +1,12 @@
-Region Grow
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Region Grow{% endblock %}
 
+{% block description %}
 Fast 2D segmentation by evolving the user-given mask, the initialised mask should be set in the central part of the object to be segmented. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -56,8 +53,10 @@ Parameters
             description: pattern to apply this to.
             default: VOLUME_YZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.evolving_contours.region_grow.rst{% endblock %}

@@ -1,15 +1,12 @@
-Visual Hulls Recon
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Visual Hulls Recon{% endblock %}
 
+{% block description %}
 A Plugin to reconstruct an image by filter back projection using the inverse radon transform from scikit-image. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -89,48 +86,45 @@ Parameters
             description: Threshold to binarize the input sinogram.
             default: "0.5"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **The visual hull concept for silhouette-based image understanding by Laurentini, Aldo et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{laurentini1994visual,
+            title={The visual hull concept for silhouette-based image understanding},
+            author={Laurentini, Aldo},
+            journal={IEEE Transactions on pattern analysis and machine intelligence},
+            volume={16},
+            number={2},
+            pages={150--162},
+            year={1994},
+            publisher={IEEE}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T The visual hull concept for silhouette-based image understanding
+            %A Laurentini, Aldo
+            %J IEEE Transactions on pattern analysis and machine intelligence
+            %V 16
+            %N 2
+            %P 150-162
+            %@ 0162-8828
+            %D 1994
+            %I IEEE
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-The visual hull concept for silhouette-based image understanding by Laurentini, Aldo et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{laurentini1994visual,
-    title={The visual hull concept for silhouette-based image understanding},
-    author={Laurentini, Aldo},
-    journal={IEEE Transactions on pattern analysis and machine intelligence},
-    volume={16},
-    number={2},
-    pages={150--162},
-    year={1994},
-    publisher={IEEE}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T The visual hull concept for silhouette-based image understanding
-    %A Laurentini, Aldo
-    %J IEEE Transactions on pattern analysis and machine intelligence
-    %V 16
-    %N 2
-    %P 150-162
-    %@ 0162-8828
-    %D 1994
-    %I IEEE
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.reconstructions.visual_hulls_recon.rst{% endblock %}

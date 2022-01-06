@@ -1,15 +1,12 @@
-Denoise Bregman Filter
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Denoise Bregman Filter{% endblock %}
 
+{% block description %}
 Split Bregman method for solving the denoising Total Variation ROF model. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -52,8 +49,10 @@ Parameters
             options: "['Isotropic', 'Anisotropic']"
             default: "False"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.filters.denoising.denoise_bregman_filter.rst{% endblock %}

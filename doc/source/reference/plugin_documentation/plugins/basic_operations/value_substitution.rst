@@ -1,15 +1,12 @@
-Value Substitution
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Value Substitution{% endblock %}
 
+{% block description %}
 The function looks for a specific value in the provided second dataset (e.g. a mask image) and substitutes it with a given value. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -46,8 +43,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.value_substitution.rst{% endblock %}

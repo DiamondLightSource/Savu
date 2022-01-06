@@ -1,15 +1,12 @@
-Sinogram Clean
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Sinogram Clean{% endblock %}
 
+{% block description %}
 Clean the sinogram by applying a mask in Fourier space. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameters
             description: Drop lines around vertical center of the mask scipy.optimize.curve_fit.
             default: "20"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.alignment.sinogram_clean.rst{% endblock %}

@@ -23,6 +23,7 @@ Alignment
    Projection Vertical Alignment <plugin_documentation/plugins/alignment/projection_vertical_alignment>
    Sinogram Alignment <plugin_documentation/plugins/alignment/sinogram_alignment>
    Sinogram Clean <plugin_documentation/plugins/alignment/sinogram_clean>
+   Projection 2D Alignment <plugin_documentation/plugins/alignment/projection_2d_alignment>
 
 
 Azimuthal Integrators
@@ -59,6 +60,7 @@ Centering
    :maxdepth: 1 
 
    Vo Centering <plugin_documentation/plugins/centering/vo_centering>
+   Centering360 <plugin_documentation/plugins/centering/centering360>
 
 
 Component Analysis
@@ -143,6 +145,7 @@ Denoising
    Denoise Bregman Filter <plugin_documentation/plugins/filters/denoising/denoise_bregman_filter>
    Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
    Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
+   Wavelet Denoising Gpu <plugin_documentation/plugins/filters/denoising/wavelet_denoising_gpu>
 
 
 Fitters
@@ -379,7 +382,7 @@ Simulation
 .. toctree::
    :maxdepth: 1 
 
-   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
    Tomo Phantom Artifacts <plugin_documentation/plugins/simulation/tomo_phantom_artifacts>
+   Tomo Phantom Quantification <plugin_documentation/plugins/simulation/tomo_phantom_quantification>
 
 

@@ -1,15 +1,12 @@
-Forward Projector Gpu
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Forward Projector Gpu{% endblock %}
 
+{% block description %}
 This plugin uses ToMoBAR software and GPU Astra projector to generate parallel-beam projection data. The plugin will project the given object using the available metadata OR user-provided geometry. In case when angles set to None, the metadata projection geometry will be used. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -43,8 +40,10 @@ Parameters
             description: The centre of rotation.
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.reconstructions.projectors.forward_projector_gpu.rst{% endblock %}

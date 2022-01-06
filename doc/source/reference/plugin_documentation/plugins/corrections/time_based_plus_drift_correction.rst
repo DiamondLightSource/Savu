@@ -1,15 +1,12 @@
-Time Based Plus Drift Correction
-########################################################
+{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Time Based Plus Drift Correction{% endblock %}
 
+{% block description %}
 Apply a time-based dark and flat field correction on data with an image drift using linear interpolation and template matching. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameters
             dtype: "list[str]"
             default: "['100:200', '100:200']"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.time_based_plus_drift_correction.rst{% endblock %}
