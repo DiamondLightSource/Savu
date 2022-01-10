@@ -1,4 +1,4 @@
-{% extends "/home/glb23482/git_projects/Savu/doc/source/reference/savu_commands/plugin_template.rst" %}
+{% extends "plugin_template.rst" %}
 
 {% block title %}Min And Max{% endblock %}
 
