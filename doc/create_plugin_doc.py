@@ -185,10 +185,7 @@ def populate_plugin_doc_files(
     title = convert_title(title[-1])
     # Depending on the number of nested directories, determine which section
     # heading and title to apply
-    new_rst_file.write(
-        f'{{% extends "{savu_base_path}doc/source/reference/savu_commands/'
-        f'plugin_template.rst" %}}\n'
-    )
+    new_rst_file.write(f'{{% extends "plugin_template.rst" %}}\n')
     new_rst_file.write(f"\n{{% block title %}}{title}{{% endblock %}}\n")
 
     plugin_data = plugin_class.tools.get_param_definitions()
@@ -267,15 +264,25 @@ def write_api_link_to_file(f, file_path, mod_path_length):
     :param mod_path_length: Module/path length to set the api file
         directory correctly
     """
-    count = 0
     mod = file_path.replace("/", ".")
-    plugin_api = "plugin_api/"
-    while count < mod_path_length:
-        plugin_api = f"../{plugin_api}"
-        count += 1
+    plugin_dir = get_path_to_directory(mod_path_length)
+    plugin_api = f"{plugin_dir}plugin_api/"
     f.write("\n{% block plugin_file %}")
     f.write(f"{plugin_api}{mod}.rst")
     f.write("{% endblock %}\n")
+
+
+def get_path_to_directory(mod_path_length):
+    """ Find the backward navigation to the main directory
+    :param mod_path_length: length of the plugin module/plugin path
+    :return:str to savu directory from plugin rst file
+    """
+    count = 0
+    plugin_dir = ""
+    while count < mod_path_length:
+        plugin_dir = f"../{plugin_dir}"
+        count += 1
+    return plugin_dir
 
 
 def get_parameter_info(p_name, parameter):
