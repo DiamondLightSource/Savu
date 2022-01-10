@@ -1,15 +1,12 @@
-Tomopy Recon
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Tomopy Recon{% endblock %}
 
+{% block description %}
 A wrapper to the tomopy reconstruction library. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -141,51 +138,48 @@ Parameter definitions
                     fbp
                     gridrec
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **TomoPy: a framework for the analysis of synchrotron tomographic data by Gürsoy, Doga et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{gursoy2014tomopy,
+            title={TomoPy: a framework for the analysis of synchrotron tomographic data},
+            author={Gürsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
+            journal={Journal of synchrotron radiation},
+            volume={21},
+            number={5},
+            pages={1188--1193},
+            year={2014},
+            publisher={International Union of Crystallography}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T TomoPy: a framework for the analysis of synchrotron tomographic data
+            %A Gürsoy, Doga
+            %A De Carlo, Francesco
+            %A Xiao, Xianghui
+            %A Jacobsen, Chris
+            %J Journal of synchrotron radiation
+            %V 21
+            %N 5
+            %P 1188-1193
+            %@ 1600-5775
+            %D 2014
+            %I International Union of Crystallography
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-TomoPy: a framework for the analysis of synchrotron tomographic data by Gürsoy, Doga et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{gursoy2014tomopy,
-    title={TomoPy: a framework for the analysis of synchrotron tomographic data},
-    author={Gürsoy, Doga and De Carlo, Francesco and Xiao, Xianghui and Jacobsen, Chris},
-    journal={Journal of synchrotron radiation},
-    volume={21},
-    number={5},
-    pages={1188--1193},
-    year={2014},
-    publisher={International Union of Crystallography}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T TomoPy: a framework for the analysis of synchrotron tomographic data
-    %A Gürsoy, Doga
-    %A De Carlo, Francesco
-    %A Xiao, Xianghui
-    %A Jacobsen, Chris
-    %J Journal of synchrotron radiation
-    %V 21
-    %N 5
-    %P 1188-1193
-    %@ 1600-5775
-    %D 2014
-    %I International Union of Crystallography
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.reconstructions.tomopy_recon.rst{% endblock %}

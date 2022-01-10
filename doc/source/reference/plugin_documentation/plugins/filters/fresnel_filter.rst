@@ -1,18 +1,16 @@
-Fresnel Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Fresnel Filter{% endblock %}
 
+{% block description %}
 A low-pass filter to improve the contrast of reconstructed images which is similar to the Paganin filter but can work on both sinograms and projections. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/fresnel_filter_doc.rst>
 
-Parameter definitions
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -49,51 +47,48 @@ Parameter definitions
             description: Apply the logarithm function to a sinogram before filtering.
             default: "True"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Superior techniques for eliminating ring artifacts in X-ray micro-tomography by Vo, Nghia T et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{Vo:21,
+            title = {Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography},
+            author = {Nghia T. Vo and Robert C. Atwood and Michael Drakopoulos and Thomas Connolley},
+            journal = {Opt. Express},
+            number = {12},
+            pages = {17849--17874},
+            publisher = {OSA},
+            volume = {29},
+            month = {Jun},
+            year = {2021},
+            doi = {10.1364/OE.418448}}
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
+            %A Vo, Nghia T
+            %A Atwood, Robert C
+            %A Drakopoulos, Michael
+            %J Optics express
+            %V 26
+            %N 22
+            %P 28396-28412
+            %@ 1094-4087
+            %D 2018
+            %I Optical Society of America
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Superior techniques for eliminating ring artifacts in X-ray micro-tomography by Vo, Nghia T et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{Vo:21,
-    title = {Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography},
-    author = {Nghia T. Vo and Robert C. Atwood and Michael Drakopoulos and Thomas Connolley},
-    journal = {Opt. Express},
-    number = {12},
-    pages = {17849--17874},
-    publisher = {OSA},
-    volume = {29},
-    month = {Jun},
-    year = {2021},
-    doi = {10.1364/OE.418448}}
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
-    %A Vo, Nghia T
-    %A Atwood, Robert C
-    %A Drakopoulos, Michael
-    %J Optics express
-    %V 26
-    %N 22
-    %P 28396-28412
-    %@ 1094-4087
-    %D 2018
-    %I Optical Society of America
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.filters.fresnel_filter.rst{% endblock %}

@@ -1,15 +1,12 @@
-Inpainting
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Inpainting{% endblock %}
 
+{% block description %}
 A plugin to apply 2D/3D inpainting technique to data. If there is a chunk of data missing or one needs to inpaint some data features. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -57,8 +54,10 @@ Parameter definitions
             description: Pattern to apply these to.
             default: SINOGRAM
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.filters.inpainting.inpainting.rst{% endblock %}

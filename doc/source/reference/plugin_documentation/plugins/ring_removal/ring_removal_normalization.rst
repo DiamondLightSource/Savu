@@ -1,18 +1,16 @@
-Ring Removal Normalization
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ring Removal Normalization{% endblock %}
 
+{% block description %}
 Normalization-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_normalization_doc.rst>
 
-Parameter definitions
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -42,8 +40,10 @@ Parameter definitions
             description: Divide the sinogram to many chunks of rows
             default: "1"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.ring_removal_normalization.rst{% endblock %}

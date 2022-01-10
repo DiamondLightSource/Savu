@@ -1,15 +1,12 @@
-Random 3D Tomo Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Random 3D Tomo Loader{% endblock %}
 
+{% block description %}
 A hdf5 dataset of a specified size is created at runtime using numpy random sampling (numpy.random), saved with relevant meta_data to a NeXus file, and used as input. It recreates the behaviour of the nxtomo loader but with random data.  The input file path passed to Savu will be ignored (use a dummy). Note: Further extensions planned to allow the generated data to be re-loaded with the nxtomo_loader. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -77,8 +74,10 @@ Parameter definitions
             description: Specify position of darks and flats (in that order) in the data.
             default: "[[0, 1], [2, 3]]"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.random_3d_tomo_loader.rst{% endblock %}

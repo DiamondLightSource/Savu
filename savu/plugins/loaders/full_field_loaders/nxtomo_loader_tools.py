@@ -17,7 +17,7 @@ class NxtomoLoaderTools(PluginTools):
             default: entry1/tomo_entry/data/data
         image_key_path:
             visibility: intermediate
-            dtype: h5path
+            dtype: [None, h5path]
             description: Path to the image key entry inside the nxs file.
               Set this parameter to None if use this loader for radiography.
             default: entry1/tomo_entry/instrument/detector/image_key

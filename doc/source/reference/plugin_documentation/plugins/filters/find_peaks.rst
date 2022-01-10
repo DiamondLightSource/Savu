@@ -1,15 +1,12 @@
-Find Peaks
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Find Peaks{% endblock %}
 
+{% block description %}
 This plugin uses peakutils to find peaks in spectra and add them to the metadata. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameter definitions
             description: Minimum distance for peak detection.
             default: "15"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.find_peaks.rst{% endblock %}

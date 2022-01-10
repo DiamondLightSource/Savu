@@ -1,18 +1,16 @@
-Distortion Correction
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Distortion Correction{% endblock %}
 
+{% block description %}
 A plugin to apply radial distortion correction. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/distortion_correction_doc.rst>
 
-Parameter definitions
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -60,50 +58,47 @@ Parameter definitions
             description: When applied to previewed/cropped data, the result may contain zeros around the edges, which can be removed by cropping the edges by a specified number of pixels
             default: "0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography by Vo, Nghia T et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{vo2015radial,
+              title={Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography},
+              author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
+              journal={Optics express},
+              volume={23},
+              number={25},
+              pages={32859--32868},
+              year={2015},
+              publisher={Optical Society of America}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography
+            %A Vo, Nghia T
+            %A Atwood, Robert C
+            %A Drakopoulos, Michael
+            %J Optics express
+            %V 23
+            %N 25
+            %P 32859-32868
+            %@ 1094-4087
+            %D 2015
+            %I Optical Society of America
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography by Vo, Nghia T et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{vo2015radial,
-      title={Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography},
-      author={Vo, Nghia T and Atwood, Robert C and Drakopoulos, Michael},
-      journal={Optics express},
-      volume={23},
-      number={25},
-      pages={32859--32868},
-      year={2015},
-      publisher={Optical Society of America}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Radial lens distortion correction with sub-pixel accuracy for X-ray micro-tomography
-    %A Vo, Nghia T
-    %A Atwood, Robert C
-    %A Drakopoulos, Michael
-    %J Optics express
-    %V 23
-    %N 25
-    %P 32859-32868
-    %@ 1094-4087
-    %D 2015
-    %I Optical Society of America
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.corrections.distortion_correction.rst{% endblock %}

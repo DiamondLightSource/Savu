@@ -32,7 +32,7 @@ keep=false
 cpu=false
 while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
-		t ) type=$OPTARG ;;
+		t ) GPUarch_nodes=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
         z ) zocalo=$OPTARG ;;
@@ -62,7 +62,7 @@ outname=savu
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
     dev_mode=true
-    type=STANDARD
+    GPUarch_nodes=STANDARD
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -106,7 +106,7 @@ else
 	nargs=${#args[@]}
 
 	if [ $nargs != 3 ] ; then
-	    tput setaf 1    
+	    tput setaf 1
 	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
 	    tput setaf 6
 	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
@@ -149,34 +149,66 @@ else
 
 	if [ "$gpfs03" = false ] ; then
 		cluster=cluster
-		# determine cluster setup based on type
-		case $type in
-			'AUTO') gpu_arch=Kepler ; nNodes=1 ;;
-			'PREVIEW') gpu_arch=Kepler ; nNodes=1 ;;
-			'BIG') gpu_arch=Pascal ; nNodes=8 ;;
-			'') type="STANDARD"; gpu_arch=Kepler ; nNodes=4 ;;
-			 *) echo -e "\nUnknown 'type' optional argument"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'"
-				exit 1 ;;
+		# determine cluster setup based on the provided variable "GPUarch_nodes"
+		if [[ -z "${GPUarch_nodes}" ]]; then
+			# define STANDARD resources
+  			GPUarch_nodes="STANDARD"
+  			arch='Kepler'
+  			num=2
+		else
+			arch=${GPUarch_nodes%_*}
+			num=${GPUarch_nodes##*_}
+		fi
+		case $arch in
+			'Kepler')
+			  gpu_arch=Kepler ;
+			  nNodes=$num
+			  ;;
+			'Pascal')
+			  gpu_arch=Pascal ;
+			  nNodes=$num
+			  ;;
+			*)
+			  echo -e "\nUnknown 'GPUarch_nodes' optional argument"
+			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
+			  exit 1
+			  ;;
 		esac
 
 	else
 		cluster='hamilton'
-		# determine cluster setup based on type
-
-		case $project in
-			"k11") gpu_arch='Volta' ;;
-			*) gpu_arch='Pascal' ;;
+		# determine cluster setup based on the provided variable "GPUarch_nodes"
+		if [[ -z "${GPUarch_nodes}" ]]; then
+			# define STANDARD resources
+  			GPUarch_nodes="STANDARD"
+  			arch='Pascal'
+  			num=2
+		else
+			arch=${GPUarch_nodes%_*}
+			num=${GPUarch_nodes##*_}
+		fi
+		case $arch in
+			'Volta')
+			  gpu_arch=$arch ;
+			  nNodes=$num
+			  ;;
+			'Pascal')
+			  gpu_arch=$arch ;
+			  nNodes=$num
+			  ;;
+			 *)
+			  echo -e "\nUnknown 'GPUarch_nodes' optional argument\n"
+			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Volta_2', 'Pascal_2'"
+				exit 1
+				;;
 		esac
-
-		case $type in
-			'AUTO') nNodes=1 ;;
-			'PREVIEW') nNodes=1 ;;
-			'BIG') nNodes=4 ;;
-			'') type="STANDARD"; nNodes=2 ;;
-			 *) echo -e "\nUnknown 'type' optional argument\n"
-			    echo -e "Please choose from 'AUTO' or 'PREVIEW'" 
-				exit 1 ;;
+		case $project in
+			"k11")
+			  gpu_arch='Volta'
+			  ;;
+			*)
+			  gpu_arch='Pascal'
+			  ;;
 		esac
 	fi
 
@@ -245,7 +277,7 @@ if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
 	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
 	exit 1
 fi
-	
+
 
 # set total processes required
 processes=$((nNodes*cpus_per_node))
@@ -282,7 +314,7 @@ savupath=${savupath%/savu}
 # set the suffix
 arg_parse "-suffix" suffix $options
 options=${options//"-suffix $suffix"/}
-if [ ! $suffix ] ; then 
+if [ ! $suffix ] ; then
   suffix=""
 else
   suffix=_$suffix
@@ -328,7 +360,7 @@ else
 	if [ ! -d $interfolder ]; then
 		create_folder $interfolder
 	fi
-    if [ ! $type == 'AUTO' ] && [ ! $type == 'PREVIEW' ] && [ ! $keep == true ] ; then
+    if [ ! $keep == true ] ; then
 		delete=$interfolder
 	fi
 fi
@@ -358,20 +390,19 @@ basename=`basename $process_file`
 cp $process_file $interfolder
 process_file=$interfolder/$basename
 
+if [ -n "${infile+set}" ]; then
+    # copy infile to the intermediate folder
+    orig_in_file=$infile
+    infile=`readlink -f $infile`
+    basename=`basename $infile`
+    cp $infile $interfolder
+    infile=$interfolder/$basename
+fi
+
 # create a modified command with the new process list path
 log_process_file=$logfolder/$basename
 # replace the original process list path with the process list resaved into the log file
 modified_command=${original_command/$orig_process_file/$log_process_file}
-
-# copy original command to the log folder
-command_file="$logfolder/run_command.txt"
-
-cat > $command_file <<ENDFILE
-# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
-$original_command
-# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
-$modified_command
-ENDFILE
 
 # =========================== qsub =======================================
 # general arguments
@@ -404,19 +435,36 @@ args="${qsub_args} ${mpijob_args} ${savu_args}"
 
 case $cluster in
 	"test_cluster")
-		qsub -l infiniband $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -l infiniband $args" ;;
 	"cluster")
 		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl \
-		-l infiniband $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -l infiniband $args" ;;
 	"hamilton")
 		# RAM 384G per core (but 377G available?) ~ 9G per core
 		# requesting 7G per core as minimum (required to be available on startup),but will use all
 		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		qsub -l m_mem_free=7G $args > /dls/tmp/savu/$USER.out ;;
+		sbmt_cmd="qsub -l m_mem_free=7G $args" ;;
 esac
 
+$sbmt_cmd > /dls/tmp/savu/$USER.out
+
 # =========================== end qsub ===================================
+
+# copy original command to the log folder
+command_file="$logfolder/run_command.txt"
+
+cat > $command_file <<ENDFILE
+# The script location
+$(dirname $0)
+# The directory the script was executed from
+$PWD
+# The original savu_mpi command used is the following (note that the -s savu_version flag defines the Savu environment)
+$original_command
+# Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
+$modified_command
+# The qsub run command is the following:
+$sbmt_cmd
+ENDFILE
 
 # get the job number here
 filename=`echo $outname.o`
@@ -428,7 +476,8 @@ ln -s $interpath/savu.o$jobnumber /dls/tmp/savu/savu.o$jobnumber
 echo -e "\n\t************************************************************************"
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
-echo -e "\n\t Your job has been submitted to the cluster with job number "$jobnumber"."
+echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
+echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $arch GPU and $num node(s)."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
@@ -450,4 +499,3 @@ echo -e "\n\t For a more detailed log file see: "
 echo -e "\t   $interfolder/savu.o$jobnumber"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
-

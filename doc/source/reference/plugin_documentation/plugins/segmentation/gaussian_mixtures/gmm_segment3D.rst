@@ -1,15 +1,12 @@
-Gmm Segment3D
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Gmm Segment3D{% endblock %}
 
+{% block description %}
 A Plugin to segment data using Gaussian Mixtures from scikit 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -33,8 +30,10 @@ Parameter definitions
             description: The number of classes for GMM
             default: "4"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.gaussian_mixtures.gmm_segment3D.rst{% endblock %}

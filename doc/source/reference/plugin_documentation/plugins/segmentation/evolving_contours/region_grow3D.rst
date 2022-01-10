@@ -1,15 +1,12 @@
-Region Grow3D
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Region Grow3D{% endblock %}
 
+{% block description %}
 Fast 3D segmentation by evolving the user-given mask, the initialised mask should be set in the central part of the object to be segmented. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -50,8 +47,10 @@ Parameter definitions
             default: "6"
             options: "[4, 6, 8, 26]"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.evolving_contours.region_grow3D.rst{% endblock %}

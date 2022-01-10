@@ -1,15 +1,12 @@
-Image Stitching
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Image Stitching{% endblock %}
 
+{% block description %}
 Method to stitch images of two tomo-datasets including flat-field correction. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -63,8 +60,10 @@ Parameter definitions
             description: Apply normalization before stitching.
             default: "True"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.reshape.image_stitching.rst{% endblock %}

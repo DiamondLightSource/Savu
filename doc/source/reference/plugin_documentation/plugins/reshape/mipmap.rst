@@ -1,15 +1,12 @@
-Mipmap
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mipmap{% endblock %}
 
+{% block description %}
 A plugin to downsample multidimensional data successively by powers of 2. The output is multiple 'mipmapped' datasets, each a power of 2 smaller in each dimension than the previous dataset. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -44,8 +41,10 @@ Parameter definitions
             description: The name of the dataset, to which the binsize will be appended for each instance.
             default: Mipmap
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.reshape.mipmap.rst{% endblock %}

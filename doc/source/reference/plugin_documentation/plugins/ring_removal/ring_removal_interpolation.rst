@@ -1,15 +1,12 @@
-Ring Removal Interpolation
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ring Removal Interpolation{% endblock %}
 
+{% block description %}
 Interpolation-based method working in the sinogram space to remove ring artifacts. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameter definitions
             description: Ratio used to locate stripe artifacts. Greater is less sensitive.
             default: "3.0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.ring_removal_interpolation.rst{% endblock %}

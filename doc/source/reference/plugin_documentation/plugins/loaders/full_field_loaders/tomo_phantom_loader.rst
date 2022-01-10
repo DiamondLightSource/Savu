@@ -1,15 +1,12 @@
-Tomo Phantom Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Tomo Phantom Loader{% endblock %}
 
+{% block description %}
 A hdf5 dataset of a specified size is created at runtime using Tomophantom to generate synthetic data , saved with relevant meta_data to a NeXus file, and used as input. It recreates the behaviour of the nxtomo loader but with synthetic data.  The input file path passed to Savu will be ignored (use a dummy). 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -21,7 +18,7 @@ Parameter definitions
             visibility: basic
             dtype: "[list[float], list[]]"
             description: "A list specifiying the sizes of dimensions of the generated 3D               projection data in the following format [Angles, DetectorsY, DetectorsX]."
-            default: "[]"
+            default: "[180, 128, 160]"
         
         axis_labels:
             visibility: basic
@@ -33,7 +30,7 @@ Parameter definitions
             visibility: basic
             dtype: int
             description: Select a model number from the library (see TomoPhantom dat files).
-            default: "11"
+            default: "13"
         
         patterns:
             visibility: hidden
@@ -59,50 +56,47 @@ Parameter definitions
             description: The names assigned to the datasets.
             default: "['synth_proj_data', 'phantom']"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by Kazantsev, Daniil et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{kazantsev2018tomophantom,
+              title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
+              author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
+              journal={SoftwareX},
+              volume={7},
+              pages={150--155},
+              year={2018},
+              publisher={Elsevier}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
+            %A Kazantsev, Daniil
+            %A Pickalov, Valery
+            %A Nagella, Srikanth
+            %A Pasca, Edoardo
+            %A Withers, Philip J
+            %J SoftwareX
+            %V 7
+            %P 150-155
+            %@ 2352-7110
+            %D 2018
+            %I Elsevier
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by Kazantsev, Daniil et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{kazantsev2018tomophantom,
-      title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
-      author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
-      journal={SoftwareX},
-      volume={7},
-      pages={150--155},
-      year={2018},
-      publisher={Elsevier}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
-    %A Kazantsev, Daniil
-    %A Pickalov, Valery
-    %A Nagella, Srikanth
-    %A Pasca, Edoardo
-    %A Withers, Philip J
-    %J SoftwareX
-    %V 7
-    %P 150-155
-    %@ 2352-7110
-    %D 2018
-    %I Elsevier
-    
-
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.tomo_phantom_loader.rst{% endblock %}

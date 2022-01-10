@@ -1,15 +1,12 @@
-Morph Snakes
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Snakes{% endblock %}
 
+{% block description %}
 A Plugin to segment reconstructed data using Morphsnakes module. When initialised with a mask, the active contour propagates to find the minimum of energy (a possible edge countour). 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -55,8 +52,10 @@ Parameter definitions
             description: Pattern to apply to this.
             default: VOLUME_YZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.evolving_contours.morph_snakes.rst{% endblock %}

@@ -1,15 +1,12 @@
-Nxstxm Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Nxstxm Loader{% endblock %}
 
+{% block description %}
 A class to load tomography data from an NXstxm file. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -23,8 +20,10 @@ Parameter definitions
             description: The name assigned to the dataset.
             default: stxm
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.mapping_loaders.nxstxm_loader.rst{% endblock %}

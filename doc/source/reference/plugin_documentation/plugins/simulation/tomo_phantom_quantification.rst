@@ -1,15 +1,12 @@
-Tomo Phantom Quantification
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Tomo Phantom Quantification{% endblock %}
 
+{% block description %}
 A plugin to calculate some standard image quality metrics 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -32,8 +29,10 @@ Parameter definitions
             description: Pattern to apply this to.
             default: SINOGRAM
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.simulation.tomo_phantom_quantification.rst{% endblock %}

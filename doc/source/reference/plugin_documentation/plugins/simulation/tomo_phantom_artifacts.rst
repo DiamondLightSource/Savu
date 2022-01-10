@@ -1,15 +1,12 @@
-Tomo Phantom Artifacts
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Tomo Phantom Artifacts{% endblock %}
 
-A plugin to add artifacts to the generated synthetic data using TomoPhantom 
+{% block description %}
+A plugin to add artifacts to real or generated synthetic data using TomoPhantom 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -22,6 +19,12 @@ Parameter definitions
             dtype: "[list[],list[str]]"
             description: Default out dataset names.
             default: "['synth_proj_data_artifacts']"
+        
+        pattern:
+            visibility: advanced
+            dtype: str
+            description: Pattern to apply this to.
+            default: SINOGRAM
         
         artifacts_noise_type:
             visibility: intermediate
@@ -36,10 +39,16 @@ Parameter definitions
             default: "100000"
             dependency: artifacts_noise_type
         
-        artifacts_misalignment_maxamplitude:
+        datashifts_maxamplitude_pixel:
             visibility: advanced
             dtype: "[None,int]"
-            description: Incorporate misalignment into projections (in pixels).
+            description: Incorporate misalignment into projections (in pixels), requires PROJECTION pattern.
+            default: None
+        
+        datashifts_maxamplitude_subpixel:
+            visibility: advanced
+            dtype: "[None,float]"
+            description: Incorporate misalignment into projections (in subpixel resolution), requires PROJECTION pattern.
             default: None
         
         artifacts_zingers_percentage:
@@ -58,7 +67,7 @@ Parameter definitions
         artifacts_stripes_percentage:
             visibility: intermediate
             dtype: "[None,float]"
-            description: The amount of stripes in the data (percent-wise)
+            description: The amount of stripes in the data (percent-wise), applied to SINOGRAM data.
             default: None
         
         artifacts_stripes_maxthickness:
@@ -116,50 +125,47 @@ Parameter definitions
             default: "0.003"
             dependency: artifacts_fresnel_distance
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by Kazantsev, Daniil et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{kazantsev2018tomophantom,
+              title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
+              author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
+              journal={SoftwareX},
+              volume={7},
+              pages={150--155},
+              year={2018},
+              publisher={Elsevier}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
+            %A Kazantsev, Daniil
+            %A Pickalov, Valery
+            %A Nagella, Srikanth
+            %A Pasca, Edoardo
+            %A Withers, Philip J
+            %J SoftwareX
+            %V 7
+            %P 150-155
+            %@ 2352-7110
+            %D 2018
+            %I Elsevier
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks by Kazantsev, Daniil et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{kazantsev2018tomophantom,
-      title={TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks},
-      author={Kazantsev, Daniil and Pickalov, Valery and Nagella, Srikanth and Pasca, Edoardo and Withers, Philip J},
-      journal={SoftwareX},
-      volume={7},
-      pages={150--155},
-      year={2018},
-      publisher={Elsevier}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T TomoPhantom, a software package to generate 2D-4D analytical phantoms for CT image reconstruction algorithm benchmarks
-    %A Kazantsev, Daniil
-    %A Pickalov, Valery
-    %A Nagella, Srikanth
-    %A Pasca, Edoardo
-    %A Withers, Philip J
-    %J SoftwareX
-    %V 7
-    %P 150-155
-    %@ 2352-7110
-    %D 2018
-    %I Elsevier
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.simulation.tomo_phantom_artifacts.rst{% endblock %}

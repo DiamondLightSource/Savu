@@ -1,18 +1,16 @@
-Vo Centering
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Vo Centering{% endblock %}
 
+{% block description %}
 A plugin to calculate the centre of rotation using the Vo method 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/centering/vo_centering_doc.rst>
 
-Parameter definitions
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -96,51 +94,48 @@ Parameter definitions
             description: Averaging sinograms around a required sinogram to improve signal-to-noise ratio
             default: "5"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Reliable method for calculating the center of rotation in parallel-beam tomography by Vo, Nghia T et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{vo2014reliable,
+            title={Reliable method for calculating the center of rotation in parallel-beam tomography},
+            author={Vo, Nghia T and Drakopoulos, Michael and Atwood, Robert C and Reinhard, Christina},
+            journal={Optics express},
+            volume={22},
+            number={16},
+            pages={19078--19086},
+            year={2014},
+            publisher={Optical Society of America}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Reliable method for calculating the center of rotation in parallel-beam tomography
+            %A Vo, Nghia T
+            %A Drakopoulos, Michael
+            %A Atwood, Robert C
+            %A Reinhard, Christina
+            %J Optics express
+            %V 22
+            %N 16
+            %P 19078-19086
+            %@ 1094-4087
+            %D 2014
+            %I Optical Society of America
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Reliable method for calculating the center of rotation in parallel-beam tomography by Vo, Nghia T et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{vo2014reliable,
-    title={Reliable method for calculating the center of rotation in parallel-beam tomography},
-    author={Vo, Nghia T and Drakopoulos, Michael and Atwood, Robert C and Reinhard, Christina},
-    journal={Optics express},
-    volume={22},
-    number={16},
-    pages={19078--19086},
-    year={2014},
-    publisher={Optical Society of America}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Reliable method for calculating the center of rotation in parallel-beam tomography
-    %A Vo, Nghia T
-    %A Drakopoulos, Michael
-    %A Atwood, Robert C
-    %A Reinhard, Christina
-    %J Optics express
-    %V 22
-    %N 16
-    %P 19078-19086
-    %@ 1094-4087
-    %D 2014
-    %I Optical Society of America
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.centering.vo_centering.rst{% endblock %}

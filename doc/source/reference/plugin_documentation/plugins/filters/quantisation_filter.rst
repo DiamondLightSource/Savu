@@ -1,15 +1,12 @@
-Quantisation Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Quantisation Filter{% endblock %}
 
+{% block description %}
 A plugin to quantise an image into discrete levels. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -51,8 +48,10 @@ Parameter definitions
             description: Number of levels.
             default: "5"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.quantisation_filter.rst{% endblock %}

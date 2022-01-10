@@ -1,15 +1,12 @@
-Raven Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Raven Filter{% endblock %}
 
+{% block description %}
 FFT-based method for removing ring artifacts. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -51,48 +48,45 @@ Parameter definitions
             description: Padding for Fourier transform.
             default: "50"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Numerical removal of ring artifacts in microtomography by Raven, Carsten et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{raven1998numerical,
+            title={Numerical removal of ring artifacts in microtomography},
+            author={Raven, Carsten},
+            journal={Review of scientific instruments},
+            volume={69},
+            number={8},
+            pages={2978--2980},
+            year={1998},
+            publisher={American Institute of Physics}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Numerical removal of ring artifacts in microtomography
+            %A Raven, Carsten
+            %J Review of scientific instruments
+            %V 69
+            %N 8
+            %P 2978-2980
+            %@ 0034-6748
+            %D 1998
+            %I American Institute of Physics
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Numerical removal of ring artifacts in microtomography by Raven, Carsten et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{raven1998numerical,
-    title={Numerical removal of ring artifacts in microtomography},
-    author={Raven, Carsten},
-    journal={Review of scientific instruments},
-    volume={69},
-    number={8},
-    pages={2978--2980},
-    year={1998},
-    publisher={American Institute of Physics}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Numerical removal of ring artifacts in microtomography
-    %A Raven, Carsten
-    %J Review of scientific instruments
-    %V 69
-    %N 8
-    %P 2978-2980
-    %@ 0034-6748
-    %D 1998
-    %I American Institute of Physics
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.raven_filter.rst{% endblock %}

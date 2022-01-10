@@ -1,15 +1,12 @@
-Camera Rot Correction
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Camera Rot Correction{% endblock %}
 
+{% block description %}
 A plugin to apply a rotation to projection images, for example to correct for missing camera alignment. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -63,8 +60,10 @@ Parameter definitions
             description: If not use_auto_centre, this value determines the detector x coordinate for the centre of rotation.
             default: "1079.5"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.camera_rot_correction.rst{% endblock %}

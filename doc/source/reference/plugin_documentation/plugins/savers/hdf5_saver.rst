@@ -1,15 +1,12 @@
-Hdf5 Saver
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Hdf5 Saver{% endblock %}
 
+{% block description %}
 A class to save tomography data to a hdf5 file 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -33,8 +30,10 @@ Parameter definitions
             description: "Optimise data storage to this access pattern. 'optimum' will automate this process by choosing the output pattern from the previous plugin, if it exists, else the first pattern."
             default: optimum
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.savers.hdf5_saver.rst{% endblock %}

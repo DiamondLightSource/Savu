@@ -1,15 +1,12 @@
-Geo Distance
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Geo Distance{% endblock %}
 
+{% block description %}
 Geodesic transformation of images with mask initialisation. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -37,8 +34,10 @@ Parameter definitions
             description: The number of iterations for raster scanning.
             default: "4"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.geo_distance.geo_distance.rst{% endblock %}

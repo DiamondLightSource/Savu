@@ -1,15 +1,12 @@
-Rescale Intensity
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Rescale Intensity{% endblock %}
 
+{% block description %}
 The plugin performs stretching or shrinking the data intensity levels based on skimage rescale_intensity module. Min-max scalars for rescaling can be passed with METADATA OR by providing as an input. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -46,8 +43,10 @@ Parameter definitions
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.rescale_intensity.rst{% endblock %}

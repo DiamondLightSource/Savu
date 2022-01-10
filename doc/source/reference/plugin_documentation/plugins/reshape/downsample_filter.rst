@@ -1,15 +1,12 @@
-Downsample Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Downsample Filter{% endblock %}
 
+{% block description %}
 A plugin to downsample and rescale data volume including options of flipping and rotating images 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -84,8 +81,10 @@ Parameter definitions
             description: Global min for scaling.
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.reshape.downsample_filter.rst{% endblock %}

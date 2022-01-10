@@ -1,15 +1,12 @@
-Forward Projector Cpu
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Forward Projector Cpu{% endblock %}
 
+{% block description %}
 This plugin uses ToMoBAR software and CPU Astra projector to generate parallel-beam projection data. The plugin will project the given object using the available metadata OR user-provided geometry. In case when angles set to None, the metadata projection geometry will be used. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -43,8 +40,10 @@ Parameter definitions
             description: The centre of rotation.
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.reconstructions.projectors.forward_projector_cpu.rst{% endblock %}

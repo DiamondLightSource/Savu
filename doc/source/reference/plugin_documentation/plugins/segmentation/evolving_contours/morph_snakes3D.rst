@@ -1,15 +1,12 @@
-Morph Snakes3D
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Snakes3D{% endblock %}
 
+{% block description %}
 A Plugin to 3D segment reconstructed data using Morphsnakes module. When initialised with a mask, the active contour propagates to find the minimum of energy (a possible edge countour). 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -49,8 +46,10 @@ Parameter definitions
             description: The number of iterations.
             default: "350"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.evolving_contours.morph_snakes3D.rst{% endblock %}

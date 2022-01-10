@@ -1,15 +1,12 @@
-Arithmetic Operations
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Arithmetic Operations{% endblock %}
 
+{% block description %}
 Basic arithmetic operations on data: addition, subtraction, multiplication and division. Operations can be performed by extracting scalars from METADATA (min, max, mean) OR providing a scalar value. 
+{% endblock %}
 
-Parameter definitions
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -47,8 +44,10 @@ Parameter definitions
             default: max
             options: "['min', 'max', 'mean']"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.arithmetic_operations.rst{% endblock %}
