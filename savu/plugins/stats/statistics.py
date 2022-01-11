@@ -15,8 +15,6 @@ import os
 
 
 class Statistics(object):
-    _index_dict = {"max": 0, "min": 1, "mean": 2, "mean_std_dev": 3, "median_std_dev": 4}
-    _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"]
     pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     no_stats_plugins = ["BasicOperations", "Mipmap"]
 
