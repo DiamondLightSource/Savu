@@ -9,7 +9,7 @@ Method working in the sinogram space to remove ring artifacts caused by dead pix
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/remove_unresponsive_and_fluctuating_rings_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

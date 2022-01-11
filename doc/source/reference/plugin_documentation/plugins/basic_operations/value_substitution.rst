@@ -6,7 +6,7 @@ Description
 
 The function looks for a specific value in the provided second dataset (e.g. a mask image) and substitutes it with a given value. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

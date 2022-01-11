@@ -6,7 +6,7 @@ Description
 
 Apply a time-based dark and flat field correction to data. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

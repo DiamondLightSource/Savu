@@ -9,7 +9,7 @@ A plugin to apply radial distortion correction.
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/corrections/distortion_correction_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

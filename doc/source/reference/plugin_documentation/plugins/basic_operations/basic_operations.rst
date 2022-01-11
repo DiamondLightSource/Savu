@@ -6,7 +6,7 @@ Description
 
 A class that performs basic mathematical operations on datasets. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

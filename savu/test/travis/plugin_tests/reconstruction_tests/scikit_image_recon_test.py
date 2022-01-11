@@ -28,7 +28,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class PluginRunnerScikitImageTest(unittest.TestCase):
     def setUp(self):
-        self.data_file = '24737.nxs'
+        self.data_file = 'tomo_standard.nxs'
         self.experiment = None
 
     def test_sart_scikitimage(self):

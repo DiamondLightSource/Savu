@@ -6,7 +6,7 @@ Description
 
 This plugin fits peaks. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -39,6 +39,8 @@ from tomophantom import TomoP2D, TomoP3D
 class BaseTomophantomLoader(BaseLoader):
     def __init__(self, name='BaseTomophantomLoader'):
         super(BaseTomophantomLoader, self).__init__(name)
+        self.cor = None
+        self.n_entries = None
 
     def setup(self):
         exp = self.exp
@@ -51,14 +53,12 @@ class BaseTomophantomLoader(BaseLoader):
 
         self.tomo_model = self.parameters['tomo_model']
         # setting angles for parallel beam geometry
-        self.angles = np.linspace(0.0,180.0-(1e-14), self.parameters['proj_data_dims'][0], dtype='float32')
+        self.angles = np.linspace(0.0, 180.0-(1e-14), self.parameters['proj_data_dims'][0], dtype='float32')
         path = os.path.dirname(tomophantom.__file__)
         self.path_library3D = os.path.join(path, "Phantom3DLibrary.dat")
 
-
         data_obj.backing_file = self.__get_backing_file(data_obj, 'synth_proj_data')
         data_obj.data = data_obj.backing_file['/']['entry1']['tomo_entry']['data']['data']
-        #data_obj.data.dtype # Need to do something to .data to keep the file open!
 
         # create a phantom file
         data_obj2 = exp.create_data_object('in_data', 'phantom')
@@ -68,15 +68,13 @@ class BaseTomophantomLoader(BaseLoader):
 
         data_obj2.backing_file = self.__get_backing_file(data_obj2, 'phantom')
         data_obj2.data = data_obj2.backing_file['/']['phantom']['data']
-        #data_obj2.data.dtype # Need to do something to .data to keep the file open!
         data_obj.set_shape(data_obj.data.shape)
         group_name = '1-TomoPhantomLoader-phantom'
 
         self.n_entries = data_obj.get_shape()[0]
-        cor_val=0.5*(self.parameters['proj_data_dims'][2])
-        self.cor=np.linspace(cor_val, cor_val, self.parameters['proj_data_dims'][1], dtype='float32')
+        cor_val = 0.5*(self.parameters['proj_data_dims'][2])
+        self.cor = np.linspace(cor_val, cor_val, self.parameters['proj_data_dims'][1], dtype='float32')
         self._set_metadata(data_obj, self._get_n_entries())
-
 
         return data_obj, data_obj2
 
@@ -92,8 +90,8 @@ class BaseTomophantomLoader(BaseLoader):
         dims_temp = self.parameters['proj_data_dims'].copy()
         proj_data_dims = tuple(dims_temp)
         if (file_name == 'phantom'):
-            dims_temp[0]=dims_temp[1]
-            dims_temp[2]=dims_temp[1]
+            dims_temp[0] = dims_temp[1]
+            dims_temp[2] = dims_temp[1]
             proj_data_dims = tuple(dims_temp)
 
         patterns = data_obj.get_data_patterns()

@@ -6,7 +6,7 @@ Description
 
 Uses pyfai to remap the data. We then remap, percentile file and integrate. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

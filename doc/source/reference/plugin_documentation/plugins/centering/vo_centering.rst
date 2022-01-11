@@ -9,7 +9,7 @@ A plugin to calculate the centre of rotation using the Vo method
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/centering/vo_centering_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

@@ -6,7 +6,7 @@ Description
 
 Crops a spectrum to a range 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

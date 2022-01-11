@@ -6,7 +6,7 @@ Description
 
 A Plugin to apply a simple dark and flat field correction to data. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
