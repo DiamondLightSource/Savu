@@ -38,12 +38,12 @@ class MrcSaver(BaseImageSaver, CpuPlugin):
     def __init__(self):
         super(MrcSaver, self).__init__("MrcSaver")
         self.in_data = None
-        self.filename = None
+        self.out_filename = None
 
     def pre_process(self):
         # Get metadata to create mrc file
         self.in_data = self.get_in_datasets()[0]
-        filename = self.__get_file_name()
+        self.out_filename = self.__get_file_name()
         data_type_lookup = {'int8': 0, 'int16': 1, 'float32':2, 'complex64':4, 'uint16':6}
         try:
             mrc_mode = data_type_lookup[self.parameters['mrc_mode']]
@@ -56,11 +56,11 @@ class MrcSaver(BaseImageSaver, CpuPlugin):
 
         # Create mrc file
         self.mrc = mrcfile.new_mmap(
-            name=filename,
+            name=self.out_filename,
             shape=self.in_data.get_shape(),
             mrc_mode=mrc_mode,
         )
-        logging.info("Created mrc file {}".format(self.filename))
+        logging.info("Created mrc file {}".format(self.out_filename))
 
     def process_frames(self, data):
         # Save data to mrc in parallel
@@ -74,7 +74,7 @@ class MrcSaver(BaseImageSaver, CpuPlugin):
         logging.info("MRC file closed")
 
     def __get_file_name(self):
-        # Get the mrc filename in the format <original_img_name>_processed.mrc
+        # Get the mrc output filename in the format <original_img_name>_processed.mrc
         out_path = self.exp.meta_data.get('out_path')
         imgname = os.path.splitext(os.path.split(self.exp.meta_data.get('data_file'))[-1])[0]
         fname = "{}_processed.mrc".format(imgname)
