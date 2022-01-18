@@ -40,9 +40,14 @@ def __option_parser(doc=True):
     desc = "Generate three plugin files: a plugin file, a plugin tools " \
            "file and a plugin guide file. These files will be stored inside " \
            "the Savu directory and the file paths will be printed to the screen."
+
     parser = argparse.ArgumentParser(prog='savu_plugin_generator', description=desc)
+    plugin_name_help = "Plugin name to create file. \n If you would like " \
+            "to create a plugin in a sub-folder of the 'savu/plugins' folder, " \
+            " e.g 'savu/plugins/corrections', please add the sub-folder name " \
+            "like this 'corrections/plugin_name'."
     parser.add_argument('plugin_name',
-                        help='Plugin name to create file',
+                        help=plugin_name_help,
                         type=str)
     delete_str = 'Delete the plugin file and its tools ' \
                  'and documentation files.'
@@ -248,6 +253,7 @@ def get_module_info(title):
 def convert_title(original_title):
     # Capwords is used so that the first letter following a number is
     # not capitalised. This would affect plugin names including '3d'
+    original_title = original_title.split("/")[-1]
     return string.capwords(original_title.replace("_", " "))
 
 
@@ -275,9 +281,7 @@ def remove_plugin_files(file_path, savu_base_path, plugin_guide_path):
 
     # Delete documentation file
     doc_file_path = file_path.replace("savu/", "")
-    doc_folder = (
-        savu_base_path + "doc/source/" + plugin_guide_path + doc_file_path
-    )
+    doc_folder = f"{savu_base_path}doc/source/{plugin_guide_path}{doc_file_path}"
     doc_file_str = doc_folder + "_doc.rst"
     doc_error_str = \
         "No documentation file was located for this plugin."
@@ -321,7 +325,7 @@ def check_plugin_exists(plugin_name):
     plugin_title = convert_title(plugin_name).replace(" ", "")
     plugin = get_plugin_class(plugin_title)
     if plugin is None:
-        plugin_module_name = plugin_name
+        plugin_module_name = plugin_name.replace("/",".")
         module = "savu.plugins." + plugin_module_name
         return False, module
     print("This plugin does exist inside Savu.\n")
@@ -334,12 +338,8 @@ def main():
     print("\n*******************************************************")
     print(" Please only use this command when you are working on")
     print(" your own Savu directory. New plugin files cannot be ")
-    print(" saved to the Diamond Light Source Savu directory")
-    print("*******************************************************")
-    print(" Three files will be created: ")
-    print(" * A plugin file \n * A plugin tools file \n"
-          " * A file where you can describe how to use your "
-          "plugin")
+    print(" saved to or deleted from the Diamond Light Source Savu ")
+    print(" directory")
     print("*******************************************************")
 
     plugin_exists, module = check_plugin_exists(args.plugin_name)
@@ -356,6 +356,12 @@ def main():
         else:
             print("Plugin files were not removed.")
     else:
+        print("*******************************************************")
+        print(" Three files will be created: ")
+        print(" * A plugin file \n * A plugin tools file \n"
+              " * A file where you can describe how to use your "
+              "plugin")
+        print("*******************************************************")
         question_str_1 = f"Do you want the files to be saved inside " \
                        f"{savu_base_path}?"
         question_str = f"Do you want to view the paths to the current " \
@@ -367,8 +373,8 @@ def main():
             create_tools_template(file_path, module, savu_base_path)
             create_documentation_template(
                 file_path, module, savu_base_path, plugin_guide_path)
-            print(f"\nIf you want to remove all files created, use "
-                  f"\n      savu_plugin_generator -r {args.plugin_name}\n")
+            print(f"\nIf you want to delete all three files, use "
+                  f"\n      savu_plugin_generator -d {args.plugin_name}\n")
         else:
             print("Exiting plugin generator.")
 
