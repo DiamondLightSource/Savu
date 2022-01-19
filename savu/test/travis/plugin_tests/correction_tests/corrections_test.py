@@ -71,5 +71,19 @@ class CorrectionsTest(unittest.TestCase):
         run_protected_plugin_runner(options)
         tu.cleanup(options)
 
+    def test_phase_unwrapping(self):
+        process_list = 'corrections/phase_unwrapping_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_phase_unwrapping2(self):
+        process_list = 'corrections/phase_unwrapping_test2.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
 if __name__ == "__main__":
     unittest.main()
