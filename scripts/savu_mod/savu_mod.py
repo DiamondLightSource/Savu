@@ -43,7 +43,7 @@ def arg_parser(doc=True):
                         type=str)
     parser.add_argument('plugin_index',
                         help='Plugin index (for when multiple plugins of one type are present)',
-                        nargs="?", type=int, default=0)
+                        nargs="?", type=int, default=1)
     parser.add_argument('param',
                         help='Parameter name',
                         type=str)
@@ -78,12 +78,9 @@ def modify_content(args):
     content = load_process_list(args.process_list)
     # Modify the plugin and parameter value
     plugin = content.plugin_to_num(args.plugin, args.plugin_index)
-    content_modified = content.modify(plugin, args.param,
-                                      ' '.join(args.value))
-    if content_modified:
-        print(f"Parameter {args.param} for the plugin {args.plugin} was "
-              f"modified to {args.value}.")
-    return content
+    content_modified = content.modify(plugin, args.param, args.value)
+
+    return content, content_modified
 
 
 def save_content(content, args):
@@ -103,8 +100,11 @@ def command_line_modify():
     """
     args = arg_parser(doc=False)
 
-    content = modify_content(args)
-    save_content(content, args)
+    content, content_modified = modify_content(args)
+    if content_modified:
+        print(f"Parameter {args.param} for the plugin {args.plugin} was "
+              f"modified to {args.value}.")
+        save_content(content, args)
 
 
 if __name__ == '__main__':

@@ -570,7 +570,9 @@ class Content(object):
         if plugin_val in pl_names:
             # Find the plugin number
             pl_indexes = [i for i, p in enumerate(pl_names) if p == plugin_val]
-            return str(pl_indexes[pl_index] + 1)
+            # Subtract one to access correct list index. Add one to access
+            # correct plugin position
+            return str(pl_indexes[pl_index-1] +1)
         else:
             raise Exception("This plugin is not present in this process list.")
 
