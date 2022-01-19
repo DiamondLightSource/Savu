@@ -21,15 +21,14 @@ class FresnelFilterTools(PluginTools):
         apply_log:
               visibility: basic
               dtype: bool
-              description: Apply the logarithm function to a sinogram before
+              description: Apply the logarithm function to a sinogram/projection before
                filtering.
               default: True
         """
 
     def citation(self):
         """
-        "The code is the implementation of the work taken from the following
-        paper:"
+        "The code is the implementation of the work taken from the following paper:"
         bibtex:
                 @article{Vo:21,
                 title = {Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography},
@@ -44,16 +43,16 @@ class FresnelFilterTools(PluginTools):
                 doi = {10.1364/OE.418448}}
         endnote:
                 %0 Journal Article
-                %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
+                %T Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography
                 %A Vo, Nghia T
                 %A Atwood, Robert C
                 %A Drakopoulos, Michael
+                %A Connolley, Thomas
                 %J Optics express
-                %V 26
-                %N 22
-                %P 28396-28412
-                %@ 1094-4087
-                %D 2018
+                %V 29
+                %N 12
+                %P 17849-17874
+                %D 2021
                 %I Optical Society of America
-        doi: "10.1364/OE.26.028396"
+        doi: "10.1364/OE.418448"
         """
