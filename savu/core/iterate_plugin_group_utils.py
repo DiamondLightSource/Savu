@@ -44,14 +44,19 @@ def enable_iterative_loop(setup_fn):
                 # this is the pattern that was used for the input data for the
                 # start plugin
                 in_pattern = start_plugin_in_pData[0].get_pattern_name()
+                # this is the padding that is going to be applied to the input
+                # data for the start plugin
+                in_padding = start_plugin_in_pData[0].padding
 
                 # create PluginData object for original and cloned Data objects,
                 # that have the pattern of the start plugin, and append to the
                 # start plugin's 'plugin_in_datasets'
                 orig_start_pData = PluginData(out_dataset[0], start_plugin)
+                orig_start_pData.padding = in_padding
                 orig_start_pData.plugin_data_setup(in_pattern, 'single')
                 start_plugin.parameters['plugin_in_datasets'].append(orig_start_pData)
                 clone_start_pData = PluginData(out_dataset[1], start_plugin)
+                clone_start_pData.padding = in_padding
                 clone_start_pData.plugin_data_setup(in_pattern, 'single')
                 start_plugin.parameters['plugin_in_datasets'].append(clone_start_pData)
                 # "re-finalise" the plugin datasets for the start plugin, now
@@ -82,19 +87,6 @@ def setup_extra_plugin_data_padding(padding_fn):
             if out_pData[0].padding is not None:
                 out_pData[1].padding = out_pData[0].padding
 
-        try:
-            iterate_plugin_group = check_if_in_iterative_loop(plugin.exp)
-            in_pData, out_pData = plugin.get_plugin_datasets()
-            start_plugin_in_pData, start_plugin_out_pData = \
-                iterate_plugin_group.start_plugin.get_plugin_datasets()
-            padding = out_pData[0].padding
-            for plugin_data in start_plugin_in_pData:
-                if plugin_data.padding is None:
-                    plugin_data.padding = padding
-
-            iterate_plugin_group.start_plugin._finalise_plugin_datasets()
-        except AttributeError as e:
-            print('In plugin setup, will not create new PluginData objects')
     return wrapper
 
 def create_clone(clone, data):
