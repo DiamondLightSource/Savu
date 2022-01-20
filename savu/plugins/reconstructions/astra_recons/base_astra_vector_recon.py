@@ -23,6 +23,8 @@ import astra
 import numpy as np
 
 from savu.plugins.reconstructions.base_recon import BaseRecon
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 
 class BaseAstraVectorRecon(BaseRecon):
     """
@@ -36,6 +38,14 @@ class BaseAstraVectorRecon(BaseRecon):
         super(BaseAstraVectorRecon, self).__init__(name)
         self.res = False
 
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
+
+    @enable_iterative_loop
     def setup(self):
         self.alg = self.parameters['algorithm']
         self.get_max_frames = \
@@ -45,7 +55,12 @@ class BaseAstraVectorRecon(BaseRecon):
         out_dataset = self.get_out_datasets()
 
         # if res_norm is required then setup another output dataset
-        if len(out_dataset) == 2:
+        if self.parameters['res_norm'] and self.nClone_datasets() == 1:
+            err_str = "The res_norm output dataset has not yet been " \
+                "implemented for when AstraReconGpu is at the end of an " \
+                "iterative loop"
+            raise ValueError(err_str)
+        elif self.parameters['res_norm']:
             self.res = True
             out_pData = self.get_plugin_out_datasets()
             in_data = self.get_in_datasets()[0]

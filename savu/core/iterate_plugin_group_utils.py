@@ -101,18 +101,35 @@ def check_if_in_iterative_loop(exp):
     Inspect the metadata inside the Experiment object to determine if current
     processing is inside an iterative loop
     '''
-    current_plugin_index = exp.meta_data.get('nPlugin')
-    for group in exp.meta_data.get('iterate_groups'):
-        start_index = shift_plugin_index(exp, group.start_index)
-        end_index = shift_plugin_index(exp, group.end_index)
-        if start_index <= current_plugin_index and \
-            end_index >= current_plugin_index:
-            return group
+    try:
+        current_plugin_index = exp.meta_data.get('nPlugin')
+        for group in exp.meta_data.get('iterate_groups'):
+            start_index = shift_plugin_index(exp, group.start_index)
+            end_index = shift_plugin_index(exp, group.end_index)
+            if start_index <= current_plugin_index and \
+                end_index >= current_plugin_index:
+                return group
 
-    # never hit an instance of IteratePluginGroup where the current plugin
-    # index was within the start and end plugin indices, so processing is
-    # not inside an iterative loop
-    return None
+        # never hit an instance of IteratePluginGroup where the current plugin
+        # index was within the start and end plugin indices, so processing is
+        # not inside an iterative loop
+        return None
+    except AttributeError as e:
+        # TODO: Currently, an AttributeError only occurs inside two framework
+        # tests:
+        # - astra_multiple_parameter_test.py
+        # - multiple_parameter_test.py
+        # due to the exp variable still being None (ie, when this check of if
+        # the processing is in an iterative loop or not occurs, the Experiment
+        # object hasn't yet been set in these tests).
+        #
+        # These framework tests should be investigated to better understand:
+        # - in what cases the Experiment object isn't yet set when running Savu
+        # - if this check can occur elsewhere, to avoid causing those framework
+        #   tests to fail
+        err_str = f"Error when checking if inside an iterative loop: {e}"
+        print(err_str)
+        return None
 
 def check_if_end_plugin_in_iterate_group(exp):
     '''
