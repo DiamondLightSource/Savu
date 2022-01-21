@@ -21,6 +21,7 @@ class Statistics(object):
     def __init__(self):
         self.calc_stats = True
         self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+        self.stats_before_processing = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
 
     def setup(self, plugin_self):
@@ -42,16 +43,22 @@ class Statistics(object):
         cls.volume_stats = {}
         cls.global_stats = {}
         cls.global_residuals = {}
+        cls.plugin_numbers = {}
         n_plugins = len(exp.meta_data.plugin_list.plugin_list)
-        # for n in range(n_plugins):
-        #    cls.data_stats[n + 1] = [None, None, None, None, None]
-        #    cls.volume_stats[n + 1] = [None, None, None, None, None]
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
         cls.path = f"{cls.path}/stats"
         if not os.path.exists(cls.path):
             os.mkdir(cls.path)
+
+    def set_slice_stats(self, slice, base_slice):
+        slice_stats_before = self.calc_slice_stats(base_slice)
+        slice_stats_after = self.calc_slice_stats(slice, base_slice)
+        for key in list(self.stats_before_processing.keys()):
+            self.stats_before_processing[key].append(slice_stats_before[key])
+        for key in list(self.stats.keys()):
+            self.stats[key].append(slice_stats_after[key])
 
     def calc_slice_stats(self, my_slice, base_slice=None):
         """Calculates and returns slice stats for the current slice.
@@ -95,18 +102,6 @@ class Statistics(object):
             rmsd = None
         return rmsd
 
-    def set_slice_stats(self, slice_stats):
-        """Appends slice stats arrays with the stats parameters of the current slice.
-
-        :param slice_stats: The stats for the current slice.
-        """
-        self.stats['max'].append(slice_stats['max'])
-        self.stats['min'].append(slice_stats['min'])
-        self.stats['mean'].append(slice_stats['mean'])
-        self.stats['std_dev'].append(slice_stats['std_dev'])
-        self.stats['RSS'].append(slice_stats['RSS'])
-        self.stats['data_points'].append(slice_stats['data_points'])
-
     def calc_stats_residuals(self, stats_before, stats_after):
         residuals = {'max': None, 'min': None, 'mean': None, 'std_dev': None}
         for key in list(residuals.keys()):
@@ -119,9 +114,11 @@ class Statistics(object):
         self.residuals['mean'].append(residuals['mean'])
         self.residuals['std_dev'].append(residuals['std_dev'])
 
-    def get_slice_stats(self, stat, slice_num):
-        """Returns array of stats associated with the processed slices of the current plugin."""
-        return self.stats[stat][slice_num]
+    def calc_volume_stats(self, slice_stats):
+        volume_stats = {'max': max(slice_stats['max']), 'min': min(slice_stats['min']),
+                        'mean': np.mean(slice_stats['mean']), 'mean_std_dev': np.mean(slice_stats['std_dev']),
+                        'median_std_dev': np.median(slice_stats['std_dev'])}
+        return volume_stats
 
     def set_volume_stats(self):
         """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values.
@@ -130,16 +127,16 @@ class Statistics(object):
         p_num = Statistics.count
         name = self.plugin_name
         i = 2
-        while name in list(Statistics.global_stats.keys()):
+        while name in list(Statistics.plugin_numbers.keys()):
             name = self.plugin_name + str(i)
             i += 1
         Statistics.global_stats[p_num] = {}
         if len(self.stats['max']) != 0:
-            Statistics.global_stats[p_num]['max'] = max(self.stats['max'])
-            Statistics.global_stats[p_num]['min'] = min(self.stats['min'])
-            Statistics.global_stats[p_num]['mean'] = np.mean(self.stats['mean'])
-            Statistics.global_stats[p_num]['mean_std_dev'] = np.mean(self.stats['std_dev'])
-            Statistics.global_stats[p_num]['median_std_dev'] = np.median(self.stats['std_dev'])
+            Statistics.global_stats[p_num] = self.calc_volume_stats(self.stats)
+            Statistics.global_residuals[p_num] = {}
+            before_processing = self.calc_volume_stats(self.stats_before_processing)
+            for key in list(before_processing.keys()):
+                Statistics.global_residuals[p_num][key] = Statistics.global_stats[p_num][key] - before_processing[key]
             if None not in self.stats['RSS']:
                 total_rss = sum(self.stats['RSS'])
                 n = sum(self.stats['data_points'])
@@ -147,15 +144,15 @@ class Statistics(object):
             else:
                 Statistics.global_stats[p_num]['RMSD'] = None
 
-            Statistics.global_stats[name] = Statistics.global_stats[p_num]
-            self._link_stats_to_datasets(Statistics.global_stats[name])
+            Statistics.plugin_numbers[name] = p_num
+            self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
 
         slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
 
         #if None not in self.stats['RMSD']:
         #    slice_stats_array = np.append(slice_stats_array, self.stats['RMSD'], 0)
         self._write_stats_to_file(slice_stats_array, p_num)
-        self.set_volume_residuals()
+        #self.set_volume_residuals()
         self._already_called = True
 
     def set_volume_residuals(self):
@@ -179,10 +176,8 @@ class Statistics(object):
         name = plugin_name
         if n is not None and n not in (0, 1):
             name = name + str(n)
-        if stat is not None:
-            return Statistics.global_stats[name][stat]
-        else:
-            return Statistics.global_stats[name]
+        p_num = Statistics.plugin_numbers[name]
+        return self.get_stats_from_num(p_num, stat)
 
     def get_stats_from_num(self, p_num, stat=None):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
@@ -262,13 +257,8 @@ class Statistics(object):
             while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
                 group_name = f"stats{i}"
                 i += 1
-            out_dataset.meta_data.set([group_name, "max"], stats["max"])
-            out_dataset.meta_data.set([group_name, "min"], stats["min"])
-            out_dataset.meta_data.set([group_name, "mean"], stats["mean"])
-            out_dataset.meta_data.set([group_name, "mean_std_dev"], stats["mean_std_dev"])
-            out_dataset.meta_data.set([group_name, "median_std_dev"], stats["median_std_dev"])
-            if stats["RMSD"] is not None:
-                out_dataset.meta_data.set([group_name, "RMSD"], stats["RMSD"])
+            for key in list(stats.keys()):
+                out_dataset.meta_data.set([group_name, key], stats[key])
 
     def _write_stats_to_file(self, slice_stats_array, p_num):
         """Writes slice statistics to a h5 file"""
