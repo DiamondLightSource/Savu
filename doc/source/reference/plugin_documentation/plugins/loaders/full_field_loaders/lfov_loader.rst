@@ -1,15 +1,12 @@
-Lfov Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Lfov Loader{% endblock %}
 
+{% block description %}
 A class to load 2 scans in Nexus/hdf format into one dataset. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -89,8 +86,10 @@ Parameters
             description: Offsets of row indices between datasets.
             default: "[0, -1]"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.lfov_loader.rst{% endblock %}

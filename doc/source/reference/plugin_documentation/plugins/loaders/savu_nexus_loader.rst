@@ -1,15 +1,12 @@
-Savu Nexus Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Savu Nexus Loader{% endblock %}
 
+{% block description %}
 A class to load datasets, and associated metadata, from a Savu output nexus file. By default, the last instance of each unique dataset name will be loaded. Opt instead to load a subset of these datasets, or individual datasets by populating the parameters. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -29,8 +26,10 @@ Parameters
             description: Override the dataset names associated with the datasets parameter above.
             default: "[]"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.loaders.savu_nexus_loader.rst{% endblock %}

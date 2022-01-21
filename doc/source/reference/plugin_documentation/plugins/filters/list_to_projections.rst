@@ -1,15 +1,12 @@
-List To Projections
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}List To Projections{% endblock %}
 
+{% block description %}
 Convert a list of points into a 2D projection 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,8 +42,10 @@ Parameters
             description: The value to fill with, takes an average if nothing else chosen.
             default: mean
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.list_to_projections.rst{% endblock %}

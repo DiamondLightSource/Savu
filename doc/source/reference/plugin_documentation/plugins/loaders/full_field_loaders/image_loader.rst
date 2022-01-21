@@ -1,15 +1,12 @@
-Image Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Image Loader{% endblock %}
 
+{% block description %}
 Load tomographic data in image format (tiff) 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -53,8 +50,10 @@ Parameters
             description: The name assigned to the dataset.
             default: tomo
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.image_loader.rst{% endblock %}

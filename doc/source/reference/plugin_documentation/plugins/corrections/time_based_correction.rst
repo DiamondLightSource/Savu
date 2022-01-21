@@ -1,15 +1,12 @@
-Time Based Correction
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Time Based Correction{% endblock %}
 
+{% block description %}
 Apply a time-based dark and flat field correction to data. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -33,8 +30,10 @@ Parameters
             description: "Set corrected values to be in the range [0, 1]."
             default: "False"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.corrections.time_based_correction.rst{% endblock %}

@@ -1,15 +1,12 @@
-Band Pass
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Band Pass{% endblock %}
 
+{% block description %}
 A plugin to filter each frame with a gaussian 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -40,8 +37,10 @@ Parameters
             options: "['High', 'Low']"
             default: High
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.band_pass.rst{% endblock %}
