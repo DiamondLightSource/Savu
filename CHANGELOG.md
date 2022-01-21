@@ -29,22 +29,36 @@ All notable changes to this project are documented in this file.
   * *projection_2d_alignment* - works with 2 sets of 3D projection data by comparing projection images and estimating vertical-horizontal shifts in data. The vector shifts then stored in experimental data to be used later in 3D vector geometry.
 ### Filters
   * *wavelet_denoising_gpu* - a GPU plugin for denoising using Wavelets. Highly optimised for GPU performance. 
+### Centering
+  * *360_centering* - a plugin to calculate centre of rotation. 
 
 ## _Updated and new packages as dependencies_
   * A new [pypwt](https://github.com/pierrepaleo/pypwt "pypwt") GPU wavelet package added through Jenkins build and savu-dep channel 
   * ToMoBAR and TomoPhantom packages have been updated
 
 ## _Configurator_ 
+  *  Allow a list as a single dimension input to the preview parameter
+  *  Allow a start keyword inside the preview parameter
+  *  Allow a parameter to be a directory path within the Savu folder
+### New Commands
+  * *savu_mod* - a way to modify one parameter present in a plugin list. 
 
 ## _Documentation_
+  *  Plugin API moved to dropdown boxes on every plugin documentation page
+  *  Plugin template links updated
 
 ## _BUGS_
   *  res_norm bug when using AstaReconGPU with CGLS_CUDA
+  *  Fix indentation for the plugin_generator command
+  *  Allow saving to inner plugin directories when using the plugin_generator command
 
 ## Other
   * The test dataset 24737.nxs has been changed to tomo-standard.nxs
   * The synthetic test data has been added 
   * Environment variable *type* is replaced with *GPUarch_nodes*
+  * *savu_mod* - Modify one parameter present in a plugin list. 
+  * Save the job command to a log file
+  * Save the directory the command was run to a log file
 
 
 
