@@ -6,7 +6,7 @@ Description
 
 A plugin to apply median-based dezinger to PROJECTION (raw) data.     The plugin works in a 3D mode (kernel_size x kernel_size x kernel_size). 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

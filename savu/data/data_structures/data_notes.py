@@ -92,7 +92,7 @@ def _create():
         of two ways:
 
             1. Passing a ``Data`` object as the only argument: All required
-            information is coped from this data object. For example,
+            information is copied from this data object. For example,
 
                 >>> out_dataset[0].create_dataset(in_dataset[0])
 

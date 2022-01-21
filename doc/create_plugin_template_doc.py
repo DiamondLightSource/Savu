@@ -29,9 +29,10 @@ from collections import OrderedDict
 import savu.plugins.utils as pu
 import doc.create_plugin_doc as pdoc
 
+plugin_example_dir = "examples/plugin_examples/plugin_templates/general"
 
 def create_plugin_template_downloads(savu_base_path):
-    """Inside plugin_examples/plugin_templates/general
+    """Inside examples/plugin_examples/plugin_templates/general
     If the file begins with 'plugin_template' then select it
     Read the lines of the files docstring and set as a descriptor
     """
@@ -57,8 +58,7 @@ def create_plugin_template_downloads(savu_base_path):
                 # Create the restructured text page for the plugin template
                 # python code
                 generate_template_files(doc_name, title)
-                inner_file_str = \
-                    "../../../plugin_examples/plugin_templates/general"
+                inner_file_str = f"../../../{plugin_example_dir}"
                 doc_template.write(f"{title}{pdoc.set_underline(3 ,66)}")
                 doc_template.write(
                     "\nA template to create a simple plugin "
@@ -114,7 +114,7 @@ def generate_template_files(doc_name, title):
     :param title:
     :return:
     """
-    inner_file_str = "../../../../plugin_examples/plugin_templates/general"
+    inner_file_str = f"../../../../{plugin_example_dir}"
     template_file_path = \
         f"{savu_base_path}doc/source/dev_guides/templates/{doc_name}.rst"
 
@@ -144,7 +144,7 @@ def _get_download_string(label, inner_file, doc_name):
 
 def _get_include_string(doc_name):
     include_str = f".. literalinclude:: " \
-                  f"/../../plugin_examples/plugin_templates/general/{doc_name}.py"
+                  f"/../../{plugin_example_dir}/{doc_name}.py"
     return include_str
 
 
@@ -170,7 +170,7 @@ def create_template_class_dict(savu_base_path):
     """
     docstring_text = {}
     plugin_ex_path = \
-        f"{savu_base_path}plugin_examples/plugin_templates/general"
+        f"{savu_base_path}{plugin_example_dir}"
 
     for t_root, t_dirs, template_files \
             in os.walk(plugin_ex_path, topdown=True):

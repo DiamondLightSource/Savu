@@ -6,7 +6,7 @@ Description
 
 A plugin to apply a sub-pixel correction to images. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

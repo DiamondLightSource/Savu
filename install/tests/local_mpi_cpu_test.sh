@@ -32,7 +32,7 @@ if [ $redirect ] ; then
   exec &> $redirect
 fi
 
-savu_mpijob_local.sh $TESTDATA/data/24737.nxs $TESTDATA/test_process_lists/mpi_cpu_test.nxs $output
+savu_mpijob_local.sh $TESTDATA/data/tomo_standard.nxs $TESTDATA/test_process_lists/mpi_cpu_test.nxs $output
 
 if [ $redirect ] ; then
  exec 2<&4

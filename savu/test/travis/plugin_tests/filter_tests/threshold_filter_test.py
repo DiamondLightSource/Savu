@@ -32,7 +32,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 
 class ThresholdFilterTest(unittest.TestCase):
     global data_file, experiment
-    data_file = '24737.nxs'
+    data_file = 'tomo_standard.nxs'
     experiment = None
 
     def test_binary_quantisation_filter(self):

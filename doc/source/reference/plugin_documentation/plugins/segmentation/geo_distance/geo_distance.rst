@@ -6,7 +6,7 @@ Description
 
 Geodesic transformation of images with mask initialisation. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

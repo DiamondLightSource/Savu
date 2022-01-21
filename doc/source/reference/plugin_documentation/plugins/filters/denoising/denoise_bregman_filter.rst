@@ -6,7 +6,7 @@ Description
 
 Split Bregman method for solving the denoising Total Variation ROF model. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

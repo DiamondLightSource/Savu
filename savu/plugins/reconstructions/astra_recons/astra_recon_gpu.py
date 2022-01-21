@@ -65,26 +65,25 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
 
     def astra_setup(self):
         options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
-                        "FP_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
+                        "FP_CUDA", "BP_CUDA", "BP3D_CUDA", "FBP3D_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
         if not options_list.count(self.parameters['algorithm']):
             raise Exception("Unknown Astra GPU algorithm.")
 
     def astra_2D_vector_recon(self, data):
         sino = data[0]
         cor, angles, vol_shape, init = self.get_frame_params()
-        angles = np.deg2rad(angles)
         if self.res:
             res = np.zeros(self.len_res)
         # create volume geom
         vol_geom = astra.create_vol_geom(vol_shape)
         # create projection geom
         det_width = sino.shape[self.dim_detX]
-        half_det_width = 0.5*det_width
-        cor_astra = half_det_width - cor
+        half_det_width = 0.5 * det_width
+        cor_astra_scalar = half_det_width - cor
         # set parallel beam vector geometry
-        vectors = self.vec_geom_init2D(angles, 1.0, cor_astra-0.5)
+        vectors = self.vec_geom_init2D(np.deg2rad(angles), 1.0, cor_astra_scalar - 0.5)
         try:
-            #vector geometry (astra > 1.9v)
+            # vector geometry (astra > 1.9v)
             proj_geom = astra.create_proj_geom('parallel_vec', det_width, vectors)
         except:
             print('Warning: using scalar geometry since the Astra version <1.9 does not support the vector one for 2D')
@@ -100,8 +99,8 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         else:
             rec_id = astra.data2d.create('-vol', vol_geom)
 
-#        if self.mask_id:
-#            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
+        #        if self.mask_id:
+        #            self.mask_id = astra.data2d.create('-vol', vol_geom, self.mask)
         # setup configuration options
         cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
         # create algorithm id
@@ -117,7 +116,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         # get reconstruction matrix
 
         if self.manual_mask is not False:
-            recon = self.manual_mask*astra.data2d.get(rec_id)
+            recon = self.manual_mask * astra.data2d.get(rec_id)
         else:
             recon = astra.data2d.get(rec_id)
 
@@ -126,15 +125,12 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         return [recon, res] if self.res else recon
 
     def astra_3D_vector_recon(self, data):
-        #def astra_3D_vector_recon(self, sino, cors, angles, vol_shape, init):
-#        while len(cors) is not self.sino_shape[self.slice_dir]:
-#            cors.append(0)
-        sino = data[0]
+        proj_data3d = data[0]  # get 3d block of projection data
         cor, angles, vol_shape, init = self.get_frame_params()
-        half_det_width = 0.5*sino.shape[self.sino_dim_detX]
-        cor_astra = half_det_width - cor[0]
+        projection_shifts2d = self.get_frame_shifts()
+        half_det_width = 0.5 * proj_data3d.shape[self.sino_dim_detX]
+        cor_astra_scalar = half_det_width - np.mean(cor)  # works with scalar CoR only atm
 
-        sslice = [slice(None)]*self.nDims
         recon = np.zeros(vol_shape)
         recon = np.expand_dims(recon, axis=self.slice_dir)
         if self.res:
@@ -143,41 +139,39 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         # create volume geometry
         vol_geom = \
             astra.create_vol_geom(vol_shape[0], vol_shape[2], vol_shape[1])
-        # pad the sinogram
-        # Don't pad the sinogram if 3d
-        # Originally in pad_sino:
-        # centre_pad = (0, 0) if '3D' in self.alg else \
-        # self.array_pad(cor, sino.shape[self.dim_detX])
 
-        #pad_sino = self.pad_sino(self.slice_func(sino, sslice), cors)
-        #nDets = pad_sino.shape[self.slice_dir]
-        #trans = (self.slice_dir, self.det_rot, self.sino_dim_detX)
-        #pad_sino = np.transpose(pad_sino, trans)
+        # define astra vector geometry for 3d case
+        vectors3d = self.vec_geom_init3D(np.deg2rad(angles + 90.0), 1.0, 1.0, cor_astra_scalar - 0.5,
+                                         projection_shifts2d)
+        proj_geom = astra.create_proj_geom('parallel3d_vec',
+                                           proj_data3d.shape[self.sino_dim_detY],
+                                           proj_data3d.shape[self.sino_dim_detX],
+                                           vectors3d)
 
-        # create projection geom
-        #vectors3D = self.create_3d_vector_geom(angles, cor, sino.shape[self.sino_dim_detX])
-        # define astra vector geometry (default)
-        vectors3D = self.vec_geom_init3D(np.deg2rad(angles), 1.0, 1.0, cor_astra-0.5)
-        proj_geom = astra.create_proj_geom('parallel3d_vec', sino.shape[self.sino_dim_detY], sino.shape[self.sino_dim_detX],
-                                           vectors3D)
-        # create sinogram id
-        sino_id = astra.data3d.create("-sino", proj_geom, np.swapaxes(sino, 0, 1))
+        proj_data3d = np.swapaxes(proj_data3d, 0, 1)
+        if self.parameters['algorithm'] == "FBP3D_CUDA":
+            # pre-filter projection data
+            proj_data3d = self.filtersinc3d(proj_data3d)
+
+        # create projection data id
+        proj_id = astra.data3d.create("-sino", proj_geom, proj_data3d)
 
         # create reconstruction id
         if init is not None:
-            #init = np.transpose(init, (0, 2, 1))  # make this general
             rec_id = astra.data3d.create('-vol', vol_geom, init)
         else:
             rec_id = astra.data3d.create('-vol', vol_geom)
 
         # setup configuration options
-        cfg = self.set_config(rec_id, sino_id, proj_geom, vol_geom)
+        cfg = self.set_config(rec_id, proj_id, proj_geom, vol_geom)
+
+        if self.parameters['algorithm'] == "FBP3D_CUDA":
+            cfg['type'] = 'BP3D_CUDA'
 
         # create algorithm id
         alg_id = astra.algorithm.create(cfg)
 
         # run algorithm
-        """
         if self.res:
             for j in range(self.iters):
                 # Run a single iteration
@@ -185,19 +179,17 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
                 res[j] = astra.algorithm.get_res_norm(alg_id)
         else:
             astra.algorithm.run(alg_id, self.iters)
-        """
-        astra.algorithm.run(alg_id, self.iters)
 
         # get reconstruction matrix
-        #if self.manual_mask:
+        # if self.manual_mask:
         #    recon = self.mask*astra.data3d.get(rec_id)
-        #else:
+        # else:
         #    recon = astra.data3d.get(rec_id)
 
         recon = np.transpose(astra.data3d.get(rec_id), (2, 0, 1))
 
         # delete geometry
-        self.delete(alg_id, sino_id, rec_id, False)
+        self.delete(alg_id, proj_id, rec_id, False)
 
         self.start += 1
         if self.res:
@@ -205,81 +197,80 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         else:
             return recon
 
-    def create_3d_vector_geom(self, angles, cors, detX):
-        # add tilt for detector
-        # make sure output volume is the correct way
-        # add res_norm
-        # add a mask
-        angles = np.deg2rad(angles)
-        vectors3D = np.zeros((len(angles), 12))
-        shift = detX/2.0 - cors[0] # temporary
-        for i in range(len(angles)):
-            # ray direction
-            vectors3D[i, 0] = np.cos(angles[i])
-            vectors3D[i, 1] = -np.sin(angles[i])
-            vectors3D[i, 2] = 0
-
-            # center of detector
-            vectors3D[i, 3] = -shift*np.sin(angles[i])
-            vectors3D[i, 4] = -shift*np.cos(angles[i])
-            vectors3D[i, 5] = 0
-
-            # vector from detector pixel (0,0) to (0,1)
-            vectors3D[i, 6] = -np.sin(angles[i])
-            vectors3D[i, 7] = -np.cos(angles[i])
-            vectors3D[i, 8] = 0
-
-            # vector from detector pixel (0,0) to (1,0)
-            vectors3D[i, 9] = 0
-            vectors3D[i, 10] = 0
-            vectors3D[i, 11] = 1
-        return vectors3D
-
     def rotation_matrix2D(self, theta):
-        #define 2D rotation matrix
+        # define 2D rotation matrix
         return np.array([[np.cos(theta), -np.sin(theta)],
                          [np.sin(theta), np.cos(theta)]])
 
     def rotation_matrix3D(self, theta):
-        #define 3D rotation matrix
+        # define 3D rotation matrix
         return np.array([[np.cos(theta), -np.sin(theta), 0.0],
                          [np.sin(theta), np.cos(theta), 0.0],
-                         [0.0 , 0.0 , 1.0]])
+                         [0.0, 0.0, 1.0]])
 
     def vec_geom_init2D(self, angles_rad, DetectorSpacingX, CenterRotOffset):
-        #define 2D vector geometry
-        s0 = [0.0, -1.0] # source
-        d0 = [CenterRotOffset, 0.0] # detector
-        u0 = [DetectorSpacingX, 0.0] # detector coordinates
+        # define 2D vector geometry
+        s0 = [0.0, -1.0]  # source
+        d0 = [CenterRotOffset, 0.0]  # detector
+        u0 = [DetectorSpacingX, 0.0]  # detector coordinates
 
-        vectors = np.zeros([angles_rad.size,6])
-        for i in range(0,angles_rad.size):
+        vectors = np.zeros([angles_rad.size, 6])
+        for i in range(0, angles_rad.size):
             theta = angles_rad[i]
-            vec_temp = np.dot(self.rotation_matrix2D(theta),s0)
-            vectors[i,0:2] = vec_temp[:] # ray position
-            vec_temp = np.dot(self.rotation_matrix2D(theta),d0)
-            vectors[i,2:4] = vec_temp[:] # center of detector position
-            vec_temp = np.dot(self.rotation_matrix2D(theta),u0)
-            vectors[i,4:6] = vec_temp[:] # detector pixel (0,0) to (0,1).
+            vec_temp = np.dot(self.rotation_matrix2D(theta), s0)
+            vectors[i, 0:2] = vec_temp[:]  # ray position
+            vec_temp = np.dot(self.rotation_matrix2D(theta), d0)
+            vectors[i, 2:4] = vec_temp[:]  # center of detector position
+            vec_temp = np.dot(self.rotation_matrix2D(theta), u0)
+            vectors[i, 4:6] = vec_temp[:]  # detector pixel (0,0) to (0,1).
         return vectors
 
-    def vec_geom_init3D(self, angles_rad, DetectorSpacingX, DetectorSpacingY, CenterRotOffset):
-        #define 3D vector geometry
-        s0 = [0.0, -1.0, 0.0] # source
-        d0 = [CenterRotOffset, 0.0, 0.0] # detector
-        u0 = [DetectorSpacingX, 0.0, 0.0] # detector coordinates
-        v0 = [0.0, 0.0, DetectorSpacingY] # detector coordinates
+    def vec_geom_init3D(self, angles_rad, DetectorSpacingX, DetectorSpacingY, CenterRotOffset, projection_shifts2d):
+        # define 3D vector geometry
+        s0 = [0.0, -1.0, 0.0]  # source
+        u0 = [DetectorSpacingX, 0.0, 0.0]  # detector coordinates
+        v0 = [0.0, 0.0, DetectorSpacingY]  # detector coordinates
 
-        vectors = np.zeros([angles_rad.size,12])
-        for i in range(0,angles_rad.size):
+        vectors = np.zeros([angles_rad.size, 12])
+        for i in range(0, angles_rad.size):
+            d0 = [CenterRotOffset - projection_shifts2d[i, 0], 0.0,
+                  CenterRotOffset - projection_shifts2d[i, 1]]  # detector
             theta = angles_rad[i]
-            vec_temp = np.dot(self.rotation_matrix3D(theta),s0)
-            vectors[i,0:3] = vec_temp[:] # ray position
-            vec_temp = np.dot(self.rotation_matrix3D(theta),d0)
-            vectors[i,3:6] = vec_temp[:] # center of detector position
-            vec_temp = np.dot(self.rotation_matrix3D(theta),u0)
-            vectors[i,6:9] = vec_temp[:] # detector pixel (0,0) to (0,1).
-            vec_temp = np.dot(self.rotation_matrix3D(theta),v0)
-            vectors[i,9:12] = vec_temp[:] # Vector from detector pixel (0,0) to (1,0)
+            vec_temp = np.dot(self.rotation_matrix3D(theta), s0)
+            vectors[i, 0:3] = vec_temp[:]  # ray position
+            vec_temp = np.dot(self.rotation_matrix3D(theta), d0)
+            vectors[i, 3:6] = vec_temp[:]  # center of detector position
+            vec_temp = np.dot(self.rotation_matrix3D(theta), u0)
+            vectors[i, 6:9] = vec_temp[:]  # detector pixel (0,0) to (0,1).
+            vec_temp = np.dot(self.rotation_matrix3D(theta), v0)
+            vectors[i, 9:12] = vec_temp[:]  # Vector from detector pixel (0,0) to (1,0)
         return vectors
 
+    def filtersinc3d(self, projection3d):
+        import scipy.fftpack
+        # applies a sinc filter to 3D projection data
+        # Data format [DetectorVert, Projections, DetectorHoriz]
+        # adopted from Matlabs code by  Waqas Akram
+        # "a":	This parameter varies the filter magnitude response.
+        # When "a" is very small (a<<1), the response approximates |w|
+        # As "a" is increased, the filter response starts to
+        # roll off at high frequencies.
+        a = 1.1
+        [DetectorsLengthV, projectionsNum, DetectorsLengthH] = np.shape(projection3d)
+        w = np.linspace(-np.pi, np.pi - (2 * np.pi) / DetectorsLengthH, DetectorsLengthH, dtype='float32')
+
+        rn1 = np.abs(2.0 / a * np.sin(a * w / 2.0))
+        rn2 = np.sin(a * w / 2.0)
+        rd = (a * w) / 2.0
+        rd_c = np.zeros([1, DetectorsLengthH])
+        rd_c[0, :] = rd
+        r = rn1 * (np.dot(rn2, np.linalg.pinv(rd_c))) ** 2
+        multiplier = (1.0 / projectionsNum)
+        f = scipy.fftpack.fftshift(r)
+        filtered = np.zeros(np.shape(projection3d))
+
+        for j in range(0, DetectorsLengthV):
+            for i in range(0, projectionsNum):
+                IMG = scipy.fftpack.fft(projection3d[j, i, :])
+                filtered[j, i, :] = multiplier * np.real(scipy.fftpack.ifft(IMG * f))
+        return np.float32(filtered)

@@ -12,12 +12,12 @@ class AstraReconGpuTools(PluginTools):
               (Error in the solution)
             default: False
             dependency:
-              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA]
+              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA, CGLS3D_CUDA, SIRT3D_CUDA]
         algorithm:
             visibility: basic
             dtype: str
             options: [FBP_CUDA, SIRT_CUDA, SART_CUDA, CGLS_CUDA,
-              BP_CUDA, SIRT3D_CUDA, CGLS3D_CUDA]
+              BP_CUDA, BP3D_CUDA, FBP3D_CUDA, SIRT3D_CUDA, CGLS3D_CUDA]
             description:
                 summary: Reconstruction type
                 options:
@@ -26,6 +26,8 @@ class AstraReconGpuTools(PluginTools):
                   SART_CUDA: Simultaneous Algebraic Reconstruction Technique
                   CGLS_CUDA: Conjugate Gradient Least Squares
                   BP_CUDA: Backward Projection
+                  BP3D_CUDA: Backward Projection 3D
+                  FBP3D_CUDA: Filtered Backprojection Method 3D
                   SIRT3D_CUDA: Simultaneous Iterative Reconstruction Technique 3D
                   CGLS3D_CUDA: Conjugate Gradient Least Squares 3D
             default: FBP_CUDA
@@ -71,7 +73,9 @@ class AstraReconGpuTools(PluginTools):
                 flat-top:
                 kaiser:
                 parzen:
-            default: 'ram-lak'            
+            default: 'ram-lak'
+            dependency:
+                algorithm: [FBP_CUDA]
         outer_pad:
              dependency:
                algorithm: [FBP_CUDA, BP_CUDA]

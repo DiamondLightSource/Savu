@@ -6,7 +6,7 @@ Description
 
 Convert a list of points into a 2D projection 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

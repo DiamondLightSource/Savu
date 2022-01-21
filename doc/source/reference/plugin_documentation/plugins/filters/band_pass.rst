@@ -6,7 +6,7 @@ Description
 
 A plugin to filter each frame with a gaussian 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

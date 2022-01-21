@@ -6,7 +6,7 @@ Description
 
 The base class from which all plugins should inherit. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

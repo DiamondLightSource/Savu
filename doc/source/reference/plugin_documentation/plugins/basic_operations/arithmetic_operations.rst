@@ -6,7 +6,7 @@ Description
 
 Basic arithmetic operations on data: addition, subtraction, multiplication and division. Operations can be performed by extracting scalars from METADATA (min, max, mean) OR providing a scalar value. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

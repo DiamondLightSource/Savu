@@ -6,7 +6,7 @@ Description
 
 A hdf5 dataset of a specified size is created at runtime using numpy random sampling (numpy.random), saved with relevant meta_data to a NeXus file, and used as input. It recreates the behaviour of the nxtomo loader but with random data.  The input file path passed to Savu will be ignored (use a dummy). Note: Further extensions planned to allow the generated data to be re-loaded with the nxtomo_loader. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

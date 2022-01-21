@@ -208,7 +208,7 @@ def populate_plugin_doc_files(new_rst_file, tool_class_list, file_path,
 
     if tool_class.define_parameters.__doc__:
         # Check define parameters exists
-        new_rst_file.write(f"\nParameter definitions{set_underline(3,26)}")
+        new_rst_file.write(f"\nParameters{set_underline(3,26)}")
         new_rst_file.write("\n.. code-block:: yaml")
         new_rst_file.write("\n")
 

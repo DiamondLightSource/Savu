@@ -26,7 +26,7 @@ from savu.test.travis.framework_tests.plugin_runner_test import \
 class CorrectionsTest(unittest.TestCase):
     
     def setUp(self):
-        self.data_file = '24737.nxs'
+        self.data_file = 'tomo_standard.nxs'
         self.experiment = None
 
     def test_camera_rot_correction(self):
@@ -66,6 +66,20 @@ class CorrectionsTest(unittest.TestCase):
 
     def test_convert_360_180_sinogram(self):
         process_list = 'corrections/convert_360_180_sinogram_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_phase_unwrapping(self):
+        process_list = 'corrections/phase_unwrapping_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment,
+                                        process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_phase_unwrapping2(self):
+        process_list = 'corrections/phase_unwrapping_test2.nxs'
         options = tu.initialise_options(self.data_file, self.experiment,
                                         process_list)
         run_protected_plugin_runner(options)

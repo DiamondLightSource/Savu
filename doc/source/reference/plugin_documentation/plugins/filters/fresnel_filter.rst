@@ -9,7 +9,7 @@ A low-pass filter to improve the contrast of reconstructed images which is simil
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/fresnel_filter_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

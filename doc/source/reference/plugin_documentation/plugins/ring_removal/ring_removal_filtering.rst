@@ -9,7 +9,7 @@ Method working in the sinogram space to remove ring artifacts by combining a fil
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_filtering_doc.rst>
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml

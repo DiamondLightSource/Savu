@@ -6,7 +6,7 @@ Description
 
 A class to load multiple scans in Nexus format into one dataset. 
 
-Parameter definitions
+Parameters
 --------------------------
 
 .. code-block:: yaml
