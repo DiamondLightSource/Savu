@@ -1,15 +1,12 @@
-Stage Motion
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Stage Motion{% endblock %}
 
+{% block description %}
 A Plugin to calculate stage motion from motion positions. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -41,8 +38,10 @@ Parameters
             description: The extra datasets to use as output for min and max.
             default: "['qmin', 'qmax']"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.kinematics.stage_motion.rst{% endblock %}

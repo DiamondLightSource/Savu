@@ -1,15 +1,12 @@
-Morph Proc
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Proc{% endblock %}
 
+{% block description %}
 A Plugin to perform morphological operations on grayscale images (use: erosion, dilation, opening, closing) or binary images (use: binary_erosion, binary_dilation, binary_opening, binary_closing) 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -46,8 +43,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.morphological_operations.morph_proc.rst{% endblock %}

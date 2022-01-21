@@ -1,15 +1,12 @@
-Dezinger
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Dezinger{% endblock %}
 
+{% block description %}
 A plugin to apply median-based dezinger to PROJECTION (raw) data.     The plugin works in a 3D mode (kernel_size x kernel_size x kernel_size). 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameters
             description: A threshold for detecting and removing outliers in data.              If set too small, dezinger acts like a median filter. The value of               the threshold is multiplied with a variance level in data.
             default: "0.1"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.filters.dezingers.dezinger.rst{% endblock %}

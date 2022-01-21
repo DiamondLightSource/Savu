@@ -1,15 +1,12 @@
-Data Threshold
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Data Threshold{% endblock %}
 
+{% block description %}
 The module to threshold the data (less, lessequal, equal, greater, greaterequal) than the given value, based on the condition the data values will be replaced by the provided new value 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -53,8 +50,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.data_threshold.rst{% endblock %}

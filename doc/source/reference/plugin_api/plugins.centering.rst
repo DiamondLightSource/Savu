@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   plugins.centering.centering360
    plugins.centering.vo_centering
 
 Module contents

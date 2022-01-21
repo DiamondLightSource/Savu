@@ -1,15 +1,12 @@
-Yaml Converter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Yaml Converter{% endblock %}
 
+{% block description %}
 A class to load data from a non-standard nexus/hdf5 file using descriptions loaded from a yaml file. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -29,8 +26,10 @@ Parameters
             description: A hidden parameter to hold parameters passed in via a savu template file.
             default: 
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.loaders.yaml_converter.rst{% endblock %}
