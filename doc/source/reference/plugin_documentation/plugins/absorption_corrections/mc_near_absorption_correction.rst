@@ -1,15 +1,12 @@
-Mc Near Absorption Correction
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mc Near Absorption Correction{% endblock %}
 
+{% block description %}
 McNears absorption correction, takes in a normalised absorption sinogram and xrf sinogram stack. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -43,8 +40,10 @@ Parameters
             description: The compound
             default: Co0.1Re0.01Ti0.05(SiO2)0.84
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.absorption_corrections.mc_near_absorption_correction.rst{% endblock %}

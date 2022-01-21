@@ -1,15 +1,12 @@
-Astra Recon Gpu
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Astra Recon Gpu{% endblock %}
 
+{% block description %}
 A Plugin to run the astra reconstruction 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -93,6 +90,8 @@ Parameters
                     SIRT_CUDA
                     SART_CUDA
                     CGLS_CUDA
+                    CGLS3D_CUDA
+                    SIRT3D_CUDA
         
         outer_pad:
             visibility: intermediate
@@ -126,6 +125,8 @@ Parameters
                     SIRT_CUDA
                     SART_CUDA
                     CGLS_CUDA
+                    CGLS3D_CUDA
+                    SIRT3D_CUDA
         
         algorithm:
             visibility: basic
@@ -169,135 +170,133 @@ Parameters
                     kaiser: None
                     parzen: None
             default: ram-lak
+            dependency: 
+                algorithm: 
+                    FBP_CUDA
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Fast and flexible X-ray tomography using the ASTRA toolbox by Van Aarle, Wim et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{van2016fast,
+            title={Fast and flexible X-ray tomography using the ASTRA toolbox},
+            author={Van Aarle, Wim and Palenstijn, Willem Jan and Cant, Jeroen and Janssens, Eline and Bleichrodt, Folkert and Dabravolski, Andrei and De Beenhouwer, Jan and Batenburg, K Joost and Sijbers, Jan},
+            journal={Optics express},
+            volume={24},
+            number={22},
+            pages={25129--25147},
+            year={2016},
+            publisher={Optical Society of America}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Fast and flexible X-ray tomography using the ASTRA toolbox
+            %A Van Aarle, Wim
+            %A Palenstijn, Willem Jan
+            %A Cant, Jeroen
+            %A Janssens, Eline
+            %A Bleichrodt, Folkert
+            %A Dabravolski, Andrei
+            %A De Beenhouwer, Jan
+            %A Batenburg, K Joost
+            %A Sijbers, Jan
+            %J Optics express
+            %V 24
+            %N 22
+            %P 25129-25147
+            %@ 1094-4087
+            %D 2016
+            %I Optical Society of America
+            
+        
+        
+        **The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography by Van Aarle, Wim et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{van2015astra,
+            title={The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography},
+            author={Van Aarle, Wim and Palenstijn, Willem Jan and De Beenhouwer, Jan and Altantzis, Thomas and Bals, Sara and Batenburg, K Joost and Sijbers, Jan},
+            journal={Ultramicroscopy},
+            volume={157},
+            pages={35--47},
+            year={2015},
+            publisher={Elsevier}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography
+            %A Van Aarle, Wim
+            %A Palenstijn, Willem Jan
+            %A De Beenhouwer, Jan
+            %A Altantzis, Thomas
+            %A Bals, Sara
+            %A Batenburg, K Joost
+            %A Sijbers, Jan
+            %J Ultramicroscopy
+            %V 157
+            %P 35-47
+            %@ 0304-3991
+            %D 2015
+            %I Elsevier
+            
+        
+        
+        **Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs) by Palenstijn, WJ et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{palenstijn2011performance,
+              title={Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)},
+              author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},
+              journal={Journal of structural biology},
+              volume={176},
+              number={2},
+              pages={250--253},
+              year={2011},
+              publisher={Elsevier}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)
+            %A Palenstijn, WJ
+            %A Batenburg, KJ
+            %A Sijbers, J
+            %J Journal of structural biology
+            %V 176
+            %N 2
+            %P 250-253
+            %@ 1047-8477
+            %D 2011
+            %I Elsevier
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Fast and flexible X-ray tomography using the ASTRA toolbox by Van Aarle, Wim et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{van2016fast,
-    title={Fast and flexible X-ray tomography using the ASTRA toolbox},
-    author={Van Aarle, Wim and Palenstijn, Willem Jan and Cant, Jeroen and Janssens, Eline and Bleichrodt, Folkert and Dabravolski, Andrei and De Beenhouwer, Jan and Batenburg, K Joost and Sijbers, Jan},
-    journal={Optics express},
-    volume={24},
-    number={22},
-    pages={25129--25147},
-    year={2016},
-    publisher={Optical Society of America}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Fast and flexible X-ray tomography using the ASTRA toolbox
-    %A Van Aarle, Wim
-    %A Palenstijn, Willem Jan
-    %A Cant, Jeroen
-    %A Janssens, Eline
-    %A Bleichrodt, Folkert
-    %A Dabravolski, Andrei
-    %A De Beenhouwer, Jan
-    %A Batenburg, K Joost
-    %A Sijbers, Jan
-    %J Optics express
-    %V 24
-    %N 22
-    %P 25129-25147
-    %@ 1094-4087
-    %D 2016
-    %I Optical Society of America
-    
-
-The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography by Van Aarle, Wim et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{van2015astra,
-    title={The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography},
-    author={Van Aarle, Wim and Palenstijn, Willem Jan and De Beenhouwer, Jan and Altantzis, Thomas and Bals, Sara and Batenburg, K Joost and Sijbers, Jan},
-    journal={Ultramicroscopy},
-    volume={157},
-    pages={35--47},
-    year={2015},
-    publisher={Elsevier}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T The ASTRA Toolbox: A platform for advanced algorithm development in electron tomography
-    %A Van Aarle, Wim
-    %A Palenstijn, Willem Jan
-    %A De Beenhouwer, Jan
-    %A Altantzis, Thomas
-    %A Bals, Sara
-    %A Batenburg, K Joost
-    %A Sijbers, Jan
-    %J Ultramicroscopy
-    %V 157
-    %P 35-47
-    %@ 0304-3991
-    %D 2015
-    %I Elsevier
-    
-
-Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs) by Palenstijn, WJ et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{palenstijn2011performance,
-      title={Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)},
-      author={Palenstijn, WJ and Batenburg, KJ and Sijbers, J},
-      journal={Journal of structural biology},
-      volume={176},
-      number={2},
-      pages={250--253},
-      year={2011},
-      publisher={Elsevier}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Performance improvements for iterative electron tomography reconstruction using graphics processing units (GPUs)
-    %A Palenstijn, WJ
-    %A Batenburg, KJ
-    %A Sijbers, J
-    %J Journal of structural biology
-    %V 176
-    %N 2
-    %P 250-253
-    %@ 1047-8477
-    %D 2011
-    %I Elsevier
-    
-
+{% block plugin_file %}../../../../plugin_api/plugins.reconstructions.astra_recons.astra_recon_gpu.rst{% endblock %}

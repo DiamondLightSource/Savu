@@ -1,15 +1,12 @@
-Data Removal
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Data Removal{% endblock %}
 
+{% block description %}
 A class to remove any unwanted data from the specified pattern frame. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,8 +42,10 @@ Parameters
             description: Data dimension to reduce.
             default: "0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.reshape.data_removal.rst{% endblock %}

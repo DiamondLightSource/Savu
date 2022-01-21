@@ -1,15 +1,12 @@
-Thresh Segm
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Thresh Segm{% endblock %}
 
+{% block description %}
 A Plugin to segment the data by providing two scalar values for lower and upper intensities 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -51,8 +48,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XY
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.thresholding.thresh_segm.rst{% endblock %}

@@ -19,10 +19,11 @@ rm -rf $DIR/source/reference/framework_api/
 # -f, --force. Usually, apidoc does not overwrite files, unless this option is given.
 # -e, --separate. Put each module file in its own page.
 # -T, --no-toc. Do not create a table of contents file.
+# -E, --no-headings. Do not create headings for the modules/packages. This is useful, for example, when docstrings already contain headings.
 # add -Q to suppress warnings
 
 # Generate plugin api rst files
-sphinx-apidoc -feT -o $DIR/source/reference/plugin_api $DIR/../savu/plugins/ $DIR/../savu/plugins/loaders/utils/** $DIR/../savu/plugins/savers/utils/** $DIR/../savu/plugins/unregistered/** $DIR/../savu/plugins/under_development/** $DIR/../savu/plugins/*tools* $DIR/../savu/plugins/**/*tools* $DIR/../savu/plugins/**/**/*tools* $DIR/../savu/plugins/**/**/**/*tools*
+sphinx-apidoc -feTE -o $DIR/source/reference/plugin_api $DIR/../savu/plugins/ $DIR/../savu/plugins/loaders/utils/** $DIR/../savu/plugins/savers/utils/** $DIR/../savu/plugins/unregistered/** $DIR/../savu/plugins/under_development/** $DIR/../savu/plugins/*tools* $DIR/../savu/plugins/**/*tools* $DIR/../savu/plugins/**/**/*tools* $DIR/../savu/plugins/**/**/**/*tools*
 
 # Generate savu framework api
 sphinx-apidoc -feT -o $DIR/source/reference/framework_api $DIR/../savu/ $DIR/../savu/plugins/ $DIR/../savu/test/ $DIR/../savu/data/*tools*

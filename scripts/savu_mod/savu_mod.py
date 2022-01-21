@@ -39,18 +39,21 @@ def arg_parser(doc=True):
     desc = "Modify one parameter value inside one process list."
     parser = argparse.ArgumentParser(prog='savu_mod', description=desc)
     parser.add_argument('plugin',
-                        help='Plugin name',
+                        help='Plugin name or number',
                         type=str)
     parser.add_argument('plugin_index',
-                        help='Plugin index (for when multiple plugins of one type are present)',
-                        nargs="?", type=int, default=0)
+                        help='Associated plugin index (for when identical plugins are present in the process list)',
+                        nargs="?", type=int, default=1)
     parser.add_argument('param',
-                        help='Parameter name',
+                        help='Parameter name or number from the list of plugin parameters',
                         type=str)
-    parser.add_argument("value", help="value")
+    parser.add_argument("value", help="New parameter value")
     parser.add_argument('process_list',
-                        help='Process list',
+                        help='Process list file path',
                         type=str)
+    save_str = "Save the modified process list without a confirmation."
+    parser.add_argument("-q", "--quick", action="store_true",
+                        dest="save", help=save_str, default=False)
     return parser if doc is True else parser.parse_args()
 
 
@@ -78,20 +81,18 @@ def modify_content(args):
     content = load_process_list(args.process_list)
     # Modify the plugin and parameter value
     plugin = content.plugin_to_num(args.plugin, args.plugin_index)
-    content_modified = content.modify(plugin, args.param,
-                                      ' '.join(args.value))
-    if content_modified:
-        print(f"Parameter {args.param} for the plugin {args.plugin} was "
-              f"modified to {args.value}.")
-    return content
+    content_modified = content.modify(plugin, args.param, args.value)
+
+    return content, content_modified
 
 
 def save_content(content, args):
     """Save the plugin list with the modified parameter value """
     content.check_file(args.process_list)
     DispDisplay(content.plugin_list)._notices()
-    content.save(args.process_list, check=input("Are you sure you want to save the "
-                        "modified process list to %s [y/N]" % (args.process_list)))
+    save_file = "y" if args.save else input("Are you sure you want to save "
+        "the modified process list to %s [y/N]" % (args.process_list))
+    content.save(args.process_list, check=save_file)
 
 
 @error_catcher_savu
@@ -103,8 +104,11 @@ def command_line_modify():
     """
     args = arg_parser(doc=False)
 
-    content = modify_content(args)
-    save_content(content, args)
+    content, content_modified = modify_content(args)
+    if content_modified:
+        print(f"Parameter {args.param} for the plugin {args.plugin} was "
+              f"modified to {args.value}.")
+        save_content(content, args)
 
 
 if __name__ == '__main__':

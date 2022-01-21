@@ -1,15 +1,12 @@
-No Process Plugin
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}No Process Plugin{% endblock %}
 
+{% block description %}
 The base class from which all plugins should inherit. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -39,8 +36,10 @@ Parameters
             description: Dummy parameter for testing.
             default: "10"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.no_process_plugin.rst{% endblock %}

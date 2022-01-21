@@ -1,15 +1,12 @@
-Image Interpolation
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Image Interpolation{% endblock %}
 
+{% block description %}
 A plugin to interpolate an image by a factor 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -40,8 +37,10 @@ Parameters
             options: "['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']"
             default: bicubic
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.image_interpolation.rst{% endblock %}

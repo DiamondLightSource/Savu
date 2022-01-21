@@ -15,6 +15,7 @@ Submodules
    plugins.filters.denoising.denoise_bregman_filter
    plugins.filters.denoising.median_filter
    plugins.filters.denoising.median_filter_gpu
+   plugins.filters.denoising.wavelet_denoising_gpu
 
 Module contents
 ---------------

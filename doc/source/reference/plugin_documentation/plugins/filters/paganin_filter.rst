@@ -1,18 +1,16 @@
-Paganin Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Paganin Filter{% endblock %}
 
+{% block description %}
 A plugin to apply the Paganin filter (for denoising or contrast enhancement) on projections. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/filters/paganin_filter_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -78,52 +76,49 @@ Parameters
             description: Increment all values by this amount before taking the log.
             default: "0.0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object by Paganin, David et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{paganin2002simultaneous,
+            title={Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object},
+            author={Paganin, David and Mayo, Sheridan C and Gureyev, Tim E and Miller, Peter R and Wilkins, Steve W},
+            journal={Journal of microscopy},
+            volume={206},
+            number={1},
+            pages={33--40},
+            year={2002},
+            publisher={Wiley Online Library}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object
+            %A Paganin, David
+            %A Mayo, Sheridan C
+            %A Gureyev, Tim E
+            %A Miller, Peter R
+            %A Wilkins, Steve W
+            %J Journal of microscopy
+            %V 206
+            %N 1
+            %P 33-40
+            %@ 0022-2720
+            %D 2002
+            %I Wiley Online Library
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object by Paganin, David et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{paganin2002simultaneous,
-    title={Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object},
-    author={Paganin, David and Mayo, Sheridan C and Gureyev, Tim E and Miller, Peter R and Wilkins, Steve W},
-    journal={Journal of microscopy},
-    volume={206},
-    number={1},
-    pages={33--40},
-    year={2002},
-    publisher={Wiley Online Library}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object
-    %A Paganin, David
-    %A Mayo, Sheridan C
-    %A Gureyev, Tim E
-    %A Miller, Peter R
-    %A Wilkins, Steve W
-    %J Journal of microscopy
-    %V 206
-    %N 1
-    %P 33-40
-    %@ 0022-2720
-    %D 2002
-    %I Wiley Online Library
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.filters.paganin_filter.rst{% endblock %}
