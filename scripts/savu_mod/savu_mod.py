@@ -59,10 +59,7 @@ def arg_parser(doc=True):
 
 def load_process_list(process_list):
     """ Load only plugins inside the process list to the configurator"""
-
-    plugin_list = PluginList()._populate_plugin_list(process_list)
     content = Content(level='basic')
-
     # Open the process list file
     content.fopen(process_list, update=True)
     # Refresh the plugins
