@@ -39,17 +39,17 @@ def arg_parser(doc=True):
     desc = "Modify one parameter value inside one process list."
     parser = argparse.ArgumentParser(prog='savu_mod', description=desc)
     parser.add_argument('plugin',
-                        help='Plugin name',
+                        help='Plugin name or number',
                         type=str)
     parser.add_argument('plugin_index',
-                        help='Plugin index (for when multiple plugins of one type are present)',
+                        help='Associated plugin index (for when identical plugins are present in the process list)',
                         nargs="?", type=int, default=1)
     parser.add_argument('param',
-                        help='Parameter name',
+                        help='Parameter name or number from the list of plugin parameters',
                         type=str)
-    parser.add_argument("value", help="value")
+    parser.add_argument("value", help="New parameter value")
     parser.add_argument('process_list',
-                        help='Process list',
+                        help='Process list file path',
                         type=str)
     return parser if doc is True else parser.parse_args()
 
