@@ -1,9 +1,9 @@
 :orphan:
 
 Convert 360 180 Sinogram Documentation
-#################################################################
+######################################
 
-(Change this) Include your plugin documentation here. Use a restructured text format.
+To be updated ...
 
 ..
     This is a comment. Include an image or file by using the following text
