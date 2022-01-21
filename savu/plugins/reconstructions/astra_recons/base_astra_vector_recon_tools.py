@@ -12,7 +12,7 @@ geometry
             description: Number of iterations to perform
             default: 1
             dependency:
-              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA, CGLS3D_CUDA, SIRT3D_CUDA]
+              algorithm: [SIRT_CUDA, SART_CUDA, CGLS_CUDA, BP3D_CUDA, CGLS3D_CUDA, SIRT3D_CUDA]
         outer_pad:
              visibility: intermediate
              dtype: [bool, float]
