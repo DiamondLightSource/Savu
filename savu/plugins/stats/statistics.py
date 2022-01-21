@@ -148,20 +148,8 @@ class Statistics(object):
             self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
 
         slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
-
-        #if None not in self.stats['RMSD']:
-        #    slice_stats_array = np.append(slice_stats_array, self.stats['RMSD'], 0)
         self._write_stats_to_file(slice_stats_array, p_num)
-        #self.set_volume_residuals()
         self._already_called = True
-
-    def set_volume_residuals(self):
-        p_num = Statistics.count
-        Statistics.global_residuals[p_num] = {}
-        Statistics.global_residuals[p_num]['max'] = np.mean(self.residuals['max'])
-        Statistics.global_residuals[p_num]['min'] = np.mean(self.residuals['min'])
-        Statistics.global_residuals[p_num]['mean'] = np.mean(self.residuals['mean'])
-        Statistics.global_residuals[p_num]['std_dev'] = np.mean(self.residuals['std_dev'])
 
     def get_stats(self, plugin_name, n=None, stat=None):
         """Returns stats associated with a certain plugin.
