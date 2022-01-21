@@ -51,6 +51,9 @@ def arg_parser(doc=True):
     parser.add_argument('process_list',
                         help='Process list file path',
                         type=str)
+    save_str = "Save the modified process list without a confirmation."
+    parser.add_argument("-q", "--quick", action="store_true",
+                        dest="save", help=save_str, default=False)
     return parser if doc is True else parser.parse_args()
 
 
@@ -87,8 +90,9 @@ def save_content(content, args):
     """Save the plugin list with the modified parameter value """
     content.check_file(args.process_list)
     DispDisplay(content.plugin_list)._notices()
-    content.save(args.process_list, check=input("Are you sure you want to save the "
-                        "modified process list to %s [y/N]" % (args.process_list)))
+    save_file = "y" if args.save else input("Are you sure you want to save "
+        "the modified process list to %s [y/N]" % (args.process_list))
+    content.save(args.process_list, check=save_file)
 
 
 @error_catcher_savu
