@@ -103,7 +103,7 @@ class IteratePluginGroup():
             self._execute_iterations(exp, transport)
             # finished all iterations, set which output dataset to keep, and
             # which to remove
-            self._finalise_iterated_datasets()
+            self._finalise_iterated_datasets(exp)
         else:
             # start != end -> group of plugins to iterate over is more than one
             # plugin
@@ -132,7 +132,7 @@ class IteratePluginGroup():
                 self._execute_iterations(exp, transport)
                 # finished all iterations, set which output dataset to keep, and
                 # which to remove
-                self._finalise_iterated_datasets()
+                self._finalise_iterated_datasets(exp)
             elif nPlugin >= start and nPlugin <= end:
                 # a "middle" plugin is being run on iteration 0
                 plugin = self.plugin_runner._PluginRunner__run_plugin(
@@ -372,7 +372,7 @@ class IteratePluginGroup():
         self.end_plugin._finalise_datasets()
         self.end_plugin._finalise_plugin_datasets()
 
-    def _finalise_iterated_datasets(self):
+    def _finalise_iterated_datasets(self, exp):
         '''
         Inspect the two Data objects that are used to contain the input and
         output data for iterations over the course of the iterative processing
@@ -411,8 +411,8 @@ class IteratePluginGroup():
                 # And also, the ORIGINAL dataset is set in the Experiment
                 # object, but under the name of the CLONED/OBSOLETE dataset
                 temp = obsolete
-                self.exp.index['out_data'][name] = final_dataset
-                self.exp.index['out_data'][s2.get_name()] = temp
+                exp.index['out_data'][name] = final_dataset
+                exp.index['out_data'][s2.get_name()] = temp
                 # One last thing to do in this case is to set the "name"
                 # inside the Data object that final_result is set to.
                 #
