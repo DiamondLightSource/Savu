@@ -228,7 +228,6 @@ class BaseTomophantomLoader(BaseLoader):
 
         plugin_list = PluginList()
         #plugin_list._save_plugin_list(filename)
-        self.exp._finalise_setup(plugin_list)
         self._link_nexus_file(data_obj2, 'phantom', plugin_list)
         self._link_nexus_file(data_obj, 'synth_proj_data', plugin_list)
 
