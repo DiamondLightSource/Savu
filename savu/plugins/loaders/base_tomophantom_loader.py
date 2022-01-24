@@ -91,7 +91,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         dims_temp = self.parameters['proj_data_dims'].copy()
         proj_data_dims = tuple(dims_temp)
-        if (file_name == 'phantom'):
+        if file_name == 'phantom':
             dims_temp[0] = dims_temp[1]
             dims_temp[2] = dims_temp[1]
             proj_data_dims = tuple(dims_temp)
@@ -179,10 +179,10 @@ class BaseTomophantomLoader(BaseLoader):
         return sl, len(frames)
 
     def __convert_patterns(self, data_obj, object_type):
-        if (object_type == 'synth_proj_data'):
+        if object_type == 'synth_proj_data':
             pattern_list = self.parameters['patterns']
         else:
-            pattern_list = self.parameters['patterns_tomo']
+            pattern_list = self.parameters['patterns_tomo2']
         for p in pattern_list:
             p_split = p.split('.')
             name = p_split[0]
