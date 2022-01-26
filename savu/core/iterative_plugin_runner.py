@@ -179,9 +179,22 @@ class IteratePluginGroup():
                 clean_up_plugin = True
             else:
                 clean_up_plugin = False
+
+            start = shift_plugin_index(exp, self.start_index)
             # naughty naughty, to run a double underscore method, but for now,
             # just testing...
             for plugin in self.plugins:
+                # reset the slicing of the input data for the plugin, to be what
+                # it was on the previous iteration before the plugin was run, as
+                # opposed to what it potentially changed to after processing
+                # occurred in the last iteration
+                #
+                # only reset the input PluginData for the plugin if it's not the
+                # start plugin of an iterative loop, since this is already done
+                # by default for the start plugin on every iteration
+                nPlugin = exp.meta_data.get('nPlugin')
+                if nPlugin != start:
+                    self._reset_input_dataset_slicing(plugin)
                 print(f"Running {plugin.name} in iterative group of plugins")
                 # TODO: need to pass the plguin dict, or something more than an
                 # empty dict...
@@ -199,6 +212,16 @@ class IteratePluginGroup():
             # reached _ip_iteration=n, then this means that n+1 iterations
             # have been performed
             self.increment_ip_iteration()
+
+    def _reset_input_dataset_slicing(self, plugin):
+        """
+        Reset the slicing of the input dataset of a plugin in an iterative loop,
+        to what it was on the previous iteration
+        """
+        previous_in_pData = plugin.parameters['plugin_in_datasets'][0]
+        plugin.parameters['in_datasets'][0]._set_plugin_data(previous_in_pData)
+        plugin._finalise_plugin_datasets()
+        plugin._finalise_datasets()
 
     def increment_ip_iteration(self):
         self._ip_iteration += 1
