@@ -29,7 +29,6 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import scripts.config_generator.savu_config as sc
-    from savu.data.plugin_list import PluginList
     from scripts.config_generator.content import Content
     from scripts.config_generator.display_formatter import DispDisplay
 
