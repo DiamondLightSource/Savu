@@ -136,7 +136,8 @@ class IteratePluginGroup():
             elif nPlugin >= start and nPlugin <= end:
                 # a "middle" plugin is being run on iteration 0
                 plugin = self.plugin_runner._PluginRunner__run_plugin(
-                    exp_coll['plugin_dict'][nPlugin])
+                    exp_coll['plugin_dict'][nPlugin],
+                    clean_up_plugin=False)
                 plugin_name = plugin.name
             else:
                 info_dict = {
