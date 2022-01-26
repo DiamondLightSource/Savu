@@ -43,7 +43,7 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         new_shape = (in_dataset[0].get_shape()[slice_dirs[0]], 2)
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.shifts', 'y.shifts'],
-                                      remove=True)
+                                      remove=False)
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
 
