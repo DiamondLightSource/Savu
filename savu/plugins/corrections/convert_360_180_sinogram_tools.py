@@ -15,6 +15,6 @@ class Convert360180SinogramTools(PluginTools):
               visibility: intermediate
               dtype: [list[],list[str]]
               description: Create a list of the output datatsets to create.
-              default: ['in_datasets[0]', 'cor']
+              default: []
 
         """
