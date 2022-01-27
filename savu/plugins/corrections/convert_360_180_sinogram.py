@@ -63,13 +63,7 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         new_shape = (np.prod(np.array(old_shape)[slice_dirs]), 1)
         self.orig_shape = (np.prod(np.array(old_shape)[slice_dirs]), 1)
 
-        out_dataset[1].create_dataset(shape=new_shape,
-                                      axis_labels=['x.pixels', 'y.pixels'],
-                                      transport='hdf5')
-        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
-
         out_pData[0].plugin_data_setup('SINOGRAM', 'single')
-        out_pData[1].plugin_data_setup('METADATA', 'single')
 
     def pre_process(self):
         out_dataset = self.get_out_datasets()[0]
@@ -159,7 +153,5 @@ class Convert360180Sinogram(Plugin, CpuPlugin):
         out_dataset = self.get_out_datasets()[0]
         out_dataset.meta_data.set("centre_of_rotation", np.array([self.cor]))
 
-        return [sinocombine, np.array([self.cor])]
+        return [sinocombine]
 
-    def nOutput_datasets(self):
-        return 2
