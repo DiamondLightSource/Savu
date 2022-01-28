@@ -99,6 +99,13 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                 # iterations
                 if iterate_group._ip_iteration == 0:
                     self.angles_rad = -self.angles_rad
+
+            if iterate_group is not None and \
+                iterate_group._ip_iteration > 0 and \
+                'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+                # update projection_shifts from experimental metadata
+                self.projection_shifts = \
+                    self.exp.meta_data.dict['projection_shifts']
             cor = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts
         else:
             cor = (-self.cor + self.det_horiz_half - 0.5)
