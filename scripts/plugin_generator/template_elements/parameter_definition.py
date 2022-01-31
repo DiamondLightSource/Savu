@@ -17,7 +17,6 @@
         """
 
     def citation1(self):
-        # use a u notation for unicode characters - for example, mew
         """
         A description of the citation
         bibtex:

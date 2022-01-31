@@ -39,7 +39,7 @@ os.environ['savu_mode'] = 'hdf5'
 
 def run_refresh_lists():
     print("This function will refresh all process lists")
-    result = subprocess.run(["python", savuPath+'/../scripts/configurator_tests/refresh_process_lists_test.py'])
+    result = subprocess.run(["python", savuPath+'/../scripts/refresh_process_lists/refresh_process_lists_test.py'])
     if (result.returncode == 1):
         print("Tests FAILED, please see the report")
         exit(1)
