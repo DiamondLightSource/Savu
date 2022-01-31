@@ -23,6 +23,7 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 
 from tomobar.methodsDIR import RecToolsDIR
 import numpy as np
@@ -90,7 +91,21 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         # dealing with 3D data case
         if image.ndim == 3:
             vert_size = np.shape(image)[1]
-            self.angles_rad = -self.angles_rad
+            iterate_group = check_if_in_iterative_loop(self.exp)
+            if iterate_group is None:
+                self.angles_rad = -self.angles_rad
+            else:
+                # only apply the sign change on iteration 0, not on subsequent
+                # iterations
+                if iterate_group._ip_iteration == 0:
+                    self.angles_rad = -self.angles_rad
+
+            if iterate_group is not None and \
+                iterate_group._ip_iteration > 0 and \
+                'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+                # update projection_shifts from experimental metadata
+                self.projection_shifts = \
+                    self.exp.meta_data.dict['projection_shifts']
             cor = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts
         else:
             cor = (-self.cor + self.det_horiz_half - 0.5)
