@@ -4,7 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## _Core_
 * Statistics (TODO)
-* Iterative plugins (TODO)
+* Iterative plugins (A capability to enable some plugins to be iterative):
+  - `iterate` command to enable control over iterative plugins (see `iterate -h` for help)
 
 ## _Existing Plugins_
 

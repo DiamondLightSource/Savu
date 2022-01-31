@@ -186,10 +186,10 @@ def _iterate_arg_parser(args=None, doc=True):
     """ Argument parser for iterate command. """
     desc = sc.get_description()['iterate']
     parser = ArgumentParser(prog='iterate', description=desc)
-    set_arg_help = 'Set the start index, end index, and number of iterations'
+    set_arg_help = 'Set the start plugin index, end plugin index, and number of iterations'
     parser.add_argument('--set', nargs=3, type=int,
         metavar=('START', 'END', 'ITERATIONS'), help=set_arg_help)
-    remove_arg_help = 'Remove an iterative loop'
+    remove_arg_help = 'Remove a specific iterative loop or all loops in the process list'
     parser.add_argument('--remove', type=int, help=remove_arg_help)
     # TODO: Trying to allow it to be passed only a start index, and if so, to
     # set the end index the same as the given start index.

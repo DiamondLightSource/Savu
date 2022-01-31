@@ -204,15 +204,43 @@ class PluginList(object):
         return group
 
     def add_iterate_plugin_group_dict(self, start, end, iterations):
-        '''
-        Add an element to self.iterate_plugin_groups
-        '''
-        group = {
+        """Add an element to self.iterate_plugin_groups"""
+        group_new = {
             'start_index': start,
             'end_index': end,
             'iterations': iterations
         }
-        self.iterate_plugin_groups.append(group)
+        list_new_indices = list(range(start, end+1))
+
+        if iterations <= 0:
+            print("The number of iterations should be larger than zero and nonnegative")
+            return
+        elif start <= 0 or start > len(self.plugin_list) or end <= 0 or end > len(self.plugin_list):
+            print("The given plugin indices are not within the range of existing plugin indices")
+            return
+
+        # crosscheck with the existing iterative loops
+        if len(self.iterate_plugin_groups) != 0:
+            noexactlist = True
+            nointersection = True
+            for count, group in enumerate(self.iterate_plugin_groups, 1):
+                start_int = int(group['start_index'])
+                end_int = int(group['end_index'])
+                list_existing_indices = list(range(start_int, end_int+1))
+                if bool(set(list_new_indices).intersection(list_existing_indices)):
+                    # check if the intersection of lists is exact (number of iterations to change)
+                    nointersection = False
+                    if list_new_indices == list_existing_indices:
+                        print(f"The number of iterations of loop group no. {count}, {list_new_indices} has been set to: {iterations}")
+                        self.iterate_plugin_groups[count-1]["iterations"] = iterations
+                        noexactlist = False
+                    else:
+                        print(f"The plugins of group no. {count} are already set to be iterative: {set(list_new_indices).intersection(list_existing_indices)}")
+            if noexactlist and nointersection:
+                self.iterate_plugin_groups.append(group_new)
+        else:
+            self.iterate_plugin_groups.append(group_new)
+        self.print_iterative_loops()
 
     def remove_iterate_plugin_group_dict(self, number):
         """ Remove a specific element from self.iterate_plugin_groups """
@@ -235,9 +263,9 @@ class PluginList(object):
             print('Iterative loops in the current process list are:')
             for count, group in enumerate(self.iterate_plugin_groups, 1):
                 number = f"({count}) "
-                start_str = f"start: {group['start_index']}"
-                end_str = f"end: {group['end_index']}"
-                iterations_str = f"iterations: {group['iterations']}"
+                start_str = f"start plugin index: {group['start_index']}"
+                end_str = f"end index: {group['end_index']}"
+                iterations_str = f"iterations number: {group['iterations']}"
                 full_str = number + start_str + ', ' + end_str + ', ' + \
                     iterations_str
                 print(full_str)
