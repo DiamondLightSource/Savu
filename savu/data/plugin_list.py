@@ -249,6 +249,8 @@ class PluginList(object):
             del self.iterate_plugin_groups[number - 1]
         except IndexError as e:
             print(f"There doesn't exist an iterative loop with number {number}")
+        finally:
+            self.print_iterative_loops()
 
     def clear_iterate_plugin_group_dicts(self):
         """
