@@ -244,6 +244,11 @@ class PluginList(object):
 
     def remove_iterate_plugin_group_dict(self, number):
         """ Remove a specific element from self.iterate_plugin_groups """
+        if number <= 0:
+            print('The iterative loops are indexed starting from 1')
+            self.print_iterative_loops()
+            return
+
         try:
             # convert the one-based index to a zero-based index
             del self.iterate_plugin_groups[number - 1]
