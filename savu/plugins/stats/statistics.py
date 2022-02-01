@@ -8,6 +8,7 @@
 """
 
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
+from savu.plugins.stats.stats_utils import StatsUtils
 
 import h5py as h5
 import numpy as np
@@ -15,8 +16,10 @@ import os
 
 
 class Statistics(object):
-    pattern_list = ["SINOGRAM", "PROJECTION", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
+    _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     no_stats_plugins = ["BasicOperations", "Mipmap"]
+    _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "RMSD"]
+
 
     def __init__(self):
         self.calc_stats = True
@@ -42,9 +45,14 @@ class Statistics(object):
         cls.data_stats = {}
         cls.volume_stats = {}
         cls.global_stats = {}
+        cls.exp = exp
+        n_plugins = len(exp.meta_data.plugin_list.plugin_list)
+        for i in range(1, n_plugins + 1):
+            cls.global_stats[i] = np.array([])
         cls.global_residuals = {}
         cls.plugin_numbers = {}
-        n_plugins = len(exp.meta_data.plugin_list.plugin_list)
+        cls.plugin_names = {}
+
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -81,7 +89,7 @@ class Statistics(object):
             return slice_stats
         return None
 
-    def _calc_rss(self, array1, array2): # residual sum of squares
+    def _calc_rss(self, array1, array2):  # residual sum of squares
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
             rss = sum(value**2 for value in np.nditer(residuals))
@@ -115,9 +123,8 @@ class Statistics(object):
         self.residuals['std_dev'].append(residuals['std_dev'])
 
     def calc_volume_stats(self, slice_stats):
-        volume_stats = {'max': max(slice_stats['max']), 'min': min(slice_stats['min']),
-                        'mean': np.mean(slice_stats['mean']), 'mean_std_dev': np.mean(slice_stats['std_dev']),
-                        'median_std_dev': np.median(slice_stats['std_dev'])}
+        volume_stats = np.array([max(slice_stats['max']), min(slice_stats['min']), np.mean(slice_stats['mean']),
+                        np.mean(slice_stats['std_dev']), np.median(slice_stats['std_dev'])])
         return volume_stats
 
     def set_volume_stats(self):
@@ -130,25 +137,31 @@ class Statistics(object):
         while name in list(Statistics.plugin_numbers.keys()):
             name = self.plugin_name + str(i)
             i += 1
-        Statistics.global_stats[p_num] = {}
+
         if len(self.stats['max']) != 0:
-            Statistics.global_stats[p_num] = self.calc_volume_stats(self.stats)
+            stats_array = self.calc_volume_stats(self.stats)
             Statistics.global_residuals[p_num] = {}
             before_processing = self.calc_volume_stats(self.stats_before_processing)
-            for key in list(before_processing.keys()):
-                Statistics.global_residuals[p_num][key] = Statistics.global_stats[p_num][key] - before_processing[key]
+            #for key in list(before_processing.keys()):
+            #    Statistics.global_residuals[p_num][key] = Statistics.global_stats[p_num][key] - before_processing[key]
             if None not in self.stats['RSS']:
                 total_rss = sum(self.stats['RSS'])
                 n = sum(self.stats['data_points'])
-                Statistics.global_stats[p_num]['RMSD'] = self._rmsd_from_rss(total_rss, n)
+                RMSD = self._rmsd_from_rss(total_rss, n)
+                stats_array = np.append(stats_array, RMSD)
+            #else:
+            #    stats_array = np.append(stats_array[p_num], None)
+            if len(Statistics.global_stats[p_num]) == 0:
+                Statistics.global_stats[p_num] = stats_array
             else:
-                Statistics.global_stats[p_num]['RMSD'] = None
-
+                Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
             Statistics.plugin_numbers[name] = p_num
+            if p_num not in list(Statistics.plugin_names.keys()):
+                Statistics.plugin_names[p_num] = name
             self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
 
         slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
-        self._write_stats_to_file(slice_stats_array, p_num)
+        self._write_stats_to_file3(p_num)
         self._already_called = True
 
     def get_stats(self, plugin_name, n=None, stat=None):
@@ -167,7 +180,7 @@ class Statistics(object):
         p_num = Statistics.plugin_numbers[name]
         return self.get_stats_from_num(p_num, stat)
 
-    def get_stats_from_num(self, p_num, stat=None):
+    def get_stats_from_num(self, p_num, stat=None, instance=0):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
 
         :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
@@ -179,26 +192,31 @@ class Statistics(object):
         """
         if p_num <= 0:
             p_num = Statistics.count + p_num
-        if stat is not None:
-            return Statistics.global_stats[p_num][stat]
+        if Statistics.global_stats[p_num].ndim == 1:
+            stats_array = Statistics.global_stats[p_num]
         else:
-            return Statistics.global_stats[p_num]
+            stats_array = Statistics.global_stats[p_num][instance]
+        stats_dict = self._array_to_dict(stats_array)
+        if stat is not None:
+            return stats_dict[stat]
+        else:
+            return stats_dict
 
-    def get_stats_from_dataset(self, dataset, stat=None, set_num=None):
+    def get_stats_from_dataset(self, dataset, stat=None, instance=None):
         """Returns stats associated with a dataset.
 
         :param dataset: The dataset whose associated stats are being fetched.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
             {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': }
-        :param set_num: In the (rare) case that there are multiple sets of stats associated with the dataset,
+        :param instance: In the (rare) case that there are multiple sets of stats associated with the dataset,
             specify which set to return.
 
         """
         key = "stats"
         stats = {}
-        if set_num is not None and set_num not in (0, 1):
-            key = key + str(set_num)
+        if instance is not None and instance not in (0, 1):
+            key = key + str(instance)
         stats = dataset.meta_data.get(key)
         if stat is not None:
             return stats[stat]
@@ -213,6 +231,12 @@ class Statistics(object):
 
     def get_global_stats(self):
         return Statistics.global_stats
+
+    def _array_to_dict(self, stats_array):
+        stats_dict = {}
+        for i, value in enumerate(stats_array):
+            stats_dict[Statistics._key_list[i]] = value
+        return stats_dict
 
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
@@ -232,21 +256,77 @@ class Statistics(object):
                         break
         self.calc_stats = False
         for dataset in out_datasets:
-            if bool(set(Statistics.pattern_list) & set(dataset.data_info.get("data_patterns"))):
+            if bool(set(Statistics._pattern_list) & set(dataset.data_info.get("data_patterns"))):
                 self.calc_stats = True
 
     def _link_stats_to_datasets(self, stats):
         """Links the volume wide statistics to the output dataset(s)"""
         out_dataset = self.plugin.get_out_datasets()[0]
         n_datasets = self.plugin.nOutput_datasets()
+        stats_dict = self._array_to_dict(stats)
         i = 2
         group_name = "stats"
+        #out_dataset.data_info.set([group_name], stats)
         if n_datasets == 1:
             while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
                 group_name = f"stats{i}"
                 i += 1
+            for key in list(stats_dict.keys()):
+                out_dataset.meta_data.set([group_name, key], stats_dict[key])
+
+    def _write_stats_to_file2(self, p_num):
+        path = Statistics.path
+        filename = f"{path}/stats.h5"
+        stats = Statistics.global_stats[p_num]
+        array_dim = stats.shape
+        self.hdf5 = Hdf5Utils(self.plugin.exp)
+        group_name = f"{p_num}-{self.plugin_name}-stats"
+        with h5.File(filename, "a") as h5file:
+            if group_name not in h5file:
+                group = h5file.create_group(group_name, track_order=None)
+                dataset = self.hdf5.create_dataset_nofill(group, "stats", array_dim, stats.dtype)
+                dataset[::] = stats[::]
+            else:
+                group = h5file[group_name]
+
+
+    @classmethod
+    def _write_stats_to_file4(cls):
+        path = cls.path
+        filename = f"{path}/stats.h5"
+        stats = cls.global_stats
+        cls.hdf5 = Hdf5Utils(cls.exp)
+        for i in range(5):
+            array = np.array([])
+            stat = cls._key_list[i]
             for key in list(stats.keys()):
-                out_dataset.meta_data.set([group_name, key], stats[key])
+                if len(stats[key]) != 0:
+                    if stats[key].ndim == 1:
+                        array = np.append(array, stats[key][i])
+                    else:
+                        array = np.append(array, stats[key][0][i])
+            array_dim = array.shape
+            group_name = f"all-{stat}"
+            with h5.File(filename, "a") as h5file:
+                group = h5file.create_group(group_name, track_order=None)
+                dataset = cls.hdf5.create_dataset_nofill(group, stat, array_dim, array.dtype)
+                dataset[::] = array[::]
+
+    def _write_stats_to_file3(self, p_num):
+        path = Statistics.path
+        filename = f"{path}/stats.h5"
+        stats = self.global_stats
+        self.hdf5 = Hdf5Utils(self.exp)
+        with h5.File(filename, "a") as h5file:
+            group = h5file.require_group("stats")
+            if stats[p_num].shape != (0,):
+                if str(p_num) in list(group.keys()):
+                    del group[str(p_num)]
+                dataset = group.create_dataset(str(p_num), shape=stats[p_num].shape, dtype=stats[p_num].dtype)
+                dataset[::] = stats[p_num][::]
+                dataset.attrs.create("plugin_name", self.plugin_names[p_num])
+                dataset.attrs.create("pattern", self.pattern)
+
 
     def _write_stats_to_file(self, slice_stats_array, p_num):
         """Writes slice statistics to a h5 file"""
@@ -288,10 +368,11 @@ class Statistics(object):
         if self.plugin.pcount == 0:
             self.slice_list, self.pad = self._get_unpadded_slice_list(slice1, slice_dims)
         if self.pad:
-            for slice_dim in slice_dims:
-                temp_slice = np.swapaxes(slice1, 0, slice_dim)
-                temp_slice = temp_slice[self.slice_list[slice_dim]]
-                slice1 = np.swapaxes(temp_slice, 0, slice_dim)
+            #for slice_dim in slice_dims:
+            slice_dim = slice_dims[0]
+            temp_slice = np.swapaxes(slice1, 0, slice_dim)
+            temp_slice = temp_slice[self.slice_list[slice_dim]]
+            slice1 = np.swapaxes(temp_slice, 0, slice_dim)
         return slice1
 
     def _get_unpadded_slice_list(self, slice1, slice_dims):
@@ -299,12 +380,13 @@ class Statistics(object):
         slice_list = list(self.plugin.slice_list[0])
         pad = False
         if len(slice_list) == len(slice1.shape):
-            for i in slice_dims:
-                slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
-                if slice_width != slice1.shape[i]:
-                    pad = True
-                    pad_width = (slice1.shape[i] - slice_width) // 2  # Assuming symmetrical padding
-                    slice_list[i] = slice(pad_width, pad_width + 1, 1)
+            #for i in slice_dims:
+            i = slice_dims[0]
+            slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
+            if slice_width != slice1.shape[i]:
+                pad = True
+                pad_width = (slice1.shape[i] - slice_width) // 2  # Assuming symmetrical padding
+                slice_list[i] = slice(pad_width, pad_width + 1, 1)
             return tuple(slice_list), pad
         else:
             return self.plugin.slice_list[0], pad
@@ -317,6 +399,7 @@ class Statistics(object):
                 slice1 = self._de_list(slice1)
         return slice1
 
+
     @classmethod
     def _count(cls):
         cls.count += 1
@@ -327,3 +410,5 @@ class Statistics(object):
         print(cls.volume_stats)
         print(cls.global_stats)
         print(cls.global_residuals)
+        stats_utils = StatsUtils()
+        stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
