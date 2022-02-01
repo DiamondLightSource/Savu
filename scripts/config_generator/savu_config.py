@@ -49,7 +49,7 @@ def _help(content, args):
     command_title = " Savu configurator commands "
     title_separator = "*"*((width-len(command_title))//2)
     print(f"{title_separator}{command_title}{title_separator}")
-    for key in list(commands.keys()):
+    for key in sorted(list(commands.keys()),  key=str.lower):
         doc = commands[key].__doc__
         if doc:
             print("%8s : %s" % (key, commands[key].__doc__))
