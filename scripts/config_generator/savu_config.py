@@ -198,12 +198,12 @@ def _iterate(content, args):
     # TODO: note the lack of use of _disp(); maybe will need this for
     # visually displaying the iterative loops in the terminal window?
     # TODO: no error-checking is performed by this command yet
-    if args.remove is not None:
-        content.remove_iterate_plugin_groups(args.remove)
-    elif args.set is None:
-        # display all iterative loops
+    if args.remove is None and args.set is None:
+        # no optional args are given; default to displaying all iterative loops
         content.display_iterative_loops()
-    elif len(args.set) == 3:
+    elif args.remove is not None:
+        content.remove_iterate_plugin_groups(args.remove)
+    elif args.set is not None:
         # create a dict representing a group of plugins to iterate over
         start = args.set[0]
         end = args.set[1]
