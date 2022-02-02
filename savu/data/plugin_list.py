@@ -242,20 +242,30 @@ class PluginList(object):
             self.iterate_plugin_groups.append(group_new)
         self.print_iterative_loops()
 
-    def remove_iterate_plugin_group_dict(self, number):
+    def remove_iterate_plugin_group_dicts(self, indices):
         """ Remove a specific element from self.iterate_plugin_groups """
-        if number <= 0:
-            print('The iterative loops are indexed starting from 1')
-            self.print_iterative_loops()
-            return
+        if len(indices) == 0:
+            # remove all iterative loops in process list
+            self.clear_iterate_plugin_group_dicts()
+        else:
+            # remove specified iterative loops in process list
+            sorted_indices = sorted(indices)
 
-        try:
-            # convert the one-based index to a zero-based index
-            del self.iterate_plugin_groups[number - 1]
-        except IndexError as e:
-            print(f"There doesn't exist an iterative loop with number {number}")
-        finally:
-            self.print_iterative_loops()
+            if sorted_indices[0] <= 0:
+                print('The iterative loops are indexed starting from 1')
+                self.print_iterative_loops()
+                return
+
+            for i in reversed(sorted_indices):
+                try:
+                    # convert the one-based index to a zero-based index
+                    del self.iterate_plugin_groups[i - 1]
+                except IndexError as e:
+                    info_str = f"There doesn't exist an iterative loop with " \
+                               f"number {i}"
+                    print(info_str)
+
+        self.print_iterative_loops()
 
     def clear_iterate_plugin_group_dicts(self):
         """

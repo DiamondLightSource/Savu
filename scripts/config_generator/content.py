@@ -150,12 +150,12 @@ class Content(object):
         '''
         self.plugin_list.add_iterate_plugin_group_dict(start, end, iterations)
 
-    def remove_iterate_plugin_group(self, number):
+    def remove_iterate_plugin_groups(self, indices):
         """
-        Remove a dict in PluginList that represents a group of plugins in the
+        Remove dicts in PluginList that represent a group of plugins in the
         process list to iterate over
         """
-        self.plugin_list.remove_iterate_plugin_group_dict(number)
+        self.plugin_list.remove_iterate_plugin_group_dicts(indices)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)

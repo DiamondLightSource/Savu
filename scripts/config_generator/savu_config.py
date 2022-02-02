@@ -199,7 +199,7 @@ def _iterate(content, args):
     # visually displaying the iterative loops in the terminal window?
     # TODO: no error-checking is performed by this command yet
     if args.remove is not None:
-        content.remove_iterate_plugin_group(args.remove)
+        content.remove_iterate_plugin_groups(args.remove)
     elif args.set is None:
         # display all iterative loops
         content.display_iterative_loops()
