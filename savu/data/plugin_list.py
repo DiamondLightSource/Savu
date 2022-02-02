@@ -243,10 +243,15 @@ class PluginList(object):
         self.print_iterative_loops()
 
     def remove_iterate_plugin_group_dicts(self, indices):
-        """ Remove a specific element from self.iterate_plugin_groups """
+        """ Remove elements from self.iterate_plugin_groups """
         if len(indices) == 0:
             # remove all iterative loops in process list
-            self.clear_iterate_plugin_group_dicts()
+            prompt_str = 'Are you sure you want to remove all iterative ' \
+                'loops? [y/N]'
+            check = input(prompt_str)
+            should_remove_all = check.lower() == 'y'
+            if should_remove_all:
+                self.clear_iterate_plugin_group_dicts()
         else:
             # remove specified iterative loops in process list
             sorted_indices = sorted(indices)
