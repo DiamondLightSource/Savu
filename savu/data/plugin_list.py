@@ -330,6 +330,30 @@ class PluginList(object):
             grp.create_dataset('iterations'.encode('ascii'), shape, 'i',
                 iterate_group['iterations'])
 
+    def shift_subsequent_iterative_loops(self, pos, direction):
+        """
+        Shift all iterative loops occurring after a given plugin position
+        """
+        for iterate_group in self.iterate_plugin_groups:
+            if pos < iterate_group['start_index']:
+                self.shift_iterative_loop(iterate_group, direction)
+
+    def shift_iterative_loop(self, iterate_group, direction):
+        """
+        Shift an iterative loop up or down in the process list, based on if a
+        plugin is added or removed
+        """
+        if direction == 1:
+            iterate_group['start_index'] += 1
+            iterate_group['end_index'] += 1
+        elif direction == -1:
+            iterate_group['start_index'] -= 1
+            iterate_group['end_index'] -= 1
+        else:
+            err_str = f"Bad direction value given to shift iterative loop: " \
+                      f"{direction}"
+            raise ValueError(err_str)
+
     def __save_savu_notes(self, notes):
         """ Save the version number
 

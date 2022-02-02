@@ -275,6 +275,7 @@ def _rem(content, args):
             pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
+        content.check_iterative_loops(pos)
     _disp(content, '-q')
     return content
 

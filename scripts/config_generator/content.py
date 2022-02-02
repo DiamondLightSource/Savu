@@ -1043,11 +1043,23 @@ class Content(object):
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
+
+    def check_iterative_loops(self, pos):
+        """
+        When a plugin is removed, check if any iterative loops should be removed
+        or shifted
+        """
         # handle if the removed plugin was in an iterative loop
-        is_in_loop = self.plugin_list.check_pos_in_iterative_loop(int(pos_str))
+        is_in_loop = self.plugin_list.check_pos_in_iterative_loop(pos)
         if is_in_loop:
             # delete the associated loop
-            self.plugin_list.remove_associated_iterate_group_dict(int(pos_str))
+            self.plugin_list.remove_associated_iterate_group_dict(pos)
+
+        # check if there are any iterative loops in the process list
+        do_loops_exist = len(self.plugin_list.iterate_plugin_groups) > 0
+        if do_loops_exist:
+            # shift the start+end of all loops after the plugin down by 1
+            self.plugin_list.shift_subsequent_iterative_loops(pos, -1)
 
     @property
     def size(self):
