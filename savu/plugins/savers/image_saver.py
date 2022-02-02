@@ -112,8 +112,8 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
         data = self.get_in_datasets()[0]
         pattern = self.parameters['pattern']
         try:
-            self.the_min = data.meta_data.get(['stats', 'min'])
-            self.the_max = data.meta_data.get(['stats', 'max'])
+            self.the_min = self.stats_obj.get_stats_from_dataset(data, "min")
+            self.the_max = self.stats_obj.get_stats_from_dataset(data, "max")
             self._data_range = (self.the_min, self.the_max)
         except KeyError:
             self._data_range = 'image'
