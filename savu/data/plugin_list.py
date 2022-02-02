@@ -287,6 +287,29 @@ class PluginList(object):
                     iterations_str
                 print(full_str)
 
+    def remove_associated_iterate_group_dict(self, pos):
+        """
+        Remove an iterative loop associated to a plugin index
+        """
+        for i, iterate_group in enumerate(self.iterate_plugin_groups):
+            if iterate_group['start_index'] <= pos and \
+                pos <= iterate_group['end_index']:
+                del self.iterate_plugin_groups[i]
+                break
+
+    def check_pos_in_iterative_loop(self, pos):
+        """
+        Check if the given plugin position is in an iterative loop
+        """
+        is_in_loop = False
+        for iterate_group in self.iterate_plugin_groups:
+            if iterate_group['start_index'] <= pos and \
+                pos <= iterate_group['end_index']:
+                is_in_loop = True
+                break
+
+        return is_in_loop
+
     def __save_iterate_plugin_groups(self, group):
         '''
         Save information regarding the groups of plugins to iterate over

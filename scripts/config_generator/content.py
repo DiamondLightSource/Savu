@@ -1043,6 +1043,11 @@ class Content(object):
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
+        # handle if the removed plugin was in an iterative loop
+        is_in_loop = self.plugin_list.check_pos_in_iterative_loop(int(pos_str))
+        if is_in_loop:
+            # delete the associated loop
+            self.plugin_list.remove_associated_iterate_group_dict(int(pos_str))
 
     @property
     def size(self):
