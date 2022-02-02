@@ -36,14 +36,15 @@ class Statistics(object):
             self.pad_dims = []
             self._already_called = False
             self._set_pattern_info()
+        if self.calc_stats:
+            Statistics._any_stats = True
 
 
     @classmethod
     def _setup_class(cls, exp):
-        """Sets up the statistics class for the whole experiment (only called once)"""
+        """Sets up the statistics class for the whole plugin chain (only called once)"""
+        cls._any_stats = False
         cls.count = 2
-        cls.data_stats = {}
-        cls.volume_stats = {}
         cls.global_stats = {}
         cls.exp = exp
         n_plugins = len(exp.meta_data.plugin_list.plugin_list)
@@ -94,7 +95,7 @@ class Statistics(object):
             residuals = np.subtract(array1, array2)
             rss = sum(value**2 for value in np.nditer(residuals))
         else:
-            print("Warning: cannot calculate RSS, arrays different sizes.")  # need to make this an actual warning
+            #print("Warning: cannot calculate RSS, arrays different sizes.")  # need to make this an actual warning
             rss = None
         return rss
 
@@ -406,9 +407,6 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        print(cls.data_stats)
-        print(cls.volume_stats)
-        print(cls.global_stats)
-        print(cls.global_residuals)
-        stats_utils = StatsUtils()
-        stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
+        if cls._any_stats:
+            stats_utils = StatsUtils()
+            stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
