@@ -143,6 +143,20 @@ class Content(object):
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
 
+    def iterate(self, args):
+        if args.remove is None and args.set is None:
+            # no optional args are given; default to displaying all iterative
+            # loops
+            self.display_iterative_loops()
+        elif args.remove is not None:
+            self.remove_iterate_plugin_groups(args.remove)
+        elif args.set is not None:
+            # create a dict representing a group of plugins to iterate over
+            start = args.set[0]
+            end = args.set[1]
+            iterations = args.set[2]
+            self.add_iterate_plugin_group(start, end, iterations)
+
     def add_iterate_plugin_group(self, start, end, iterations):
         '''
         Add a dict to PluginList that represents a group of plugins in the
