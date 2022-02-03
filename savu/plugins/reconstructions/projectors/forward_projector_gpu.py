@@ -33,6 +33,12 @@ import copy
 class ForwardProjectorGpu(Plugin, GpuPlugin):
     def __init__(self):
         super(ForwardProjectorGpu, self).__init__('ForwardProjectorGpu')
+        self.angles_total = None
+        self.det_horiz_half = None
+        self.detectors_horiz = None
+        self.projection_shifts = None
+        self.cor = None
+        self.angles_rad = None
 
     def pre_process(self):
         # getting metadata for CoR
@@ -56,12 +62,12 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
             self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
 
         # deal with user-defined parameters
-        if (self.parameters['angles_deg'] is not None):
+        if self.parameters['angles_deg'] is not None:
             angles_list = self.parameters['angles_deg']
             self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-        if (self.parameters['centre_of_rotation'] is not None):
+        if self.parameters['centre_of_rotation'] is not None:
             self.cor = self.parameters['centre_of_rotation']
-        if (self.parameters['det_horiz'] is not None):
+        if self.parameters['det_horiz'] is not None:
             self.detectors_horiz = self.parameters['det_horiz']
 
         self.det_horiz_half = 0.5 * self.detectors_horiz
