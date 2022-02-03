@@ -292,15 +292,27 @@ class PluginList(object):
                     iterations_str
                 print(full_str)
 
-    def remove_associated_iterate_group_dict(self, pos):
+    def remove_associated_iterate_group_dict(self, pos, direction):
         """
         Remove an iterative loop associated to a plugin index
         """
+        operation = 'add' if direction == 1 else 'remove'
         for i, iterate_group in enumerate(self.iterate_plugin_groups):
-            if iterate_group['start_index'] <= pos and \
-                pos <= iterate_group['end_index']:
-                del self.iterate_plugin_groups[i]
-                break
+            if operation == 'remove':
+                if iterate_group['start_index'] <= pos and \
+                    pos <= iterate_group['end_index']:
+                    # remove the loop if the plugin being removed is at any
+                    # position within an iterative loop
+                    del self.iterate_plugin_groups[i]
+                    break
+            elif operation == 'add':
+                if iterate_group['start_index'] != iterate_group['end_index']:
+                    # remove the loop only if the plugin is being added between
+                    # the start and end of the loop
+                    if iterate_group['start_index'] < pos and \
+                        pos <= iterate_group['end_index']:
+                        del self.iterate_plugin_groups[i]
+                        break
 
     def check_pos_in_iterative_loop(self, pos):
         """
@@ -334,8 +346,17 @@ class PluginList(object):
         """
         Shift all iterative loops occurring after a given plugin position
         """
+        # if removing a plugin that is positioned before a loop, the loop should
+        # be shifted down by 1; but if removing a plugin that is positioned at
+        # the start of the loop, it will be removed instead of shifted (ie, both
+        # < or <= work for this case)
+        #
+        # if adding a plugin that will be positioned before a loop, the loop
+        # should be shifted up by 1; also, if adding a plugin to be positioned
+        # where the start of a loop currently exists, this should shift the loop
+        # up by 1 as well (ie, only <= works for this case, hence the use of <=)
         for iterate_group in self.iterate_plugin_groups:
-            if pos < iterate_group['start_index']:
+            if pos <= iterate_group['start_index']:
                 self.shift_iterative_loop(iterate_group, direction)
 
     def shift_iterative_loop(self, iterate_group, direction):
