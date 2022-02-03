@@ -1,15 +1,12 @@
-Ica
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ica{% endblock %}
 
+{% block description %}
 This plugin performs independent component analysis on XRD/XRF spectra. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -55,8 +52,10 @@ Parameters
             description: The state
             default: "1"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.component_analysis.ica.rst{% endblock %}

@@ -569,6 +569,29 @@ class Content(object):
                 f"The {pname} parameter is not available" f" for this plugin."
             )
 
+
+    def plugin_to_num(self, plugin_val, pl_index):
+        """Check the plugin is within the process list and
+        return the number in the list.
+
+        :param plugin_val: The dictionary of parameters
+        :param pl_index: The plugin index (for use when there are multiple
+           plugins of same name)
+        :return: A plugin index number of a certain plugin in the process list
+        """
+        if plugin_val.isdigit():
+            return plugin_val
+        pl_names = [pl["name"] for pl in self.plugin_list.plugin_list]
+        if plugin_val in pl_names:
+            # Find the plugin number
+            pl_indexes = [i for i, p in enumerate(pl_names) if p == plugin_val]
+            # Subtract one to access correct list index. Add one to access
+            # correct plugin position
+            return str(pl_indexes[pl_index-1] +1)
+        else:
+            raise Exception("This plugin is not present in this process list.")
+
+
     def value(self, value):
         if not value.count(";"):
             try:
@@ -810,6 +833,7 @@ class Content(object):
         """
         plugin_param = plugin_param.split(".")
         plugin = plugin_param[0]
+        # change str plugin name to a number
         start = self.find_position(plugin)
         self._check_command_valid(plugin_param, config_disp)
         subelem = plugin_param[1]

@@ -1,18 +1,16 @@
-Image Saver
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Image Saver{% endblock %}
 
+{% block description %}
 A class to save tomography data to image files.  Run the MaxAndMin plugin before this to rescale the data. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/savers/image_saver_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -73,8 +71,10 @@ Parameters
             description: Override the default output jpg file prefix
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.savers.image_saver.rst{% endblock %}

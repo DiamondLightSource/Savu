@@ -1,15 +1,12 @@
-Morph Proc Line
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Morph Proc Line{% endblock %}
 
+{% block description %}
 A Larix morphological processing module using line segments to remove inconsistent gaps 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -51,8 +48,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_YZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.segmentation.morphological_operations.morph_proc_line.rst{% endblock %}

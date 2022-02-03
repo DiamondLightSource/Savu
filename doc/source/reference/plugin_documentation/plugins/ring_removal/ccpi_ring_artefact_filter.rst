@@ -1,15 +1,12 @@
-Ccpi Ring Artefact Filter
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ccpi Ring Artefact Filter{% endblock %}
 
+{% block description %}
 Regularization-based method for removing ring artifacts. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -45,50 +42,47 @@ Parameters
             description: Unknown description (for plate-like objects only).
             default: "0"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Regularization methods for inverse problems in x-ray tomography by Titarenko, Valeriy et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @inproceedings{
+            titarenko2010regularization,
+            title={Regularization methods for inverse problems in x-ray tomography},
+            author={Titarenko, Valeriy and Bradley, Robert and Martin, Christopher and Withers, Philip J and Titarenko, Sofya},
+            booktitle={Developments in X-Ray Tomography VII},
+            volume={7804},
+            pages={78040Z},
+            year={2010},
+            organization={International Society for Optics and Photonics}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Conference Proceedings
+            %T Regularization methods for inverse problems in x-ray tomography
+            %A Titarenko, Valeriy
+            %A Bradley, Robert
+            %A Martin, Christopher
+            %A Withers, Philip J
+            %A Titarenko, Sofya
+            %B Developments in X-Ray Tomography VII
+            %V 7804
+            %P 78040Z
+            %D 2010
+            %I International Society for Optics and Photonics
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Regularization methods for inverse problems in x-ray tomography by Titarenko, Valeriy et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @inproceedings{
-    titarenko2010regularization,
-    title={Regularization methods for inverse problems in x-ray tomography},
-    author={Titarenko, Valeriy and Bradley, Robert and Martin, Christopher and Withers, Philip J and Titarenko, Sofya},
-    booktitle={Developments in X-Ray Tomography VII},
-    volume={7804},
-    pages={78040Z},
-    year={2010},
-    organization={International Society for Optics and Photonics}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Conference Proceedings
-    %T Regularization methods for inverse problems in x-ray tomography
-    %A Titarenko, Valeriy
-    %A Bradley, Robert
-    %A Martin, Christopher
-    %A Withers, Philip J
-    %A Titarenko, Sofya
-    %B Developments in X-Ray Tomography VII
-    %V 7804
-    %P 78040Z
-    %D 2010
-    %I International Society for Optics and Photonics
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.ccpi_ring_artefact_filter.rst{% endblock %}

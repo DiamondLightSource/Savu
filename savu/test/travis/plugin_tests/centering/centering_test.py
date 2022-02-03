@@ -30,7 +30,7 @@ class CenteringTest(unittest.TestCase):
         self.experiment = None
 
     def test_centering360(self):
-        process_list = 'centering/centering360_test.nxs'
+        process_list = 'centering/centering360_test1.nxs'
         options = tu.initialise_options(self.data_file, self.experiment,
                                         process_list)
         run_protected_plugin_runner(options)
