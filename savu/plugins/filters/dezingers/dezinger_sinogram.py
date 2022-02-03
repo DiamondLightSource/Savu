@@ -35,7 +35,10 @@ class DezingerSinogram(BaseDezingerSinogram, CpuPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
-        std_dev = np.std(input_temp)
+        if not self.std_dev:
+            in_dataset = self.get_in_datasets()[0]
+            self.std_dev = self.stats_obj.get_stats_from_dataset(in_dataset, "median_std_dev")
+        std_dev = self.std_dev
         input_temp =np.swapaxes(input_temp,0,1)
         result = MEDIAN_DEZING(input_temp.copy(order='C'), self.parameters['kernel_size'], std_dev*self.parameters['outlier_mu'])
         return np.swapaxes(result,0,1)
