@@ -1,15 +1,12 @@
-Scikitimage Sart
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Scikitimage Sart{% endblock %}
 
+{% block description %}
 A Plugin to reconstruct an image by filter back projection using the inverse radon transform from scikit-image. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -133,50 +130,47 @@ Parameters
             description: Float. Relaxation parameter for the update step. A higher value can improve the convergence rate, but one runs the risk of instabilities. Values close to or higher than 1 are not recommended.
             default: "0.15"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **Principles of computerized tomographic imaging by Kak, Avinash C et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{kak2002principles,
+            title={Principles of computerized tomographic imaging},
+            author={Kak, Avinash C and Slaney, Malcolm and Wang, Ge},
+            journal={Medical Physics},
+            volume={29},
+            number={1},
+            pages={107--107},
+            year={2002},
+            publisher={Wiley Online Library}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T Principles of computerized tomographic imaging
+            %A Kak, Avinash C
+            %A Slaney, Malcolm
+            %A Wang, Ge
+            %J Medical Physics
+            %V 29
+            %N 1
+            %P 107-107
+            %@ 0094-2405
+            %D 2002
+            %I Wiley Online Library
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-Principles of computerized tomographic imaging by Kak, Avinash C et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{kak2002principles,
-    title={Principles of computerized tomographic imaging},
-    author={Kak, Avinash C and Slaney, Malcolm and Wang, Ge},
-    journal={Medical Physics},
-    volume={29},
-    number={1},
-    pages={107--107},
-    year={2002},
-    publisher={Wiley Online Library}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T Principles of computerized tomographic imaging
-    %A Kak, Avinash C
-    %A Slaney, Malcolm
-    %A Wang, Ge
-    %J Medical Physics
-    %V 29
-    %N 1
-    %P 107-107
-    %@ 0094-2405
-    %D 2002
-    %I Wiley Online Library
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.reconstructions.scikitimage_sart.rst{% endblock %}

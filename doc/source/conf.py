@@ -358,6 +358,18 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"http://docs.python.org/": None}
 
+def rstjinja(app, docname, source):
+    """
+    Render the pages as jinja templates
+    """
+    # Make sure we're outputting HTML
+    if app.builder.format != 'html':
+        return
+    src = source[0]
+    rendered = app.builder.templates.render_string(
+        src, app.config.html_context
+    )
+    source[0] = rendered
 
 def setup(app):
     # General width and navigation bar format
@@ -365,5 +377,6 @@ def setup(app):
     # Style for plugin template pages
     app.add_css_file("css/plugin_template.css")
     app.add_css_file("css/plugin_template_download.css")
+    app.connect("source-read", rstjinja)
 
 

@@ -1,15 +1,12 @@
-Elementwise Arrays Arithmetics
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Elementwise Arrays Arithmetics{% endblock %}
 
+{% block description %}
 Basic arithmetic operations on two input datasets: addition, subtraction, multiplication and division. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -41,8 +38,10 @@ Parameters
             description: Pattern to apply this to.
             default: VOLUME_XZ
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.basic_operations.elementwise_arrays_arithmetics.rst{% endblock %}

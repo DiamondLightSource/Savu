@@ -294,6 +294,64 @@ class PreviewParameterTest(unittest.TestCase):
         value = ["start:65"]
         self.assertTrue(self.check_modification(value, key, pdefs))
 
+    def test_35(self):
+        # Check that inner lists are not allowed
+        pdefs = self.initial_setup()
+        import numpy as np
+        u = np.arange(0,50)
+        key = "preview"
+        value = [[["0:50"],["90:1800"]],":",":"]
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_36(self):
+        # Check that keyword arange is not allowed
+        pdefs = self.initial_setup()
+        import numpy as np
+        key = "preview"
+        value = ["np.arange(0, 50)+np.arange(90, 1800)",":",":"]
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_37(self):
+        # Check that a list input for a dimension is allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = [[1, 3, 4, 5, 9, 10, 11], ":", ":"]
+        self.assertTrue(self.check_modification(value, key, pdefs))
+
+    def test_38(self):
+        # Check that a list of str input is not allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = ["[1, 3, 4, 5, 9, 10, 11]", ":", ":"]
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
+    def test_39(self):
+        # Check that a list range is allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = [1, 3, 4, 5, 9, 10, 11]
+        self.assertTrue(self.check_modification(value, key, pdefs))
+
+    def test_40(self):
+        # Check that a list range is allowed for one dimension
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = ["1:11", ":", ":"]
+        self.assertTrue(self.check_modification(value, key, pdefs))
+
+    def test_41(self):
+        # Check that a keyword range not allowed
+        pdefs = self.initial_setup()
+
+        key = "preview"
+        value = ["range(1,11)", ":", ":"]
+        value_check = pu._dumps(value)
+        self.assertFalse(self.check_modification(value, key, pdefs))
+
     def test_dict_1(self):
         # Check that key value dict is not accepted if preview is invalid
         pdefs = self.initial_setup()

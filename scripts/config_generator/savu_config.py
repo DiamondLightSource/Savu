@@ -190,6 +190,7 @@ def _add(content, args):
     elems = content.get_positions()
     final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
     content.add(args.name, args.pos if args.pos else str(final))
+    content.check_iterative_loops([int(args.pos)] if args.pos else [int(final)], 1)
     _disp(content, '-q')
     return content
 
@@ -200,18 +201,7 @@ def _iterate(content, args):
     """ Set a plugin (or group of plugins) to run iteratively. """
     # TODO: note the lack of use of _disp(); maybe will need this for
     # visually displaying the iterative loops in the terminal window?
-    # TODO: no error-checking is performed by this command yet
-    if args.remove is None and args.set is None:
-        # no optional args are given; default to displaying all iterative loops
-        content.display_iterative_loops()
-    elif args.remove is not None:
-        content.remove_iterate_plugin_groups(args.remove)
-    elif args.set is not None:
-        # create a dict representing a group of plugins to iterate over
-        start = args.set[0]
-        end = args.set[1]
-        iterations = args.set[2]
-        content.add_iterate_plugin_group(start, end, iterations)
+    content.iterate(args)
     return content
     # TODO: the commented-out code below is associated with the TODO in
     # arg_parsers._iterate_arg_parser()
@@ -278,6 +268,7 @@ def _rem(content, args):
             pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
+        content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
 

@@ -1,15 +1,12 @@
-Pyfai Azimuthal Integrator Separate
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Pyfai Azimuthal Integrator Separate{% endblock %}
 
+{% block description %}
 1D azimuthal integrator by pyFAI 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -49,8 +46,10 @@ Parameters
             description: Number of azimuthal bins.
             default: "20"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.azimuthal_integrators.pyfai_azimuthal_integrator_separate.rst{% endblock %}

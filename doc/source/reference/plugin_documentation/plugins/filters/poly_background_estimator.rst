@@ -1,15 +1,12 @@
-Poly Background Estimator
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Poly Background Estimator{% endblock %}
 
+{% block description %}
 This plugin uses peakutils to find peaks in spectra. This is then metadata. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -49,8 +46,10 @@ Parameters
             description: Ratio of variance between successive poly iterations.
             default: "0.9"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.filters.poly_background_estimator.rst{% endblock %}

@@ -1,15 +1,12 @@
-Mm Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mm Loader{% endblock %}
 
+{% block description %}
 Testing the mmloader plugin 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -23,17 +20,17 @@ Parameters
             description: "The names assigned to each dataset in the order [fluorescence, diffraction, absorption, monitor]"
             default: "['fluo', 'xrd', 'stxm', 'monitor']"
         
-        fluo_offset:
-            visibility: basic
-            dtype: float
-            description: fluo scale offset.
-            default: "0.0"
-        
         fluo_gain:
             visibility: intermediate
             dtype: float
             description: fluo gain
             default: "0.01"
+        
+        fluo_offset:
+            visibility: basic
+            dtype: float
+            description: fluo scale offset.
+            default: "0.0"
         
         calibration_path:
             visibility: basic
@@ -41,8 +38,10 @@ Parameters
             description: Path to the calibration file
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.mapping_loaders.mm_loader.rst{% endblock %}
