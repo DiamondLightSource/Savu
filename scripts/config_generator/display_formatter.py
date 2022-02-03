@@ -66,7 +66,6 @@ class DisplayFormatter(object):
         count = start
         plugin_list = self.plugin_list[start:stop]
         line_break = "%s" % ("*" * width)
-
         out_string.append(line_break)
 
         display_args = {
@@ -76,19 +75,22 @@ class DisplayFormatter(object):
         }
 
         iterative_grp = self.plugin_list_inst.get_iterate_plugin_group_dicts()
-        start_indices = [grp['start_index'] for grp in iterative_grp]
+        start_indices = {grp['start_index']:grp['iterations']
+                         for grp in iterative_grp}
         end_indices = [grp['end_index'] for grp in iterative_grp]
+
         for p_dict in plugin_list:
             count += 1
-            if count in start_indices:
-                iter_start = "Iterative loop of plugin(s) starts"
+            if count in start_indices.keys():
+                iter_start = f"Iterative loop of plugin(s) starts " \
+                f"({start_indices[count]} iteration{'s'[:start_indices[count]^1]})"
                 out_string.append(self._separator_string(iter_start, "-", width, 2))
             description = self._get_description(
                 width, level, p_dict, count, verbosity, display_args
             )
             out_string.append(description)
             if count in end_indices:
-                iter_end = "Iterative loop of plugin(s) ends"
+                iter_end = f"Iterative loop of plugin{'s'[:count^1]} ends"
                 out_string.append(self._separator_string(iter_end, "-", width, 2))
         out_string.append(line_break)
         return "\n".join(out_string)
