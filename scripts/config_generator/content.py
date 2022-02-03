@@ -438,6 +438,7 @@ class Content(object):
         """
         parameter_valid = False
         current_parameter_details = tools.param.get(param_name)
+        current_plugin_name = tools.plugin_class.name
 
         # If dimensions are provided then alter preview param
         if self.preview_dimension_to_modify(dim, param_name):
@@ -459,9 +460,6 @@ class Content(object):
             else:
                 print(f"ERROR: The input value {value} "
                       f"for {param_name} is not correct.")
-                print(f"The default value "
-                      f"{current_parameter_details['default']} has been used "
-                      f"in it's place.")
                 print(error_str)
         else:
             print("Not in parameter keys.")
