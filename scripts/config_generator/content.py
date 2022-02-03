@@ -348,6 +348,7 @@ class Content(object):
         self.insert(pu.plugins[name](), new_pos, new)
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
+        self.check_iterative_loops([old_pos + 1, new_pos + 1], 0)
 
     def modify(self, pos_str, param_name, value, default=False, ref=False,
                dim=False):
@@ -1068,27 +1069,55 @@ class Content(object):
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
 
-    def check_iterative_loops(self, pos, direction):
+    def check_iterative_loops(self, positions, direction):
         """
-        When a plugin is added or removed, check if any iterative loops should
-        be removed or shifted
+        When a plugin is added, removed, or moved, check if any iterative loops
+        should be removed or shifted
         """
-        # handle if the plugin to add/remove is in an iterative loop
-        is_in_loop = self.plugin_list.check_pos_in_iterative_loop(pos)
-        if is_in_loop:
-            # delete the associated loop
-            self.plugin_list.remove_associated_iterate_group_dict(pos,
-                direction)
+        def moved_plugin(old_pos, new_pos):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(old_pos)
+            if is_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    old_pos, -1)
 
-        # check if there are any iterative loops in the process list
-        do_loops_exist = len(self.plugin_list.iterate_plugin_groups) > 0
-        if do_loops_exist:
-            if direction == -1:
-                # shift the start+end of all loops after the plugin down by 1
-                self.plugin_list.shift_subsequent_iterative_loops(pos, -1)
-            elif direction == 1:
-                # shift the start+end of all loops after the plugin up by 1
-                self.plugin_list.shift_subsequent_iterative_loops(pos, 1)
+            if_will_be_in_loop = \
+                self.plugin_list.check_pos_in_iterative_loop(new_pos)
+            if if_will_be_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    new_pos, -1)
+
+            # shift any relevant loops
+            if new_pos < old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [new_pos, old_pos], 1)
+            elif new_pos > old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [old_pos, new_pos], -1)
+
+        def added_removed_plugin(pos, direction):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(pos)
+            if is_in_loop:
+                # delete the associated loop
+                self.plugin_list.remove_associated_iterate_group_dict(pos,
+                    direction)
+
+            # check if there are any iterative loops in the process list
+            do_loops_exist = len(self.plugin_list.iterate_plugin_groups) > 0
+            if do_loops_exist:
+                if direction == -1:
+                    # shift the start+end of all loops after the plugin down by
+                    # 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, -1)
+                elif direction == 1:
+                    # shift the start+end of all loops after the plugin up by 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, 1)
+
+        if direction == 0:
+            # a plugin has been moved
+            moved_plugin(positions[0], positions[1])
+        else:
+            # a plugin has been added or removed
+            added_removed_plugin(positions[0], direction)
 
     @property
     def size(self):

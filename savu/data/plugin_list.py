@@ -365,6 +365,15 @@ class PluginList(object):
             if pos <= iterate_group['start_index']:
                 self.shift_iterative_loop(iterate_group, direction)
 
+    def shift_range_iterative_loops(self, positions, direction):
+        """
+        Shift all iterative loops within a range of plugin indices
+        """
+        for iterate_group in self.iterate_plugin_groups:
+            if positions[0] <= iterate_group['start_index'] and \
+                iterate_group['end_index'] <= positions[1]:
+                self.shift_iterative_loop(iterate_group, direction)
+
     def shift_iterative_loop(self, iterate_group, direction):
         """
         Shift an iterative loop up or down in the process list, based on if a

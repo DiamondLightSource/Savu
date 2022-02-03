@@ -190,7 +190,7 @@ def _add(content, args):
     elems = content.get_positions()
     final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
     content.add(args.name, args.pos if args.pos else str(final))
-    content.check_iterative_loops(int(args.pos) if args.pos else int(final), 1)
+    content.check_iterative_loops([int(args.pos)] if args.pos else [int(final)], 1)
     _disp(content, '-q')
     return content
 
@@ -279,7 +279,7 @@ def _rem(content, args):
             pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
-        content.check_iterative_loops(pos, -1)
+        content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
 
