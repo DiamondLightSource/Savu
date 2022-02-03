@@ -26,6 +26,7 @@ class Statistics(object):
         self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
         self.stats_before_processing = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
+        self._repeat_count = 0
 
     def setup(self, plugin_self):
         if plugin_self.name in Statistics.no_stats_plugins:
@@ -47,8 +48,8 @@ class Statistics(object):
         cls.count = 2
         cls.global_stats = {}
         cls.exp = exp
-        n_plugins = len(exp.meta_data.plugin_list.plugin_list)
-        for i in range(1, n_plugins + 1):
+        cls.n_plugins = len(exp.meta_data.plugin_list.plugin_list)
+        for i in range(1, cls.n_plugins + 1):
             cls.global_stats[i] = np.array([])
         cls.global_residuals = {}
         cls.plugin_numbers = {}
@@ -126,6 +127,15 @@ class Statistics(object):
     def calc_volume_stats(self, slice_stats):
         volume_stats = np.array([max(slice_stats['max']), min(slice_stats['min']), np.mean(slice_stats['mean']),
                         np.mean(slice_stats['std_dev']), np.median(slice_stats['std_dev'])])
+        if None not in slice_stats['RSS']:
+            total_rss = sum(slice_stats['RSS'])
+            n = sum(slice_stats['data_points'])
+            RMSD = self._rmsd_from_rss(total_rss, n)
+            NRMSD = RMSD / abs(volume_stats[2])  # normalised RMSD (dividing by mean)
+            volume_stats = np.append(volume_stats, NRMSD)
+        else:
+            #volume_stats = np.append(volume_stats, None)
+            pass
         return volume_stats
 
     def set_volume_stats(self):
@@ -138,20 +148,13 @@ class Statistics(object):
         while name in list(Statistics.plugin_numbers.keys()):
             name = self.plugin_name + str(i)
             i += 1
-
         if len(self.stats['max']) != 0:
             stats_array = self.calc_volume_stats(self.stats)
             Statistics.global_residuals[p_num] = {}
-            before_processing = self.calc_volume_stats(self.stats_before_processing)
+            #before_processing = self.calc_volume_stats(self.stats_before_processing)
             #for key in list(before_processing.keys()):
             #    Statistics.global_residuals[p_num][key] = Statistics.global_stats[p_num][key] - before_processing[key]
-            if None not in self.stats['RSS']:
-                total_rss = sum(self.stats['RSS'])
-                n = sum(self.stats['data_points'])
-                RMSD = self._rmsd_from_rss(total_rss, n)
-                stats_array = np.append(stats_array, RMSD)
-            #else:
-            #    stats_array = np.append(stats_array[p_num], None)
+
             if len(Statistics.global_stats[p_num]) == 0:
                 Statistics.global_stats[p_num] = stats_array
             else:
@@ -164,8 +167,9 @@ class Statistics(object):
         slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
         self._write_stats_to_file3(p_num)
         self._already_called = True
+        self._repeat_count += 1
 
-    def get_stats(self, plugin_name, n=None, stat=None):
+    def get_stats(self, plugin_name, n=None, stat=None, instance=1):
         """Returns stats associated with a certain plugin.
 
         :param plugin_name: name of the plugin whose associated stats are being fetched.
@@ -173,15 +177,18 @@ class Statistics(object):
             specify the nth instance. Not specifying will select the first (or only) instance.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD' }
+        :param instance: In cases where there are multiple set of stats associated with a plugin
+            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
         """
         name = plugin_name
-        if n is not None and n not in (0, 1):
+        if n in (None, 0, 1):
             name = name + str(n)
         p_num = Statistics.plugin_numbers[name]
-        return self.get_stats_from_num(p_num, stat)
+        return self.get_stats_from_num(p_num, stat, instance)
 
-    def get_stats_from_num(self, p_num, stat=None, instance=0):
+    def get_stats_from_num(self, p_num, stat=None, instance=1):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
 
         :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
@@ -189,13 +196,25 @@ class Statistics(object):
             E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD' }
+        :param instance: In cases where there are multiple set of stats associated with a plugin
+            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
         """
         if p_num <= 0:
             p_num = Statistics.count + p_num
-        if Statistics.global_stats[p_num].ndim == 1:
+        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, "all"):
             stats_array = Statistics.global_stats[p_num]
         else:
+            if instance == "all":
+                stats_list = [self.get_stats_from_num(p_num, stat=stat, instance=1)]
+                n = 2
+                while n <= Statistics.global_stats[p_num].ndim:
+                    stats_list.append(self.get_stats_from_num(p_num, stat=stat, instance=n))
+                    n += 1
+                return stats_list
+            if instance > 0:
+                instance -= 1
             stats_array = Statistics.global_stats[p_num][instance]
         stats_dict = self._array_to_dict(stats_array)
         if stat is not None:
@@ -209,14 +228,22 @@ class Statistics(object):
         :param dataset: The dataset whose associated stats are being fetched.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': }
-        :param instance: In the (rare) case that there are multiple sets of stats associated with the dataset,
-            specify which set to return.
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD'}
+        :param instance: In cases where there are multiple set of stats associated with a dataset
+            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
 
         """
         key = "stats"
         stats = {}
-        if instance is not None and instance not in (0, 1):
+        if instance not in (None, 0, 1):
+            if instance == "all":
+                stats = [self.get_stats_from_dataset(dataset, stat=stat, instance=1)]
+                n = 2
+                while ("stats" + str(n)) in list(dataset.meta_data.get_dictionary().keys()):
+                    stats.append(self.get_stats_from_dataset(dataset, stat=stat, instance=n))
+                    n += 1
+                return stats
             key = key + str(instance)
         stats = dataset.meta_data.get(key)
         if stat is not None:
@@ -264,7 +291,10 @@ class Statistics(object):
         """Links the volume wide statistics to the output dataset(s)"""
         out_dataset = self.plugin.get_out_datasets()[0]
         n_datasets = self.plugin.nOutput_datasets()
-        stats_dict = self._array_to_dict(stats)
+        if self._repeat_count > 0:
+            stats_dict = self._array_to_dict(stats[self._repeat_count])
+        else:
+            stats_dict = self._array_to_dict(stats)
         i = 2
         group_name = "stats"
         #out_dataset.data_info.set([group_name], stats)
@@ -407,6 +437,7 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
+        print(cls.global_stats)
         if cls._any_stats:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
