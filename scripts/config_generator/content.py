@@ -149,27 +149,13 @@ class Content(object):
             # loops
             self.display_iterative_loops()
         elif args.remove is not None:
-            self.remove_iterate_plugin_groups(args.remove)
+            self.plugin_list.remove_iterate_plugin_groups(args.remove)
         elif args.set is not None:
             # create a dict representing a group of plugins to iterate over
             start = args.set[0]
             end = args.set[1]
             iterations = args.set[2]
-            self.add_iterate_plugin_group(start, end, iterations)
-
-    def add_iterate_plugin_group(self, start, end, iterations):
-        '''
-        Add a dict to PluginList that represents a group of plugins in the
-        process list to iterate over
-        '''
-        self.plugin_list.add_iterate_plugin_group_dict(start, end, iterations)
-
-    def remove_iterate_plugin_groups(self, indices):
-        """
-        Remove dicts in PluginList that represent a group of plugins in the
-        process list to iterate over
-        """
-        self.plugin_list.remove_iterate_plugin_group_dicts(indices)
+            self.plugin_list.add_iterate_plugin_group(start, end, iterations)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)

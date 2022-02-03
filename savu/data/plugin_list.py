@@ -203,7 +203,7 @@ class PluginList(object):
         group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
 
-    def add_iterate_plugin_group_dict(self, start, end, iterations):
+    def add_iterate_plugin_group(self, start, end, iterations):
         """Add an element to self.iterate_plugin_groups"""
         group_new = {
             'start_index': start,
@@ -242,7 +242,7 @@ class PluginList(object):
             self.iterate_plugin_groups.append(group_new)
         self.print_iterative_loops()
 
-    def remove_iterate_plugin_group_dicts(self, indices):
+    def remove_iterate_plugin_groups(self, indices):
         """ Remove elements from self.iterate_plugin_groups """
         if len(indices) == 0:
             # remove all iterative loops in process list
