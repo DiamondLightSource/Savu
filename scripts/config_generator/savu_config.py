@@ -25,6 +25,8 @@ import re
 import sys
 import logging
 
+from colorama import Fore
+
 logger = logging.getLogger('documentationLog')
 logger_rst = logging.getLogger('documentationRst')
 
@@ -52,7 +54,8 @@ def _help(content, args):
     for key in sorted(list(commands.keys()),  key=str.lower):
         doc = commands[key].__doc__
         if doc:
-            print("%8s : %s" % (key, commands[key].__doc__))
+            print(Fore.GREEN + f"{key:>8}" + Fore.RESET
+                  + f" : {commands[key].__doc__}")
     line_separator = "*" * width
     info_text = "* For more information about individual commands type " \
                 "'<command> -h' *"
