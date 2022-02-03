@@ -438,6 +438,7 @@ class Content(object):
         """
         parameter_valid = False
         current_parameter_details = tools.param.get(param_name)
+        current_plugin_name = tools.plugin_class.name
 
         # If dimensions are provided then alter preview param
         if self.preview_dimension_to_modify(dim, param_name):
@@ -457,10 +458,7 @@ class Content(object):
             if parameter_valid:
                 self._change_value(param_name, value, tools, parameters)
             else:
-                value = str(value)
-                display_value = f"{value[0:12]}.." if len(value) > 12 \
-                                else value
-                print(f"ERROR: The input value {display_value} "
+                print(f"ERROR: The input value {value} "
                       f"for {param_name} is not correct.")
                 print(error_str)
         else:
