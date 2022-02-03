@@ -278,6 +278,12 @@ class PluginList(object):
         """
         self.iterate_plugin_groups = []
 
+    def get_iterate_plugin_group_dicts(self):
+        """
+        Return the list of dicts representing groups of plugins to iterate over
+        """
+        return self.iterate_plugin_groups
+
     def print_iterative_loops(self):
         if len(self.iterate_plugin_groups) == 0:
             print('There are no iterative loops in the current process list')

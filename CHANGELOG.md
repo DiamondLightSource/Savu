@@ -39,6 +39,8 @@ All notable changes to this project are documented in this file.
   * ToMoBAR and TomoPhantom packages have been updated
 
 ## _Configurator_
+  * Asterix line added to indicate the start and end of the process list
+  * Line separator added to indicate an iterative plugin loop
 
 ## _Documentation_
 
