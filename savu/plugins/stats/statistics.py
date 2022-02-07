@@ -437,7 +437,6 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        print(cls.global_stats)
         if cls._any_stats:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
