@@ -334,6 +334,16 @@ class Content(object):
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
 
+    def replace(self, old, new_plugin):
+        self.check_for_plugin_failure(new_plugin)
+        old_pos = self.find_position(old)
+        self.remove(old_pos)
+        pos, str_pos = self.convert_pos(old)
+        plugin = pu.plugins[new_plugin]()
+        plugin.get_plugin_tools()._populate_default_parameters()
+        self.insert(plugin, pos, str_pos)
+        #self.plugin_list.plugin_list[pos]["pos"] = str_pos
+
     def modify(self, pos_str, param_name, value, default=False, ref=False,
                dim=False):
         """Modify the plugin at pos_str and the parameter at param_name
