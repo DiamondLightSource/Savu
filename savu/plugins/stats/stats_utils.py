@@ -7,7 +7,7 @@ class StatsUtils(object):
 
     _pattern_dict = {"projection": ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "4D_SCAN", "SINOMOVIE"],
                      "reconstruction": ["VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D"]}
-    _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "RMSD"]
+    _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
@@ -36,7 +36,7 @@ class StatsUtils(object):
 
         stats_df_new = pd.DataFrame(stats_dict, index_list)
 
-        colours = ["red", "blue", "green", "black", "purple", "brown"]  #max, min, mean, mean std dev, median std dev, RMSD
+        colours = ["red", "blue", "green", "black", "purple", "brown"]  #max, min, mean, mean std dev, median std dev, NRMSD
 
         new_index = []
         legend = ""
@@ -72,15 +72,15 @@ class StatsUtils(object):
     def _get_dicts_for_graphs(file):
         stats_dict = {}
         stats_dict["projection"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                    "RMSD": []}
+                                    "NRMSD": []}
         stats_dict["reconstruction"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                        "RMSD": []}
+                                        "NRMSD": []}
 
         index_list = {"projection": [], "reconstruction": []}
 
         group = file["stats"]
         for space in ("projection", "reconstruction"):
-            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "RMSD"]):
+            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]):
                 for key in list(group.keys()):
                     if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
                         if f"{key}: {group[key].attrs.get('plugin_name')}" not in index_list[space]:

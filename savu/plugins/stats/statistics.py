@@ -13,12 +13,13 @@ from savu.plugins.stats.stats_utils import StatsUtils
 import h5py as h5
 import numpy as np
 import os
+from mpi4py import MPI
 
 
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     no_stats_plugins = ["BasicOperations", "Mipmap"]
-    _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "RMSD"]
+    _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
 
     def __init__(self):
@@ -60,7 +61,7 @@ class Statistics(object):
             cls.path = cls.path[0:-1]
         cls.path = f"{cls.path}/stats"
         if not os.path.exists(cls.path):
-            os.mkdir(cls.path)
+            os.makedirs(cls.path, exist_ok=True)
 
     def set_slice_stats(self, slice, base_slice):
         slice_stats_before = self.calc_slice_stats(base_slice)
@@ -126,7 +127,7 @@ class Statistics(object):
 
     def calc_volume_stats(self, slice_stats):
         volume_stats = np.array([max(slice_stats['max']), min(slice_stats['min']), np.mean(slice_stats['mean']),
-                        np.mean(slice_stats['std_dev']), np.median(slice_stats['std_dev'])])
+                                np.mean(slice_stats['std_dev']), np.median(slice_stats['std_dev'])])
         if None not in slice_stats['RSS']:
             total_rss = sum(slice_stats['RSS'])
             n = sum(slice_stats['data_points'])
@@ -142,6 +143,15 @@ class Statistics(object):
         """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values.
         Links volume stats with the output dataset and writes slice stats to file.
         """
+        comm = MPI.COMM_WORLD
+        rank = comm.rank
+        size = comm.size
+        stats = self.stats
+        combined_stats_list = comm.allgather(stats)
+        combined_stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+        for single_stats in combined_stats_list:
+            for key in list(single_stats.keys()):
+                combined_stats[key] += single_stats[key]
         p_num = Statistics.count
         name = self.plugin_name
         i = 2
@@ -149,7 +159,7 @@ class Statistics(object):
             name = self.plugin_name + str(i)
             i += 1
         if len(self.stats['max']) != 0:
-            stats_array = self.calc_volume_stats(self.stats)
+            stats_array = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
             #before_processing = self.calc_volume_stats(self.stats_before_processing)
             #for key in list(before_processing.keys()):
@@ -164,7 +174,7 @@ class Statistics(object):
                 Statistics.plugin_names[p_num] = name
             self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
 
-        slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
+        #slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
         self._write_stats_to_file3(p_num)
         self._already_called = True
         self._repeat_count += 1
@@ -177,7 +187,7 @@ class Statistics(object):
             specify the nth instance. Not specifying will select the first (or only) instance.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD' }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
         :param instance: In cases where there are multiple set of stats associated with a plugin
             due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
@@ -196,7 +206,7 @@ class Statistics(object):
             E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD' }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
         :param instance: In cases where there are multiple set of stats associated with a plugin
             due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
@@ -228,7 +238,7 @@ class Statistics(object):
         :param dataset: The dataset whose associated stats are being fetched.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'RMSD'}
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD'}
         :param instance: In cases where there are multiple set of stats associated with a dataset
             due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
@@ -348,7 +358,7 @@ class Statistics(object):
         filename = f"{path}/stats.h5"
         stats = self.global_stats
         self.hdf5 = Hdf5Utils(self.exp)
-        with h5.File(filename, "a") as h5file:
+        with h5.File(filename, "a", driver="mpio", comm=MPI.COMM_WORLD) as h5file:
             group = h5file.require_group("stats")
             if stats[p_num].shape != (0,):
                 if str(p_num) in list(group.keys()):
@@ -378,8 +388,8 @@ class Statistics(object):
             std_dev_ds = self.hdf5.create_dataset_nofill(group, "standard_deviation",
                                                          slice_stats_dim, slice_stats_array.dtype)
             if slice_stats_array.shape[0] == 5:
-                rmsd_ds = self.hdf5.create_dataset_nofill(group, "RMSD", slice_stats_dim, slice_stats_array.dtype)
-                rmsd_ds[::] = slice_stats_array[4]
+                nrmsd_ds = self.hdf5.create_dataset_nofill(group, "NRMSD", slice_stats_dim, slice_stats_array.dtype)
+                nrmsd_ds[::] = slice_stats_array[4]
             max_ds[::] = slice_stats_array[0]
             min_ds[::] = slice_stats_array[1]
             mean_ds[::] = slice_stats_array[2]
