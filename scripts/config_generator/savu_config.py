@@ -24,6 +24,7 @@
 import re
 import sys
 import logging
+from . import hdf_utils as hu
 
 logger = logging.getLogger('documentationLog')
 logger_rst = logging.getLogger('documentationRst')
@@ -331,7 +332,6 @@ def main(test=False):
                  If test is False then nothing is touched.
     """
 
-    print("Running the configurator")
     # required for running the tests locally or on travis
     # drops the last argument from pytest which is the test file/module
     if test:
@@ -345,9 +345,25 @@ def main(test=False):
             pass
 
     args = parsers._config_arg_parser(doc=False)
+    if args.tree is not None:
+        file_path = args.tree
+        hu.get_hdf_tree(file_path, add_shape=True, display=True)
+        sys.exit(0)
+    if args.find is not None:
+        vals = args.find
+        file_path = vals[0][0]
+        pattern = vals[0][1]
+        hu.find_hdf_key(file_path, pattern, display=True)
+        sys.exit(0)
+    if args.check is not None:
+        file_path = args.check
+        hu.check_tomo_data(file_path)
+        sys.exit(0)
+
     if args.error:
         utils.error_level = 1
 
+    print("Running the configurator")
     print("Starting Savu Config tool (please wait for prompt)")
 
     _reduce_logging_level()
