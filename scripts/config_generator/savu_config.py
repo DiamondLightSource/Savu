@@ -201,7 +201,14 @@ def _iterate(content, args):
     """ Set a plugin (or group of plugins) to run iteratively. """
     # TODO: note the lack of use of _disp(); maybe will need this for
     # visually displaying the iterative loops in the terminal window?
-    content.iterate(args)
+    if args.remove is None and args.set is None:
+        # display only the loops, not the rest of the process list
+        content.display_iterative_loops()
+    else:
+        content.iterate(args)
+        # display the process list with the visual markers of where iterative
+        # loops are
+        _disp(content, '-q')
     return content
     # TODO: the commented-out code below is associated with the TODO in
     # arg_parsers._iterate_arg_parser()
