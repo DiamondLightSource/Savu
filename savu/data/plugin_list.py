@@ -210,7 +210,6 @@ class PluginList(object):
             'end_index': end,
             'iterations': iterations
         }
-        list_new_indices = list(range(start, end+1))
 
         if iterations <= 0:
             print("The number of iterations should be larger than zero and nonnegative")
@@ -219,6 +218,24 @@ class PluginList(object):
             print("The given plugin indices are not within the range of existing plugin indices")
             return
 
+        are_crosschecks_ok = \
+            self._crosscheck_existing_loops(start, end, iterations)
+
+        if are_crosschecks_ok:
+            self.iterate_plugin_groups.append(group_new)
+            info_str = f"The following loop has been added: start plugin " \
+                       f"index {group_new['start_index']}, end plugin index " \
+                       f"{group_new['end_index']}, iterations " \
+                       f"{group_new['iterations']}"
+            print(info_str)
+
+    def _crosscheck_existing_loops(self, start, end, iterations):
+        """
+        Check requested loop to be added against existing loops for potential
+        clashes
+        """
+        are_crosschecks_ok = False
+        list_new_indices = list(range(start, end+1))
         # crosscheck with the existing iterative loops
         if len(self.iterate_plugin_groups) != 0:
             noexactlist = True
@@ -237,10 +254,11 @@ class PluginList(object):
                     else:
                         print(f"The plugins of group no. {count} are already set to be iterative: {set(list_new_indices).intersection(list_existing_indices)}")
             if noexactlist and nointersection:
-                self.iterate_plugin_groups.append(group_new)
+                are_crosschecks_ok = True
         else:
-            self.iterate_plugin_groups.append(group_new)
-        self.print_iterative_loops()
+            are_crosschecks_ok = True
+
+        return are_crosschecks_ok
 
     def remove_iterate_plugin_groups(self, indices):
         """ Remove elements from self.iterate_plugin_groups """
@@ -252,25 +270,32 @@ class PluginList(object):
             should_remove_all = check.lower() == 'y'
             if should_remove_all:
                 self.clear_iterate_plugin_group_dicts()
+                print('All iterative loops have been removed')
+            else:
+                print('No iterative loops have been removed')
         else:
             # remove specified iterative loops in process list
             sorted_indices = sorted(indices)
 
             if sorted_indices[0] <= 0:
                 print('The iterative loops are indexed starting from 1')
-                self.print_iterative_loops()
                 return
 
             for i in reversed(sorted_indices):
                 try:
                     # convert the one-based index to a zero-based index
-                    del self.iterate_plugin_groups[i - 1]
+                    iterate_group = self.iterate_plugin_groups.pop(i - 1)
+                    info_str = f"The following loop has been removed: start " \
+                               f"plugin index " \
+                               f"{iterate_group['start_index']}, " \
+                               f"end plugin index " \
+                               f"{iterate_group['end_index']}, iterations " \
+                               f"{iterate_group['iterations']}"
+                    print(info_str)
                 except IndexError as e:
                     info_str = f"There doesn't exist an iterative loop with " \
                                f"number {i}"
                     print(info_str)
-
-        self.print_iterative_loops()
 
     def clear_iterate_plugin_group_dicts(self):
         """
