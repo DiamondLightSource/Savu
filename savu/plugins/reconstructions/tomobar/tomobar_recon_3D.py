@@ -28,6 +28,8 @@ from savu.plugins.driver.gpu_plugin import GpuPlugin
 import numpy as np
 from tomobar.methodsIR import RecToolsIR
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group, setup_extra_plugin_data_padding
 
 
 @register_plugin
@@ -36,6 +38,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
 
+    @setup_extra_plugin_data_padding
     def set_filter_padding(self, in_pData, out_pData):
         self.pad = self.parameters['padding']
         in_data = self.get_in_datasets()[0]
@@ -45,6 +48,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         in_pData[0].padding = pad_dict
         out_pData[0].padding = pad_dict
 
+    @enable_iterative_loop
     def setup(self):
         in_dataset = self.get_in_datasets()[0]
         procs = self.exp.meta_data.get("processes")
@@ -154,8 +158,19 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def nInput_datasets(self):
         return max(len(self.parameters['in_datasets']), 1)
 
+    # total number of output datasets
     def nOutput_datasets(self):
-        return 1
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
+
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
 
     def _set_max_frames(self, frames):
         self._max_frames = frames

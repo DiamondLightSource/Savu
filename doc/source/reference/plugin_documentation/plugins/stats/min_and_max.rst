@@ -1,15 +1,12 @@
-Min And Max
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Min And Max{% endblock %}
 
+{% block description %}
 A plugin to calculate the min and max values of each slice (as determined by the pattern parameter) 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -62,8 +59,10 @@ Parameters
             description: Used to calculate the circular mask. If not provided, it is calculated using the center of rotation.
             default: None
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.stats.min_and_max.rst{% endblock %}

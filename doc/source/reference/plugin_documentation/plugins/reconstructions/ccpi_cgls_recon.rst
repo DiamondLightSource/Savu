@@ -1,15 +1,12 @@
-Ccpi Cgls Recon
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ccpi Cgls Recon{% endblock %}
 
+{% block description %}
 A Plugin to run the CCPi implementation of the CGLS reconstruction algorithm. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -102,8 +99,10 @@ Parameters
             options: "[8, 16, 24, 32]"
             default: "16"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../plugin_api/plugins.reconstructions.ccpi_cgls_recon.rst{% endblock %}

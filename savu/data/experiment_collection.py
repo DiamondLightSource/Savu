@@ -31,6 +31,7 @@ from savu.data.meta_data import MetaData
 from savu.data.plugin_list import PluginList
 from savu.data.data_structures.data import Data
 from savu.core.checkpointing import Checkpointing
+from savu.core.iterative_plugin_runner import IteratePluginGroup
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 import savu.plugins.loaders.utils.yaml_utils as yaml
 
@@ -73,6 +74,7 @@ class Experiment(object):
             self.meta_data.plugin_list._populate_plugin_list(process_file,
                                                              template=template)
         self.meta_data.set("nPlugin", 0) # initialise
+        self.meta_data.set('iterate_groups', [])
 
     def create_data_object(self, dtype, name, override=True):
         """ Create a data object.
@@ -92,10 +94,27 @@ class Experiment(object):
         self._set_process_list_path()
         self._set_transport(transport)
         self.collection = {'plugin_dict': [], 'datasets': []}
+        self._setup_iterate_plugin_groups(transport)
 
         self._barrier()
         self._check_checkpoint()
         self._barrier()
+
+    def _setup_iterate_plugin_groups(self, transport):
+        '''
+        Create all the necessary instances of IteratePluginGroup
+        '''
+        iterate_plugin_groups = []
+        iterate_group_dicts = self.meta_data.plugin_list.iterate_plugin_groups
+
+        for group in iterate_group_dicts:
+            iterate_plugin_group = IteratePluginGroup(transport,
+                group['start_index'],
+                group['end_index'],
+                group['iterations'])
+            iterate_plugin_groups.append(iterate_plugin_group)
+
+        self.meta_data.set('iterate_groups', iterate_plugin_groups)
 
     def _finalise_setup(self, plugin_list):
         checkpoint = self.meta_data.get('checkpoint')

@@ -1,15 +1,12 @@
-Mrc Loader
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Mrc Loader{% endblock %}
 
+{% block description %}
 Load Medical Research Council (MRC) formatted image data. 
+{% endblock %}
 
-Parameters
---------------------------
-
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         preview:
             visibility: basic
@@ -29,8 +26,10 @@ Parameters
             description: The name assigned to the dataset
             default: tomo
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+    No citations
+{% endblock %}
+
+{% block plugin_file %}../../../../plugin_api/plugins.loaders.full_field_loaders.mrc_loader.rst{% endblock %}

@@ -1,18 +1,16 @@
-Ring Removal Regularization
-########################################################
+{% extends "plugin_template.rst" %}
 
-Description
---------------------------
+{% block title %}Ring Removal Regularization{% endblock %}
 
+{% block description %}
 Regularization-based method working in the sinogram space to remove ring artifacts. 
 
 .. toctree::
     Plugin documention and guidelines on use </../../../plugin_guides/plugins/ring_removal/ring_removal_regularization_doc.rst>
 
-Parameters
---------------------------
+{% endblock %}
 
-.. code-block:: yaml
+{% block parameter_yaml %}
 
         in_datasets:
             visibility: datasets
@@ -42,50 +40,47 @@ Parameters
             description: Divide the sinogram to many chunks of rows.
             default: "1"
         
-Key
-^^^^^^^^^^
+{% endblock %}
 
-.. literalinclude:: /../source/files_and_images/plugin_guides/short_parameter_key.yaml
-    :language: yaml
+{% block plugin_citations %}
+        
+        **An analytical formula for ring artefact suppression in X-ray tomography by Titarenko, Sofya et al.**
+        
+        **Bibtex**
+        
+        .. code-block:: none
+        
+            @article{titarenko2010analytical,
+              title={An analytical formula for ring artefact suppression in X-ray tomography},
+              author={Titarenko, Sofya and Withers, Philip J and Yagola, Anatoly},
+              journal={Applied Mathematics Letters},
+              volume={23},
+              number={12},
+              pages={1489--1495},
+              year={2010},
+              publisher={Elsevier}
+            }
+            
+        
+        **Endnote**
+        
+        .. code-block:: none
+        
+            %0 Journal Article
+            %T An analytical formula for ring artefact suppression in X-ray tomography
+            %A Titarenko, Sofya
+            %A Withers, Philip J
+            %A Yagola, Anatoly
+            %J Applied Mathematics Letters
+            %V 23
+            %N 12
+            %P 1489-1495
+            %@ 0893-9659
+            %D 2010
+            %I Elsevier
+            
+        
+        
+{% endblock %}
 
-Citations
---------------------------
-
-An analytical formula for ring artefact suppression in X-ray tomography by Titarenko, Sofya et al.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bibtex
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    @article{titarenko2010analytical,
-      title={An analytical formula for ring artefact suppression in X-ray tomography},
-      author={Titarenko, Sofya and Withers, Philip J and Yagola, Anatoly},
-      journal={Applied Mathematics Letters},
-      volume={23},
-      number={12},
-      pages={1489--1495},
-      year={2010},
-      publisher={Elsevier}
-    }
-    
-
-Endnote
-""""""""""""""""""""""""""""""""""""""""""
-
-.. code-block:: none
-
-    %0 Journal Article
-    %T An analytical formula for ring artefact suppression in X-ray tomography
-    %A Titarenko, Sofya
-    %A Withers, Philip J
-    %A Yagola, Anatoly
-    %J Applied Mathematics Letters
-    %V 23
-    %N 12
-    %P 1489-1495
-    %@ 0893-9659
-    %D 2010
-    %I Elsevier
-    
-
+{% block plugin_file %}../../../plugin_api/plugins.ring_removal.ring_removal_regularization.rst{% endblock %}
