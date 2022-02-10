@@ -9,6 +9,7 @@
 
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.plugins.stats.stats_utils import StatsUtils
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 
 import h5py as h5
 import numpy as np
@@ -28,6 +29,7 @@ class Statistics(object):
         self.stats_before_processing = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self._repeat_count = 0
+        self.p_num = None
 
     def setup(self, plugin_self):
         if plugin_self.name in Statistics.no_stats_plugins:
@@ -35,19 +37,29 @@ class Statistics(object):
         if self.calc_stats:
             self.plugin = plugin_self
             self.plugin_name = plugin_self.name
-            self.pad_dims = []
+            self._pad_dims = []
             self._already_called = False
             self._set_pattern_info()
         if self.calc_stats:
             Statistics._any_stats = True
+        self._setup_iterative()
 
+    def _setup_iterative(self):
+        self._iterative_group = check_if_in_iterative_loop(Statistics.exp)
+        if self._iterative_group:
+            if self._iterative_group.start_index == Statistics.count:
+                Statistics._loop_counter += 1
+                Statistics.loop_stats.append({"RMSD": np.array([])})
+            self.l_num = Statistics._loop_counter - 1
 
     @classmethod
     def _setup_class(cls, exp):
         """Sets up the statistics class for the whole plugin chain (only called once)"""
+        cls.stats_flag = True
         cls._any_stats = False
         cls.count = 2
         cls.global_stats = {}
+        cls.loop_stats = []
         cls.exp = exp
         cls.n_plugins = len(exp.meta_data.plugin_list.plugin_list)
         for i in range(1, cls.n_plugins + 1):
@@ -55,13 +67,14 @@ class Statistics(object):
         cls.global_residuals = {}
         cls.plugin_numbers = {}
         cls.plugin_names = {}
-
+        cls._loop_counter = 0
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
         cls.path = f"{cls.path}/stats"
-        if not os.path.exists(cls.path):
-            os.makedirs(cls.path, exist_ok=True)
+        if MPI.COMM_WORLD.rank == 0:
+            if not os.path.exists(cls.path):
+                os.mkdir(cls.path)
 
     def set_slice_stats(self, slice, base_slice):
         slice_stats_before = self.calc_slice_stats(base_slice)
@@ -139,25 +152,35 @@ class Statistics(object):
             pass
         return volume_stats
 
+    def _set_loop_stats(self):
+        data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
+        data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
+        RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
+        Statistics.loop_stats[self.l_num]["RMSD"] = np.append(Statistics.loop_stats[self.l_num]["RMSD"], RMSD)
+
     def set_volume_stats(self):
         """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values.
         Links volume stats with the output dataset and writes slice stats to file.
         """
-        comm = MPI.COMM_WORLD
-        rank = comm.rank
-        size = comm.size
         stats = self.stats
-        combined_stats_list = comm.allgather(stats)
-        combined_stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
-        for single_stats in combined_stats_list:
-            for key in list(single_stats.keys()):
-                combined_stats[key] += single_stats[key]
-        p_num = Statistics.count
+        combined_stats = self._combine_mpi_stats(stats)
+        if not self.p_num:
+            self.p_num = Statistics.count
+        p_num = self.p_num
         name = self.plugin_name
         i = 2
-        while name in list(Statistics.plugin_numbers.keys()):
-            name = self.plugin_name + str(i)
-            i += 1
+        if not self._iterative_group:
+            while name in list(Statistics.plugin_numbers.keys()):
+                name = self.plugin_name + str(i)
+                i += 1
+        elif self._iterative_group._ip_iteration == 0:
+            while name in list(Statistics.plugin_numbers.keys()):
+                name = self.plugin_name + str(i)
+                i += 1
+        elif self._iterative_group.end_index == p_num:
+            self._set_loop_stats()
+        if p_num not in list(Statistics.plugin_names.keys()):
+            Statistics.plugin_names[p_num] = name
         if len(self.stats['max']) != 0:
             stats_array = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
@@ -170,16 +193,50 @@ class Statistics(object):
             else:
                 Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
             Statistics.plugin_numbers[name] = p_num
-            if p_num not in list(Statistics.plugin_names.keys()):
-                Statistics.plugin_names[p_num] = name
             self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
 
-        #slice_stats_array = np.array([self.stats['max'], self.stats['min'], self.stats['mean'], self.stats['std_dev']])
         self._write_stats_to_file3(p_num)
         self._already_called = True
         self._repeat_count += 1
 
-    def get_stats(self, plugin_name, n=None, stat=None, instance=1):
+    def get_stats(self, p_num, stat=None, instance=1):
+        """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
+
+        :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
+            If p_num <= 0, it is relative to the plugin number of the current plugin being run.
+            E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
+        :param instance: In cases where there are multiple set of stats associated with a plugin
+            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
+        """
+        if p_num <= 0:
+            try:
+                p_num = self.p_num + p_num
+            except TypeError:
+                p_num = Statistics.count + p_num
+        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, "all"):
+            stats_array = Statistics.global_stats[p_num]
+        else:
+            if instance == "all":
+                stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
+                n = 2
+                while n <= Statistics.global_stats[p_num].ndim:
+                    stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
+                    n += 1
+                return stats_list
+            if instance > 0:
+                instance -= 1
+            stats_array = Statistics.global_stats[p_num][instance]
+        stats_dict = self._array_to_dict(stats_array)
+        if stat is not None:
+            return stats_dict[stat]
+        else:
+            return stats_dict
+
+    def get_stats_from_name(self, plugin_name, n=None, stat=None, instance=1):
         """Returns stats associated with a certain plugin.
 
         :param plugin_name: name of the plugin whose associated stats are being fetched.
@@ -196,41 +253,7 @@ class Statistics(object):
         if n in (None, 0, 1):
             name = name + str(n)
         p_num = Statistics.plugin_numbers[name]
-        return self.get_stats_from_num(p_num, stat, instance)
-
-    def get_stats_from_num(self, p_num, stat=None, instance=1):
-        """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
-
-        :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
-            If p_num <= 0, it is relative to the plugin number of the current plugin being run.
-            E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
-        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
-            If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
-        :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
-            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
-        """
-        if p_num <= 0:
-            p_num = Statistics.count + p_num
-        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, "all"):
-            stats_array = Statistics.global_stats[p_num]
-        else:
-            if instance == "all":
-                stats_list = [self.get_stats_from_num(p_num, stat=stat, instance=1)]
-                n = 2
-                while n <= Statistics.global_stats[p_num].ndim:
-                    stats_list.append(self.get_stats_from_num(p_num, stat=stat, instance=n))
-                    n += 1
-                return stats_list
-            if instance > 0:
-                instance -= 1
-            stats_array = Statistics.global_stats[p_num][instance]
-        stats_dict = self._array_to_dict(stats_array)
-        if stat is not None:
-            return stats_dict[stat]
-        else:
-            return stats_dict
+        return self.get_stats(p_num, stat, instance)
 
     def get_stats_from_dataset(self, dataset, stat=None, instance=None):
         """Returns stats associated with a dataset.
@@ -261,14 +284,14 @@ class Statistics(object):
         else:
             return stats
 
-    def get_data_stats(self):
-        return Statistics.data_stats
-
-    def get_volume_stats(self):
-        return Statistics.volume_stats
-
-    def get_global_stats(self):
-        return Statistics.global_stats
+    def _combine_mpi_stats(self, slice_stats):
+        comm = MPI.COMM_WORLD
+        combined_stats_list = comm.allgather(slice_stats)
+        combined_stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+        for single_stats in combined_stats_list:
+            for key in list(single_stats.keys()):
+                combined_stats[key] += single_stats[key]
+        return combined_stats
 
     def _array_to_dict(self, stats_array):
         stats_dict = {}
@@ -353,47 +376,61 @@ class Statistics(object):
                 dataset = cls.hdf5.create_dataset_nofill(group, stat, array_dim, array.dtype)
                 dataset[::] = array[::]
 
-    def _write_stats_to_file3(self, p_num):
+    def _write_stats_to_file3(self, p_num=None):
+        if not p_num:
+            p_num = self.p_num
         path = Statistics.path
         filename = f"{path}/stats.h5"
-        stats = self.global_stats
+        stats = self.global_stats[p_num]
         self.hdf5 = Hdf5Utils(self.exp)
         with h5.File(filename, "a", driver="mpio", comm=MPI.COMM_WORLD) as h5file:
             group = h5file.require_group("stats")
-            if stats[p_num].shape != (0,):
+            if stats.shape != (0,):
                 if str(p_num) in list(group.keys()):
                     del group[str(p_num)]
-                dataset = group.create_dataset(str(p_num), shape=stats[p_num].shape, dtype=stats[p_num].dtype)
-                dataset[::] = stats[p_num][::]
+                dataset = group.create_dataset(str(p_num), shape=stats.shape, dtype=stats.dtype)
+                dataset[::] = stats[::]
                 dataset.attrs.create("plugin_name", self.plugin_names[p_num])
                 dataset.attrs.create("pattern", self.pattern)
+            if self._iterative_group:
+                l_stats = Statistics.loop_stats[self.l_num]
+                group1 = h5file.require_group("iterative")
+                if self._iterative_group._ip_iteration == self._iterative_group._ip_fixed_iterations - 1\
+                        and self.p_num == self._iterative_group.end_index:
+                    dataset1 = group1.create_dataset(str(self.l_num), shape=l_stats["RMSD"].shape, dtype=l_stats["RMSD"].dtype)
+                    dataset1[::] = l_stats["RMSD"][::]
+                    loop_plugins = []
+                    for i in range(self._iterative_group.start_index + 1, self._iterative_group.end_index + 1):
+                        loop_plugins.append(self.plugin_names[i])
+                    dataset1.attrs.create("loop_plugins", loop_plugins)
+                    dataset.attrs.create("n_loop_plugins", len(loop_plugins))
 
-
-    def _write_stats_to_file(self, slice_stats_array, p_num):
+    def write_slice_stats_to_file(self, slice_stats=None, p_num=None):
         """Writes slice statistics to a h5 file"""
+        if not slice_stats:
+            slice_stats = self.stats
+        if not p_num:
+            p_num = self.count
+            plugin_name = self.plugin_name
+        else:
+            plugin_name = self.plugin_names[p_num]
+        combined_stats = self._combine_mpi_stats(slice_stats)
+        slice_stats_arrays = {}
+        datasets = {}
         path = Statistics.path
-        filename = f"{path}/stats_p{p_num}_{self.plugin_name}.h5"
-        slice_stats_dim = (slice_stats_array.shape[1],)
+        filename = f"{path}/stats_p{p_num}_{plugin_name}.h5"
         self.hdf5 = Hdf5Utils(self.plugin.exp)
-        with h5.File(filename, "a") as h5file:
+        with h5.File(filename, "a", driver="mpio", comm=MPI.COMM_WORLD) as h5file:
             i = 2
             group_name = "/stats"
             while group_name in h5file:
                 group_name = f"/stats{i}"
                 i += 1
             group = h5file.create_group(group_name, track_order=None)
-            max_ds = self.hdf5.create_dataset_nofill(group, "max", slice_stats_dim, slice_stats_array.dtype)
-            min_ds = self.hdf5.create_dataset_nofill(group, "min", slice_stats_dim, slice_stats_array.dtype)
-            mean_ds = self.hdf5.create_dataset_nofill(group, "mean", slice_stats_dim, slice_stats_array.dtype)
-            std_dev_ds = self.hdf5.create_dataset_nofill(group, "standard_deviation",
-                                                         slice_stats_dim, slice_stats_array.dtype)
-            if slice_stats_array.shape[0] == 5:
-                nrmsd_ds = self.hdf5.create_dataset_nofill(group, "NRMSD", slice_stats_dim, slice_stats_array.dtype)
-                nrmsd_ds[::] = slice_stats_array[4]
-            max_ds[::] = slice_stats_array[0]
-            min_ds[::] = slice_stats_array[1]
-            mean_ds[::] = slice_stats_array[2]
-            std_dev_ds[::] = slice_stats_array[3]
+            for key in list(combined_stats.keys()):
+                slice_stats_arrays[key] = np.array(combined_stats[key])
+                datasets[key] = self.hdf5.create_dataset_nofill(group, key, (len(slice_stats_arrays[key]),), slice_stats_arrays[key].dtype)
+                datasets[key][::] = slice_stats_arrays[key]
 
     def _unpad_slice(self, slice1):
         """If data is padded in the slice dimension, removes this pad."""
@@ -407,12 +444,12 @@ class Statistics(object):
                     break
         slice_dims = out_dataset.get_slice_dimensions()
         if self.plugin.pcount == 0:
-            self.slice_list, self.pad = self._get_unpadded_slice_list(slice1, slice_dims)
-        if self.pad:
+            self._slice_list, self._pad = self._get_unpadded_slice_list(slice1, slice_dims)
+        if self._pad:
             #for slice_dim in slice_dims:
             slice_dim = slice_dims[0]
             temp_slice = np.swapaxes(slice1, 0, slice_dim)
-            temp_slice = temp_slice[self.slice_list[slice_dim]]
+            temp_slice = temp_slice[self._slice_list[slice_dim]]
             slice1 = np.swapaxes(temp_slice, 0, slice_dim)
         return slice1
 
@@ -447,6 +484,7 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        if cls._any_stats:
+        print(Statistics.loop_stats)
+        if cls._any_stats & cls.stats_flag:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
