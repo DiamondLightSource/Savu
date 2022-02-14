@@ -24,6 +24,7 @@
 import re
 import sys
 import logging
+from . import hdf_utils as hu
 
 logger = logging.getLogger('documentationLog')
 logger_rst = logging.getLogger('documentationRst')
@@ -68,8 +69,8 @@ def _help(content, args):
 def _open(content, args):
     """ Open an existing process list."""
     content.fopen(args.file, update=True, skip=args.skip)
+    _disp(content, '-q')
     _ref(content, '* -n')
-    #_disp(content, '-q')
     return content
 
 
@@ -293,6 +294,13 @@ def _history(content, arg):
         print("%5i : %s" % (i, utils.readline.get_history_item(i)))
     return content
 
+@parse_args
+@error_catcher
+def _replace(content, args):
+    """ Replace a plugin with another """
+    content.replace(args.old, args.new_plugin)
+    _disp(content, '-q')
+    return content
 
 commands = {'open': _open,
             'help': _help,
@@ -312,7 +320,8 @@ commands = {'open': _open,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
-            'history': _history}
+            'history': _history,
+            'replace': _replace}
 
 def get_description():
     """ For each command, enter the function and save the docstring to a
@@ -331,7 +340,6 @@ def main(test=False):
                  If test is False then nothing is touched.
     """
 
-    print("Running the configurator")
     # required for running the tests locally or on travis
     # drops the last argument from pytest which is the test file/module
     if test:
@@ -345,9 +353,25 @@ def main(test=False):
             pass
 
     args = parsers._config_arg_parser(doc=False)
+    if args.tree is not None:
+        file_path = args.tree
+        hu.get_hdf_tree(file_path, add_shape=True, display=True)
+        sys.exit(0)
+    if args.find is not None:
+        vals = args.find
+        file_path = vals[0][0]
+        pattern = vals[0][1]
+        hu.find_hdf_key(file_path, pattern, display=True)
+        sys.exit(0)
+    if args.check is not None:
+        file_path = args.check
+        hu.check_tomo_data(file_path)
+        sys.exit(0)
+
     if args.error:
         utils.error_level = 1
 
+    print("Running the configurator")
     print("Starting Savu Config tool (please wait for prompt)")
 
     _reduce_logging_level()
