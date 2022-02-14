@@ -229,7 +229,9 @@ class Content(object):
         union_params = set(keep).intersection(set(plugin.parameters))
         # Names of the parameter names present in both lists
         for param in union_params:
-            self.modify(str_pos, param, keep[param], ref=True)
+            valid_mod = self.modify(str_pos, param, keep[param], ref=True)
+            if not valid_mod:
+                self._print_default_message(plugin, param)
         # add any parameter mutations here
         classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
         m_dict = self.param_mutations
@@ -246,6 +248,17 @@ class Content(object):
                     self.modify(str_pos, entry["new"], val, ref=True)
         if changes:
             mutations.param_change_str(keep, plugin.parameters, name, keys)
+
+    def _print_default_message(self, plugin, param):
+        """Print message to alert user that value has not been changed/updated
+
+        :param plugin: plugin object
+        :param param: parameter name
+        """
+        pdefs = plugin.get_plugin_tools().get_param_definitions()
+        default = pdefs[param]['default']
+        print(f"This has been replaced by the default {param}: "
+              f"{default}.")
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
@@ -373,7 +386,7 @@ class Content(object):
         else:
             value = self._catch_parameter_tuning_syntax(value, param_name)
             valid_modification = self.modify_main(
-                param_name, value, tools, parameters, dim
+                param_name, value, tools, parameters, dim, pos_str
             )
         return valid_modification
 
@@ -431,7 +444,7 @@ class Content(object):
         param_name = pu.param_to_str(param_name, keys)
         return param_name, value
 
-    def modify_main(self, param_name, value, tools, parameters, dim):
+    def modify_main(self, param_name, value, tools, parameters, dim, pos_str):
         """Check the parameter is within the current parameter list.
         Check the new parameter value is valid, modify the parameter
         value, update defaults, check if dependent parameters should
@@ -442,6 +455,7 @@ class Content(object):
         :param tools: The plugin tools
         :param parameters: The plugin parameters
         :param dim: The dimensions
+        :param pos_str: The plugin position number
 
         returns: A boolean True if the value is a valid input for the
           selected parameter
@@ -468,8 +482,8 @@ class Content(object):
             if parameter_valid:
                 self._change_value(param_name, value, tools, parameters)
             else:
-                print(f"ERROR: The input value {value} "
-                      f"for {param_name} is not correct.")
+                print(f"ERROR: The value {value} for "
+                      f"{pos_str}.{param_name} is not correct.")
                 print(error_str)
         else:
             print("Not in parameter keys.")

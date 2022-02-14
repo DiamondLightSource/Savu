@@ -58,7 +58,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "LLT_ROF"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters, False
+            key, value, tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
@@ -84,7 +84,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         display_value_before = \
             pdefs["regularisation_methodTV"]["display"]
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters, False
+            key, value, tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
@@ -115,7 +115,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters, False
+            key, value, tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
@@ -146,7 +146,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "FGP_TV"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters, False
+            key, value, tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
@@ -185,7 +185,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "SB_TV"
 
         valid_modification = content.modify_main(
-            key, value, plugin.tools, plugin.parameters, False
+            key, value, plugin.tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
@@ -225,7 +225,7 @@ class ParameterDependencyDisplayTest(unittest.TestCase):
         value = "None"
 
         valid_modification = content.modify_main(
-            key, value, tools, plugin.parameters, False
+            key, value, tools, plugin.parameters, False, 1
         )
         self.assertTrue(valid_modification)
 
