@@ -68,8 +68,8 @@ def _help(content, args):
 def _open(content, args):
     """ Open an existing process list."""
     content.fopen(args.file, update=True, skip=args.skip)
+    _disp(content, '-q')
     _ref(content, '* -n')
-    #_disp(content, '-q')
     return content
 
 
