@@ -151,6 +151,9 @@ class Content(object):
             start = args.set[0]
             end = args.set[1]
             iterations = args.set[2]
+            # set the plugins to be identified as iterative in the plugins dictionary
+            for i in range((end-start)+1):
+                self.plugin_list.plugin_list[i+start-1]['iterative'] = True
             self.plugin_list.add_iterate_plugin_group(start, end, iterations)
 
     def refresh(self, str_pos, defaults=False, change=False):
@@ -871,6 +874,7 @@ class Content(object):
         plugin_dict["id"] = plugin.__module__
         plugin_dict["data"] = plugin.parameters
         plugin_dict["active"] = True
+        plugin_dict["iterative"] = False
         plugin_dict["tools"] = tools
         plugin_dict["param"] = tools.get_param_definitions()
         plugin_dict["doc"] = tools.docstring_info
