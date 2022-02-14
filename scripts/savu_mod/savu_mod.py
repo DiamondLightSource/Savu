@@ -77,7 +77,7 @@ def timestamp_file(filename):
     :param filename: filename input
     :return: t_filename, the filename with a timestamp
     """
-    cur_time = datetime.now().strftime("%Y-%m-%d-%H:%M:%S:%f")
+    cur_time = datetime.now().strftime("%Y_%m_%d-%Hh_%Mm_%Ss_%f")
     filelist = filename.split(".")
     t_filename = f"{filelist[0]}_{cur_time}.{filelist[1]}"
     return t_filename
