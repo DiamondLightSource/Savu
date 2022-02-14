@@ -49,7 +49,7 @@ class Statistics(object):
         if self._iterative_group:
             if self._iterative_group.start_index == Statistics.count:
                 Statistics._loop_counter += 1
-                Statistics.loop_stats.append({"RMSD": np.array([])})
+                Statistics.loop_stats.append({"NRMSD": np.array([])})
             self.l_num = Statistics._loop_counter - 1
 
     @classmethod
@@ -156,7 +156,8 @@ class Statistics(object):
         data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
         data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
         RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
-        Statistics.loop_stats[self.l_num]["RMSD"] = np.append(Statistics.loop_stats[self.l_num]["RMSD"], RMSD)
+        NRMSD = RMSD/abs(self.get_stats(self.p_num, stat="mean", instance=self._iterative_group._ip_iteration))
+        Statistics.loop_stats[self.l_num]["NRMSD"] = np.append(Statistics.loop_stats[self.l_num]["NRMSD"], NRMSD)
 
     def set_volume_stats(self):
         """Calculates volume-wide statistics from slice stats, and updates class-wide arrays with these values.
@@ -177,10 +178,10 @@ class Statistics(object):
             while name in list(Statistics.plugin_numbers.keys()):
                 name = self.plugin_name + str(i)
                 i += 1
-        elif self._iterative_group.end_index == p_num:
-            self._set_loop_stats()
+
         if p_num not in list(Statistics.plugin_names.keys()):
             Statistics.plugin_names[p_num] = name
+        Statistics.plugin_numbers[name] = p_num
         if len(self.stats['max']) != 0:
             stats_array = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
@@ -192,8 +193,12 @@ class Statistics(object):
                 Statistics.global_stats[p_num] = stats_array
             else:
                 Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
-            Statistics.plugin_numbers[name] = p_num
+
             self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
+
+        if self._iterative_group:
+            if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
+                self._set_loop_stats()
 
         self._write_stats_to_file3(p_num)
         self._already_called = True
@@ -209,7 +214,7 @@ class Statistics(object):
             If left blank will return the whole dictionary of stats:
             {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
         :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
         """
         if p_num <= 0:
@@ -246,7 +251,7 @@ class Statistics(object):
             If left blank will return the whole dictionary of stats:
             {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
         :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
         """
         name = plugin_name
@@ -263,7 +268,7 @@ class Statistics(object):
             If left blank will return the whole dictionary of stats:
             {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD'}
         :param instance: In cases where there are multiple set of stats associated with a dataset
-            due to multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
 
         """
@@ -397,16 +402,16 @@ class Statistics(object):
                 group1 = h5file.require_group("iterative")
                 if self._iterative_group._ip_iteration == self._iterative_group._ip_fixed_iterations - 1\
                         and self.p_num == self._iterative_group.end_index:
-                    dataset1 = group1.create_dataset(str(self.l_num), shape=l_stats["RMSD"].shape, dtype=l_stats["RMSD"].dtype)
-                    dataset1[::] = l_stats["RMSD"][::]
+                    dataset1 = group1.create_dataset(str(self.l_num), shape=l_stats["NRMSD"].shape, dtype=l_stats["NRMSD"].dtype)
+                    dataset1[::] = l_stats["NRMSD"][::]
                     loop_plugins = []
-                    for i in range(self._iterative_group.start_index + 1, self._iterative_group.end_index + 1):
+                    for i in range(self._iterative_group.start_index, self._iterative_group.end_index + 1):
                         loop_plugins.append(self.plugin_names[i])
                     dataset1.attrs.create("loop_plugins", loop_plugins)
                     dataset.attrs.create("n_loop_plugins", len(loop_plugins))
 
     def write_slice_stats_to_file(self, slice_stats=None, p_num=None):
-        """Writes slice statistics to a h5 file"""
+        """Writes slice statistics to a h5 file. Placed in the stats folder in the output directory."""
         if not slice_stats:
             slice_stats = self.stats
         if not p_num:
