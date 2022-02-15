@@ -145,11 +145,6 @@ class PluginList(object):
             print(f"*** This process list was created using Savu "
                   f"{pl_version}  ***")
             print(separator)
-            print(f"The process list has been loaded.\n"
-                  f"Any warnings below point to the problematic parameters.\n"
-                  f"Incorect parameter values have been reverted to default. \n"
-                  f"Save this process list to save the updated values.")
-            print(separator)
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, "a") as nxs_file:
