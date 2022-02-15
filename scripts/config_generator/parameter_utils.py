@@ -555,7 +555,7 @@ def _check_options(param_def, value, pvalid):
         else:
             pvalid = False
             option_error_str = (
-                "That does not match one of the required options."
+                "It does not match one of the required options."
             )
             option_error_str += Fore.CYAN + "\nThe options are:\n"
             option_error_str += "\n".join(str(o) for o in options) + Fore.RESET

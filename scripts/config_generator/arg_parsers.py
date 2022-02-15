@@ -245,6 +245,15 @@ def _move_arg_parser(args=None, doc=True):
     return __arg_parser(parser, args, 'move', doc)
 
 
+def _replace_arg_parser(args=None, doc=True):
+    """ Argument parser for replace command. """
+    desc = sc.get_description()['replace']
+    parser = ArgumentParser(prog='replace', description=desc)
+    parser.add_argument("old", help="Old plugin position.")
+    parser.add_argument('new_plugin', help="New plugin name.")
+    return __arg_parser(parser, args, 'replace', doc)
+
+
 def _coll_arg_parser(args=None, doc=True):
     """ Argument parser for coll command. """
     desc = sc.get_description()['coll']

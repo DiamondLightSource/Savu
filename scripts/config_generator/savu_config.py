@@ -69,8 +69,8 @@ def _help(content, args):
 def _open(content, args):
     """ Open an existing process list."""
     content.fopen(args.file, update=True, skip=args.skip)
-    _ref(content, '* -n')
     _disp(content, '-q')
+    _ref(content, '* -n')
     return content
 
 
@@ -294,6 +294,13 @@ def _history(content, arg):
         print("%5i : %s" % (i, utils.readline.get_history_item(i)))
     return content
 
+@parse_args
+@error_catcher
+def _replace(content, args):
+    """ Replace a plugin with another """
+    content.replace(args.old, args.new_plugin)
+    _disp(content, '-q')
+    return content
 
 commands = {'open': _open,
             'help': _help,
@@ -313,7 +320,8 @@ commands = {'open': _open,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
-            'history': _history}
+            'history': _history,
+            'replace': _replace}
 
 def get_description():
     """ For each command, enter the function and save the docstring to a

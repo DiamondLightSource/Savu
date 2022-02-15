@@ -94,6 +94,36 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
+    def testReplace(self):
+        # Exception due to invalid plugin number
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'replace 2 TomopyRecon',
+                      'exit',
+                      'y']
+        output_checks = ['ValueError']
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
+
+    def testReplace_1(self):
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'replace 1 SavuNexusLoader',
+                      'exit',
+                      'y']
+        output_checks = ['Exception', 'Error']
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
+
+    def testReplace_2(self):
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'replace 1 IncorrectString',
+                      'exit',
+                      'y']
+        output_checks = ['Unknown plugin']
+        sctu.savu_config_runner(input_list, output_checks)
+
     def testrunconfig(self):
         result = subprocess.run(['savu_config', '-h'], stdout=subprocess.PIPE)
         str_stdout=str(result.stdout)
