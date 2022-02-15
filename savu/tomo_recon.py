@@ -71,7 +71,7 @@ def __option_parser(doc=True):
     parser.add_argument("--system_params", help=sys_params_help, default=None)
 
     # Set stats off
-    parser.add_argument("--stats", help="Turn stats 'on' or 'off'", default="on", choices=["on", "off"])
+    parser.add_argument("--stats", help="Turn stats 'on' or 'off'.", default="on", choices=["on", "off"])
 
     # Hidden arguments
     # process names
