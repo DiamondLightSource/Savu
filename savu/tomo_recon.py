@@ -70,6 +70,9 @@ def __option_parser(doc=True):
     sys_params_help = "Override default path to Savu system parameters file."
     parser.add_argument("--system_params", help=sys_params_help, default=None)
 
+    # Set stats off
+    parser.add_argument("--stats", help="Turn stats 'on' or 'off'", default="on", choices=["on", "off"])
+
     # Hidden arguments
     # process names
     parser.add_argument("-n", "--names", help=hide, default="CPU0")
@@ -154,6 +157,7 @@ def _set_options(args):
     options['email'] = args.email
     options['femail'] = args.femail
     options['system_params'] = args.system_params
+    options['stats'] = args.stats
 
     if args.folder:
         out_folder_name = os.path.basename(args.folder)

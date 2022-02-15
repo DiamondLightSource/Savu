@@ -140,7 +140,7 @@ class StatsUtils(object):
 
     @staticmethod
     def _get_dicts_for_loops(file):
-        if isinstance(file["iterative"], h5.Group):
+        if "iterative" in list(file.keys()):
             group = file["iterative"]
             loop_stats = []
             loop_plugins = []

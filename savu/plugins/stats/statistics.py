@@ -55,7 +55,10 @@ class Statistics(object):
     @classmethod
     def _setup_class(cls, exp):
         """Sets up the statistics class for the whole plugin chain (only called once)"""
-        cls.stats_flag = True
+        if exp.meta_data.get("stats") == "on":
+            cls.stats_flag = True
+        elif exp.meta_data.get("stats") == "off":
+            cls.stats_flag = False
         cls._any_stats = False
         cls.count = 2
         cls.global_stats = {}
@@ -110,7 +113,7 @@ class Statistics(object):
             residuals = np.subtract(array1, array2)
             rss = sum(value**2 for value in np.nditer(residuals))
         else:
-            #print("Warning: cannot calculate RSS, arrays different sizes.")  # need to make this an actual warning
+            #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
         return rss
 
@@ -153,6 +156,7 @@ class Statistics(object):
         return volume_stats
 
     def _set_loop_stats(self):
+        # NEED TO CHANGE THIS - MUST USE SLICES
         data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
         data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
         RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
@@ -489,7 +493,6 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        print(Statistics.loop_stats)
         if cls._any_stats & cls.stats_flag:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
