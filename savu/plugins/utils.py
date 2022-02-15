@@ -480,5 +480,7 @@ def _alphanum(_str):
     :param _str:
     :return: list of numbers and letters
     """
+    _str = _str.strip() # Remove spacing
     char_list = re.split("([0-9]+)", _str)
+    char_list = list(filter(None, char_list))
     return [_str_to_int(c) for c in char_list]
