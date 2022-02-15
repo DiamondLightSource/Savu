@@ -144,6 +144,7 @@ class PluginList(object):
             print(separator)
             print(f"*** This process list was created using Savu "
                   f"{pl_version}  ***")
+            print(separator)
 
     def _save_plugin_list(self, out_filename):
         with h5py.File(out_filename, "a") as nxs_file:
