@@ -24,7 +24,7 @@ Method to convert a 360-degree sinogram to a 180-degree sinogram in a half-acqui
             visibility: datasets
             dtype: "[list[],list[str]]"
             description: Create a list of the output datatsets to create.
-            default: "['in_datasets[0]', 'cor']"
+            default: "[]"
         
         center:
             visibility: basic
