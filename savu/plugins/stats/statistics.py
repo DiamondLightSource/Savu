@@ -19,7 +19,7 @@ from mpi4py import MPI
 
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
-    no_stats_plugins = ["BasicOperations", "Mipmap"]
+    _no_stats_plugins = ["BasicOperations", "Mipmap"]
     _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
 
@@ -32,7 +32,7 @@ class Statistics(object):
         self.p_num = None
 
     def setup(self, plugin_self):
-        if plugin_self.name in Statistics.no_stats_plugins:
+        if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
             self.plugin = plugin_self
@@ -101,14 +101,14 @@ class Statistics(object):
             if base_slice is not None:
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
-                rss = self._calc_rss(my_slice, base_slice)
+                rss = self.calc_rss(my_slice, base_slice)
             else:
                 rss = None
             slice_stats['RSS'] = rss
             return slice_stats
         return None
 
-    def _calc_rss(self, array1, array2):  # residual sum of squares
+    def calc_rss(self, array1, array2):  # residual sum of squares
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
             rss = sum(value**2 for value in np.nditer(residuals))
@@ -117,13 +117,13 @@ class Statistics(object):
             rss = None
         return rss
 
-    def _rmsd_from_rss(self, rss, n):
+    def rmsd_from_rss(self, rss, n):
         return np.sqrt(rss/n)
 
     def calc_rmsd(self, array1, array2):
         if array1.shape == array2.shape:
-            rss = self._calc_rss(array1, array2)
-            rmsd = self._rmsd_from_rss(rss, array1.size)
+            rss = self.calc_rss(array1, array2)
+            rmsd = self.rmsd_from_rss(rss, array1.size)
         else:
             print("Warning: cannot calculate RMSD, arrays different sizes.")  # need to make this an actual warning
             rmsd = None
@@ -147,8 +147,9 @@ class Statistics(object):
         if None not in slice_stats['RSS']:
             total_rss = sum(slice_stats['RSS'])
             n = sum(slice_stats['data_points'])
-            RMSD = self._rmsd_from_rss(total_rss, n)
-            NRMSD = RMSD / abs(volume_stats[2])  # normalised RMSD (dividing by mean)
+            RMSD = self.rmsd_from_rss(total_rss, n)
+            the_range = volume_stats[0] - volume_stats[1]
+            NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
             volume_stats = np.append(volume_stats, NRMSD)
         else:
             #volume_stats = np.append(volume_stats, None)
@@ -160,7 +161,9 @@ class Statistics(object):
         data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
         data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
         RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
-        NRMSD = RMSD/abs(self.get_stats(self.p_num, stat="mean", instance=self._iterative_group._ip_iteration))
+        the_range = self.get_stats(self.p_num, stat="max", instance=self._iterative_group._ip_iteration) -\
+                self.get_stats(self.p_num, stat="min", instance=self._iterative_group._ip_iteration)
+        NRMSD = RMSD/the_range
         Statistics.loop_stats[self.l_num]["NRMSD"] = np.append(Statistics.loop_stats[self.l_num]["NRMSD"], NRMSD)
 
     def set_volume_stats(self):
@@ -204,11 +207,11 @@ class Statistics(object):
             if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
                 self._set_loop_stats()
 
-        self._write_stats_to_file3(p_num)
+        self._write_stats_to_file(p_num)
         self._already_called = True
         self._repeat_count += 1
 
-    def get_stats(self, p_num, stat=None, instance=1):
+    def get_stats(self, p_num, stat=None, instance=-1):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
 
         :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
@@ -226,15 +229,16 @@ class Statistics(object):
                 p_num = self.p_num + p_num
             except TypeError:
                 p_num = Statistics.count + p_num
-        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, "all"):
+        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, -1, "all"):
             stats_array = Statistics.global_stats[p_num]
         else:
             if instance == "all":
                 stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
                 n = 2
-                while n <= Statistics.global_stats[p_num].ndim:
-                    stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
-                    n += 1
+                if Statistics.global_stats[p_num].ndim != 1:
+                    while n <= len(Statistics.global_stats[p_num]):
+                        stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
+                        n += 1
                 return stats_list
             if instance > 0:
                 instance -= 1
@@ -245,7 +249,7 @@ class Statistics(object):
         else:
             return stats_dict
 
-    def get_stats_from_name(self, plugin_name, n=None, stat=None, instance=1):
+    def get_stats_from_name(self, plugin_name, n=None, stat=None, instance=-1):
         """Returns stats associated with a certain plugin.
 
         :param plugin_name: name of the plugin whose associated stats are being fetched.
@@ -264,7 +268,7 @@ class Statistics(object):
         p_num = Statistics.plugin_numbers[name]
         return self.get_stats(p_num, stat, instance)
 
-    def get_stats_from_dataset(self, dataset, stat=None, instance=None):
+    def get_stats_from_dataset(self, dataset, stat=None, instance=-1):
         """Returns stats associated with a dataset.
 
         :param dataset: The dataset whose associated stats are being fetched.
@@ -278,20 +282,24 @@ class Statistics(object):
         """
         key = "stats"
         stats = {}
-        if instance not in (None, 0, 1):
-            if instance == "all":
-                stats = [self.get_stats_from_dataset(dataset, stat=stat, instance=1)]
-                n = 2
-                while ("stats" + str(n)) in list(dataset.meta_data.get_dictionary().keys()):
-                    stats.append(self.get_stats_from_dataset(dataset, stat=stat, instance=n))
-                    n += 1
-                return stats
-            key = key + str(instance)
-        stats = dataset.meta_data.get(key)
-        if stat is not None:
-            return stats[stat]
+
+        stats_list = [dataset.meta_data.get("stats")]
+        n = 2
+        while ("stats" + str(n)) in list(dataset.meta_data.get_dictionary().keys()):
+            stats_list.append(dataset.meta_data.get("stats" + str(n)))
+            n += 1
+        if stat:
+            for i in range(len(stats_list)):
+                stats_list[i] = stats_list[i][stat]
+        if instance in (None, 0, 1):
+            stats = stats_list[0]
+        elif instance == "all":
+            stats = stats_list
         else:
-            return stats
+            if instance >= 2:
+                instance -= 1
+            stats = stats_list[instance]
+        return stats
 
     def _combine_mpi_stats(self, slice_stats):
         comm = MPI.COMM_WORLD
@@ -340,52 +348,13 @@ class Statistics(object):
         i = 2
         group_name = "stats"
         #out_dataset.data_info.set([group_name], stats)
-        if n_datasets == 1:
-            while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
-                group_name = f"stats{i}"
-                i += 1
-            for key in list(stats_dict.keys()):
-                out_dataset.meta_data.set([group_name, key], stats_dict[key])
+        while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
+            group_name = f"stats{i}"
+            i += 1
+        for key in list(stats_dict.keys()):
+            out_dataset.meta_data.set([group_name, key], stats_dict[key])
 
-    def _write_stats_to_file2(self, p_num):
-        path = Statistics.path
-        filename = f"{path}/stats.h5"
-        stats = Statistics.global_stats[p_num]
-        array_dim = stats.shape
-        self.hdf5 = Hdf5Utils(self.plugin.exp)
-        group_name = f"{p_num}-{self.plugin_name}-stats"
-        with h5.File(filename, "a") as h5file:
-            if group_name not in h5file:
-                group = h5file.create_group(group_name, track_order=None)
-                dataset = self.hdf5.create_dataset_nofill(group, "stats", array_dim, stats.dtype)
-                dataset[::] = stats[::]
-            else:
-                group = h5file[group_name]
-
-
-    @classmethod
-    def _write_stats_to_file4(cls):
-        path = cls.path
-        filename = f"{path}/stats.h5"
-        stats = cls.global_stats
-        cls.hdf5 = Hdf5Utils(cls.exp)
-        for i in range(5):
-            array = np.array([])
-            stat = cls._key_list[i]
-            for key in list(stats.keys()):
-                if len(stats[key]) != 0:
-                    if stats[key].ndim == 1:
-                        array = np.append(array, stats[key][i])
-                    else:
-                        array = np.append(array, stats[key][0][i])
-            array_dim = array.shape
-            group_name = f"all-{stat}"
-            with h5.File(filename, "a") as h5file:
-                group = h5file.create_group(group_name, track_order=None)
-                dataset = cls.hdf5.create_dataset_nofill(group, stat, array_dim, array.dtype)
-                dataset[::] = array[::]
-
-    def _write_stats_to_file3(self, p_num=None):
+    def _write_stats_to_file(self, p_num=None):
         if not p_num:
             p_num = self.p_num
         path = Statistics.path

@@ -138,9 +138,8 @@ class Plugin(PluginDatasets):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
 
-        if self.stats_obj.calc_stats:
+        if self.stats_obj.calc_stats and self.stats_obj.stats_flag:
             self.stats_obj.set_slice_stats(frames, data_copy)
-
         self.pcount += 1
         return frames
 
@@ -169,7 +168,7 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
-        if self.stats_obj.calc_stats:
+        if self.stats_obj.calc_stats and self.stats_obj.stats_flag:
             if not self.stats_obj._already_called:
                 self.stats_obj.set_volume_stats()
             self.stats_obj._already_called = False
