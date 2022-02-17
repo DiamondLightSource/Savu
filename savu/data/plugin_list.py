@@ -271,6 +271,7 @@ class PluginList(object):
             check = input(prompt_str)
             should_remove_all = check.lower() == 'y'
             if should_remove_all:
+                self.set_iterate_bool()
                 self.clear_iterate_plugin_group_dicts()
                 print('All iterative loops have been removed')
             else:
@@ -286,6 +287,7 @@ class PluginList(object):
             for i in reversed(sorted_indices):
                 try:
                     # convert the one-based index to a zero-based index
+                    self.reset_iterate_for_group(self.iterate_plugin_groups[i-1])
                     iterate_group = self.iterate_plugin_groups.pop(i - 1)
                     info_str = f"The following loop has been removed: start " \
                                f"plugin index " \
@@ -305,9 +307,25 @@ class PluginList(object):
         """
         self.iterate_plugin_groups = []
 
-    def get_iterate_plugin_group_dicts(self):
+    def set_iterate_bool(self):
+        """Set all plugins in all groups to iterative=False. This
+        affects the display formatter.
         """
-        Return the list of dicts representing groups of plugins to iterate over
+        for i, iterate_group in enumerate(self.iterate_plugin_groups):
+            self.reset_iterate_for_group(iterate_group)
+
+    def reset_iterate_for_group(self, grp):
+        """Set the iterative boolean to False when an iterative loop
+        is removed.
+
+        :param grp: iterative plugin loop group
+        """
+        for i in range((grp['end_index'] - grp['start_index']) + 1):
+            self.plugin_list[i + grp['start_index'] - 1]['iterative'] = False
+
+    def get_iterate_plugin_group_dicts(self):
+        """Return the list of dicts representing groups of plugins to
+        iterate over
         """
         return self.iterate_plugin_groups
 
@@ -331,19 +349,21 @@ class PluginList(object):
         """
         operation = 'add' if direction == 1 else 'remove'
         for i, iterate_group in enumerate(self.iterate_plugin_groups):
+            s_index = iterate_group['start_index']
+            e_index = iterate_group['end_index']
             if operation == 'remove':
-                if iterate_group['start_index'] <= pos and \
-                    pos <= iterate_group['end_index']:
+                if s_index <= pos and pos <= e_index:
+                    self.reset_iterate_for_group(iterate_group)
                     # remove the loop if the plugin being removed is at any
                     # position within an iterative loop
                     del self.iterate_plugin_groups[i]
                     break
             elif operation == 'add':
-                if iterate_group['start_index'] != iterate_group['end_index']:
+                if s_index != e_index:
                     # remove the loop only if the plugin is being added between
                     # the start and end of the loop
-                    if iterate_group['start_index'] < pos and \
-                        pos <= iterate_group['end_index']:
+                    if s_index < pos and pos <= e_index:
+                        self.reset_iterate_for_group(iterate_group)
                         del self.iterate_plugin_groups[i]
                         break
 
