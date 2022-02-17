@@ -68,7 +68,8 @@ class PluginList(object):
             self._template.creating = True
 
     def _get_plugin_entry_template(self):
-        template = {"active": True, "name": None, "id": None, "data": None}
+        template = {"active": True, "name": None, "id": None, "data": None,
+                    "iterative": False}
         return template
 
     def __get_json_keys(self):
@@ -85,7 +86,7 @@ class PluginList(object):
 
             plugin_group = plugin_file["entry/plugin"]
             self.plugin_list = []
-            single_val = ["name", "id", "pos", "active"]
+            single_val = ["name", "id", "pos", "active", "iterative"]
             exclude = ["citation"]
             ordered_pl_keys = pu.sort_alphanum(list(plugin_group.keys()))
             for group in ordered_pl_keys:
@@ -121,6 +122,7 @@ class PluginList(object):
                     plugin['param'] = plugin_tools.get_param_definitions() if \
                         plugin_tools else {}
                     plugin['pos'] = group.strip()
+                    plugin['iterative'] = plugin_group[group]['iterative'][0]
 
                     for param in parameters:
                         try:
@@ -675,6 +677,7 @@ class PluginList(object):
             process["pos"] = str(pos + 1)
             process["data"] = plugin.parameters
             process["active"] = True
+            process["iterative"] = False
             process["param"] = ptools.get_param_definitions()
             process["doc"] = ptools.docstring_info
             process["tools"] = ptools

@@ -161,11 +161,13 @@ class Content(object):
         plugin_entry = self.plugin_list.plugin_list[pos]
         name = change if change else plugin_entry["name"]
         active = plugin_entry["active"]
+        iterative = plugin_entry["iterative"]
         plugin = pu.plugins[name]()
         plugin.get_plugin_tools()._populate_default_parameters()
         keep = self.get(pos)["data"] if not defaults else None
         self.insert(plugin, pos, str_pos, replace=True)
         self.plugin_list.plugin_list[pos]["active"] = active
+        self.plugin_list.plugin_list[pos]["iterative"] = iterative
         if keep:
             self._update_parameters(plugin, name, keep, str_pos)
 

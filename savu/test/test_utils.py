@@ -151,6 +151,7 @@ def set_plugin_entry(name, ID, data, pos):
     plugin['hide'] = []
     plugin['user'] = []
     plugin['active'] = []
+    plugin['iterative'] = []
     plugin['pos'] = str(pos)
     return plugin
 
