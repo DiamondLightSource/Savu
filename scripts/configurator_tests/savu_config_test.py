@@ -25,14 +25,12 @@ class SavuConfigTest(unittest.TestCase):
 
     def testHelpBlank(self):
         input_list = ['', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = ['Close the program']
         sctu.savu_config_runner(input_list, output_checks)
 
     def testHelpCommand(self):
         input_list = ['help', 'exit', 'y']
-        output_checks = ['help :  Display the help information',
-                         'exit :  Close the program']
+        output_checks = ['Display the help information']
         sctu.savu_config_runner(input_list, output_checks)
 
     def testAdd(self):
