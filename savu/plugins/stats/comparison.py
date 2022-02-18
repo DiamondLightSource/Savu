@@ -119,8 +119,6 @@ class Comparison(Plugin, CpuPlugin):
         stats = [{}, {}]
         try:
             stats[0] = self.stats_obj.get_stats_from_dataset(in_datasets[0])
-            print(self.stats_obj.get_stats_from_dataset(in_datasets[0], stat="NRMSD", instance="all"))
-            print(self.stats_obj.get_stats(-1, stat="NRMSD", instance="all"))
         except KeyError:
             print(f"Can't find min and max metadata in {self.names[0]}, having to calculate")
             stats[0]["min"] = np.min(in_datasets[0].data[()])

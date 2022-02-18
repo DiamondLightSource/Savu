@@ -31,7 +31,7 @@ class Statistics(object):
         self._repeat_count = 0
         self.p_num = None
 
-    def setup(self, plugin_self):
+    def setup(self, plugin_self, pattern=None):
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
@@ -39,7 +39,10 @@ class Statistics(object):
             self.plugin_name = plugin_self.name
             self._pad_dims = []
             self._already_called = False
-            self._set_pattern_info()
+            if pattern:
+                self.pattern = pattern
+            else:
+                self._set_pattern_info()
         if self.calc_stats:
             Statistics._any_stats = True
         self._setup_iterative()
@@ -79,23 +82,24 @@ class Statistics(object):
             if not os.path.exists(cls.path):
                 os.mkdir(cls.path)
 
-    def set_slice_stats(self, slice, base_slice):
-        slice_stats_before = self.calc_slice_stats(base_slice)
-        slice_stats_after = self.calc_slice_stats(slice, base_slice)
-        for key in list(self.stats_before_processing.keys()):
-            self.stats_before_processing[key].append(slice_stats_before[key])
+    def set_slice_stats(self, slice, base_slice=None, pad=True):
+        slice_stats_after = self.calc_slice_stats(slice, base_slice, pad=pad)
+        if base_slice:
+            slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
+            for key in list(self.stats_before_processing.keys()):
+                self.stats_before_processing[key].append(slice_stats_before[key])
         for key in list(self.stats.keys()):
             self.stats[key].append(slice_stats_after[key])
 
-    def calc_slice_stats(self, my_slice, base_slice=None):
+    def calc_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Calculates and returns slice stats for the current slice.
 
         :param slice1: The slice whose stats are being calculated.
         """
         if my_slice is not None:
-            slice_num = self.plugin.pcount
             my_slice = self._de_list(my_slice)
-            my_slice = self._unpad_slice(my_slice)
+            if pad:
+                my_slice = self._unpad_slice(my_slice)
             slice_stats = {'max': np.amax(my_slice).astype('float64'), 'min': np.amin(my_slice).astype('float64'),
                            'mean': np.mean(my_slice), 'std_dev': np.std(my_slice), 'data_points': my_slice.size}
             if base_slice is not None:
@@ -201,7 +205,8 @@ class Statistics(object):
             else:
                 Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
 
-            self._link_stats_to_datasets(Statistics.global_stats[Statistics.plugin_numbers[name]])
+            stats_dict = self._array_to_dict(stats_array)
+            self._link_stats_to_datasets(stats_dict)
 
         if self._iterative_group:
             if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
@@ -318,7 +323,7 @@ class Statistics(object):
 
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
-        in_datasets, out_datasets = self.plugin.get_datasets()
+        out_datasets = self.plugin.get_out_datasets()
         try:
             self.pattern = self.plugin.parameters['pattern']
             if self.pattern == None:
@@ -337,14 +342,11 @@ class Statistics(object):
             if bool(set(Statistics._pattern_list) & set(dataset.data_info.get("data_patterns"))):
                 self.calc_stats = True
 
-    def _link_stats_to_datasets(self, stats):
+    def _link_stats_to_datasets(self, stats_dict):
         """Links the volume wide statistics to the output dataset(s)"""
         out_dataset = self.plugin.get_out_datasets()[0]
         n_datasets = self.plugin.nOutput_datasets()
-        if self._repeat_count > 0:
-            stats_dict = self._array_to_dict(stats[self._repeat_count])
-        else:
-            stats_dict = self._array_to_dict(stats)
+
         i = 2
         group_name = "stats"
         #out_dataset.data_info.set([group_name], stats)
@@ -354,9 +356,11 @@ class Statistics(object):
         for key in list(stats_dict.keys()):
             out_dataset.meta_data.set([group_name, key], stats_dict[key])
 
-    def _write_stats_to_file(self, p_num=None):
-        if not p_num:
+    def _write_stats_to_file(self, p_num=None, plugin_name=None):
+        if p_num is None:
             p_num = self.p_num
+        if plugin_name is None:
+            plugin_name = self.plugin_names[p_num]
         path = Statistics.path
         filename = f"{path}/stats.h5"
         stats = self.global_stats[p_num]
@@ -368,7 +372,7 @@ class Statistics(object):
                     del group[str(p_num)]
                 dataset = group.create_dataset(str(p_num), shape=stats.shape, dtype=stats.dtype)
                 dataset[::] = stats[::]
-                dataset.attrs.create("plugin_name", self.plugin_names[p_num])
+                dataset.attrs.create("plugin_name", plugin_name)
                 dataset.attrs.create("pattern", self.pattern)
             if self._iterative_group:
                 l_stats = Statistics.loop_stats[self.l_num]
