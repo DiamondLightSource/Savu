@@ -61,6 +61,7 @@ class PaddingDummy(BaseRecon, CpuPlugin):
         cor, angles, self.vol_shape, init = self.get_frame_params()
         projdata3D = data[0].astype(np.float32)
         dim_tuple = np.shape(projdata3D)
+        print(dim_tuple)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         res = np.zeros((self.Horiz_det, dim_tuple[1], self.Horiz_det))
         return res

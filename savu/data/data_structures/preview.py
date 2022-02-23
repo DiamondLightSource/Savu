@@ -59,6 +59,13 @@ class Preview(object):
             isinstance(preview_list, str) else preview_list
         preview_list = self.__convert_nprocs(preview_list)
 
+        # check if padding exists in any of the plugins
+        data_obj = self.get_data_obj()
+        for i in range(len(data_obj.exp.meta_data.plugin_list.plugin_list)):
+            if 'padding' in data_obj.exp.meta_data.plugin_list.plugin_list[i]['data']:
+                padding_value = data_obj.exp.meta_data.plugin_list.plugin_list[i]['data']['padding']
+                #data_obj.exp.meta_data.set('global_padding_value', padding_value)
+
         if preview_list:
             preview_list = self._add_preview_defaults(preview_list)
             starts, stops, steps, chunks = \

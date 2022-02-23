@@ -222,7 +222,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         vectors = np.zeros([angles_rad.size, 12])
         for i in range(0, angles_rad.size):
             d0 = [CenterRotOffset - projection_shifts2d[i, 0], 0.0,
-                  CenterRotOffset - projection_shifts2d[i, 1]]  # detector
+                  CenterRotOffset - projection_shifts2d[i, 1] - 0.5]  # detector
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix3D(theta), s0)
             vectors[i, 0:3] = vec_temp[:]  # ray position
