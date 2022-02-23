@@ -132,7 +132,15 @@ class DisplayFormatter(object):
         active = f"{active} " if active else ""
         title = f"{active}{pos} {p_dict['name']}"
         title = title if quiet else f"{title} ({p_dict['id']})"
-        if p_dict['iterative']:
+
+        # determine if the given plugin is in an iterative loop or not
+        is_in_loop = False
+        int_pos = int(p_dict['pos'])
+        for grp in self.plugin_list_inst.iterate_plugin_groups:
+            if grp['start_index'] <= int_pos and int_pos <= grp['end_index']:
+                is_in_loop = True
+
+        if is_in_loop:
             title_str = self._get_equal_lines(
                 "   "+title, width, Back.BLUE+fore_colour, Style.RESET_ALL, " ")
         else:
