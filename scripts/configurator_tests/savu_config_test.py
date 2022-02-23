@@ -92,6 +92,103 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
+    def test_iterate_add_loop_success(self):
+        start = 2
+        stop = 2
+        iterations = 5
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            f"iterate --set {start} {stop} {iterations}",
+            'exit',
+            'y'
+        ]
+        output_str = f"The following loop has been added: start plugin index " \
+                     f"{start}, end plugin index {stop}, iterations " \
+                     f"{iterations}"
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_iterate_add_loop_fail(self):
+        start = 4
+        stop = 4
+        iterations = 5
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            f"iterate --set {start} {stop} {iterations}",
+            'exit',
+            'y'
+        ]
+        output_str = 'The given plugin indices are not within the range of ' \
+            'existing plugin indices'
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_iterate_remove_loop_success(self):
+        start = 2
+        stop = 2
+        iterations = 5
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            f"iterate --set {start} {stop} {iterations}",
+            'iterate --remove 1',
+            'exit',
+            'y'
+        ]
+        output_str = f"The following loop has been removed: start plugin " \
+                     f"index {start}, end plugin index {stop}, iterations " \
+                     f"{iterations}"
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_iterate_remove_loop_fail(self):
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            'iterate --remove 1',
+            'exit',
+            'y'
+        ]
+        output_str = "There doesn't exist an iterative loop with number 1"
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_iterate_remove_all_loops_confirm(self):
+        start = 2
+        stop = 2
+        iterations = 5
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            f"iterate --set {start} {stop} {iterations}",
+            'iterate --remove',
+            'y',
+            'exit',
+            'y'
+        ]
+        output_str = 'All iterative loops have been removed'
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_iterate_remove_all_loops_deny(self):
+        start = 2
+        stop = 2
+        iterations = 5
+        input_list = [
+            'add TomoPhantomLoader',
+            'add MedianFilter',
+            f"iterate --set {start} {stop} {iterations}",
+            'iterate --remove',
+            'n',
+            'exit',
+            'y'
+        ]
+        output_str = 'No iterative loops have been removed'
+        output_checks = [output_str]
+        sctu.savu_config_runner(input_list, output_checks)
+
     def testrunconfig(self):
         result = subprocess.run(['savu_config', '-h'], stdout=subprocess.PIPE)
         str_stdout=str(result.stdout)
