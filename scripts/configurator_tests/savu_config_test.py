@@ -217,8 +217,7 @@ class SavuConfigTest(unittest.TestCase):
                       'exit',
                       'y']
         output_checks = ['Unknown plugin']
-        sctu.savu_config_runner(input_list, output_checks,
-                        error_str=True)
+        sctu.savu_config_runner(input_list, output_checks)
 
     def testrunconfig(self):
         result = subprocess.run(['savu_config', '-h'], stdout=subprocess.PIPE)
