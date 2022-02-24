@@ -67,7 +67,17 @@ def _config_arg_parser(doc=True):
     parser.add_argument("-e", "--error", dest="error", help="Shows all errors that Savu encounters.",
                         action='store_true', default=False)
     parser.add_argument("--examples", dest="examples", action='store_true',
-                        help="Add example plugins", default=False)
+                        help="Add example plugins.", default=False)
+    parser.add_argument("--tree", dest="tree",
+                        help="Display the tree view of a hdf/nxs file.",
+                        type=str, default=None, required=False)
+    parser.add_argument("--check", dest="check",
+                        help="Check if a tomographic data file (hdf/nxs) contains conventional"
+                             " dataset-paths for NxTomoLoader.",
+                        type=str, default=None, required=False)
+    parser.add_argument("--find", dest="find", nargs=2, action="append",
+                        help="Find paths to datasets in a hdf/nxs file matching a pattern",
+                        type=str, default=None, required=False)
     return parser if doc==True else parser.parse_args()
 
 
@@ -256,6 +266,15 @@ def _move_arg_parser(args=None, doc=True):
     parser.add_argument("orig_pos", help="Original position.")
     parser.add_argument('new_pos', help="New position.")
     return __arg_parser(parser, args, 'move', doc)
+
+
+def _replace_arg_parser(args=None, doc=True):
+    """ Argument parser for replace command. """
+    desc = sc.get_description()['replace']
+    parser = ArgumentParser(prog='replace', description=desc)
+    parser.add_argument("old", help="Old plugin position.")
+    parser.add_argument('new_plugin', help="New plugin name.")
+    return __arg_parser(parser, args, 'replace', doc)
 
 
 def _coll_arg_parser(args=None, doc=True):
