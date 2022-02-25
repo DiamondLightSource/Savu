@@ -140,12 +140,13 @@ class DisplayFormatter(object):
             if grp['start_index'] <= int_pos and int_pos <= grp['end_index']:
                 is_in_loop = True
 
-        if is_in_loop:
-            title_str = self._get_equal_lines(
-                "   "+title, width, Back.BLUE+fore_colour, Style.RESET_ALL, " ")
-        else:
-            title_str = self._get_equal_lines(
-                title, width, back_colour+fore_colour, Style.RESET_ALL, " ")
+        text_indent = '   ' if is_in_loop else ''
+        if is_in_loop and active == '':
+            back_colour = Back.BLUE
+
+        title_str = self._get_equal_lines(
+            text_indent+title, width, back_colour+fore_colour, Style.RESET_ALL,
+            " ")
         return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
