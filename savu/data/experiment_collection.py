@@ -324,10 +324,12 @@ class Experiment(object):
                 if out_name in list(self.index['in_data'].keys()):
                     finalise['replace'].append(self.index['in_data'][out_name])
         else:
-            # don't set any datasets to be replaced when in an iterative loop,
-            # as a workaround to intermediate datasets being terminated when
-            # they are not explicitly named in the configurator
-            print('Not marking any datasets in a loop as \"to replace\"')
+            # temporary workaround to
+            # https://jira.diamond.ac.uk/browse/SCI-10216: don't mark any
+            # datasets as "to replace" if the given plugin is in an iterative
+            # loop
+            logging.debug('Not marking any datasets in a loop as '\
+                          '\"to replace\"')
         
         return finalise
 
