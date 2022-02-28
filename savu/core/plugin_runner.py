@@ -173,12 +173,12 @@ class PluginRunner(object):
         # associated with the Data objects of the plugin, apart from for the
         # last iteration
         if clean_up_plugin:
-            print(f"Cleaning up plugin {plugin.name}")
+            logging.debug(f"Cleaning up plugin {plugin.name}")
             plugin._clean_up()
         else:
             info_msg = f"Not cleaning up plugin {plugin.name}, as it is in a " \
                 f"group to iterate over"
-            print(info_msg)
+            logging.debug(info_msg)
 
         finalise = self.exp._finalise_experiment_for_current_plugin()
 
