@@ -138,7 +138,7 @@ class Plugin(PluginDatasets):
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
 
-        if self.stats_obj.calc_stats and self.stats_obj.stats_flag:
+        if self.stats_obj.calc_stats and self.stats_obj._stats_flag:
             self.stats_obj.set_slice_stats(frames, data_copy)
         self.pcount += 1
         return frames
@@ -168,10 +168,12 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
-        if self.stats_obj.calc_stats and self.stats_obj.stats_flag:
+        if self.stats_obj.calc_stats and self.stats_obj._stats_flag:
             if not self.stats_obj._already_called:
                 self.stats_obj.set_volume_stats()
             self.stats_obj._already_called = False
+        #else:
+        #    self.stats_obj._delete_stats_metadata(self)
         pass
 
     def set_preview(self, data, params):
@@ -201,9 +203,10 @@ class Plugin(PluginDatasets):
     def __copy_meta_data(self):
         """
         Copy all metadata from input datasets to output datasets, except axis
-        data that is no longer valid.
+        data and statistics that is no longer valid.
         """
         remove_keys = self.__remove_axis_data()
+        remove_keys[0].add("stats")
         in_meta_data, out_meta_data = self.get()
         copy_dict = {}
         for mData in in_meta_data:
