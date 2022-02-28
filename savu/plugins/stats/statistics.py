@@ -43,7 +43,6 @@ class Statistics(object):
                 self.pattern = pattern
             else:
                 self._set_pattern_info()
-        if self.calc_stats:
             Statistics._any_stats = True
         self._setup_iterative()
 
@@ -58,10 +57,14 @@ class Statistics(object):
     @classmethod
     def _setup_class(cls, exp):
         """Sets up the statistics class for the whole plugin chain (only called once)"""
-        if exp.meta_data.get("stats") == "on":
-            cls.stats_flag = True
-        elif exp.meta_data.get("stats") == "off":
-            cls.stats_flag = False
+        try:
+            if exp.meta_data.get("stats") == "on":
+                cls._stats_flag = True
+            elif exp.meta_data.get("stats") == "off":
+                cls._stats_flag = False
+        except KeyError:
+            cls._stats_flag = True
+        print(cls._stats_flag)
         cls._any_stats = False
         cls.count = 2
         cls.global_stats = {}
@@ -82,8 +85,8 @@ class Statistics(object):
             if not os.path.exists(cls.path):
                 os.mkdir(cls.path)
 
-    def set_slice_stats(self, slice, base_slice=None, pad=True):
-        slice_stats_after = self.calc_slice_stats(slice, base_slice, pad=pad)
+    def set_slice_stats(self, my_slice, base_slice=None, pad=True):
+        slice_stats_after = self.calc_slice_stats(my_slice, base_slice, pad=pad)
         if base_slice:
             slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
             for key in list(self.stats_before_processing.keys()):
@@ -94,7 +97,8 @@ class Statistics(object):
     def calc_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Calculates and returns slice stats for the current slice.
 
-        :param slice1: The slice whose stats are being calculated.
+        :param my_slice: The slice whose stats are being calculated.
+        :param base_slice: Provide a base slice to calculate residuals from, to calculate RMSD.
         """
         if my_slice is not None:
             my_slice = self._de_list(my_slice)
@@ -206,7 +210,7 @@ class Statistics(object):
                 Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
 
             stats_dict = self._array_to_dict(stats_array)
-            self._link_stats_to_datasets(stats_dict)
+            self._link_stats_to_datasets(stats_dict, self._iterative_group)
 
         if self._iterative_group:
             if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
@@ -215,6 +219,8 @@ class Statistics(object):
         self._write_stats_to_file(p_num)
         self._already_called = True
         self._repeat_count += 1
+        if self._iterative_group:
+            self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
     def get_stats(self, p_num, stat=None, instance=-1):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
@@ -342,19 +348,27 @@ class Statistics(object):
             if bool(set(Statistics._pattern_list) & set(dataset.data_info.get("data_patterns"))):
                 self.calc_stats = True
 
-    def _link_stats_to_datasets(self, stats_dict):
+    def _link_stats_to_datasets(self, stats_dict, iterative=False):
         """Links the volume wide statistics to the output dataset(s)"""
         out_dataset = self.plugin.get_out_datasets()[0]
+        my_dataset = out_dataset
+        if iterative:
+            if "itr_clone" in out_dataset.group_name:
+                my_dataset = list(iterative._ip_data_dict["iterating"].keys())[0]
         n_datasets = self.plugin.nOutput_datasets()
 
         i = 2
         group_name = "stats"
         #out_dataset.data_info.set([group_name], stats)
-        while group_name in list(out_dataset.meta_data.get_dictionary().keys()):
+        while group_name in list(my_dataset.meta_data.get_dictionary().keys()):
             group_name = f"stats{i}"
             i += 1
         for key in list(stats_dict.keys()):
-            out_dataset.meta_data.set([group_name, key], stats_dict[key])
+            my_dataset.meta_data.set([group_name, key], stats_dict[key])
+
+    def _delete_stats_metadata(self, plugin):
+        out_dataset = plugin.get_out_datasets()[0]
+        out_dataset.meta_data.delete("stats")
 
     def _write_stats_to_file(self, p_num=None, plugin_name=None):
         if p_num is None:
@@ -466,6 +480,6 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        if cls._any_stats & cls.stats_flag:
+        #if cls._any_stats & cls._stats_flag:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
