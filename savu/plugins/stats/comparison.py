@@ -82,6 +82,8 @@ class Comparison(Plugin, CpuPlugin):
         self.rss_list = []
         self.flipped_rss_list = []
         self.data_points_list = []
+        self.partial_cc_top = []
+        self.partial_cc_bottom = ([], [])
         # ================== Input and output plugin datasets ==================
         # in_pData and out_pData are instances of the PluginData class.
         # All in_datasets and out_datasets above have an in/out_pData object
@@ -94,8 +96,8 @@ class Comparison(Plugin, CpuPlugin):
 
         # Each plugin dataset must call this method and define the data access
         # pattern and number of frames required.
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        in_pData[1].plugin_data_setup(self.parameters['pattern'], 'single')
+        for i in range(len(in_pData)):
+            in_pData[i].plugin_data_setup(self.parameters['pattern'], 'single')
 
         # 'single', 'multiple' or an int (should only be used if essential)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
@@ -116,22 +118,20 @@ class Comparison(Plugin, CpuPlugin):
         if not self.names[1]:
             self.names[1] = "dataset2"
 
-        stats = [{}, {}]
+        self.stats = [None, None]
+        self.ranges = [None, None]
         try:
-            stats[0] = self.stats_obj.get_stats_from_dataset(in_datasets[0])
+            self.stats[0] = self.stats_obj.get_stats_from_dataset(in_datasets[0])
+            self.ranges[0] = self.stats[0]["max"] - self.stats[0]["min"]
         except KeyError:
-            print(f"Can't find min and max metadata in {self.names[0]}, having to calculate")
-            stats[0]["min"] = np.min(in_datasets[0].data[()])
-            stats[0]["max"] = np.max(in_datasets[0].data[()])
+            print(f"Can't find stats metadata in {self.names[0]}, cannot do comparison")
         try:
-            stats[1] = self.stats_obj.get_stats_from_dataset(in_datasets[1])
+            self.stats[1] = self.stats_obj.get_stats_from_dataset(in_datasets[1])
+            self.ranges[1] = self.stats[1]["max"] - self.stats[1]["min"]
         except KeyError:
-            print(f"Can't find min and max metadata in {self.names[1]}, having to calculate")
-            stats[1]["min"] = np.min(in_datasets[1].data[()])
-            stats[1]["max"] = np.max(in_datasets[1].data[()])
-        self.mins = (stats[0]["min"], stats[1]["min"])
-        self.ranges = (stats[0]["max"] - stats[0]["min"], stats[1]["max"] - stats[1]["min"])
-
+            print(f"Can't find stats metadata in {self.names[1]}, cannot do comparison")
+        print(self.stats[0])
+        print(self.stats[1])
 
     def process_frames(self, data):
         # This function is called in a loop by the framework until all the
@@ -146,30 +146,39 @@ class Comparison(Plugin, CpuPlugin):
         # This plugin has one output dataset, so a single numpy array (a
         # SINOGRAM in this case) should be returned to the framework.
         if data[0].shape == data[1].shape:
-            scaled_data = [self._scale_data(data[0], self.mins[0], self.ranges[0]),
-                           self._scale_data(data[1], self.mins[1], self.ranges[1])]
-            self.rss_list.append(self.stats_obj.calc_rss(scaled_data[0], scaled_data[1]))
-            self.data_points_list.append(data[0].size)
-            flipped_data = 1 - scaled_data[0]
-            self.flipped_rss_list.append(self.stats_obj.calc_rss(flipped_data, scaled_data[1]))
+            if self.stats[0] is not None and self.stats[1] is not None:
+                scaled_data = [self._scale_data(data[0], self.stats[0]["min"], self.ranges[0]),
+                               self._scale_data(data[1], self.stats[1]["min"], self.ranges[1])]
+                self.rss_list.append(self.stats_obj.calc_rss(scaled_data[0], scaled_data[1]))
+                self.data_points_list.append(data[0].size)
+                flipped_data = 1 - scaled_data[0]
+                self.flipped_rss_list.append(self.stats_obj.calc_rss(flipped_data, scaled_data[1]))
+
+                self.partial_cc_top.append(np.sum((data[0] - self.stats[0]["mean"]) * (data[1] - self.stats[1]["mean"])))
+                self.partial_cc_bottom[0].append(np.sum((data[0] - self.stats[0]["mean"]) ** 2))
+                self.partial_cc_bottom[1].append(np.sum((data[1] - self.stats[1]["mean"]) ** 2))
+
         else:
             print("Arrays different sizes, can't calculated residuals.")
         return [data[0], data[1]]
 
-    def _scale_data(self, data, vol_min, vol_range): # scale data slice to be between 0 and 1
+    def _scale_data(self, data, vol_min, vol_range, new_min=0, new_range=1):  # scale data slice to be between 0 and 1
         data = data - vol_min
-        data = data * (1/vol_range)
+        data = data * (new_range/vol_range)
+        data = data + new_min
         return data
 
     def post_process(self):
+        if self.stats[0] is not None and self.stats[1] is not None:
+            total_rss = sum(self.rss_list)
+            total_data = sum(self.data_points_list)
+            RMSD = self.stats_obj.rmsd_from_rss(total_rss, total_data)
+            print(f"Normalised root mean square deviation between {self.names[0]} and {self.names[1]} is {RMSD}")
 
-        total_rss = sum(self.rss_list)
-        total_data = sum(self.data_points_list)
-        RMSD = self.stats_obj.rmsd_from_rss(total_rss, total_data)
-        print(f"Normalised root mean square deviation between {self.names[0]} and {self.names[1]} is {RMSD}")
+            total_flipped_rss = sum(self.flipped_rss_list)
+            FRMSD = self.stats_obj.rmsd_from_rss(total_flipped_rss, total_data)
+            print(f"Normalised root mean square deviation between {self.names[0]} and {self.names[1]} is {FRMSD}, \
+                  when the contrast is flipped")
 
-        total_flipped_rss = sum(self.flipped_rss_list)
-        FRMSD = self.stats_obj.rmsd_from_rss(total_flipped_rss, total_data)
-        print(f"Normalised root mean square deviation between {self.names[0]} and {self.names[1]} is {FRMSD}, \
-              when the contrast is flipped")
-
+            PCC = np.sum(self.partial_cc_top) / (np.sqrt(np.sum(self.partial_cc_bottom[0]) * np.sum(self.partial_cc_bottom[1])))
+            print(f"Pearson correlation coefficient between {self.names[0]} and {self.names[1]} is {PCC}")
