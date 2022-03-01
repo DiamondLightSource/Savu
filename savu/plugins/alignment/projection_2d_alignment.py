@@ -27,6 +27,8 @@ from skimage.registration import phase_cross_correlation
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import copy
 
+from mpi4py import MPI
+
 import numpy as np
 
 @register_plugin
@@ -56,23 +58,15 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         self.iterate_group = check_if_in_iterative_loop(self.exp)
         self.iterations_number = 1
         if bool(self.iterate_group):
+            self.iterations_number = self.iterate_group._ip_fixed_iterations
             if 'error_alignment_vector' in list(self.exp.meta_data.dict.keys()):
                 self.error_alignment_vector = self.exp.meta_data.dict['error_alignment_vector']
             else:
-                self.iterations_number = self.iterate_group._ip_fixed_iterations
-                self.error_alignment_vector = np.zeros((self.iterations_number, 2))
+                self.error_alignment_vector = np.zeros(self.iterations_number)
                 self.exp.meta_data.set('error_alignment_vector', copy.deepcopy(self.error_alignment_vector))
         else:
-            self.error_alignment_vector = np.zeros((self.iterations_number, 2))
+            self.error_alignment_vector = np.zeros(self.iterations_number)
             self.exp.meta_data.set('error_alignment_vector', copy.deepcopy(self.error_alignment_vector))
-
-        # creating an error vector depending on iteration number
-        new_shape2 = (self.iterations_number, 2)
-        out_dataset[1].create_dataset(shape=new_shape2,
-                                      axis_labels=['x.iterations', 'y.errors'],
-                                      remove=False)
-        out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
-        out_pData[1].plugin_data_setup('METADATA', self.get_max_frames())
 
     def process_frames(self, data):
         projection = data[0]  # extract a projection
@@ -81,11 +75,8 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         # perform alignment
         shifts, error, diffphase = phase_cross_correlation(
                     projection, projection_align, upsample_factor=self.parameters['upsample_factor'])
-        if self.iterations_number == 1:
-            errors = self.error_alignment_vector[0, :]
-        else:
-            errors = self.error_alignment_vector[self.iterate_group._ip_iteration-1, :]
-        return [shifts, errors]
+
+        return shifts
 
     def post_process(self):
         out_data = self.get_out_datasets()[0]
@@ -98,12 +89,16 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         in_meta_data = self.get_in_meta_data()[0]
         in_meta_data.set('projection_shifts', shift_vector_prev.copy())
         # filling the error vector
-        #print(self.iterate_group._ip_iteration)
+        error_scalar = np.sum(np.sqrt(shift_vector[:, 0]*shift_vector[:, 0] + shift_vector[:, 1]*shift_vector[:, 1]))
+        # print just for the first process
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        if rank == 0:
+            print(f"The alignment error is:  {error_scalar}")
         if self.iterations_number == 1:
-            self.error_alignment_vector[0, :] = np.sum(np.sqrt(shift_vector[:, 0]*shift_vector[:, 0] + shift_vector[:, 1]*shift_vector[:, 1]))
+            self.error_alignment_vector[0] = error_scalar
         else:
-            print(np.sum(np.sqrt(shift_vector[:, 0]*shift_vector[:, 0] + shift_vector[:, 1]*shift_vector[:, 1])))
-            self.error_alignment_vector[self.iterate_group._ip_iteration, :] = np.sum(np.sqrt(shift_vector[:, 0]*shift_vector[:, 0] + shift_vector[:, 1]*shift_vector[:, 1]))
+            self.error_alignment_vector[self.iterate_group._ip_iteration] = error_scalar
         self.exp.meta_data.set('error_alignment_vector', self.error_alignment_vector.copy())
 
     def get_max_frames(self):
@@ -113,4 +108,4 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         return 2
 
     def nOutput_datasets(self):
-        return 2
+        return 1
