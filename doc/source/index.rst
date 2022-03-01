@@ -48,7 +48,7 @@ Table of Contents
     reference/savu_config_commands
     reference/plugin_documentation
     reference/framework_contents
-    reference/stats_api/stats
+    reference/stats_documentation/stats
 
 .. _tutorials_content:
 
