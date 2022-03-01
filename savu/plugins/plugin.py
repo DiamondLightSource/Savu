@@ -206,7 +206,8 @@ class Plugin(PluginDatasets):
         data and statistics that is no longer valid.
         """
         remove_keys = self.__remove_axis_data()
-        remove_keys[0].add("stats")
+        for i in range(len(remove_keys)):
+            remove_keys[i].add("stats")
         in_meta_data, out_meta_data = self.get()
         copy_dict = {}
         for mData in in_meta_data:
