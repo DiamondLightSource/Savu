@@ -32,24 +32,20 @@ import numpy as np
 # This decorator is required for the configurator to recognise the plugin
 @register_plugin
 class Comparison(Plugin, CpuPlugin):
-# Each class must inherit from the Plugin class and a driver
 
     def __init__(self):
         super(Comparison, self).__init__("Comparison")
 
     def nInput_datasets(self):
-        # Called immediately after the plugin is loaded in to the framework
         return 2
 
 
     def nOutput_datasets(self):
-        # Called immediately after the plugin is loaded in to the framework
         if check_if_end_plugin_in_iterate_group(self.exp):
             return 3
         else:
             return 2
 
-        # total number of output datasets that are clones
     def nClone_datasets(self):
         if check_if_end_plugin_in_iterate_group(self.exp):
             return 1
@@ -121,7 +117,7 @@ class Comparison(Plugin, CpuPlugin):
         self.stats = [None, None]
         self.ranges = [None, None]
         try:
-            self.stats[0] = self.stats_obj.get_stats_from_dataset(in_datasets[0])
+            self.stats[0] = self.stats_obj.get_stats_from_dataset(in_datasets[0])  # get stats dictionary
             self.ranges[0] = self.stats[0]["max"] - self.stats[0]["min"]
         except KeyError:
             print(f"Can't find stats metadata in {self.names[0]}, cannot do comparison")
@@ -130,8 +126,6 @@ class Comparison(Plugin, CpuPlugin):
             self.ranges[1] = self.stats[1]["max"] - self.stats[1]["min"]
         except KeyError:
             print(f"Can't find stats metadata in {self.names[1]}, cannot do comparison")
-        print(self.stats[0])
-        print(self.stats[1])
 
     def process_frames(self, data):
         # This function is called in a loop by the framework until all the
