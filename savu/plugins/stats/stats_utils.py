@@ -16,7 +16,7 @@ class StatsUtils(object):
         loop_stats, loop_plugins = self._get_dicts_for_loops(f)
         f.close()
 
-        self.make_loop_graphs(loop_stats, loop_plugins, savepath)
+        #self.make_loop_graphs(loop_stats, loop_plugins, savepath)
 
         table_index_list = index_list
         for i in range(len(loop_plugins)):

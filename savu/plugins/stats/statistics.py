@@ -21,6 +21,7 @@ class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     _no_stats_plugins = ["BasicOperations", "Mipmap"]
     _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
+    #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
 
 
     def __init__(self):
@@ -32,17 +33,18 @@ class Statistics(object):
         self.p_num = None
 
     def setup(self, plugin_self, pattern=None):
+        self.plugin_name = plugin_self.name
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
             self.plugin = plugin_self
-            self.plugin_name = plugin_self.name
             self._pad_dims = []
             self._already_called = False
             if pattern:
                 self.pattern = pattern
             else:
                 self._set_pattern_info()
+        if self.calc_stats:
             Statistics._any_stats = True
         self._setup_iterative()
 
@@ -85,8 +87,100 @@ class Statistics(object):
             if not os.path.exists(cls.path):
                 os.mkdir(cls.path)
 
+    def get_stats(self, p_num=None, stat=None, instance=-1):
+        """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
+
+        :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
+            If p_num <= 0, it is relative to the plugin number of the current plugin being run.
+            E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
+            By default will gather stats for the current plugin.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
+        :param instance: In cases where there are multiple set of stats associated with a plugin
+            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
+            By default will retrieve the most recent set.
+        """
+        if not p_num:
+            p_num = self.p_num
+        if p_num <= 0:
+            try:
+                p_num = self.p_num + p_num
+            except TypeError:
+                p_num = Statistics.count + p_num
+        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, -1, "all"):
+            stats_array = Statistics.global_stats[p_num]
+        else:
+            if instance == "all":
+                stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
+                n = 2
+                if Statistics.global_stats[p_num].ndim != 1:
+                    while n <= len(Statistics.global_stats[p_num]):
+                        stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
+                        n += 1
+                return stats_list
+            if instance > 0:
+                instance -= 1
+            stats_array = Statistics.global_stats[p_num][instance]
+        stats_dict = self._array_to_dict(stats_array)
+        if stat is not None:
+            return stats_dict[stat]
+        else:
+            return stats_dict
+
+    def get_stats_from_name(self, plugin_name, n=None, stat=None, instance=-1):
+        """Returns stats associated with a certain plugin.
+
+        :param plugin_name: name of the plugin whose associated stats are being fetched.
+        :param n: In a case where there are multiple instances of **plugin_name** in the process list,
+            specify the nth instance. Not specifying will select the first (or only) instance.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
+        :param instance: In cases where there are multiple set of stats associated with a plugin
+            due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
+            By default will retrieve the most recent set.
+        """
+        name = plugin_name
+        if n in (None, 0, 1):
+            name = name + str(n)
+        p_num = Statistics.plugin_numbers[name]
+        return self.get_stats(p_num, stat, instance)
+
+    def get_stats_from_dataset(self, dataset, stat=None, instance=-1):
+        """Returns stats associated with a dataset.
+
+        :param dataset: The dataset whose associated stats are being fetched.
+        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
+            If left blank will return the whole dictionary of stats:
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD'}
+        :param instance: In cases where there are multiple set of stats associated with a dataset
+            due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
+
+        """
+        stats_list = [dataset.meta_data.get("stats")]
+        n = 2
+        while ("stats" + str(n)) in list(dataset.meta_data.get_dictionary().keys()):
+            stats_list.append(dataset.meta_data.get("stats" + str(n)))
+            n += 1
+        if stat:
+            for i in range(len(stats_list)):
+                stats_list[i] = stats_list[i][stat]
+        if instance in (None, 0, 1):
+            stats = stats_list[0]
+        elif instance == "all":
+            stats = stats_list
+        else:
+            if instance >= 2:
+                instance -= 1
+            stats = stats_list[instance]
+        return stats
+
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
-        slice_stats_after = self.calc_slice_stats(my_slice, base_slice, pad=pad)
+        slice_stats_after = self.calc_slice_stats(my_slice, base_slice=None, pad=pad)
         if base_slice:
             slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
             for key in list(self.stats_before_processing.keys()):
@@ -119,7 +213,10 @@ class Statistics(object):
     def calc_rss(self, array1, array2):  # residual sum of squares
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
-            rss = sum(value**2 for value in np.nditer(residuals))
+            rss = 0
+            for value in (np.nditer(residuals)):
+                rss += value**2
+            # rss = sum(value**2 for value in np.nditer(residuals))
         else:
             #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
@@ -214,7 +311,8 @@ class Statistics(object):
 
         if self._iterative_group:
             if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
-                self._set_loop_stats()
+                #self._set_loop_stats()
+                pass
 
         self._write_stats_to_file(p_num)
         self._already_called = True
@@ -222,95 +320,7 @@ class Statistics(object):
         if self._iterative_group:
             self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
-    def get_stats(self, p_num, stat=None, instance=-1):
-        """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
 
-        :param p_num: Plugin  number of the plugin whose associated stats are being fetched.
-            If p_num <= 0, it is relative to the plugin number of the current plugin being run.
-            E.g current plugin number = 5, p_num = -2 --> will return stats of the third plugin.
-        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
-            If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
-        :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
-            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
-        """
-        if p_num <= 0:
-            try:
-                p_num = self.p_num + p_num
-            except TypeError:
-                p_num = Statistics.count + p_num
-        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, -1, "all"):
-            stats_array = Statistics.global_stats[p_num]
-        else:
-            if instance == "all":
-                stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
-                n = 2
-                if Statistics.global_stats[p_num].ndim != 1:
-                    while n <= len(Statistics.global_stats[p_num]):
-                        stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
-                        n += 1
-                return stats_list
-            if instance > 0:
-                instance -= 1
-            stats_array = Statistics.global_stats[p_num][instance]
-        stats_dict = self._array_to_dict(stats_array)
-        if stat is not None:
-            return stats_dict[stat]
-        else:
-            return stats_dict
-
-    def get_stats_from_name(self, plugin_name, n=None, stat=None, instance=-1):
-        """Returns stats associated with a certain plugin.
-
-        :param plugin_name: name of the plugin whose associated stats are being fetched.
-        :param n: In a case where there are multiple instances of **plugin_name** in the process list,
-            specify the nth instance. Not specifying will select the first (or only) instance.
-        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
-            If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
-        :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
-            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
-        """
-        name = plugin_name
-        if n in (None, 0, 1):
-            name = name + str(n)
-        p_num = Statistics.plugin_numbers[name]
-        return self.get_stats(p_num, stat, instance)
-
-    def get_stats_from_dataset(self, dataset, stat=None, instance=-1):
-        """Returns stats associated with a dataset.
-
-        :param dataset: The dataset whose associated stats are being fetched.
-        :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
-            If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD'}
-        :param instance: In cases where there are multiple set of stats associated with a dataset
-            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
-            stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
-
-        """
-        key = "stats"
-        stats = {}
-
-        stats_list = [dataset.meta_data.get("stats")]
-        n = 2
-        while ("stats" + str(n)) in list(dataset.meta_data.get_dictionary().keys()):
-            stats_list.append(dataset.meta_data.get("stats" + str(n)))
-            n += 1
-        if stat:
-            for i in range(len(stats_list)):
-                stats_list[i] = stats_list[i][stat]
-        if instance in (None, 0, 1):
-            stats = stats_list[0]
-        elif instance == "all":
-            stats = stats_list
-        else:
-            if instance >= 2:
-                instance -= 1
-            stats = stats_list[instance]
-        return stats
 
     def _combine_mpi_stats(self, slice_stats):
         comm = MPI.COMM_WORLD
@@ -480,6 +490,6 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
-        #if cls._any_stats & cls._stats_flag:
+        if cls._any_stats & cls._stats_flag:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
