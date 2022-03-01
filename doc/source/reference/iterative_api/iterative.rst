@@ -2,18 +2,77 @@
 Iterative plugins API
 *********************
 
-TODO: a general description and the purpose of IP
+Introduction / What is it for?
+==============================
+
+The iterative functionality in Savu provides a way to run a plugin (or a group
+of plugins) multiple times in sequence, without the need to manually create
+multiple instances of the plugin(s) in the Savu configurator. In other words,
+this feature provides the ability to easily define iterative loops in Savu
+process lists.
+
+This can be useful for neatly representing in Savu different kinds of processing
+pipelines that involve repeated applications of a single plugin, or multiple
+plugins, such as :ref:`emulating-3d-denoising`, or :ref:`iterative-alignment`.
 
 Setting iterative plugins
 =========================
 
-TODO: An info how to set things up for iterative plugins: set, remove commands
+Adding iterative loops
+----------------------
 
+An iterative loop can be defined in a process list by providing a few pieces of
+information to the Savu configurator:
+
+* the plugin indices that mark the start and end of the iterative loop
+
+* the number of iterations to perform
+
+This can be done with the command :code:`iterate --set a b n`, where
+
+* :code:`a` is the index of the plugin where the loop should start
+
+* :code:`b` is the index of the plugin where the loop should end
+
+* :code:`n` is the number of iterations to perform
+
+For example, to iterate a single plugin with index 3 a total of 5 times, run
+:code:`iterate --set 3 3 5`.
+
+As another example, to iterate from plugin index 3 to plugin index 4 a total of
+5 times, run :code:`iterate --set 3 4 5`.
+
+Removing iterative loops
+------------------------
+
+Iterative loops are numbered inside the configurator starting from 1. This
+labelling can be viewed with the command :code:`iterate`.
+
+To remove a loop (or multiple loops), pass the number label for the loops to the
+command :code:`iterate --remove`.
+
+For example, to remove a loop with the label 1, run :code:`iterate
+--remove 1`.
+
+As another example, to remove two loops, one with label 1 and another with
+label 2, run :code:`iterate --remove 1 2`.
+
+Additionally, all loops in the process list can be removed by running
+:code:`iterate --remove` and then confirming the action when prompted.
+
+Viewing all iterative loops
+---------------------------
+
+As mentioned above, all loops and their associated information (number label,
+start index, end index, number of iterations) can be viewed with the
+:code:`iterate` command.
 
 Examples:
 =========
 
 Here we provide two examples how iterative plugins can be used in Savu.
+
+.. _emulating-3d-denoising:
 
 Emulating 3D denoising
 --------------------------------------------------------------------------------------------------------------------------
@@ -31,6 +90,8 @@ direction than using one dimension. This filtering, although 2D, emulates 3D den
    :figwidth: 100%
    :align: left
    :figclass: align-left
+
+.. _iterative-alignment:
 
 Iterative alignment reconstruction algorithm
 -------------------------------------------------------
