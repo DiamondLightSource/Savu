@@ -11,59 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
-.. module:: ccpi_denoising_gpu
+.. module:: iterative_ccpi_denoising
    :platform: Unix
-   :synopsis: GPU modules of CCPi-Regularisation Toolkit (CcpiRegulToolkitGpu)
-
-.. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
+   :synopsis: iterative ccpi denoising with changing patterns between Savu (outer) iterations
+.. moduleauthor:: Daniil Kazantsev & Yousef Moazzam <scientificsoftware@diamond.ac.uk>
 """
 
-from savu.plugins.plugin import Plugin
-from savu.plugins.driver.gpu_plugin import GpuPlugin
-from savu.plugins.utils import register_plugin
-from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
-    check_if_end_plugin_in_iterate_group
 import numpy as np
+
+from savu.plugins.utils import register_plugin
+from savu.plugins.filters.base_filter import BaseFilter
+from savu.plugins.driver.iterative_plugin import IterativePlugin
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
 
+
 @register_plugin
-class CcpiDenoisingGpu(Plugin, GpuPlugin):
+class IterativeCcpiDenoising(BaseFilter, IterativePlugin):
 
     def __init__(self):
-        super(CcpiDenoisingGpu, self).__init__('CcpiDenoisingGpu')
-        self.GPU_index = None
-        self.res = False
-        self.start = 0
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        if check_if_end_plugin_in_iterate_group(self.exp):
-            return 2
-        else:
-            return 1
-
-    def nClone_datasets(self):
-        if check_if_end_plugin_in_iterate_group(self.exp):
-            return 1
-        else:
-            return 0
-
-    @enable_iterative_loop
-    def setup(self):
-        in_dataset, out_dataset = self.get_datasets()
-        out_dataset[0].create_dataset(in_dataset[0])
-        in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
-        out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        super(IterativeCcpiDenoising, self).__init__("IterativeCcpiDenoising")
 
     def pre_process(self):
-        self.device = 'gpu'
+        # set Savu external iterations
+        self.set_iterations(self.parameters['plugin_iterations'])
+        # Ccpi-RGL toolkit modules
+        self.device = 'cpu'
         if (self.parameters['method'] == 'ROF_TV'):
             # set parameters for the ROF-TV method
             self.pars = {'algorithm': self.parameters['method'], \
@@ -105,19 +80,19 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                          'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'NDF'):
             # set parameters for the NDF method
-            if (self.parameters['penalty_type'] == 'Huber'):
+            if (self.parameters['penalty_type'] == 'huber'):
                 # Huber function for the diffusivity
                 penaltyNDF = 1
-            if (self.parameters['penalty_type'] == 'Perona'):
+            if (self.parameters['penalty_type'] == 'perona'):
                 # Perona-Malik function for the diffusivity
                 penaltyNDF = 2
-            if (self.parameters['penalty_type'] == 'Tukey'):
+            if (self.parameters['penalty_type'] == 'tukey'):
                 # Tukey Biweight function for the diffusivity
                 penaltyNDF = 3
-            if (self.parameters['penalty_type'] == 'Constr'):
+            if (self.parameters['penalty_type'] == 'constr'):
                 #  Threshold-constrained linear diffusion
                 penaltyNDF = 4
-            if (self.parameters['penalty_type'] == 'Constrhuber'):
+            if (self.parameters['penalty_type'] == 'constrhuber'):
                 #  Threshold-constrained huber diffusion
                 penaltyNDF = 5
             self.pars = {'algorithm': self.parameters['method'], \
@@ -128,7 +103,7 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                          'penalty_type': penaltyNDF, \
                          'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'Diff4th'):
-            # set parameters for the Diff4th method
+            # set parameters for the DIFF4th method
             self.pars = {'algorithm': self.parameters['method'], \
                          'regularisation_parameter': self.parameters['reg_parameter'], \
                          'edge_parameter': self.parameters['edge_par'], \
@@ -142,8 +117,6 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                          'edge_parameter': self.parameters['edge_par'], \
                          'number_of_iterations': self.parameters['max_iterations']}
         return self.pars
-        # print "The full data shape is", self.get_in_datasets()[0].get_shape()
-        # print "Example is", self.parameters['example']
 
     def process_frames(self, data):
         input_temp = np.nan_to_num(data[0])
@@ -233,4 +206,51 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
         return im_res
 
     def post_process(self):
+        # option here to break out of the iterations
+        #self.set_processing_complete()
         pass
+
+    def setup(self):
+        # set up the output dataset that is created by the plugin
+        in_dataset, out_dataset = self.get_datasets()
+
+        in_pData, out_pData = self.get_plugin_datasets()
+        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+
+        # Cloned datasets are at the end of the out_dataset list
+        out_dataset[0].create_dataset(in_dataset[0])
+
+        # What is a cloned dataset?
+        # Since each dataset in Savu has its own backing hdf5 file, a dataset
+        # cannot be used for input and output at the same time.  So, in the
+        # case of iterative plugins, if a dataset is used as output and then
+        # as input on the next iteration, the subsequent output must be a
+        # different file.
+        # A cloned dataset is a copy of another dataset but with a different
+        # backing file.  It doesn't have a name, is not accessible as a dataset
+        # in the framework and is only used in alternation with another
+        # dataset to allow it to be used as both input and output
+        # simultaneously.
+
+        # This is a cloned dataset (of out_dataset[0])
+        self.create_clone(out_dataset[1], out_dataset[0])
+
+        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        out_pData[1].plugin_data_setup('VOLUME_XZ', 'single')
+
+        # input and output datasets for the first iteration
+        self.set_iteration_datasets(0, [in_dataset[0]], [out_dataset[0]])
+        # input and output datasets for subsequent iterations
+        self.set_iteration_datasets(1, [in_dataset[0], out_dataset[0]],
+                                    [out_dataset[1]])
+        # out_dataset[0] and out_dataset[1] will continue to alternate for
+        # all remaining iterations i.e. output becomes input and input becomes
+        # output.
+
+    # total number of output datasets
+    def nOutput_datasets(self):
+        return 2
+
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        return 1

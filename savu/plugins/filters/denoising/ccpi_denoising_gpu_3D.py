@@ -25,6 +25,8 @@ from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 import numpy as np
 import subprocess as sp
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group, setup_extra_plugin_data_padding
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
@@ -35,7 +37,9 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def __init__(self):
         super(CcpiDenoisingGpu3d, self).__init__("CcpiDenoisingGpu3d")
+        self.device = None
 
+    @setup_extra_plugin_data_padding
     def set_filter_padding(self, in_pData, out_pData):
         self.pad = self.parameters['padding']
         pad_slice_dir = '%s.%s' % (self.slice_dir[0], self.pad)
@@ -43,6 +47,7 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         in_pData[0].padding = pad_dict
         out_pData[0].padding = pad_dict
 
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         pattern_type = self.parameters['pattern']
@@ -61,7 +66,7 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
             core_dims_size *= in_dataset[0].get_shape()[core_index]
         # calculate the amount of slices than would fit the GPU memory
         gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
-        slice_dize_mbbytes = int(np.ceil((core_dims_size * 1024 * 4)/(1024**3)))
+        slice_dize_mbbytes = int(np.ceil((core_dims_size * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
         if 'ROF_TV' in self.parameters['method']:
             slice_dize_mbbytes *= 4.5
@@ -81,7 +86,9 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
             slice_dize_mbbytes *= 3.5
         if 'NLTV' in self.parameters['method']:
             slice_dize_mbbytes *= 4.5
-        slices_fit_total = int(gpu_available_mb/slice_dize_mbbytes)
+        slices_fit_total = int(gpu_available_mb / slice_dize_mbbytes)
+        print(nSlices)
+        print(slices_fit_total)
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
         self._set_max_frames(nSlices)
@@ -266,3 +273,17 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def nOutput_datasets(self):
         return 1
+
+    # total number of output datasets
+    def nOutput_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
+
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0

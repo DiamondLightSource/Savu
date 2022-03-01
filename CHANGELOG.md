@@ -1,10 +1,11 @@
 All notable changes to this project are documented in this file.
 *******************************************************************
-# Savu Version 4.2, *planned release first quarter of 2022*
+# Savu Version 4.2, *planned release March 2022*
 
 ## _Core_
 * Statistics (TODO)
-* Iterative plugins (TODO)
+* Iterative plugins (A capability to enable some plugins to be iterative):
+  - `iterate` command to enable control over iterative plugins (see `iterate -h` for help)
 
 ## _Existing Plugins_
 
@@ -43,6 +44,9 @@ All notable changes to this project are documented in this file.
   *  Allow a list as a single dimension input to the preview parameter
   *  Allow a start keyword inside the preview parameter
   *  Allow a parameter to be a directory path within the Savu folder
+  *  Asterix line added to indicate the start and end of the process list
+  *  Line separator added to indicate an iterative plugin loop
+
 ### New Commands
   * *savu_mod* - a way to modify one parameter present in a plugin list. 
 

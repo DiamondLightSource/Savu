@@ -1,11 +1,17 @@
 from savu.plugins.plugin_tools import PluginTools
 
-class CcpiDenoisingGpuTools(PluginTools):
-    """Wrapper for CCPi-Regularisation Toolkit (GPU) for
-efficient 2D/3D denoising.
+class IterativeCcpiDenoisingTools(PluginTools):
+    """A wrapper for CCPi-Regularisation Toolkit (CPU) for efficient 2D denoising with changing patterns
     """
     def define_parameters(self):
         """
+        plugin_iterations:
+             visibility: basic
+             dtype: int
+             description:
+               summary: "The number of Savu's plugin outer iterations"
+             default: 5
+
         method:
              visibility: advanced
              dtype: str
@@ -38,103 +44,116 @@ efficient 2D/3D denoising.
              default: 0.00001
 
         max_iterations:
-             visibility: basic
-             dtype: int
-             description: "Total number of regularisation iterations.
-               The smaller the number of iterations, the smaller the effect
-               of the filtering is. A larger number will affect the speed
-               of the algorithm."
-             default: 300
+            visibility: basic
+            dtype: int
+            description:
+                summary: Total number of regularisation iterations.  The
+                    smaller the number of iterations, the smaller the effect of
+                    the filtering is.  A larger number will affect the speed of
+                    the algorithm.
+                range: Recommended value dependent upon method.
+            default:
+                method:
+                    ROF_TV: 2000
+                    FGP_TV: 500
+                    PD_TV: 500
+                    SB_TV: 100
+                    LLT_ROF: 2000
+                    NDF: 2000
+                    Diff4th: 1000
+                    TGV: 500
+                    NLTV: 5
 
         time_step:
              visibility: advanced
              dtype: float
-             description: 'Time marching step, relevant for ROF_TV, LLT_ROF,
-               NDF, Diff4th methods.'
-             default: 0.001
              dependency:
-               method: [ROF_TV, LLT_ROF, NDF, Diff4th]
+               regularisation_method: [ROF_TV, LLT_ROF, NDF, Diff4th]
+             description:
+               summary: Time marching parameter for convergence of explicit schemes
+               verbose: the time step constant defines the speed of convergence, the larger values can lead to divergence
+               range: Recommended between 0.0001 and 0.003
+             default: 0.003
 
         lipshitz_constant:
-             visibility: advanced
-             dtype: int
-             description: TGV method, Lipshitz constant.
-             default: 12
-             dependency:
-               method: TGV
+            visibility: advanced
+            dtype: float
+            description: TGV method, Lipshitz constant.
+            default: 12
+            dependency:
+                method: TGV
 
         alpha1:
-             visibility: advanced
-             dtype: float
-             description: 'TGV method, parameter to control the 1st-order term.'
-             default: 1.0
-             dependency:
-               method: TGV
+            visibility: advanced
+            dtype: float
+            description: 'TGV method, parameter to control the 1st-order term.'
+            default: 1.0
+            dependency:
+                method: TGV
 
         alpha0:
-             visibility: advanced
-             dtype: float
-             description: 'TGV method, parameter to control the 2nd-order term.'
-             default: 2.0
-             dependency:
-               method: TGV
+            visibility: advanced
+            dtype: float
+            description: 'TGV method, parameter to control the 2nd-order term.'
+            default: 2.0
+            dependency:
+                method: TGV
 
         reg_parLLT:
-             visibility: advanced
-             dtype: float
-             dependency:
-               method: LLT_ROF
-             description: 'LLT-ROF method, parameter to control the 2nd-order term.'
-             default: 0.05
+            visibility: advanced
+            dtype: float
+            dependency:
+                method: LLT_ROF
+            description: 'LLT-ROF method, parameter to control the 2nd-order term.'
+            default: 0.05
 
         penalty_type:
-             visibility: advanced
-             dtype: str
-             options: [Huber, Perona, Tukey, Constr, Constrhuber]
-             description:
-               summary: Penalty type
-               verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty
-                 type."
-               options:
-                 Huber: Huber
-                 Perona: Perona-Malik model
-                 Tukey: Tukey
-             dependency:
-               method: NDF
-             default: Huber
+            visibility: advanced
+            dtype: str
+            options: [huber, perona, tukey, constr, constrhuber]
+            description:
+                summary: Penalty type
+                verbose: "Nonlinear/Linear Diffusion model (NDF) specific penalty
+                   type."
+                options:
+                    huber: Huber
+                    perona: Perona-Malik model
+                    tukey: Tukey
+                    constr:
+                    constrhuber:
+            dependency:
+                method: NDF
+            default: huber
 
         edge_par:
-             visibility: advanced
-             dtype: float
-             dependency:
-               method: [NDF, Diff4th]
-             description: 'NDF and Diff4th methods, noise magnitude parameter.'
-             default: 0.01
+            visibility: advanced
+            dtype: float
+            dependency:
+                method: [NDF, Diff4th]
+            description: 'NDF and Diff4th methods, noise magnitude parameter.'
+            default: 0.01
 
         tolerance_constant:
-             visibility: advanced
-             dtype: float
-             description: Tolerance constant to stop iterations earlier.
-             default: 0.0
+            visibility: advanced
+            dtype: float
+            description: Tolerance constant to stop iterations earlier.
+            default: 0.0
 
         pattern:
-             visibility: intermediate
-             dtype: str
-             description: Pattern to apply this to.
-             options: [SINOGRAM, PROJECTION, VOLUME_XZ, VOLUME_XY]
-             default: 'VOLUME_XZ'
+            visibility: advanced
+            dtype: str
+            description: Pattern to apply this to.
+            default: 'VOLUME_XZ'
         """
-
 
     def citation1(self):
         """
-        This plugin uses the CCPi-Regularisation toolkit.
-        The toolkit provides a set of variational regularisers (denoisers) which can be embedded in
+        The CCPi-Regularisation toolkit provides a set of
+        variational regularisers (denoisers) which can be embedded in
         a plug-and-play fashion into proximal splitting methods for
         image reconstruction. CCPi-RGL comes with algorithms that can
         satisfy various prior expectations of the reconstructed object,
         for example being piecewise-constant or piecewise-smooth nature.
-
         bibtex:
                 @article{kazantsev2019ccpi,
                 title={Ccpi-regularisation toolkit for computed tomographic image reconstruction with proximal splitting algorithms},
@@ -161,15 +180,16 @@ efficient 2D/3D denoising.
         doi: "10.1016/j.softx.2019.04.003"
         """
 
+
     def citation2(self):
         """
         Rudin-Osher-Fatemi explicit PDE minimisation method
-          for smoothed Total Variation regulariser
+        for smoothed Total Variation regulariser
         bibtex:
                 @article{rudin1992nonlinear,
                   title={Nonlinear total variation based noise removal algorithms},
                   author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
-                  journal={Physica D nonlinear phenomena},
+                  journal={Physica D: nonlinear phenomena},
                   volume={60},
                   number={1-4},
                   pages={259--268},
@@ -182,7 +202,7 @@ efficient 2D/3D denoising.
                 %A Rudin, Leonid I
                 %A Osher, Stanley
                 %A Fatemi, Emad
-                %J Physica D nonlinear phenomena
+                %J Physica D: nonlinear phenomena
                 %V 60
                 %N 1-4
                 %P 259-268
@@ -194,10 +214,11 @@ efficient 2D/3D denoising.
             method: ROF_TV
         """
 
+
     def citation3(self):
         """
         Fast-Gradient-Projection algorithm for
-          Total Variation regulariser
+        Total Variation regulariser
         bibtex:
                 @article{beck2009fast,
                   title={Fast gradient-based algorithms for constrained total variation image denoising and deblurring problems},
@@ -226,10 +247,11 @@ efficient 2D/3D denoising.
             method: FGP_TV
         """
 
+
     def citation4(self):
         """
         The Split Bregman approach for Total Variation
-          regulariser
+        regulariser
         bibtex:
                @article{goldstein2009split,
                   title={The split Bregman method for L1-regularized problems},
@@ -258,10 +280,11 @@ efficient 2D/3D denoising.
             method: SB_TV
         """
 
+
     def citation5(self):
         """
         Total generalized variation regulariser for
-          piecewise-smooth recovery
+        piecewise-smooth recovery
         bibtex:
                @article{bredies2010total,
                   title={Total generalized variation},
@@ -289,12 +312,13 @@ efficient 2D/3D denoising.
         doi: "10.1137/080725891"
         dependency:
             method: TGV
-    """
+        """
+
 
     def citation6(self):
         """
         Combination for ROF model and LLT for
-          piecewise-smooth recovery
+        piecewise-smooth recovery
         bibtex:
                @article{kazantsev2017model,
                 title={Model-based iterative reconstruction using higher-order regularization of dynamic synchrotron data},
@@ -324,7 +348,8 @@ efficient 2D/3D denoising.
         doi: "10.1088/1361-6501"
         dependency:
             method: LLT_ROF
-    """
+        """
+
 
     def citation7(self):
         """
@@ -354,7 +379,8 @@ efficient 2D/3D denoising.
         doi: "10.1109/34.56205"
         dependency:
             method: NDF
-    """
+        """
+
 
     def citation8(self):
         """
@@ -385,7 +411,8 @@ efficient 2D/3D denoising.
         doi: "10.1007/s11263-010-0330-1"
         dependency:
             method: Diff4th
-    """
+        """
+
 
     def citation9(self):
         """
@@ -419,4 +446,4 @@ efficient 2D/3D denoising.
         dependency:
             method: NLTV
 
-    """
+        """

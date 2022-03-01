@@ -51,7 +51,7 @@ class TomoPhantomArtifacts(Plugin, CpuPlugin):
         if self.parameters['artifacts_noise_type'] is not None:
             _noise_ = {'noise_type': self.parameters['artifacts_noise_type'],
                        'noise_amplitude': self.parameters['artifacts_noise_amplitude'],
-                       'noise_seed': 0,
+                       'noise_seed': None,
                        'verbose': False}
 
         # misalignment dictionary

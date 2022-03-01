@@ -23,6 +23,8 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 import numpy as np
 
 try:
@@ -37,6 +39,22 @@ class WaveletDenoisingGpu(Plugin, GpuPlugin):
         super(WaveletDenoisingGpu, self).__init__('WaveletDenoisingGpu')
         self.GPU_index = None
 
+    def nInput_datasets(self):
+        return 1
+
+    def nOutput_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
+
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
+
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
@@ -49,17 +67,11 @@ class WaveletDenoisingGpu(Plugin, GpuPlugin):
         input_data[input_data > 10 ** 15] = 0.0
 
         # Running Wavelet Denoising
-        # Compute the wavelets coefficients 
+        # Compute the wavelets coefficients
         W = Wavelets(input_data, self.parameters['family_name'], self.parameters['nlevels'])
         W.forward()
         #  Do thresholding on the wavelets coefficients
         W.soft_threshold(self.parameters['threshold_level'])
         W.inverse()
-        X=W.image
+        X = W.image
         return X
-
-    def nInput_datasets(self):
-        return 1
-
-    def nOutput_datasets(self):
-        return 1

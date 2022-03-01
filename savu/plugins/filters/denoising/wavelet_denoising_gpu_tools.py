@@ -21,7 +21,7 @@ class WaveletDenoisingGpuTools(PluginTools):
         threshold_level:
              visibility: basic
              dtype: float
-             description: 
+             description:
                 summary: Threshold level to filter wavelet coefficients
                 verbose: Smaller values lead to more smoothing
              default: 0.01
@@ -30,6 +30,7 @@ class WaveletDenoisingGpuTools(PluginTools):
              visibility: intermediate
              dtype: str
              description: Pattern to apply this to.
+             options: [SINOGRAM, PROJECTION, VOLUME_XZ, VOLUME_XY]
              default: 'PROJECTION'
 
         """
@@ -37,11 +38,11 @@ class WaveletDenoisingGpuTools(PluginTools):
 
     def citation(self):
         """
-        PDWT (Parallel Discrete Wavelets Transform) is a Cuda-C++ 
-        library for computing the discrete wavelets transform of 
-        signal and images. Designed to be flexible and efficient, 
+        PDWT (Parallel Discrete Wavelets Transform) is a Cuda-C++
+        library for computing the discrete wavelets transform of
+        signal and images. Designed to be flexible and efficient,
         it offers many built-in filters and features like thresholding.
-        Its results are compatible with other wavelets software 
+        Its results are compatible with other wavelets software
         like Matlab wavelets toolbox and Python package pywavelets.
 
         bibtex:

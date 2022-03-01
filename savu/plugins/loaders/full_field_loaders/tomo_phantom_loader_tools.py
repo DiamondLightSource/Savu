@@ -1,5 +1,6 @@
 from savu.plugins.plugin_tools import PluginTools
 
+
 class TomoPhantomLoaderTools(PluginTools):
     """A hdf5 dataset of a specified size is created at runtime using Tomophantom
     to generate synthetic data , saved with relevant meta_data to a NeXus
@@ -7,6 +8,7 @@ class TomoPhantomLoaderTools(PluginTools):
     but with synthetic data.  The input file path passed to Savu will be ignored
     (use a dummy).
     """
+
     def define_parameters(self):
         """
         axis_labels:
@@ -22,13 +24,13 @@ class TomoPhantomLoaderTools(PluginTools):
         patterns:
             visibility: hidden
             dtype: list[str]
-            description: Patterns.
+            description: projection data object patterns.
             default: "['SINOGRAM.0c.1s.2c', 'PROJECTION.0s.1c.2c']"
-        patterns_tomo:
+        patterns_tomo2:
             visibility: hidden
             dtype: list[str]
-            description: Patterns.
-            default: "['VOLUME_XZ.0c.1s.2c']"
+            description: Phantom data object patterns.
+            default: "['VOLUME_XZ.0c.1s.2c', 'VOLUME_XY.0s.1c.2c']"
         out_datasets:
             visibility: basic
             dtype: list[str]
