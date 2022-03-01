@@ -1,3 +1,5 @@
+import logging
+
 from savu.data.data_structures.plugin_data import PluginData
 
 
@@ -63,7 +65,8 @@ def enable_iterative_loop(setup_fn):
                 # that these new PluginData obejcts have been added
                 start_plugin._finalise_plugin_datasets()
             except AttributeError as e:
-                print('In plugin setup, will not create new PluginData objects')
+                logging.debug('In plugin setup, will not create new ' \
+                              'PluginData objects')
 
     return wrapper
 
@@ -128,7 +131,7 @@ def check_if_in_iterative_loop(exp):
         # - if this check can occur elsewhere, to avoid causing those framework
         #   tests to fail
         err_str = f"Error when checking if inside an iterative loop: {e}"
-        print(err_str)
+        logging.debug(err_str)
         return None
 
 def check_if_end_plugin_in_iterate_group(exp):

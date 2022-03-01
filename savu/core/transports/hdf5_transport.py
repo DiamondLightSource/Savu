@@ -115,12 +115,12 @@ class Hdf5Transport(BaseTransport):
                     info_msg = f"Not linking clone data " \
                             f"{data.get_name(orig=False)}, as an odd number " \
                             f"of iterations"
-                    print(info_msg)
+                    logging.debug(info_msg)
                 elif not is_odd_iterations and not is_clone_data:
                     info_msg = f"Not linking original data " \
                             f"{data.get_name(orig=False)}, as an even number " \
                             f"of iterations"
-                    print(info_msg)
+                    logging.debug(info_msg)
                 else:
                     # link output h5 file as normal
                     self.hdf5._link_datafile_to_nexus_file(data,
@@ -130,7 +130,7 @@ class Hdf5Transport(BaseTransport):
                 # when iteration 0 was completed
                 info_msg = f"Not linking intermediate h5 file, on iteration " \
                         f"{iterate_group._ip_iteration}"
-                print(info_msg)
+                logging.debug(info_msg)
         else:
             # can link output of non-end plugins more simply
             if iterate_group._ip_iteration == 0:
@@ -142,7 +142,7 @@ class Hdf5Transport(BaseTransport):
                 # when iteration 0 was completed
                 info_msg = f"Not linking intermediate h5 file, on iteration " \
                         f"{iterate_group._ip_iteration}"
-                print(info_msg)
+                logging.debug(info_msg)
 
     def _transport_terminate_dataset(self, data):
         self.hdf5._close_file(data)

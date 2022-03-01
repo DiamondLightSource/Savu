@@ -37,6 +37,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def __init__(self):
         super(TomobarRecon3d, self).__init__("TomobarRecon3d")
+        self.Vert_det = None
+        self.pad = None
 
     @setup_extra_plugin_data_padding
     def set_filter_padding(self, in_pData, out_pData):
@@ -59,7 +61,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
         det_x_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('detector_x')]
         rot_angles_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('rotation_angle')]
-        slice_dize_mbbytes = int(np.ceil(((det_x_dim * rot_angles_dim) * 1024 * 4)/(1024**3)))
+        slice_dize_mbbytes = int(np.ceil(((det_x_dim * rot_angles_dim) * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
         if 'ROF_TV' in self.parameters['regularisation_method']:
             slice_dize_mbbytes *= 4.5
@@ -79,7 +81,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             slice_dize_mbbytes *= 3.5
         if 'NLTV' in self.parameters['regularisation_method']:
             slice_dize_mbbytes *= 4.5
-        slices_fit_total = int(gpu_available_mb/slice_dize_mbbytes)
+        slices_fit_total = int(gpu_available_mb / slice_dize_mbbytes)
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
         self._set_max_frames(nSlices)
@@ -128,10 +130,17 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         dim_tuple = np.shape(projdata3D)
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         half_det_width = 0.5 * self.Horiz_det
-        cor_astra = half_det_width - np.mean(cor)
         projdata3D[projdata3D > 10 ** 15] = 0.0
         projdata3D = np.swapaxes(projdata3D, 0, 1)
         self._data_.update({'projection_norm_data': projdata3D})
+
+        # dealing with projection shifts and the CoR
+        cor_astra = half_det_width - np.mean(cor)
+        CenterOffset = cor_astra.item() - 0.5
+        if np.sum(self.projection_shifts) != 0.0:
+            CenterOffset = np.zeros(np.shape(self.projection_shifts))
+            CenterOffset[:, 0] = (cor_astra.item() - 0.5) - self.projection_shifts[:, 0]
+            CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
 
         # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
         if ((self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS')):
@@ -143,11 +152,13 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
         # set parameters and initiate a TomoBar class object
         self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                   DetectorsDimV=self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                   CenterRotOffset=(cor_astra.item() - 0.5)-self.projection_shifts,  # The center of rotation (CoR)
+                                   DetectorsDimV=self.Vert_det,
+                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=CenterOffset,  # The center of rotation (CoR)
                                    AnglesVec=-self.anglesRAD,  # the vector of angles in radians
                                    ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                   datafidelity=self.parameters['data_fidelity'],  # data fidelity, choose LS, PWLS, SWLS
+                                   datafidelity=self.parameters['data_fidelity'],
+                                   # data fidelity, choose LS, PWLS, SWLS
                                    device_projector='gpu')
 
         # Run FISTA reconstruction algorithm here

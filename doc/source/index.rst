@@ -49,6 +49,7 @@ Table of Contents
     reference/plugin_documentation
     reference/framework_contents
     reference/stats_documentation/stats
+    reference/iterative_api/iterative
 
 .. _tutorials_content:
 
@@ -73,5 +74,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-

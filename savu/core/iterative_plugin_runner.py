@@ -1,3 +1,5 @@
+import logging
+
 from savu.core.iterate_plugin_group_utils import shift_plugin_index
 
 
@@ -109,7 +111,7 @@ class IteratePluginGroup():
             # plugin
             if nPlugin == start:
                 # start plugin is being run, on iteration 0
-                print(f"Iteration {self._ip_iteration}")
+                print(f"Iteration {self._ip_iteration}...")
                 plugin = self.plugin_runner._PluginRunner__run_plugin(
                     exp_coll['plugin_dict'][nPlugin],
                     clean_up_plugin=False)
@@ -337,7 +339,7 @@ class IteratePluginGroup():
             info_str = f"Not setting plugin datasets for " \
                        f"{self.start_plugin.name}, since iterating only a "\
                        f"single plugin"
-            print(info_str)
+            logging.debug(info_str)
 
 
     def set_plugin_datasets(self):
@@ -369,7 +371,7 @@ class IteratePluginGroup():
                 info_str = f"s1 {s1.backing_file} wasn't in either the start " \
                            f"plugin's plugin_in_datasets, nor the end " \
                            f"plugin's plugin_out_datasets"
-                print(info_str)
+                logging.debug(info_str)
 
             if s2 in p[0]:
                 new_cloned_data_pData = \
@@ -387,7 +389,7 @@ class IteratePluginGroup():
                 info_str = f"s2 {s2.backing_file} wasn't in either the start " \
                            f"plugin's plugin_in_datasets, nor the end " \
                            f"plugin's plugin_out_datasets"
-                print(info_str)
+                logging.debug(info_str)
 
         # reset the values inside Data.data_info that have an effect on how the
         # value of core_slice in SliceLists comes out
@@ -476,4 +478,4 @@ class IteratePluginGroup():
             info_str = f"Not setting up alternating plugin datasets for " \
                        f"{self.start_plugin.name}, since iterating only a "\
                        f"single plugin"
-            print(info_str)
+            logging.debug(info_str)
