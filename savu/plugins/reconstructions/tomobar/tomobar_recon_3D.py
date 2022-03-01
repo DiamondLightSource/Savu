@@ -49,6 +49,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         pad_dict = {'pad_directions': [pad_det_y], 'pad_mode': 'edge'}
         in_pData[0].padding = pad_dict
         out_pData[0].padding = pad_dict
+        if len(self.get_in_datasets()) > 1:
+            in_pData[1].padding = pad_dict
 
     @enable_iterative_loop
     def setup(self):
