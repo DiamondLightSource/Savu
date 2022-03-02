@@ -145,7 +145,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
 
         # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
-        if ((self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS')):
+        if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
             rawdata3D = data[1].astype(np.float32)
             rawdata3D[rawdata3D > 10 ** 15] = 0.0
             rawdata3D = np.swapaxes(rawdata3D, 0, 1) / np.max(np.float32(rawdata3D))
