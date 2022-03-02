@@ -63,27 +63,27 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
         det_x_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('detector_x')]
         rot_angles_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('rotation_angle')]
-        slice_dize_mbbytes = int(np.ceil(((det_x_dim * rot_angles_dim) * 1024 * 4) / (1024 ** 3)))
+        slice_size_mbbytes = int(np.ceil(((det_x_dim * det_x_dim) * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
         if 'ROF_TV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 4.5
+            slice_size_mbbytes *= 8
         if 'FGP_TV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 8.5
+            slice_size_mbbytes *= 12
         if 'SB_TV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 6.5
+            slice_size_mbbytes *= 10
         if 'PD_TV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 6.5
+            slice_size_mbbytes *= 10
         if 'LLT_ROF' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 8.5
+            slice_size_mbbytes *= 12
         if 'TGV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 11.5
+            slice_size_mbbytes *= 15
         if 'NDF' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 3.5
+            slice_size_mbbytes *= 7
         if 'Diff4th' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 3.5
+            slice_size_mbbytes *= 7
         if 'NLTV' in self.parameters['regularisation_method']:
-            slice_dize_mbbytes *= 4.5
-        slices_fit_total = int(gpu_available_mb / slice_dize_mbbytes)
+            slice_size_mbbytes *= 8
+        slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
         self._set_max_frames(nSlices)
