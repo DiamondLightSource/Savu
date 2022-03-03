@@ -60,7 +60,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         dim = in_dataset.get_data_dimension_by_axis_label('detector_y')
         nSlices = int(np.ceil(in_dataset.get_shape()[dim] / float(procs)))
         # calculate the amount of slices than would fit the GPU memory
-        gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
+        gpu_available_mb = self.get_gpu_memory()[0]/procs  # get the free GPU memory of a first device if many
         det_x_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('detector_x')]
         rot_angles_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('rotation_angle')]
         slice_size_mbbytes = int(np.ceil(((det_x_dim * det_x_dim) * 1024 * 4) / (1024 ** 3)))
@@ -72,15 +72,15 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         if 'SB_TV' in self.parameters['regularisation_method']:
             slice_size_mbbytes *= 10
         if 'PD_TV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 10
+            slice_size_mbbytes *= 8
         if 'LLT_ROF' in self.parameters['regularisation_method']:
             slice_size_mbbytes *= 12
         if 'TGV' in self.parameters['regularisation_method']:
             slice_size_mbbytes *= 15
         if 'NDF' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 7
+            slice_size_mbbytes *= 5
         if 'Diff4th' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 7
+            slice_size_mbbytes *= 5
         if 'NLTV' in self.parameters['regularisation_method']:
             slice_size_mbbytes *= 8
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
