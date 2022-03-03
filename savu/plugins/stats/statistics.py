@@ -66,7 +66,6 @@ class Statistics(object):
                 cls._stats_flag = False
         except KeyError:
             cls._stats_flag = True
-        print(cls._stats_flag)
         cls._any_stats = False
         cls.count = 2
         cls.global_stats = {}
@@ -144,7 +143,7 @@ class Statistics(object):
             By default will retrieve the most recent set.
         """
         name = plugin_name
-        if n in (None, 0, 1):
+        if n not in (None, 0, 1):
             name = name + str(n)
         p_num = Statistics.plugin_numbers[name]
         return self.get_stats(p_num, stat, instance)
@@ -159,7 +158,7 @@ class Statistics(object):
         :param instance: In cases where there are multiple set of stats associated with a dataset
             due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
-
+            By default will retrieve the most recent set.
         """
         stats_list = [dataset.meta_data.get("stats")]
         n = 2
@@ -180,7 +179,7 @@ class Statistics(object):
         return stats
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
-        slice_stats_after = self.calc_slice_stats(my_slice, base_slice=None, pad=pad)
+        slice_stats_after = self.calc_slice_stats(my_slice, base_slice, pad=pad)
         if base_slice:
             slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
             for key in list(self.stats_before_processing.keys()):

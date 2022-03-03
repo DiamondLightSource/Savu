@@ -172,8 +172,6 @@ class Plugin(PluginDatasets):
             if not self.stats_obj._already_called:
                 self.stats_obj.set_volume_stats()
             self.stats_obj._already_called = False
-        #else:
-        #    self.stats_obj._delete_stats_metadata(self)
         pass
 
     def set_preview(self, data, params):

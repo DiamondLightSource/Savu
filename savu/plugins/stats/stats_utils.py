@@ -92,11 +92,12 @@ class StatsUtils(object):
                 stat = self._stats_list[i]
                 axis.plot(stats_df_new[stat], "x-", color=colours[i])
                 for plugin in array_plugins:  # adding 'error' bars for plugins with multiple values due to parameter changes
-                    my_max = max(stats_df[stat][plugin])
-                    my_min = min(stats_df[stat][plugin])
-                    middle = (my_max + my_min) / 2
-                    my_range = my_max - my_min
-                    axis.errorbar(int(plugin[0]) - int(stats_df_new.index[0]), middle, yerr=[my_range / 2], capsize=5)
+                    if stats_df[stat][plugin] is not None:
+                        my_max = max(stats_df[stat][plugin])
+                        my_min = min(stats_df[stat][plugin])
+                        middle = (my_max + my_min) / 2
+                        my_range = my_max - my_min
+                        axis.errorbar(int(plugin[0]) - int(stats_df_new.index[0]), middle, yerr=[my_range / 2], capsize=5)
                 if i == 1:
                     maxx = len(stats_df_new[stat]) * 1.08 - 1
                     maxy = max(stats_df_new[stat])
