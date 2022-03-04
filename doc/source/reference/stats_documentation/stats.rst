@@ -42,6 +42,10 @@ Here are examples of how to use these methods:
    :align: left
    :figclass: align-left
 
+Note that stats aren't currently gathered in loaders, meaning that if a plugin occurs right after a loader in a plugin chain it will not be able to access stats and errors may occur if this is attempted. If this is needed, add NoProcessPlugin right after the loader with an appropriate pattern. This will calculate stats for the input data without doing any processing.
+
+.. autoclass:: plugins.basic_operations.no_process_plugin.NoProcessPlugin
+
 
 Accessing statistics outside of Savu
 ====================================
@@ -114,3 +118,26 @@ Some plugins don't have statistics calculated for them, such as plugins which ex
 .. autoattribute:: savu.plugins.stats.statistics.Statistics.calc_stats
 
 Attempting to access stats for plugins where stats is turned off will result in errors.
+
+
+Examples
+========
+
+The statistics class is used by the following plugins in Savu:
+
+.. autoclass:: plugins.filters.dezingers.dezinger_sinogram.DezingerSinogram
+   :members: process_frames
+   :undoc-members:
+   :noindex:
+
+.. autoclass:: plugins.reshape.downsample_filter.DownsampleFilter
+   :members: get_min_and_max
+   :undoc-members:
+   :noindex:
+
+.. autoclass:: plugins.savers.image_saver.ImageSaver
+   :members: _get_min_and_max
+   :undoc-members:
+   :noindex:
+
+The **MinAndMax** plugin is deprecated and should not be used to gather min and max values.
