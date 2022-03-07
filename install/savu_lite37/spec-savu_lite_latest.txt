@@ -277,7 +277,7 @@ https://conda.anaconda.org/savu-dep/linux-64/geodistk-0.1.6-py37hdeaff10_0.tar.b
 https://conda.anaconda.org/savu-dep/linux-64/larix-2021.03-py37hdeaff10_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/pmacparser-4.0-py37hdeaff10_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/scipy-1.5.2-py37h0b6359f_0.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2021.12-np115py37_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2022.03-np115py37_0.tar.bz2
 https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/astra-toolbox-1.9.9.dev4-py37hb48bd9c_0.tar.bz2
 https://conda.anaconda.org/ccpi/linux-64/ccpi-reconstruction-20.09-np115py37h3be76a2_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/morphsnakes-1.0-py37hdeaff10_0.tar.bz2
