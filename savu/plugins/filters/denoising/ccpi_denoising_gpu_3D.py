@@ -37,6 +37,7 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def __init__(self):
         super(CcpiDenoisingGpu3d, self).__init__("CcpiDenoisingGpu3d")
+        self.slice_dir = None
         self.device = None
 
     @setup_extra_plugin_data_padding
@@ -65,30 +66,28 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         for core_index in core_dims_index:
             core_dims_size *= in_dataset[0].get_shape()[core_index]
         # calculate the amount of slices than would fit the GPU memory
-        gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
-        slice_dize_mbbytes = int(np.ceil((core_dims_size * 1024 * 4) / (1024 ** 3)))
+        gpu_available_mb = self.get_gpu_memory()[0]/procs  # get the free GPU memory of a first device if many
+        slice_size_mbbytes = int(np.ceil((core_dims_size * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
-        if 'ROF_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 4.5
-        if 'FGP_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 8.5
-        if 'SB_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 6.5
-        if 'PD_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 6.5
-        if 'LLT_ROF' in self.parameters['method']:
-            slice_dize_mbbytes *= 8.5
-        if 'TGV' in self.parameters['method']:
-            slice_dize_mbbytes *= 11.5
-        if 'NDF' in self.parameters['method']:
-            slice_dize_mbbytes *= 3.5
-        if 'Diff4th' in self.parameters['method']:
-            slice_dize_mbbytes *= 3.5
-        if 'NLTV' in self.parameters['method']:
-            slice_dize_mbbytes *= 4.5
-        slices_fit_total = int(gpu_available_mb / slice_dize_mbbytes)
-        print(nSlices)
-        print(slices_fit_total)
+        if 'ROF_TV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 8
+        if 'FGP_TV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 12
+        if 'SB_TV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 10
+        if 'PD_TV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 8
+        if 'LLT_ROF' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 12
+        if 'TGV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 15
+        if 'NDF' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 5
+        if 'Diff4th' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 5
+        if 'NLTV' in self.parameters['regularisation_method']:
+            slice_size_mbbytes *= 8
+        slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
         self._set_max_frames(nSlices)

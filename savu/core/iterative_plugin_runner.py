@@ -220,8 +220,11 @@ class IteratePluginGroup():
         Reset the slicing of the input dataset of a plugin in an iterative loop,
         to what it was on the previous iteration
         """
-        previous_in_pData = plugin.parameters['plugin_in_datasets'][0]
-        plugin.parameters['in_datasets'][0]._set_plugin_data(previous_in_pData)
+        for count, previous_in_pData in \
+            enumerate(plugin.parameters['plugin_in_datasets']):
+            plugin.parameters['in_datasets'][count]._set_plugin_data(
+                previous_in_pData)
+
         plugin._finalise_plugin_datasets()
         plugin._finalise_datasets()
 
