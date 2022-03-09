@@ -37,6 +37,13 @@ class AstraGpuTest(unittest.TestCase):
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)
+    
+
+    def test_astraFB3d_alignment(self):
+        process_list = 'reconstruction/iterative_alignment_FBP3D_CUDA_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()
