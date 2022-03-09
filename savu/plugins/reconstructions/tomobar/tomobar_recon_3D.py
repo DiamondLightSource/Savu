@@ -153,6 +153,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
 
         # set parameters and initiate a TomoBar class object
+        """
         self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
                                    DetectorsDimV=self.Vert_det,
                                    # DetectorsDimV # detector dimension (vertical) for 3D case only
@@ -162,9 +163,21 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                    datafidelity=self.parameters['data_fidelity'],
                                    # data fidelity, choose LS, PWLS, SWLS
                                    device_projector='gpu')
-
+        """
         # Run FISTA reconstruction algorithm here
-        recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
+        #recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
+
+
+        from tomobar.methodsDIR import RecToolsDIR
+        RectoolsDIR = RecToolsDIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                   DetectorsDimV=self.Vert_det,
+                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=CenterOffset,  # The center of rotation (CoR)
+                                   AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                   ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                   device_projector='gpu')
+
+        recon = RectoolsDIR.FBP(projdata3D) #perform FBP
         recon = np.swapaxes(recon, 0, 1)
         return recon
 
