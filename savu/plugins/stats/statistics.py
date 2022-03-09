@@ -22,6 +22,7 @@ class Statistics(object):
     _no_stats_plugins = ["BasicOperations", "Mipmap"]
     _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
+    _has_setup = False
 
 
     def __init__(self):
@@ -33,6 +34,8 @@ class Statistics(object):
         self.p_num = None
 
     def setup(self, plugin_self, pattern=None):
+        if not Statistics._has_setup:
+            self._setup_class(plugin_self.exp)
         self.plugin_name = plugin_self.name
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
@@ -40,6 +43,7 @@ class Statistics(object):
             self.plugin = plugin_self
             self._pad_dims = []
             self._already_called = False
+            self.p_num = Statistics.count
             if pattern:
                 self.pattern = pattern
             else:
@@ -78,6 +82,7 @@ class Statistics(object):
         cls.plugin_numbers = {}
         cls.plugin_names = {}
         cls._loop_counter = 0
+        cls._RMSD = True
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -85,6 +90,7 @@ class Statistics(object):
         if MPI.COMM_WORLD.rank == 0:
             if not os.path.exists(cls.path):
                 os.mkdir(cls.path)
+        cls._has_setup = True
 
     def get_stats(self, p_num=None, stat=None, instance=-1):
         """Returns stats associated with a certain plugin, given the plugin number (its place in the process list).
@@ -101,7 +107,7 @@ class Statistics(object):
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
             By default will retrieve the most recent set.
         """
-        if not p_num:
+        if p_num is None:
             p_num = self.p_num
         if p_num <= 0:
             try:
@@ -199,7 +205,7 @@ class Statistics(object):
                 my_slice = self._unpad_slice(my_slice)
             slice_stats = {'max': np.amax(my_slice).astype('float64'), 'min': np.amin(my_slice).astype('float64'),
                            'mean': np.mean(my_slice), 'std_dev': np.std(my_slice), 'data_points': my_slice.size}
-            if base_slice is not None:
+            if base_slice is not None and self._RMSD:
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
                 rss = self.calc_rss(my_slice, base_slice)
@@ -209,13 +215,13 @@ class Statistics(object):
             return slice_stats
         return None
 
-    def calc_rss(self, array1, array2):  # residual sum of squares
+    def calc_rss(self, array1, array2):  # residual sum of squares # very slow needs looking at
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
             rss = 0
-            for value in (np.nditer(residuals)):
-                rss += value**2
-            # rss = sum(value**2 for value in np.nditer(residuals))
+            #for value in (np.nditer(residuals)):
+            #    rss += value**2
+            rss = np.sum(value for value in np.nditer(residuals))
         else:
             #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
@@ -406,7 +412,8 @@ class Statistics(object):
                     dataset1[::] = l_stats["NRMSD"][::]
                     loop_plugins = []
                     for i in range(self._iterative_group.start_index, self._iterative_group.end_index + 1):
-                        loop_plugins.append(self.plugin_names[i])
+                        if i in list(self.plugin_names.keys()):
+                            loop_plugins.append(self.plugin_names[i])
                     dataset1.attrs.create("loop_plugins", loop_plugins)
                     dataset.attrs.create("n_loop_plugins", len(loop_plugins))
 

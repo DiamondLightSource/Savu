@@ -285,7 +285,7 @@ https://conda.anaconda.org/conda-forge/noarch/peakutils-1.3.3-py_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/pyfai-0.19.0-py37hb3f55d8_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/scikit-image-0.17.2-py37h0da4684_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/scikit-learn-0.23.1-py37h8a51577_0.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/tomobar-2021.12-py37hdeaff10_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/tomobar-2022.03-py37hdeaff10_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/tomopy-1.9.1-py37h8342161_101.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/pypwt-0.9_10.1-py37hdeaff10_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/noarch/beautifulsoup4-4.9.3-pyhb0f4dca_0.tar.bz2
