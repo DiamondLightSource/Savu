@@ -16,7 +16,7 @@
 .. module:: tomobar_recon_3D
    :platform: Unix
    :synopsis: A wrapper around TOmographic MOdel-BAsed Reconstruction (ToMoBAR) software \
-   for advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
+   for direct and advanced iterative image reconstruction using _3D_ capabilities of regularisation. \
    This plugin will divide 3D projection data into overlapping subsets using padding.
 
 .. moduleauthor:: Daniil Kazantsev <scientificsoftware@diamond.ac.uk>
@@ -27,6 +27,7 @@ from savu.plugins.driver.gpu_plugin import GpuPlugin
 
 import numpy as np
 from tomobar.methodsIR import RecToolsIR
+from tomobar.methodsDIR import RecToolsDIR
 from savu.plugins.utils import register_plugin
 from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
     check_if_end_plugin_in_iterate_group, setup_extra_plugin_data_padding
@@ -64,25 +65,28 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         det_x_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('detector_x')]
         rot_angles_dim = in_dataset.get_shape()[in_dataset.get_data_dimension_by_axis_label('rotation_angle')]
         slice_size_mbbytes = int(np.ceil(((det_x_dim * det_x_dim) * 1024 * 4) / (1024 ** 3)))
-        # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
-        if 'ROF_TV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 8
-        if 'FGP_TV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 12
-        if 'SB_TV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 10
-        if 'PD_TV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 8
-        if 'LLT_ROF' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 12
-        if 'TGV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 15
-        if 'NDF' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 5
-        if 'Diff4th' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 5
-        if 'NLTV' in self.parameters['regularisation_method']:
-            slice_size_mbbytes *= 8
+
+        if self.parameters['reconstruction_method'] == 'FISTA3D':
+            # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
+            if 'ROF_TV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 8
+            if 'FGP_TV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 12
+            if 'SB_TV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 10
+            if 'PD_TV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 8
+            if 'LLT_ROF' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 12
+            if 'TGV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 15
+            if 'NDF' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 5
+            if 'Diff4th' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 5
+            if 'NLTV' in self.parameters['regularisation_method']:
+                slice_size_mbbytes *= 8
+
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
@@ -94,14 +98,10 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
-        out_pData = self.get_plugin_out_datasets()[0]
-        detY = in_pData.get_data_dimension_by_axis_label('detector_y')
-        # ! padding the vertical detector !
-        self.Vert_det = in_pData.get_shape()[detY] + 2 * self.pad
-
-        in_pData = self.get_plugin_in_datasets()
-        self.det_dimX_ind = in_pData[0].get_data_dimension_by_axis_label('detector_x')
-        self.det_dimY_ind = in_pData[0].get_data_dimension_by_axis_label('detector_y')
+        self.det_dimX_ind = in_pData.get_data_dimension_by_axis_label('detector_x')
+        self.det_dimY_ind = in_pData.get_data_dimension_by_axis_label('detector_y')
+        #  getting the value for padded vertical detector
+        self.Vert_det = in_pData.get_shape()[self.det_dimY_ind] + 2 * self.pad
 
         # extract given parameters into dictionaries suitable for ToMoBAR input
         self._data_ = {'OS_number': self.parameters['algorithm_ordersubsets'],
@@ -144,40 +144,50 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             CenterOffset[:, 0] = (cor_astra.item() - 0.5) - self.projection_shifts[:, 0]
             CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
 
-        # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
-        if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
-            rawdata3D = data[1].astype(np.float32)
-            rawdata3D[rawdata3D > 10 ** 15] = 0.0
-            rawdata3D = np.swapaxes(rawdata3D, 0, 1) / np.max(np.float32(rawdata3D))
-            self._data_.update({'projection_raw_data': rawdata3D})
-            self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
+        if self.parameters['reconstruction_method'] == 'FISTA3D':
+            # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
+            if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
+                rawdata3D = data[1].astype(np.float32)
+                rawdata3D[rawdata3D > 10 ** 15] = 0.0
+                rawdata3D = np.swapaxes(rawdata3D, 0, 1) / np.max(np.float32(rawdata3D))
+                self._data_.update({'projection_raw_data': rawdata3D})
+                self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
 
-        # set parameters and initiate a TomoBar class object
-        """
-        self.Rectools = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                   DetectorsDimV=self.Vert_det,
-                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                   CenterRotOffset=CenterOffset,  # The center of rotation (CoR)
-                                   AnglesVec=-self.anglesRAD,  # the vector of angles in radians
-                                   ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                   datafidelity=self.parameters['data_fidelity'],
-                                   # data fidelity, choose LS, PWLS, SWLS
-                                   device_projector='gpu')
-        """
-        # Run FISTA reconstruction algorithm here
-        #recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)
+            # set parameters and initiate a TomoBar class object for FISTA reconstruction
+            RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                       DetectorsDimV=self.Vert_det,   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with  the shift offsets
+                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                       datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
+                                       device_projector='gpu')
 
+            # Run FISTA reconstruction algorithm here
+            recon = RectoolsIter.FISTA(self._data_, self._algorithm_, self._regularisation_)
 
-        from tomobar.methodsDIR import RecToolsDIR
-        RectoolsDIR = RecToolsDIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                   DetectorsDimV=self.Vert_det,
-                                   # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                   CenterRotOffset=CenterOffset,  # The center of rotation (CoR)
-                                   AnglesVec=-self.anglesRAD,  # the vector of angles in radians
-                                   ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                   device_projector='gpu')
+        if self.parameters['reconstruction_method'] == 'FBP3D':
+            RectoolsDIR = RecToolsDIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                       DetectorsDimV=self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with the shift offsets
+                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                       device_projector='gpu')
 
-        recon = RectoolsDIR.FBP(projdata3D) #perform FBP
+            recon = RectoolsDIR.FBP(projdata3D) #perform FBP3D
+
+        if self.parameters['reconstruction_method'] == 'CGLS3D':
+            # set parameters and initiate a TomoBar class object for FISTA reconstruction
+            RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                       DetectorsDimV=self.Vert_det,   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with  the shift offsets
+                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                       datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
+                                       device_projector='gpu')
+
+            # Run CGLS reconstruction algorithm here
+            recon = RectoolsIter.CGLS(self._data_, self._algorithm_)
+
         recon = np.swapaxes(recon, 0, 1)
         return recon
 
