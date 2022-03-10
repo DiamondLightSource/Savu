@@ -57,7 +57,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def setup(self):
         in_dataset = self.get_in_datasets()[0]
         procs = self.exp.meta_data.get("processes")
-        procs = len([i for i in procs if 'GPU' in i])
+        procs = len([i for i in procs if 'GPU' in i]) # calculates the total number of GPU processes
         dim = in_dataset.get_data_dimension_by_axis_label('detector_y')
         nSlices = int(np.ceil(in_dataset.get_shape()[dim] / float(procs)))
         # calculate the amount of slices than would fit the GPU memory
@@ -160,7 +160,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                        AnglesVec=-self.anglesRAD,  # the vector of angles in radians
                                        ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
                                        datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
-                                       device_projector='gpu')
+                                       device_projector=self.parameters['GPU_index'])
 
             # Run FISTA reconstruction algorithm here
             recon = RectoolsIter.FISTA(self._data_, self._algorithm_, self._regularisation_)
@@ -171,7 +171,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                        CenterRotOffset=CenterOffset,  # The center of rotation combined with the shift offsets
                                        AnglesVec=-self.anglesRAD,  # the vector of angles in radians
                                        ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                       device_projector='gpu')
+                                       device_projector=self.parameters['GPU_index'])
 
             recon = RectoolsDIR.FBP(projdata3D) #perform FBP3D
 
@@ -183,7 +183,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                                        AnglesVec=-self.anglesRAD,  # the vector of angles in radians
                                        ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
                                        datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
-                                       device_projector='gpu')
+                                       device_projector=self.parameters['GPU_index'])
 
             # Run CGLS reconstruction algorithm here
             recon = RectoolsIter.CGLS(self._data_, self._algorithm_)
