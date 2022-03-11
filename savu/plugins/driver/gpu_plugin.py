@@ -68,6 +68,7 @@ class GpuPlugin(_base):
         self.__create_new_communicator(ranks, exp, process)
 
         if gpu_processes[process]:
+            self.stats_obj.GPU = True
             expInfo.set('process', self.new_comm.Get_rank())
             GPU_index = self.__calculate_GPU_index(nNodes)
             logging.debug("Running the GPU process %i with GPU index %i",
