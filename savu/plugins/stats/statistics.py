@@ -222,7 +222,7 @@ class Statistics(object):
             rss = 0
             #for value in (np.nditer(residuals)):
             #    rss += value**2
-            rss = np.sum(value for value in np.nditer(residuals))
+            rss = np.sum(value**2 for value in np.nditer(residuals))
         else:
             #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
