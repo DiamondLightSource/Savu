@@ -10,6 +10,8 @@ class StatsUtils(object):
                      "reconstruction": ["VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D"]}
     _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
+    plt.set_loglevel('WARNING')
+
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
         stats_dict, index_list = self._get_dicts_for_graphs(f)
