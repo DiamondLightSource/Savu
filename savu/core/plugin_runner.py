@@ -24,6 +24,9 @@ import logging
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
+from savu.core.iterative_plugin_runner import IteratePluginGroup
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 
 
 class PluginRunner(object):
@@ -65,7 +68,20 @@ class PluginRunner(object):
             self.exp._set_experiment_for_current_plugin(i)
             memory_before = cu.get_memory_usage_linux()
 
-            plugin_name = self.__run_plugin(exp_coll['plugin_dict'][i])
+            # now that nPlugin has been reset, need to check if we're at a
+            # plugin index that corresponds to a plugin inside the group to
+            # iterate over or not
+            current_iterate_plugin_group = check_if_in_iterative_loop(self.exp)
+
+            if current_iterate_plugin_group is None:
+                # not in an iterative loop, run as normal
+                plugin = self.__run_plugin(exp_coll['plugin_dict'][i])
+                plugin_name = plugin.name
+            else:
+                # in an iterative loop, run differently
+                plugin_name = \
+                    current_iterate_plugin_group._execute_iteration_0(
+                        self.exp, self)
 
             self.exp._barrier(msg='PluginRunner: plugin complete.')
 
@@ -105,8 +121,40 @@ class PluginRunner(object):
         cu.user_message("* Processing " + msg + " *")
         cu.user_message("*" * stars)
 
-    def __run_plugin(self, plugin_dict):
-        plugin = self._transport_load_plugin(self.exp, plugin_dict)
+    def __run_plugin(self, plugin_dict, clean_up_plugin=True, plugin=None):
+        # allow plugin objects to be reused for running iteratively
+        if plugin is None:
+            plugin = self._transport_load_plugin(self.exp, plugin_dict)
+
+        iterate_plugin_group = check_if_in_iterative_loop(self.exp)
+
+        if iterate_plugin_group is not None and \
+            iterate_plugin_group._ip_iteration == 0:
+                iterate_plugin_group.add_plugin_to_iterate_group(plugin)
+
+        is_end_plugin_in_iterative_loop = check_if_end_plugin_in_iterate_group(
+            self.exp)
+
+        if iterate_plugin_group is not None and \
+            is_end_plugin_in_iterative_loop and \
+            iterate_plugin_group._ip_iteration == 0:
+
+            # check if this end plugin is ALSO the start plugin
+            if iterate_plugin_group.start_index == \
+                iterate_plugin_group.end_index:
+                iterate_plugin_group.set_start_plugin(plugin)
+
+            # set the end plugin in IteratePluginGroup
+            iterate_plugin_group.set_end_plugin(plugin)
+            # setup the 'iterating' key in IteratePluginGroup._ip_data_dict
+            iterate_plugin_group.set_alternating_datasets()
+            # setup the PluginData objects
+            iterate_plugin_group.set_alternating_plugin_datasets()
+            # setup the datasets for iteration 0 and 1 inside the
+            # IteratePluginGroup object
+            iterate_plugin_group.setup_datasets()
+            # set the output datasets of the end plugin
+            iterate_plugin_group._IteratePluginGroup__set_datasets()
 
         #  ********* transport function ***********
         self._transport_pre_plugin()
@@ -117,7 +165,21 @@ class PluginRunner(object):
 
         self.exp._barrier(msg="Plugin returned from driver in Plugin Runner")
         cu._output_summary(self.exp.meta_data.get("mpi"), plugin)
-        plugin._clean_up()
+
+        # if NOT in an iterative loop, clean up the PluginData associated with
+        # the Data objects in the plugin object as normal
+        #
+        # if in an iterative loop, do not clean up the PluginData object
+        # associated with the Data objects of the plugin, apart from for the
+        # last iteration
+        if clean_up_plugin:
+            logging.debug(f"Cleaning up plugin {plugin.name}")
+            plugin._clean_up()
+        else:
+            info_msg = f"Not cleaning up plugin {plugin.name}, as it is in a " \
+                f"group to iterate over"
+            logging.debug(info_msg)
+
         finalise = self.exp._finalise_experiment_for_current_plugin()
 
         #  ********* transport function ***********
@@ -128,7 +190,8 @@ class PluginRunner(object):
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)
-        return plugin.name
+
+        return plugin
 
     def _run_plugin_list_setup(self, plugin_list):
         """ Run the plugin list through the framework without executing the
@@ -149,6 +212,7 @@ class PluginRunner(object):
         # run all plugin setup methods and store information in experiment
         # collection
         count = 0
+
         for plugin_dict in plist[n_loaders:n_loaders + n_plugins]:
             self.__plugin_setup(plugin_dict, count)
             count += 1
@@ -166,7 +230,6 @@ class PluginRunner(object):
         self.exp._reset_datasets()
         self.exp._finalise_setup(plugin_list)
         cu.user_message("Plugin list check complete!")
-
 
     def __plugin_setup(self, plugin_dict, count):
         self.exp.meta_data.set("nPlugin", count)

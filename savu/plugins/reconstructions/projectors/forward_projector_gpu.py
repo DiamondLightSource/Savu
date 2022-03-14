@@ -23,6 +23,7 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 
 from tomobar.methodsDIR import RecToolsDIR
 import numpy as np
@@ -32,6 +33,12 @@ import copy
 class ForwardProjectorGpu(Plugin, GpuPlugin):
     def __init__(self):
         super(ForwardProjectorGpu, self).__init__('ForwardProjectorGpu')
+        self.angles_total = None
+        self.det_horiz_half = None
+        self.detectors_horiz = None
+        self.projection_shifts = None
+        self.cor = None
+        self.angles_rad = None
 
     def pre_process(self):
         # getting metadata for CoR
@@ -55,12 +62,12 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
             self.projection_shifts = self.exp.meta_data.dict['projection_shifts']
 
         # deal with user-defined parameters
-        if (self.parameters['angles_deg'] is not None):
+        if self.parameters['angles_deg'] is not None:
             angles_list = self.parameters['angles_deg']
             self.angles_rad = np.deg2rad(np.linspace(angles_list[0], angles_list[1], angles_list[2], dtype=np.float))
-        if (self.parameters['centre_of_rotation'] is not None):
+        if self.parameters['centre_of_rotation'] is not None:
             self.cor = self.parameters['centre_of_rotation']
-        if (self.parameters['det_horiz'] is not None):
+        if self.parameters['det_horiz'] is not None:
             self.detectors_horiz = self.parameters['det_horiz']
 
         self.det_horiz_half = 0.5 * self.detectors_horiz
@@ -90,7 +97,21 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         # dealing with 3D data case
         if image.ndim == 3:
             vert_size = np.shape(image)[1]
-            self.angles_rad = -self.angles_rad
+            iterate_group = check_if_in_iterative_loop(self.exp)
+            if iterate_group is None:
+                self.angles_rad = -self.angles_rad
+            else:
+                # only apply the sign change on iteration 0, not on subsequent
+                # iterations
+                if iterate_group._ip_iteration == 0:
+                    self.angles_rad = -self.angles_rad
+
+            if iterate_group is not None and \
+                iterate_group._ip_iteration > 0 and \
+                'projection_shifts' in list(self.exp.meta_data.dict.keys()):
+                # update projection_shifts from experimental metadata
+                self.projection_shifts = \
+                    self.exp.meta_data.dict['projection_shifts']
             cor = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts
         else:
             cor = (-self.cor + self.det_horiz_half - 0.5)

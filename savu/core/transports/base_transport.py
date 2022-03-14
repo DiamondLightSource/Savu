@@ -33,6 +33,8 @@ import numpy as np
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.data_structures.data_types.base_type import BaseType
+from savu.core.iterate_plugin_group_utils import \
+    check_if_end_plugin_in_iterate_group
 
 NX_CLASS = 'NX_class'
 
@@ -497,7 +499,7 @@ class BaseTransport(object):
             return 'intermediate'
         return 'final_result'
 
-    def _populate_nexus_file(self, data):
+    def _populate_nexus_file(self, data, iterate_group=None):
         filename = self.exp.meta_data.get('nxs_filename')
 
         with h5py.File(filename, 'a') as nxs_file:
@@ -507,7 +509,25 @@ class BaseTransport(object):
             link_type = self.exp.meta_data.get(['link_type', name])
 
             if link_type == 'final_result':
-                group_name = 'final_result_' + data.get_name()
+                if iterate_group is not None and \
+                    check_if_end_plugin_in_iterate_group(self.exp):
+                    is_clone_data = 'clone' in name
+                    is_even_iterations = \
+                        iterate_group._ip_fixed_iterations % 2 == 0
+                    # don't need to create group for:
+                    # - clone dataset, if running an odd number of iterations
+                    # - original dataset, if running an even number of
+                    #   iterations
+                    if is_clone_data and not is_even_iterations:
+                        return
+                    elif not is_clone_data and is_even_iterations:
+                        return
+                # the group name for the output of the iterative loop should be
+                # named after the original dataset, regardless of if the link
+                # eventually points to the original or the clone, for the sake
+                # of the linkname referencing the dataset name set in
+                # savu_config
+                group_name = 'final_result_' + data.get_name(orig=True)
             else:
                 link = nxs_entry.require_group(link_type.encode("ascii"))
                 link.attrs[NX_CLASS] = 'NXcollection'
@@ -519,7 +539,14 @@ class BaseTransport(object):
 
             plugin_entry = nxs_entry.require_group(group_name)
             plugin_entry.attrs[NX_CLASS] = 'NXdata'
-            self._output_metadata(data, plugin_entry, name)
+            if iterate_group is not None and \
+                check_if_end_plugin_in_iterate_group(self.exp):
+                # always write the metadata under the name of the original
+                # dataset, not the clone dataset
+                self._output_metadata(data, plugin_entry,
+                    data.get_name(orig=False))
+            else:
+                self._output_metadata(data, plugin_entry, name)
 
     def _output_metadata(self, data, entry, name, dump=False):
         self.__output_data_type(entry, data, name)

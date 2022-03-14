@@ -25,6 +25,8 @@ Core
    Plugin Runner <framework_api/savu.core.plugin_runner>
    Transport Setup <framework_api/savu.core.transport_setup>
    Utils <framework_api/savu.core.utils>
+   Iterate Plugin Group Utils <framework_api/savu.core.iterate_plugin_group_utils>
+   Iterative Plugin Runner <framework_api/savu.core.iterative_plugin_runner>
 
 
 Transports

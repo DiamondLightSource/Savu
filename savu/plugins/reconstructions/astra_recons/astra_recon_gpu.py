@@ -26,6 +26,8 @@ from savu.plugins.reconstructions.astra_recons.base_astra_vector_recon \
     import BaseAstraVectorRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import \
+    check_if_end_plugin_in_iterate_group
 
 
 @register_plugin
@@ -43,13 +45,23 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         cfg['option']['GPUindex'] = self.parameters['GPU_index']
         return cfg
 
+    # total number of output datasets
     def nOutput_datasets(self):
         alg = self.parameters['algorithm']
-        if self.parameters['res_norm'] is True and 'FBP' not in alg:
+        if self.parameters['res_norm'] is True and 'FBP' not in alg \
+            and check_if_end_plugin_in_iterate_group(self.exp):
+            err_str = "The res_norm output dataset has not yet been " \
+                "implemented for when AstraReconGpu is at the end of an " \
+                "iterative loop"
+            raise ValueError(err_str)
+        elif self.parameters['res_norm'] is True and 'FBP' not in alg:
             self.res = True
             self.parameters['out_datasets'].append('res_norm')
             return 2
-        return 1
+        elif check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
 
     def astra_setup(self):
         options_list = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA",
@@ -222,7 +234,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         vectors = np.zeros([angles_rad.size, 12])
         for i in range(0, angles_rad.size):
             d0 = [CenterRotOffset - projection_shifts2d[i, 0], 0.0,
-                  CenterRotOffset - projection_shifts2d[i, 1]]  # detector
+                  -projection_shifts2d[i, 1] - 0.5]  # detector
             theta = angles_rad[i]
             vec_temp = np.dot(self.rotation_matrix3D(theta), s0)
             vectors[i, 0:3] = vec_temp[:]  # ray position

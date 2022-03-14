@@ -139,6 +139,11 @@ def _preview(value):
 
 
 def _typelist(func, value):
+    """ Apply the function to each value inside the list <value>.
+    Return true if all items in the list <value> return true
+    :param func Name of the function to apply to each item within the list
+    :param value The input list
+    """
     if isinstance(value, list):
         if value:
             return all(func(item) for item in value)
@@ -158,6 +163,10 @@ def _preview_dimension(value):
             valid = _preview_dimension_singular(value)
     else:
         valid = _float(value)
+
+        if not valid:
+            # Allow the value if it is a list
+            valid = _typelist(_preview_dimension_singular, value)
     return valid
 
 
@@ -546,7 +555,7 @@ def _check_options(param_def, value, pvalid):
         else:
             pvalid = False
             option_error_str = (
-                "That does not match one of the required options."
+                "It does not match one of the required options."
             )
             option_error_str += Fore.CYAN + "\nThe options are:\n"
             option_error_str += "\n".join(str(o) for o in options) + Fore.RESET
