@@ -16,7 +16,7 @@
 .. module:: cpu_iterative_plugin
    :platform: Unix
    :synopsis: Base class for all plugins which use a CPU on the target machine
-   and have the ability to be iterative
+       and have the ability to be iterative
 
 .. moduleauthor:: Daniil Kazantsev & Yousef Moazzam <scientificsoftware@diamond.ac.uk>
 
