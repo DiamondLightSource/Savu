@@ -14,6 +14,7 @@ Submodules
    plugins.corrections.distortion_correction
    plugins.corrections.monitor_correction
    plugins.corrections.mtf_deconvolution
+   plugins.corrections.phase_unwrapping
    plugins.corrections.subpixel_shift
    plugins.corrections.time_based_correction
    plugins.corrections.time_based_plus_drift_correction

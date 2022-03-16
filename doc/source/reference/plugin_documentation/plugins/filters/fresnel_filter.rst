@@ -44,14 +44,14 @@ A low-pass filter to improve the contrast of reconstructed images which is simil
         apply_log:
             visibility: basic
             dtype: bool
-            description: Apply the logarithm function to a sinogram before filtering.
+            description: Apply the logarithm function to a sinogram/projection before filtering.
             default: "True"
         
 {% endblock %}
 
 {% block plugin_citations %}
         
-        **Superior techniques for eliminating ring artifacts in X-ray micro-tomography by Vo, Nghia T et al.**
+        **Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography by Vo, Nghia T et al.**
         
         **Bibtex**
         
@@ -75,16 +75,16 @@ A low-pass filter to improve the contrast of reconstructed images which is simil
         .. code-block:: none
         
             %0 Journal Article
-            %T Superior techniques for eliminating ring artifacts in X-ray micro-tomography
+            %T Data processing methods and data acquisition for samples larger than the field of view in parallel-beam tomography
             %A Vo, Nghia T
             %A Atwood, Robert C
             %A Drakopoulos, Michael
+            %A Connolley, Thomas
             %J Optics express
-            %V 26
-            %N 22
-            %P 28396-28412
-            %@ 1094-4087
-            %D 2018
+            %V 29
+            %N 12
+            %P 17849-17874
+            %D 2021
             %I Optical Society of America
             
         
