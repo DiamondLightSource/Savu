@@ -44,7 +44,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         # getting metadata for CoR
         in_meta_data = self.get_in_meta_data()[0]
         self.cor = in_meta_data.get('centre_of_rotation')
-        self.cor = np.mean(self.cor)  # CoR must be a scalar for 3D geometry 
+        self.cor = np.mean(self.cor)  # CoR must be a scalar for 3D geometry
 
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
@@ -87,7 +87,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                    slice_dims=pattern2['slice_dims'],
                                    core_dims=pattern2['core_dims'])
         out_pData[0].plugin_data_setup(pattern['name'], self.get_max_frames())
-        out_dataset[0].meta_data.set('rotation_angle', copy.deepcopy(angles_meta_deg))               
+        out_dataset[0].meta_data.set('rotation_angle', copy.deepcopy(angles_meta_deg))
 
     def process_frames(self, data):
         image = data[0].astype(np.float32)
@@ -120,7 +120,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                   CenterRotOffset=cor,  # Center of Rotation
                                   AnglesVec=self.angles_rad,  # array of angles in radians
                                   ObjSize=image_size,  # a scalar to define reconstructed object dimensions
-                                  device_projector='gpu')
+                                  device_projector=self.parameters['GPU_index'])
         if vert_size is not None:
             sinogram_new = RectoolsDIR.FORWPROJ(np.swapaxes(image, 0, 1))
             sinogram_new = np.swapaxes(sinogram_new, 0, 1)
@@ -140,7 +140,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         sdirs = in_datasets[0].get_slice_dimensions()
         cor_vect = np.ones(np.prod([in_datasets[0].get_shape()[i] for i in sdirs]))
         self.cor *= cor_vect
-        out_datasets[0].meta_data.set('centre_of_rotation', copy.deepcopy(self.cor)) 
+        out_datasets[0].meta_data.set('centre_of_rotation', copy.deepcopy(self.cor))
 
     def get_max_frames(self):
         return 'multiple'
