@@ -28,6 +28,7 @@ from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import copy
 
 from mpi4py import MPI
+import logging
 
 import numpy as np
 
@@ -69,8 +70,8 @@ class Projection2dAlignment(Plugin, CpuPlugin):
             self.exp.meta_data.set('error_alignment_vector', copy.deepcopy(self.error_alignment_vector))
 
     def process_frames(self, data):
-        projection = data[0]  # extract a projection
-        projection_align = data[1]  # extract a projection for alignment
+        projection = data[0]   # an original data to align to (a static reference)
+        projection_align = data[1] # a projection for alignment to the given reference
 
         # perform alignment
         shifts, error, diffphase = phase_cross_correlation(
@@ -95,6 +96,7 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         rank = comm.Get_rank()
         if rank == 0:
             print(f"The alignment error is:  {error_scalar}")
+            logging.debug("The alignment error is %f" % error_scalar)
         if self.iterations_number == 1:
             self.error_alignment_vector[0] = error_scalar
         else:
