@@ -69,23 +69,23 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         gpu_available_mb = self.get_gpu_memory()[0]/procs  # get the free GPU memory of a first device if many
         slice_size_mbbytes = int(np.ceil((core_dims_size * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
-        if 'ROF_TV' in self.parameters['regularisation_method']:
+        if 'ROF_TV' in self.parameters['method']:
             slice_size_mbbytes *= 8
-        if 'FGP_TV' in self.parameters['regularisation_method']:
+        if 'FGP_TV' in self.parameters['method']:
             slice_size_mbbytes *= 12
-        if 'SB_TV' in self.parameters['regularisation_method']:
+        if 'SB_TV' in self.parameters['method']:
             slice_size_mbbytes *= 10
-        if 'PD_TV' in self.parameters['regularisation_method']:
+        if 'PD_TV' in self.parameters['method']:
             slice_size_mbbytes *= 8
-        if 'LLT_ROF' in self.parameters['regularisation_method']:
+        if 'LLT_ROF' in self.parameters['method']:
             slice_size_mbbytes *= 12
-        if 'TGV' in self.parameters['regularisation_method']:
+        if 'TGV' in self.parameters['method']:
             slice_size_mbbytes *= 15
-        if 'NDF' in self.parameters['regularisation_method']:
+        if 'NDF' in self.parameters['method']:
             slice_size_mbbytes *= 5
-        if 'Diff4th' in self.parameters['regularisation_method']:
+        if 'Diff4th' in self.parameters['method']:
             slice_size_mbbytes *= 5
-        if 'NLTV' in self.parameters['regularisation_method']:
+        if 'NLTV' in self.parameters['method']:
             slice_size_mbbytes *= 8
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
@@ -101,6 +101,15 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
                          'number_of_iterations': self.parameters['max_iterations'],
                          'time_marching_parameter': self.parameters['time_step'],
                          'tolerance_constant': self.parameters['tolerance_constant']}
+        if self.parameters['method'] == 'PD_TV':
+            # set parameters for the PD-TV method
+            self.pars = {'algorithm': self.parameters['method'],
+                         'regularisation_parameter': self.parameters['reg_parameter'],
+                         'number_of_iterations': self.parameters['max_iterations'],
+                         'tolerance_constant': self.parameters['tolerance_constant'],
+                         'methodTV': 0,
+                         'nonneg': 0,
+                         'PD_LipschitzConstant': 8}
         if self.parameters['method'] == 'FGP_TV':
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'],
@@ -192,6 +201,15 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
                                        self.pars['tolerance_constant'],
                                        self.pars['methodTV'],
                                        self.pars['nonneg'], self.device)
+        if self.parameters['method'] == 'PD_TV':
+            (im_res, infogpu) = PD_TV(self.pars['input'],
+                                       self.pars['regularisation_parameter'],
+                                       self.pars['number_of_iterations'],
+                                       self.pars['tolerance_constant'],
+                                       self.pars['methodTV'],
+                                       self.pars['nonneg'],
+                                       self.pars['PD_LipschitzConstant'],
+                                       self.parameters['GPU_index'])                                       
         if self.parameters['method'] == 'SB_TV':
             (im_res, infogpu) = SB_TV(self.pars['input'],
                                       self.pars['regularisation_parameter'],
