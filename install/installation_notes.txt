@@ -1,5 +1,10 @@
 Installation notes (for creating a new release and installing at Diamond)
 =========================================================================
+modified 04.02.2022
+- create a release-specific branch, e.g. 4_2release
+
+
+=========================================================================
  
 - Freeze on pull requests
 - Install latest version of Savu from Master into /dls_sw/apps/savu
@@ -19,4 +24,4 @@ Installation notes (for creating a new release and installing at Diamond)
 - Further testing
 - (Make this module default load if during shutdown)
 - Email beamlines
-
+=========================================================================
