@@ -20,9 +20,11 @@ All notable changes to this project are documented in this file.
   * FBP3D_CUDA method added (filtering before backprojection with BP3D_CUDA)
   * ForwardProjector works with the 3D geometry
   * 3D geometries can accept metadata for x-y shifts and correct the misalignment
+  * ToMoBAR (3d version) has got different methods working well with iterative alignment
   * GPU memory usage check for *tomobar_recon_3D* plugin to avoid CUDA error
   * *tomobar_recon_3D* access to regularisation using Wavelets, try set regularisation method e.g. to 'PD_TV_WAVELETS'
   * SWLS, PWLS methods for data fidelities are enabled in *tomobar_recon_3D*
+  * GPU device indices are controlled through ToMoBAR iterative methods and regularisation
 
 ### Filters
   * GPU memory usage check for *ccpi_denoising_gpu_3D* plugin to avoid CUDA error
