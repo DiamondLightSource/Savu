@@ -17,7 +17,7 @@ from io import StringIO
 
 import doc.doc_tests.doc_test_utils as dtu
 import scripts.configurator_tests.savu_config_test_utils as sctu
-import scripts.configurator_tests.refresh_process_lists_test as refresh
+import scripts.refresh_process_lists.refresh_process_lists_test as refresh
 
 # Determine Savu base path
 main_dir = \

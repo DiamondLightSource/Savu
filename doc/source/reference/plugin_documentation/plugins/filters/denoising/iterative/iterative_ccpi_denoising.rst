@@ -1,9 +1,9 @@
 {% extends "plugin_template.rst" %}
 
-{% block title %}Ccpi Denoising Gpu{% endblock %}
+{% block title %}Iterative Ccpi Denoising{% endblock %}
 
 {% block description %}
-Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising. 
+A wrapper for CCPi-Regularisation Toolkit (CPU) for efficient 2D denoising with changing patterns 
 {% endblock %}
 
 {% block parameter_yaml %}
@@ -23,6 +23,13 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
                 summary: A list of the dataset(s) to create.
                 verbose: A list of strings, where each string is a name to be assigned to a dataset output by the plugin. If there is only one input dataset and one output dataset and the list is left empty, the output will take the name of the input dataset. The length of the list is the number of output datasets created by the plugin.
             default: "[]"
+        
+        plugin_iterations:
+            visibility: basic
+            dtype: int
+            description: 
+                summary: "The number of Savu's plugin outer iterations"
+            default: "5"
         
         method:
             visibility: advanced
@@ -54,24 +61,39 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
         max_iterations:
             visibility: basic
             dtype: int
-            description: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
-            default: "300"
+            description: 
+                summary: Total number of regularisation iterations.  The smaller the number of iterations, the smaller the effect of the filtering is.  A larger number will affect the speed of the algorithm.
+                range: Recommended value dependent upon method.
+            default: 
+                method: 
+                    ROF_TV: "2000"
+                    FGP_TV: "500"
+                    PD_TV: "500"
+                    SB_TV: "100"
+                    LLT_ROF: "2000"
+                    NDF: "2000"
+                    Diff4th: "1000"
+                    TGV: "500"
+                    NLTV: "5"
         
         time_step:
             visibility: advanced
             dtype: float
-            description: Time marching step, relevant for ROF_TV, LLT_ROF, NDF, Diff4th methods.
-            default: "0.001"
             dependency: 
-                method: 
+                regularisation_method: 
                     ROF_TV
                     LLT_ROF
                     NDF
                     Diff4th
+            description: 
+                summary: Time marching parameter for convergence of explicit schemes
+                verbose: the time step constant defines the speed of convergence, the larger values can lead to divergence
+                range: Recommended between 0.0001 and 0.003
+            default: "0.003"
         
         lipshitz_constant:
             visibility: advanced
-            dtype: int
+            dtype: float
             description: TGV method, Lipshitz constant.
             default: "12"
             dependency: 
@@ -104,17 +126,19 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
         penalty_type:
             visibility: advanced
             dtype: str
-            options: "['Huber', 'Perona', 'Tukey', 'Constr', 'Constrhuber']"
+            options: "['huber', 'perona', 'tukey', 'constr', 'constrhuber']"
             description: 
                 summary: Penalty type
                 verbose: Nonlinear/Linear Diffusion model (NDF) specific penalty type.
                 options: 
-                    Huber: Huber
-                    Perona: Perona-Malik model
-                    Tukey: Tukey
+                    huber: Huber
+                    perona: Perona-Malik model
+                    tukey: Tukey
+                    constr: None
+                    constrhuber: None
             dependency: 
                 method: NDF
-            default: Huber
+            default: huber
         
         edge_par:
             visibility: advanced
@@ -133,10 +157,9 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
             default: "0.0"
         
         pattern:
-            visibility: intermediate
+            visibility: advanced
             dtype: str
             description: Pattern to apply this to.
-            options: "['SINOGRAM', 'PROJECTION', 'VOLUME_XZ', 'VOLUME_XY']"
             default: VOLUME_XZ
         
 {% endblock %}
@@ -190,7 +213,7 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
             @article{rudin1992nonlinear,
               title={Nonlinear total variation based noise removal algorithms},
               author={Rudin, Leonid I and Osher, Stanley and Fatemi, Emad},
-              journal={Physica D nonlinear phenomena},
+              journal={Physica D: nonlinear phenomena},
               volume={60},
               number={1-4},
               pages={259--268},
@@ -208,7 +231,7 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
             %A Rudin, Leonid I
             %A Osher, Stanley
             %A Fatemi, Emad
-            %J Physica D nonlinear phenomena
+            %J Physica D: nonlinear phenomena
             %V 60
             %N 1-4
             %P 259-268
@@ -489,4 +512,4 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
         
 {% endblock %}
 
-{% block plugin_file %}../../../../plugin_api/plugins.filters.denoising.ccpi_denoising_gpu.rst{% endblock %}
+{% block plugin_file %}../../../../../plugin_api/plugins.filters.denoising.iterative.iterative_ccpi_denoising.rst{% endblock %}

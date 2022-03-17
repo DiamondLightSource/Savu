@@ -62,8 +62,14 @@ class TomobarGpuTest(unittest.TestCase):
         tu.cleanup(options1)
         tu.cleanup(options2)
 
-    def test_tomobar3d_alignment(self):
-        process_list = 'reconstruction/tomobar/iterative_alignment_tomobar3d_test.nxs'
+    def test_tomobar3d_FBP_alignment(self):
+        process_list = 'reconstruction/tomobar/iterative_alignment_tomobar3d_FBP_test.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_tomobar3d_FISTA_alignment(self):
+        process_list = 'reconstruction/tomobar/iterative_alignment_tomobar3d_FISTA_test.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
         tu.cleanup(options)

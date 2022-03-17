@@ -49,6 +49,7 @@ A Wrapper for pypwt package for wavelet GPU denoising.
             visibility: intermediate
             dtype: str
             description: Pattern to apply this to.
+            options: "['SINOGRAM', 'PROJECTION', 'VOLUME_XZ', 'VOLUME_XY']"
             default: PROJECTION
         
 {% endblock %}
