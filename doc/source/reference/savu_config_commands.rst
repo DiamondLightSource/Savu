@@ -52,6 +52,8 @@ If you are using the command line please type ``-h`` or ``--help``.
 
 * :ref:`replace`
 
+* :ref:`replace`
+
 .. _open:
 
 open
@@ -200,6 +202,10 @@ move
 ref
 ----------------
 
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://youtu.be/qxwgGqRajbs" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 .. cssclass:: argstyle
 
     .. argparse::
@@ -212,6 +218,10 @@ ref
 
 level
 ----------------
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://youtu.be/qMKSZGqvQYk" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 .. cssclass:: argstyle
 
@@ -226,6 +236,10 @@ level
 expand
 ----------------
 
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://youtu.be/0CGtaJDrpU0" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 .. cssclass:: argstyle
 
     .. argparse::
@@ -238,6 +252,10 @@ expand
 
 cite
 ----------------
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://youtu.be/qVPHJJ4pw-A" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 .. cssclass:: argstyle
 
@@ -297,6 +315,19 @@ history
             :module: scripts.config_generator.arg_parsers
             :func: _history_arg_parser
             :prog: history
+
+
+.. _replace:
+
+replace
+----------------
+
+.. cssclass:: argstyle
+
+    .. argparse::
+            :module: scripts.config_generator.arg_parsers
+            :func: _replace_arg_parser
+            :prog: replace
 
 
 .. _iterate:
