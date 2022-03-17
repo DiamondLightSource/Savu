@@ -67,7 +67,17 @@ def _config_arg_parser(doc=True):
     parser.add_argument("-e", "--error", dest="error", help="Shows all errors that Savu encounters.",
                         action='store_true', default=False)
     parser.add_argument("--examples", dest="examples", action='store_true',
-                        help="Add example plugins", default=False)
+                        help="Add example plugins.", default=False)
+    parser.add_argument("--tree", dest="tree",
+                        help="Display the tree view of a hdf/nxs file.",
+                        type=str, default=None, required=False)
+    parser.add_argument("--check", dest="check",
+                        help="Check if a tomographic data file (hdf/nxs) contains conventional"
+                             " dataset-paths for NxTomoLoader.",
+                        type=str, default=None, required=False)
+    parser.add_argument("--find", dest="find", nargs=2, action="append",
+                        help="Find paths to datasets in a hdf/nxs file matching a pattern",
+                        type=str, default=None, required=False)
     return parser if doc==True else parser.parse_args()
 
 
@@ -182,6 +192,29 @@ def _add_arg_parser(args=None, doc=True):
     return __arg_parser(parser, args, 'add', doc)
 
 
+def _iterate_arg_parser(args=None, doc=True):
+    """ Argument parser for iterate command. """
+    desc = sc.get_description()['iterate']
+    parser = ArgumentParser(prog='iterate', description=desc)
+    set_arg_help = 'Set the start plugin index, end plugin index, and number of iterations'
+    parser.add_argument('--set', nargs=3, type=int,
+        metavar=('START', 'END', 'ITERATIONS'), help=set_arg_help)
+    remove_arg_help = "Remove a list of specific iterative loops, or all " \
+        "loops in the process list (pass no loop numbers to remove all)"
+    parser.add_argument('--remove', nargs='*', type=int, help=remove_arg_help,
+        metavar=('LOOP_NUMBER'))
+    # TODO: Trying to allow it to be passed only a start index, and if so, to
+    # set the end index the same as the given start index.
+    # It's buggy though: passing more than 3 values causes the plugin_indices
+    # arg to consume more than 2 values, which isn't desired
+#    indices_arg_help = f"The plugin indices for the start and end of the " \
+#                       f"iterative loop"
+#    parser.add_argument('indices', nargs='+', help=indices_arg_help)
+#    iterations_arg_help = 'The number of iterations to perform'
+#    parser.add_argument('iterations', nargs=1, help=iterations_arg_help)
+    return __arg_parser(parser, args, 'iterate', doc)
+
+
 def _dupl_arg_parser(args=None, doc=True):
     """ Argument parser for dupl command. """
     desc = sc.get_description()['dupl']
@@ -233,6 +266,15 @@ def _move_arg_parser(args=None, doc=True):
     parser.add_argument("orig_pos", help="Original position.")
     parser.add_argument('new_pos', help="New position.")
     return __arg_parser(parser, args, 'move', doc)
+
+
+def _replace_arg_parser(args=None, doc=True):
+    """ Argument parser for replace command. """
+    desc = sc.get_description()['replace']
+    parser = ArgumentParser(prog='replace', description=desc)
+    parser.add_argument("old", help="Old plugin position.")
+    parser.add_argument('new_plugin', help="New plugin name.")
+    return __arg_parser(parser, args, 'replace', doc)
 
 
 def _coll_arg_parser(args=None, doc=True):

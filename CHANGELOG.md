@@ -1,10 +1,11 @@
 All notable changes to this project are documented in this file.
 *******************************************************************
-# Savu Version 4.2, *planned release first quarter of 2022*
+# Savu Version 4.2, *planned release March 2022*
 
 ## _Core_
 * Statistics (TODO)
-* Iterative plugins (TODO)
+* Iterative plugins (A capability to enable some plugins to be iterative):
+  - `iterate` command to enable control over iterative plugins (see `iterate -h` for help)
 
 ## _Existing Plugins_
 
@@ -17,10 +18,11 @@ All notable changes to this project are documented in this file.
 ### Reconstruction
   * AstraReconGPU, 3D GPU methods are added (BP3D_CUDA, CGLS3D_CUDA, SIRT3D_CUDA)
   * FBP3D_CUDA method added (filtering before backprojection with BP3D_CUDA)
-  * ForwardProjector works with 3D geometry
+  * ForwardProjector works with the 3D geometry
   * 3D geometries can accept metadata for x-y shifts and correct the misalignment
   * GPU memory usage check for *tomobar_recon_3D* plugin to avoid CUDA error
   * *tomobar_recon_3D* access to regularisation using Wavelets, try set regularisation method e.g. to 'PD_TV_WAVELETS'
+  * SWLS, PWLS methods for data fidelities are enabled in *tomobar_recon_3D*
 
 ### Filters
   * GPU memory usage check for *ccpi_denoising_gpu_3D* plugin to avoid CUDA error
@@ -43,6 +45,9 @@ All notable changes to this project are documented in this file.
   *  Allow a list as a single dimension input to the preview parameter
   *  Allow a start keyword inside the preview parameter
   *  Allow a parameter to be a directory path within the Savu folder
+  *  Asterix line added to indicate the start and end of the process list
+  *  Line separator added to indicate an iterative plugin loop
+
 ### New Commands
   * *savu_mod* - a way to modify one parameter present in a plugin list. 
 

@@ -127,6 +127,7 @@ class Content(object):
         if check.lower() == "y":
             self.expand_dim = None
             self.plugin_list.plugin_list = []
+            self.plugin_list.clear_iterate_plugin_group_dicts()
 
     def check_plugin_list_exists(self):
         """ Check if plugin list is populated. """
@@ -141,6 +142,16 @@ class Content(object):
         plugin.get_plugin_tools()._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
+
+    def iterate(self, args):
+        if args.remove is not None:
+            self.plugin_list.remove_iterate_plugin_groups(args.remove)
+        elif args.set is not None:
+            # create a dict representing a group of plugins to iterate over
+            start = args.set[0]
+            end = args.set[1]
+            iterations = args.set[2]
+            self.plugin_list.add_iterate_plugin_group(start, end, iterations)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)
@@ -229,7 +240,9 @@ class Content(object):
         union_params = set(keep).intersection(set(plugin.parameters))
         # Names of the parameter names present in both lists
         for param in union_params:
-            self.modify(str_pos, param, keep[param], ref=True)
+            valid_mod = self.modify(str_pos, param, keep[param], ref=True)
+            if not valid_mod:
+                self._print_default_message(plugin, param)
         # add any parameter mutations here
         classes = [c.__name__ for c in inspect.getmro(plugin.__class__)]
         m_dict = self.param_mutations
@@ -246,6 +259,17 @@ class Content(object):
                     self.modify(str_pos, entry["new"], val, ref=True)
         if changes:
             mutations.param_change_str(keep, plugin.parameters, name, keys)
+
+    def _print_default_message(self, plugin, param):
+        """Print message to alert user that value has not been changed/updated
+
+        :param plugin: plugin object
+        :param param: parameter name
+        """
+        pdefs = plugin.get_plugin_tools().get_param_definitions()
+        default = pdefs[param]['default']
+        print(f"This has been replaced by the default {param}: "
+              f"{default}.")
 
     def _apply_plugin_updates(self, skip=False):
         # Update old process lists that start from 0
@@ -333,6 +357,17 @@ class Content(object):
         self.insert(pu.plugins[name](), new_pos, new)
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
+        self.check_iterative_loops([old_pos + 1, new_pos + 1], 0)
+
+    def replace(self, old, new_plugin):
+        self.check_for_plugin_failure(new_plugin)
+        old_pos = self.find_position(old)
+        self.remove(old_pos)
+        pos, str_pos = self.convert_pos(old)
+        plugin = pu.plugins[new_plugin]()
+        plugin.get_plugin_tools()._populate_default_parameters()
+        self.insert(plugin, pos, str_pos)
+        #self.plugin_list.plugin_list[pos]["pos"] = str_pos
 
     def modify(self, pos_str, param_name, value, default=False, ref=False,
                dim=False):
@@ -363,7 +398,7 @@ class Content(object):
         else:
             value = self._catch_parameter_tuning_syntax(value, param_name)
             valid_modification = self.modify_main(
-                param_name, value, tools, parameters, dim
+                param_name, value, tools, parameters, dim, pos_str
             )
         return valid_modification
 
@@ -421,7 +456,7 @@ class Content(object):
         param_name = pu.param_to_str(param_name, keys)
         return param_name, value
 
-    def modify_main(self, param_name, value, tools, parameters, dim):
+    def modify_main(self, param_name, value, tools, parameters, dim, pos_str):
         """Check the parameter is within the current parameter list.
         Check the new parameter value is valid, modify the parameter
         value, update defaults, check if dependent parameters should
@@ -432,12 +467,14 @@ class Content(object):
         :param tools: The plugin tools
         :param parameters: The plugin parameters
         :param dim: The dimensions
+        :param pos_str: The plugin position number
 
         returns: A boolean True if the value is a valid input for the
           selected parameter
         """
         parameter_valid = False
         current_parameter_details = tools.param.get(param_name)
+        current_plugin_name = tools.plugin_class.name
 
         # If dimensions are provided then alter preview param
         if self.preview_dimension_to_modify(dim, param_name):
@@ -457,11 +494,8 @@ class Content(object):
             if parameter_valid:
                 self._change_value(param_name, value, tools, parameters)
             else:
-                value = str(value)
-                display_value = f"{value[0:12]}.." if len(value) > 12 \
-                                else value
-                print(f"ERROR: The input value {display_value} "
-                      f"for {param_name} is not correct.")
+                print(f"ERROR: The value {value} for "
+                      f"{pos_str}.{param_name} is not correct.")
                 print(error_str)
         else:
             print("Not in parameter keys.")
@@ -1053,6 +1087,59 @@ class Content(object):
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
 
+    def check_iterative_loops(self, positions, direction):
+        """
+        When a plugin is added, removed, or moved, check if any iterative loops
+        should be removed or shifted
+        """
+        def moved_plugin(old_pos, new_pos):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(old_pos)
+            if is_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    old_pos, -1)
+
+            if_will_be_in_loop = \
+                self.plugin_list.check_pos_in_iterative_loop(new_pos)
+            if if_will_be_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    new_pos, -1)
+
+            # shift any relevant loops
+            if new_pos < old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [new_pos, old_pos], 1)
+            elif new_pos > old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [old_pos, new_pos], -1)
+
+        def added_removed_plugin(pos, direction):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(pos)
+            if is_in_loop:
+                # delete the associated loop
+                self.plugin_list.remove_associated_iterate_group_dict(pos,
+                    direction)
+
+            # check if there are any iterative loops in the process list
+            do_loops_exist = len(self.plugin_list.iterate_plugin_groups) > 0
+            if do_loops_exist:
+                if direction == -1:
+                    # shift the start+end of all loops after the plugin down by
+                    # 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, -1)
+                elif direction == 1:
+                    # shift the start+end of all loops after the plugin up by 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, 1)
+
+        if direction == 0:
+            # a plugin has been moved
+            moved_plugin(positions[0], positions[1])
+        else:
+            # a plugin has been added or removed
+            added_removed_plugin(positions[0], direction)
+
     @property
     def size(self):
         return len(self.plugin_list.plugin_list)
+
+    def display_iterative_loops(self):
+        self.plugin_list.print_iterative_loops()

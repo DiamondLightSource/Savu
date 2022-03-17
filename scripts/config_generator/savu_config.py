@@ -24,6 +24,9 @@
 import re
 import sys
 import logging
+from . import hdf_utils as hu
+
+from colorama import Fore
 
 logger = logging.getLogger('documentationLog')
 logger_rst = logging.getLogger('documentationRst')
@@ -49,10 +52,11 @@ def _help(content, args):
     command_title = " Savu configurator commands "
     title_separator = "*"*((width-len(command_title))//2)
     print(f"{title_separator}{command_title}{title_separator}")
-    for key in list(commands.keys()):
+    for key in sorted(list(commands.keys()),  key=str.lower):
         doc = commands[key].__doc__
         if doc:
-            print("%8s : %s" % (key, commands[key].__doc__))
+            print(Fore.GREEN + f"{key:>8}" + Fore.RESET
+                  + f" : {commands[key].__doc__}")
     line_separator = "*" * width
     info_text = "* For more information about individual commands type " \
                 "'<command> -h' *"
@@ -68,8 +72,8 @@ def _help(content, args):
 def _open(content, args):
     """ Open an existing process list."""
     content.fopen(args.file, update=True, skip=args.skip)
-    _ref(content, '* -n')
     _disp(content, '-q')
+    _ref(content, '* -n')
     return content
 
 
@@ -187,8 +191,42 @@ def _add(content, args):
     elems = content.get_positions()
     final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
     content.add(args.name, args.pos if args.pos else str(final))
+    content.check_iterative_loops([int(args.pos)] if args.pos else [int(final)], 1)
     _disp(content, '-q')
     return content
+
+
+@parse_args
+@error_catcher
+def _iterate(content, args):
+    """ Set a plugin (or group of plugins) to run iteratively. """
+    # TODO: note the lack of use of _disp(); maybe will need this for
+    # visually displaying the iterative loops in the terminal window?
+    if args.remove is None and args.set is None:
+        # display only the loops, not the rest of the process list
+        content.display_iterative_loops()
+    else:
+        content.iterate(args)
+        # display the process list with the visual markers of where iterative
+        # loops are
+        _disp(content, '-q')
+    return content
+    # TODO: the commented-out code below is associated with the TODO in
+    # arg_parsers._iterate_arg_parser()
+#    plugin_indices = args.indices
+#    iterations = args.iterations
+#
+#    start = plugin_indices[0]
+#    if len(plugin_indices) == 1:
+#        # only the start index has been given, so there is only one element in
+#        # the list
+#        end = plugin_indices[0]
+#    else:
+#        # both the start and end index has been given, so there are two elements
+#        # in the list
+#        end = plugin_indices[1]
+#
+#    content.add_iterate_plugin_group(start, end, iterations[0])
 
 
 @parse_args
@@ -238,6 +276,7 @@ def _rem(content, args):
             pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
+        content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
 
@@ -293,6 +332,13 @@ def _history(content, arg):
         print("%5i : %s" % (i, utils.readline.get_history_item(i)))
     return content
 
+@parse_args
+@error_catcher
+def _replace(content, args):
+    """ Replace a plugin with another """
+    content.replace(args.old, args.new_plugin)
+    _disp(content, '-q')
+    return content
 
 commands = {'open': _open,
             'help': _help,
@@ -312,7 +358,9 @@ commands = {'open': _open,
             'coll': _coll,
             'clear': _clear,
             'exit': _exit,
-            'history': _history}
+            'history': _history,
+            'iterate': _iterate,
+            'replace': _replace}
 
 def get_description():
     """ For each command, enter the function and save the docstring to a
@@ -331,7 +379,6 @@ def main(test=False):
                  If test is False then nothing is touched.
     """
 
-    print("Running the configurator")
     # required for running the tests locally or on travis
     # drops the last argument from pytest which is the test file/module
     if test:
@@ -345,9 +392,25 @@ def main(test=False):
             pass
 
     args = parsers._config_arg_parser(doc=False)
+    if args.tree is not None:
+        file_path = args.tree
+        hu.get_hdf_tree(file_path, add_shape=True, display=True)
+        sys.exit(0)
+    if args.find is not None:
+        vals = args.find
+        file_path = vals[0][0]
+        pattern = vals[0][1]
+        hu.find_hdf_key(file_path, pattern, display=True)
+        sys.exit(0)
+    if args.check is not None:
+        file_path = args.check
+        hu.check_tomo_data(file_path)
+        sys.exit(0)
+
     if args.error:
         utils.error_level = 1
 
+    print("Running the configurator")
     print("Starting Savu Config tool (please wait for prompt)")
 
     _reduce_logging_level()

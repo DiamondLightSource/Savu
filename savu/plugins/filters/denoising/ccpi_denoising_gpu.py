@@ -23,6 +23,8 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 import numpy as np
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
@@ -41,8 +43,18 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        return 1
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
 
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
+
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
@@ -93,19 +105,19 @@ class CcpiDenoisingGpu(Plugin, GpuPlugin):
                          'tolerance_constant': self.parameters['tolerance_constant']}
         if (self.parameters['method'] == 'NDF'):
             # set parameters for the NDF method
-            if (self.parameters['penalty_type'] == 'huber'):
+            if (self.parameters['penalty_type'] == 'Huber'):
                 # Huber function for the diffusivity
                 penaltyNDF = 1
-            if (self.parameters['penalty_type'] == 'perona'):
+            if (self.parameters['penalty_type'] == 'Perona'):
                 # Perona-Malik function for the diffusivity
                 penaltyNDF = 2
-            if (self.parameters['penalty_type'] == 'tukey'):
+            if (self.parameters['penalty_type'] == 'Tukey'):
                 # Tukey Biweight function for the diffusivity
                 penaltyNDF = 3
-            if (self.parameters['penalty_type'] == 'constr'):
+            if (self.parameters['penalty_type'] == 'Constr'):
                 #  Threshold-constrained linear diffusion
                 penaltyNDF = 4
-            if (self.parameters['penalty_type'] == 'constrhuber'):
+            if (self.parameters['penalty_type'] == 'Constrhuber'):
                 #  Threshold-constrained huber diffusion
                 penaltyNDF = 5
             self.pars = {'algorithm': self.parameters['method'], \

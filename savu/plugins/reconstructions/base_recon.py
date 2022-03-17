@@ -492,6 +492,11 @@ class BaseRecon(Plugin):
             "single", "multiple" or integer (only to be used if the number of
                                              frames MUST be fixed.)
         """
+        if self._max_frames:
+            frames_max = self._max_frames
+        else:
+            frames_max = 'multiple'
+        return frames_max
         return 'multiple'
 
     def get_slice_axis(self):

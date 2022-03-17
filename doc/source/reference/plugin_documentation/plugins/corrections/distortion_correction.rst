@@ -48,7 +48,7 @@ A plugin to apply radial distortion correction.
         
         file_path:
             visibility: basic
-            dtype: "[None,filepath]"
+            dtype: "[None, filepath, str]"
             description: Path to the text file having distortion coefficients. Set to None for manually inputing.
             default: None
         

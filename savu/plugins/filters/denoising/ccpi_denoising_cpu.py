@@ -1,4 +1,4 @@
-# Copyright 2014 Diamond Light Source Ltd.
+# Copyright 2014 Diamond Light Source Ltd.o
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group
 import numpy as np
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
-
 
 @register_plugin
 class CcpiDenoisingCpu(Plugin, CpuPlugin):
@@ -40,8 +41,18 @@ class CcpiDenoisingCpu(Plugin, CpuPlugin):
         return 1
 
     def nOutput_datasets(self):
-        return 1
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
 
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
+
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
