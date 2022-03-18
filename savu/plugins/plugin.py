@@ -27,6 +27,7 @@ import numpy as np
 
 import savu.plugins.utils as pu
 from savu.plugins.plugin_datasets import PluginDatasets
+from savu.plugins.stats.statistics import Statistics
 
 
 class Plugin(PluginDatasets):
@@ -62,10 +63,13 @@ class Plugin(PluginDatasets):
         """
         self._set_plugin_datasets()
         self._reset_process_frames_counter()
+        self.stats_obj = Statistics()
         self.setup()
+        self.stats_obj.setup(self)
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
         self._finalise_datasets()
+
 
     def _reset_process_frames_counter(self):
         self.pcount = 0
@@ -130,8 +134,12 @@ class Plugin(PluginDatasets):
         return data
 
     def plugin_process_frames(self, data):
+        data_copy = data.copy()  # is it ok to copy every frame like this? Enough memory?
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
+
+        if self.stats_obj.calc_stats and self.stats_obj._stats_flag:
+            self.stats_obj.set_slice_stats(frames, data_copy)
         self.pcount += 1
         return frames
 
@@ -160,6 +168,10 @@ class Plugin(PluginDatasets):
 
     def base_post_process(self):
         """ This method is called immediately after post_process(). """
+        if self.stats_obj.calc_stats and self.stats_obj._stats_flag:
+            if not self.stats_obj._already_called:
+                self.stats_obj.set_volume_stats()
+            self.stats_obj._already_called = False
         pass
 
     def set_preview(self, data, params):
@@ -189,9 +201,11 @@ class Plugin(PluginDatasets):
     def __copy_meta_data(self):
         """
         Copy all metadata from input datasets to output datasets, except axis
-        data that is no longer valid.
+        data and statistics that is no longer valid.
         """
         remove_keys = self.__remove_axis_data()
+        for i in range(len(remove_keys)):
+            remove_keys[i].add("stats")
         in_meta_data, out_meta_data = self.get()
         copy_dict = {}
         for mData in in_meta_data:

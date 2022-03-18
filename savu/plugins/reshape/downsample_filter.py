@@ -156,10 +156,8 @@ class DownsampleFilter(Plugin, CpuPlugin):
         data = self.get_in_datasets()[0]
         pattern = 'VOLUME_XZ'
         try:
-            self.the_min = np.min(
-                data.meta_data.get(['stats', 'min', pattern]))
-            self.the_max = np.max(
-                data.meta_data.get(['stats', 'max', pattern]))
+            self.the_min = self.stats_obj.get_stats_from_dataset(data, 'min')
+            self.the_max = self.stats_obj.get_stats_from_dataset(data, 'max')
             self.data_range = (self.the_min, self.the_max)
         except KeyError:
             msg = str("\n***********************************************\n" 
