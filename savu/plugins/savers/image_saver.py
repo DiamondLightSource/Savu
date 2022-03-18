@@ -122,8 +122,8 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
                 self.the_max = None
                 msg = "\n***********************************************\n"\
                     "!!!Warning!!!-> No global maximum and global minimum found\n"\
-                    "in the metadata. Please run the MaxAndMin plugin before\n" \
-                    "ImageSaver or input manually. Otherwise, local minimum\n" \
+                    "in the metadata. Please run savu with stats turned on\n" \
+                    "or input manually. Otherwise, local minimum\n" \
                     "and local maximum will be used for rescaling. This may\n"\
                     "result the fluctuation of brightness between slices.\n"\
                     "***********************************************\n"
@@ -134,6 +134,5 @@ class ImageSaver(BaseImageSaver, CpuPlugin):
     def executive_summary(self):
         if (self._data_range == 'image') and (self.num_bit != 32):
             return ["To rescale and normalise the data between global max and "
-                    "min values, please run MaxAndMin plugin before "
-                    "ImageSaver."]
+                    "min values, please run savu with stats turned on."]
         return ["Nothing to Report"]
