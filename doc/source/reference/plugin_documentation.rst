@@ -88,6 +88,7 @@ Corrections
    Subpixel Shift <plugin_documentation/plugins/corrections/subpixel_shift>
    Time Based Correction <plugin_documentation/plugins/corrections/time_based_correction>
    Time Based Plus Drift Correction <plugin_documentation/plugins/corrections/time_based_plus_drift_correction>
+   Phase Unwrapping <plugin_documentation/plugins/corrections/phase_unwrapping>
 
 
 Filters
@@ -146,6 +147,15 @@ Denoising
    Median Filter <plugin_documentation/plugins/filters/denoising/median_filter>
    Median Filter Gpu <plugin_documentation/plugins/filters/denoising/median_filter_gpu>
    Wavelet Denoising Gpu <plugin_documentation/plugins/filters/denoising/wavelet_denoising_gpu>
+
+
+Iterative
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+   Iterative Ccpi Denoising <plugin_documentation/plugins/filters/denoising/iterative/iterative_ccpi_denoising>
 
 
 Fitters
@@ -258,9 +268,9 @@ Reshape
 .. toctree::
    :maxdepth: 1 
 
-   Data Removal <plugin_documentation/plugins/reshape/data_removal>
    Downsample Filter <plugin_documentation/plugins/reshape/downsample_filter>
    Mipmap <plugin_documentation/plugins/reshape/mipmap>
+   Data Removal <plugin_documentation/plugins/reshape/data_removal>
    Image Stitching <plugin_documentation/plugins/reshape/image_stitching>
    Sum Dimension <plugin_documentation/plugins/reshape/sum_dimension>
 
@@ -295,6 +305,7 @@ Savers
    Image Saver <plugin_documentation/plugins/savers/image_saver>
    Tiff Saver <plugin_documentation/plugins/savers/tiff_saver>
    Xrf Saver <plugin_documentation/plugins/savers/xrf_saver>
+   Mrc Saver <plugin_documentation/plugins/savers/mrc_saver>
 
 
 Morphological Operations

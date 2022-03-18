@@ -17,6 +17,8 @@ Submodules
 
    savu.core.basic_plugin_runner
    savu.core.checkpointing
+   savu.core.iterate_plugin_group_utils
+   savu.core.iterative_plugin_runner
    savu.core.plugin_runner
    savu.core.transport_setup
    savu.core.utils

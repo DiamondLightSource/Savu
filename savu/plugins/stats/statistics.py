@@ -10,6 +10,7 @@
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.plugins.stats.stats_utils import StatsUtils
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
+import savu.core.utils as cu
 
 import h5py as h5
 import numpy as np
@@ -32,6 +33,7 @@ class Statistics(object):
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self._repeat_count = 0
         self.p_num = None
+        self.GPU = False
 
     def setup(self, plugin_self, pattern=None):
         if not Statistics._has_setup:
@@ -221,7 +223,7 @@ class Statistics(object):
             rss = 0
             #for value in (np.nditer(residuals)):
             #    rss += value**2
-            rss = np.sum(value for value in np.nditer(residuals))
+            rss = np.sum(value**2 for value in np.nditer(residuals))
         else:
             #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
@@ -281,7 +283,10 @@ class Statistics(object):
         Links volume stats with the output dataset and writes slice stats to file.
         """
         stats = self.stats
-        combined_stats = self._combine_mpi_stats(stats)
+        if self.GPU:
+            comm = self.plugin.new_comm
+        comm = self.plugin.get_communicator()
+        combined_stats = self._combine_mpi_stats(stats, comm=comm)
         if not self.p_num:
             self.p_num = Statistics.count
         p_num = self.p_num
@@ -318,17 +323,14 @@ class Statistics(object):
             if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
                 #self._set_loop_stats()
                 pass
-
-        self._write_stats_to_file(p_num)
+        self._write_stats_to_file(p_num, comm=comm)
         self._already_called = True
         self._repeat_count += 1
         if self._iterative_group:
             self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
 
-
-    def _combine_mpi_stats(self, slice_stats):
-        comm = MPI.COMM_WORLD
+    def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         combined_stats_list = comm.allgather(slice_stats)
         combined_stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
         for single_stats in combined_stats_list:
@@ -385,7 +387,7 @@ class Statistics(object):
         out_dataset = plugin.get_out_datasets()[0]
         out_dataset.meta_data.delete("stats")
 
-    def _write_stats_to_file(self, p_num=None, plugin_name=None):
+    def _write_stats_to_file(self, p_num=None, plugin_name=None, comm=MPI.COMM_WORLD):
         if p_num is None:
             p_num = self.p_num
         if plugin_name is None:
@@ -394,30 +396,33 @@ class Statistics(object):
         filename = f"{path}/stats.h5"
         stats = self.global_stats[p_num]
         self.hdf5 = Hdf5Utils(self.exp)
-        with h5.File(filename, "a", driver="mpio", comm=MPI.COMM_WORLD) as h5file:
-            group = h5file.require_group("stats")
-            if stats.shape != (0,):
-                if str(p_num) in list(group.keys()):
-                    del group[str(p_num)]
-                dataset = group.create_dataset(str(p_num), shape=stats.shape, dtype=stats.dtype)
-                dataset[::] = stats[::]
-                dataset.attrs.create("plugin_name", plugin_name)
-                dataset.attrs.create("pattern", self.pattern)
-            if self._iterative_group:
-                l_stats = Statistics.loop_stats[self.l_num]
-                group1 = h5file.require_group("iterative")
-                if self._iterative_group._ip_iteration == self._iterative_group._ip_fixed_iterations - 1\
-                        and self.p_num == self._iterative_group.end_index:
-                    dataset1 = group1.create_dataset(str(self.l_num), shape=l_stats["NRMSD"].shape, dtype=l_stats["NRMSD"].dtype)
-                    dataset1[::] = l_stats["NRMSD"][::]
-                    loop_plugins = []
-                    for i in range(self._iterative_group.start_index, self._iterative_group.end_index + 1):
-                        if i in list(self.plugin_names.keys()):
-                            loop_plugins.append(self.plugin_names[i])
-                    dataset1.attrs.create("loop_plugins", loop_plugins)
-                    dataset.attrs.create("n_loop_plugins", len(loop_plugins))
+        self.exp._barrier(communicator=comm)
+        if comm.rank == 0:
+            with h5.File(filename, "a") as h5file:
+                group = h5file.require_group("stats")
+                if stats.shape != (0,):
+                    if str(p_num) in list(group.keys()):
+                        del group[str(p_num)]
+                    dataset = group.create_dataset(str(p_num), shape=stats.shape, dtype=stats.dtype)
+                    dataset[::] = stats[::]
+                    dataset.attrs.create("plugin_name", plugin_name)
+                    dataset.attrs.create("pattern", self.pattern)
+                if self._iterative_group:
+                    l_stats = Statistics.loop_stats[self.l_num]
+                    group1 = h5file.require_group("iterative")
+                    if self._iterative_group._ip_iteration == self._iterative_group._ip_fixed_iterations - 1\
+                            and self.p_num == self._iterative_group.end_index:
+                        dataset1 = group1.create_dataset(str(self.l_num), shape=l_stats["NRMSD"].shape, dtype=l_stats["NRMSD"].dtype)
+                        dataset1[::] = l_stats["NRMSD"][::]
+                        loop_plugins = []
+                        for i in range(self._iterative_group.start_index, self._iterative_group.end_index + 1):
+                            if i in list(self.plugin_names.keys()):
+                                loop_plugins.append(self.plugin_names[i])
+                        dataset1.attrs.create("loop_plugins", loop_plugins)
+                        dataset.attrs.create("n_loop_plugins", len(loop_plugins))
+        self.exp._barrier(communicator=comm)
 
-    def write_slice_stats_to_file(self, slice_stats=None, p_num=None):
+    def write_slice_stats_to_file(self, slice_stats=None, p_num=None, comm=MPI.COMM_WORLD):
         """Writes slice statistics to a h5 file. Placed in the stats folder in the output directory."""
         if not slice_stats:
             slice_stats = self.stats
@@ -432,7 +437,7 @@ class Statistics(object):
         path = Statistics.path
         filename = f"{path}/stats_p{p_num}_{plugin_name}.h5"
         self.hdf5 = Hdf5Utils(self.plugin.exp)
-        with h5.File(filename, "a", driver="mpio", comm=MPI.COMM_WORLD) as h5file:
+        with h5.File(filename, "a", driver="mpio", comm=comm) as h5file:
             i = 2
             group_name = "/stats"
             while group_name in h5file:

@@ -10,6 +10,8 @@ class StatsUtils(object):
                      "reconstruction": ["VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D"]}
     _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
+    plt.set_loglevel('WARNING')
+
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
         stats_dict, index_list = self._get_dicts_for_graphs(f)
@@ -91,13 +93,14 @@ class StatsUtils(object):
             for axis in row:
                 stat = self._stats_list[i]
                 axis.plot(stats_df_new[stat], "x-", color=colours[i])
-                for plugin in array_plugins:  # adding 'error' bars for plugins with multiple values due to parameter changes
+                for plugin in array_plugins:  # adding 'error' bars for plugins with multiple values
                     if stats_df[stat][plugin] is not None:
-                        my_max = max(stats_df[stat][plugin])
-                        my_min = min(stats_df[stat][plugin])
-                        middle = (my_max + my_min) / 2
-                        my_range = my_max - my_min
-                        axis.errorbar(int(plugin[0]) - int(stats_df_new.index[0]), middle, yerr=[my_range / 2], capsize=5)
+                        if not np.isnan(stats_df[stat][plugin]).any():
+                            my_max = max(stats_df[stat][plugin])
+                            my_min = min(stats_df[stat][plugin])
+                            middle = (my_max + my_min) / 2
+                            my_range = my_max - my_min
+                            axis.errorbar(list(stats_df_new.index).index(plugin[0]), middle, yerr=[my_range / 2], capsize=5)
                 if i == 1:
                     maxx = len(stats_df_new[stat]) * 1.08 - 1
                     maxy = max(stats_df_new[stat])
