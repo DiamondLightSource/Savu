@@ -2,7 +2,7 @@
 Statistics Documentation
 ************************
 
-.. autoclass:: savu.plugins.stats.statistics.Statistics
+.. autoclass:: savu.data.stats.statistics.Statistics
    :undoc-members:
    :noindex:
 
@@ -17,13 +17,13 @@ Accessing statistics in Savu
 
 The volume-wide stats for a plugin can be accessed in Savu either with the plugin number, or the name of the plugin, using the following methods:
 
-.. automethod:: savu.plugins.stats.statistics.Statistics.get_stats
+.. automethod:: savu.data.stats.statistics.Statistics.get_stats
 
-.. automethod:: savu.plugins.stats.statistics.Statistics.get_stats_from_name
+.. automethod:: savu.data.stats.statistics.Statistics.get_stats_from_name
 
 Volume-wide stats are also added to the metadata of the output dataset for each plugin. If you have a dataset object, for example by using the **plugin.get_datasets()** method, stats can be accessed using the following method:
 
-.. automethod:: savu.plugins.stats.statistics.Statistics.get_stats_from_dataset
+.. automethod:: savu.data.stats.statistics.Statistics.get_stats_from_dataset
 
 Here are examples of how to use these methods:
 
@@ -100,7 +100,7 @@ Setting statistics
 
 Volume-wide stats are automatically calculated and set directly *after* the **post_process()** method in each plugin. Attempting to access the stats of the current plugin before this point, for example from its **out dataset**, will result in an error. If stats are needed before this point, call the method **set_volume_stats()** first to populate the relevant dictionaries and datasets. This should happen after all data processing has occurred.
 
-.. automethod:: savu.plugins.stats.statistics.Statistics.set_volume_stats
+.. automethod:: savu.data.stats.statistics.Statistics.set_volume_stats
 
 
 Turning statistics off
@@ -115,7 +115,7 @@ To stop statistics being calculated on a run of Savu, use the **--stats** option
 
 Some plugins don't have statistics calculated for them, such as plugins which exclusively produce metadata instead of processed data. To turn stats **off** for a single plugin you can set **self.stats_obj.calc_stats** to **False** in the **Setup()** method of that plugin.
 
-.. autoattribute:: savu.plugins.stats.statistics.Statistics.calc_stats
+.. autoattribute:: savu.data.stats.statistics.Statistics.calc_stats
 
 Attempting to access stats for plugins where stats is turned off will result in errors.
 

@@ -27,7 +27,7 @@ import numpy as np
 
 import savu.plugins.utils as pu
 from savu.plugins.plugin_datasets import PluginDatasets
-from savu.plugins.stats.statistics import Statistics
+from savu.data.stats.statistics import Statistics
 
 
 class Plugin(PluginDatasets):

@@ -8,9 +8,7 @@ Submodules
    :maxdepth: 4
 
    plugins.stats.comparison
-   plugins.stats.min_and_max
-   plugins.stats.statistics
-   plugins.stats.stats_utils
+   plugins.stats.min_and_max_deprecated
 
 Module contents
 ---------------
