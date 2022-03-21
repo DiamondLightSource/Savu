@@ -13,8 +13,8 @@
 # limitations under the License.
 
 """
-Module which details the data classes used by Savu.
-Specificaly these data classes are backed by hdf5 and h5py classes.
+All the plugin architecture for Savu is contained here
+
 
 .. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
 
