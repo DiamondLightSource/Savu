@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Module which details the statistics classes used by Savu.
+Modules which contain the statistics classes used by Savu.
 .. moduleauthor:: Jacob Williamson <scientificsoftware@diamond.ac.uk>
 
 """
