@@ -7,7 +7,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   plugins.stats.min_and_max
+   plugins.stats.comparison
+   plugins.stats.min_and_max_deprecated
 
 Module contents
 ---------------

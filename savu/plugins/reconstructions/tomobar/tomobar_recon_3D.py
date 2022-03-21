@@ -145,6 +145,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
 
         if self.parameters['reconstruction_method'] == 'FISTA3D':
+            if self.parameters['regularisation_method'] == 'PD_TV':
+	            self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})        
             # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
             if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
                 rawdata3D = data[1].astype(np.float32)

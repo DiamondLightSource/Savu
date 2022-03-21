@@ -22,7 +22,10 @@ MOCK_MODULES = ["numpy",
                 "mpi4py",
                 "astra",
                 "h5py",
-                "pandas"
+                "pandas",
+                "matplotlib",
+                "matplotlib.pyplot",
+                "matplotlib.ticker"
                 ]
 
 for mod_name in MOCK_MODULES:
