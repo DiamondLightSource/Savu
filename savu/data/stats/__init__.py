@@ -13,11 +13,7 @@
 # limitations under the License.
 
 """
-Module which details the data classes used by Savu.
-Specificaly these data classes are backed by hdf5 and h5py classes.
-
-.. moduleauthor:: Mark Basham <scientificsoftware@diamond.ac.uk>
+Module which details the statistics classes used by Savu.
+.. moduleauthor:: Jacob Williamson <scientificsoftware@diamond.ac.uk>
 
 """
-
-from . import transport_data
