@@ -31,7 +31,7 @@ from savu.data.chunking import Chunking
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
-from savu.plugins.stats.statistics import Statistics
+from savu.data.stats.statistics import Statistics
 
 import tomophantom
 from tomophantom import TomoP2D, TomoP3D

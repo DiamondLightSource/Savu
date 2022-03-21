@@ -162,8 +162,7 @@ class DownsampleFilter(Plugin, CpuPlugin):
         except KeyError:
             msg = str("\n***********************************************\n" 
                 "!!!Error!!!-> No global maximum and global minimum found\n"
-                "in the metadata. Please run the MaxAndMin plugin before\n"  
-                "this plugin or input manually. \n" 
+                "in the metadata. Please run savu with stats turned on or input manually. \n" 
                 "***********************************************\n")
             cu.user_message(msg)
             raise ValueError(msg)

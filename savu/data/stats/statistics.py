@@ -8,7 +8,7 @@
 """
 
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
-from savu.plugins.stats.stats_utils import StatsUtils
+from savu.data.stats.stats_utils import StatsUtils
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import savu.core.utils as cu
 

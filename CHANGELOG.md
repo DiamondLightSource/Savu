@@ -3,7 +3,12 @@ All notable changes to this project are documented in this file.
 # Savu Version 4.2, *planned release March 2022*
 
 ## _Core_
-* Statistics (TODO)
+* Statistics class:
+  - Stats relating to the data calculated alongside each plugin.
+  - Can be accessed in Savu for use in plugins.
+  - Collated and saved as a table, graphs and a .h5 file for inspection after a run (found in the 'stats' folder).
+  - Use option `--stats ` and parse arguments `on` or `off` to set stats on or off for a run (on by defualt).
+  - MinAndMax plugin is now deprecated (use statistics class instead).
 * Iterative plugins (A capability to enable some plugins to be iterative):
   - `iterate` command to enable control over iterative plugins (see `iterate -h` for help)
 
@@ -28,6 +33,11 @@ All notable changes to this project are documented in this file.
 
 ### Filters
   * GPU memory usage check for *ccpi_denoising_gpu_3D* plugin to avoid CUDA error
+  * DezingerSinogram changed to utilise new statistics class.
+  * DownsampleFiler changed to utilise new statistics class.
+
+### Savers
+  * ImageSaver changed to utilise new statistics class.
 
 ## _New plugins_
 ### Alignment

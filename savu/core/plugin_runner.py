@@ -24,7 +24,7 @@ import logging
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
-from savu.plugins.stats.statistics import Statistics
+from savu.data.stats.statistics import Statistics
 from savu.core.iterative_plugin_runner import IteratePluginGroup
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop, \
     check_if_end_plugin_in_iterate_group
