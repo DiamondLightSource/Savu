@@ -28,10 +28,10 @@ import savu.core.utils as cu
 
 
 @register_plugin
-class MinAndMax(Plugin, CpuPlugin):
+class MinAndMaxDeprecated(Plugin, CpuPlugin):
 
     def __init__(self):
-        super(MinAndMax, self).__init__("MinAndMax")
+        super(MinAndMaxDeprecated, self).__init__("MinAndMax")
 
     def circle_mask(self, width, ratio):
         # Create a circle mask.
