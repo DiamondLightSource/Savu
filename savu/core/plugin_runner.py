@@ -24,6 +24,7 @@ import logging
 import savu.core.utils as cu
 import savu.plugins.utils as pu
 from savu.data.experiment_collection import Experiment
+from savu.data.stats.statistics import Statistics
 from savu.core.iterative_plugin_runner import IteratePluginGroup
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop, \
     check_if_end_plugin_in_iterate_group
@@ -50,6 +51,7 @@ class PluginRunner(object):
         """ Create an experiment and run the plugin list.
         """
         self.exp._setup(self)
+        Statistics._setup_class(self.exp)
 
         plugin_list = self.exp.meta_data.plugin_list
         logging.info('Running the plugin list check')
@@ -95,6 +97,7 @@ class PluginRunner(object):
                 self._transport_cleanup(i + 1)
                 break
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
+            Statistics._count()
             cp.output_plugin_checkpoint()
 
         #  ********* transport function ***********
@@ -110,6 +113,7 @@ class PluginRunner(object):
         if self.exp.meta_data.get('email'):
             cu.send_email(self.exp.meta_data.get('email'))
 
+        Statistics._post_chain()
         return self.exp
 
     def __output_final_message(self):
