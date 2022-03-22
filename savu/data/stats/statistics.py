@@ -39,13 +39,13 @@ class Statistics(object):
         if not Statistics._has_setup:
             self._setup_class(plugin_self.exp)
         self.plugin_name = plugin_self.name
+        self.p_num = Statistics.count
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
             self.plugin = plugin_self
             self._pad_dims = []
             self._already_called = False
-            self.p_num = Statistics.count
             if pattern:
                 self.pattern = pattern
             else:
@@ -73,13 +73,15 @@ class Statistics(object):
         except KeyError:
             cls._stats_flag = True
         cls._any_stats = False
+        cls.exp = exp
         cls.count = 2
         cls.global_stats = {}
+        cls.global_times = {}
         cls.loop_stats = []
-        cls.exp = exp
         cls.n_plugins = len(exp.meta_data.plugin_list.plugin_list)
         for i in range(1, cls.n_plugins + 1):
             cls.global_stats[i] = np.array([])
+            cls.global_times[i] = np.array([])
         cls.global_residuals = {}
         cls.plugin_numbers = {}
         cls.plugin_names = {}
@@ -283,8 +285,6 @@ class Statistics(object):
         Links volume stats with the output dataset and writes slice stats to file.
         """
         stats = self.stats
-        if self.GPU:
-            comm = self.plugin.new_comm
         comm = self.plugin.get_communicator()
         combined_stats = self._combine_mpi_stats(stats, comm=comm)
         if not self.p_num:
@@ -329,6 +329,14 @@ class Statistics(object):
         if self._iterative_group:
             self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
+    def set_time(self, seconds):
+        self.processing_time = seconds
+        if len(Statistics.global_times[self.p_num]) == 0:
+            Statistics.global_times[self.p_num] = seconds
+        else:
+            Statistics.global_times[self.p_num] = np.append([Statistics.global_times[self.p_num], seconds])
+        comm = self.plugin.get_communicator()
+        self._write_times_to_file(comm)
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         combined_stats_list = comm.allgather(slice_stats)
@@ -421,6 +429,19 @@ class Statistics(object):
                         dataset1.attrs.create("loop_plugins", loop_plugins)
                         dataset.attrs.create("n_loop_plugins", len(loop_plugins))
         self.exp._barrier(communicator=comm)
+
+    def _write_times_to_file(self, comm):
+        p_num = self.p_num
+        plugin_name = self.plugin_name
+        path = Statistics.path
+        filename = f"{path}/stats.h5"
+        time = Statistics.global_times[p_num]
+        self.hdf5 = Hdf5Utils(self.exp)
+        if comm.rank == 0:
+            with h5.File(filename, "a") as h5file:
+                group = h5file.require_group("stats")
+                dataset = group[str(p_num)]
+                dataset.attrs.create("time", time)
 
     def write_slice_stats_to_file(self, slice_stats=None, p_num=None, comm=MPI.COMM_WORLD):
         """Writes slice statistics to a h5 file. Placed in the stats folder in the output directory."""

@@ -15,6 +15,7 @@ class StatsUtils(object):
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
         stats_dict, index_list = self._get_dicts_for_graphs(f)
+        print(stats_dict)
         loop_stats, loop_plugins = self._get_dicts_for_loops(f)
         f.close()
 
@@ -117,9 +118,9 @@ class StatsUtils(object):
     def _get_dicts_for_graphs(file):
         stats_dict = {}
         stats_dict["projection"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                    "NRMSD": []}
+                                    "NRMSD": [], "time": []}
         stats_dict["reconstruction"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                        "NRMSD": []}
+                                        "NRMSD": [], "time": []}
 
         index_list = {"projection": [], "reconstruction": []}
 
@@ -140,6 +141,10 @@ class StatsUtils(object):
                                 stats_dict[space][stat].append(group[key][:, index])
                             else:
                                 stats_dict[space][stat].append(None)
+            for key in list(group.keys()):
+                if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
+                    stats_dict[space]["time"].append(group[key].attrs.get("time"))
+
         return stats_dict, index_list
 
     @staticmethod

@@ -20,6 +20,7 @@
 """
 
 import logging
+import time
 
 import savu.core.utils as cu
 import savu.plugins.utils as pu
@@ -67,6 +68,7 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         checkpoint_plugin = cp.get_checkpoint_plugin()
         for i in range(checkpoint_plugin, n_plugins):
+            t0 = time.time()
             self.exp._set_experiment_for_current_plugin(i)
             memory_before = cu.get_memory_usage_linux()
 
@@ -99,6 +101,8 @@ class PluginRunner(object):
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
             Statistics._count()
             cp.output_plugin_checkpoint()
+            t1 = time.time()
+            plugin.stats_obj.set_time(int(t1-t0))
 
         #  ********* transport function ***********
         logging.info('Running transport_post_plugin_list_run')
