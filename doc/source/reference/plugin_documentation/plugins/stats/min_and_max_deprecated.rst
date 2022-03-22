@@ -1,6 +1,6 @@
 {% extends "plugin_template.rst" %}
 
-{% block title %}Min And Max{% endblock %}
+{% block title %}Min And Max Deprecated{% endblock %}
 
 {% block description %}
 A plugin to calculate the min and max values of each slice (as determined by the pattern parameter) 
@@ -65,4 +65,4 @@ A plugin to calculate the min and max values of each slice (as determined by the
     No citations
 {% endblock %}
 
-{% block plugin_file %}../../../plugin_api/plugins.stats.min_and_max.rst{% endblock %}
+{% block plugin_file %}../../../plugin_api/plugins.stats.min_and_max_deprecated.rst{% endblock %}

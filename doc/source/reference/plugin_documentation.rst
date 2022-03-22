@@ -375,7 +375,8 @@ Stats
 .. toctree::
    :maxdepth: 1 
 
-   Min And Max <plugin_documentation/plugins/stats/min_and_max>
+   Min And Max Deprecated <plugin_documentation/plugins/stats/min_and_max_deprecated>
+   Comparison <plugin_documentation/plugins/stats/comparison>
 
 
 Visualisation

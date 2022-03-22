@@ -208,6 +208,8 @@ ref
             :prog: ref
 
 
+..  youtube:: qxwgGqRajbs
+
 .. _level:
 
 level
@@ -220,6 +222,8 @@ level
             :func: _level_arg_parser
             :prog: level
 
+
+..  youtube:: qMKSZGqvQYk
 
 .. _expand:
 
@@ -234,6 +238,8 @@ expand
             :prog: expand
 
 
+..  youtube:: 0CGtaJDrpU0
+
 .. _cite:
 
 cite
@@ -246,6 +252,8 @@ cite
             :func: _cite_arg_parser
             :prog: cite
 
+
+..  youtube:: qVPHJJ4pw-A
 
 .. _coll:
 

@@ -1,7 +1,8 @@
-How to run Savu
+How to run Savu 
 ---------------
 
-To run Savu you require a data file and a process list (a link to process list). If Savu has been installed into the module system:
+To run Savu you require a data file and a process list (a link to process list). If Savu has been installed into the 
+`module <https://modules.readthedocs.io/en/latest/module.html>`_  system:
 
     >>> module load savu
 
@@ -13,6 +14,7 @@ To run Savu on your local machine (single threaded):
 
     >>> savu  <data_path>  <process_list_path>  <output_folder>  <optional_args>
 
+..  youtube:: 5RhNBVZSBsY
 
 The full list of aliases provided with `module load savu` is given below:
 
@@ -46,3 +48,4 @@ Optional arguments:
 .. note:: Savu produces a hdf5 file for each plugin in the process list.  It is recommended, if you are running
           Savu on a full dataset, to pass the optional argument `-d <tmp_dir>` where `tmp_dir` is the temporary
           directory for a visit.
+

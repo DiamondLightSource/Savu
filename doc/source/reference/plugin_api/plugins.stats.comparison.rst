@@ -1,4 +1,4 @@
-.. automodule:: plugins.stats.min_and_max
+.. automodule:: plugins.stats.comparison
    :members:
    :undoc-members:
    :noindex:
