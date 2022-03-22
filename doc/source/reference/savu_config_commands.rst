@@ -200,8 +200,6 @@ move
 ref
 ----------------
 
-..  youtube:: qxwgGqRajbs
-
 .. cssclass:: argstyle
 
     .. argparse::
@@ -210,12 +208,12 @@ ref
             :prog: ref
 
 
+..  youtube:: qxwgGqRajbs
+
 .. _level:
 
 level
 ----------------
-
-..  youtube:: qMKSZGqvQYk
 
 .. cssclass:: argstyle
 
@@ -225,12 +223,12 @@ level
             :prog: level
 
 
+..  youtube:: qMKSZGqvQYk
+
 .. _expand:
 
 expand
 ----------------
-
-..  youtube:: 0CGtaJDrpU0
 
 .. cssclass:: argstyle
 
@@ -240,12 +238,12 @@ expand
             :prog: expand
 
 
+..  youtube:: 0CGtaJDrpU0
+
 .. _cite:
 
 cite
 ----------------
-
-..  youtube:: qVPHJJ4pw-A
 
 .. cssclass:: argstyle
 
@@ -254,6 +252,8 @@ cite
             :func: _cite_arg_parser
             :prog: cite
 
+
+..  youtube:: qVPHJJ4pw-A
 
 .. _coll:
 

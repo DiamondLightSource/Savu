@@ -13,7 +13,6 @@
     :start-after: start_of_main_text
 
 
-..  youtube:: 7kja-R3WIYA
 
 Table of Contents
 =================
