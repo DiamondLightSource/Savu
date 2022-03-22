@@ -47,7 +47,4 @@ Optional arguments:
           Savu on a full dataset, to pass the optional argument `-d <tmp_dir>` where `tmp_dir` is the temporary
           directory for a visit.
 
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://youtu.be/5RhNBVZSBsY" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+..  youtube:: 5RhNBVZSBsY

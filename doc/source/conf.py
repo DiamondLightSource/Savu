@@ -127,6 +127,8 @@ extensions = [
     "sphinxarg.ext",
     # Allows a grid layout and dropdown boxes
     "sphinx_panels",
+    # Embed videos
+    "sphinxcontrib.youtube",
 ]
 autosummary_generate = True
 

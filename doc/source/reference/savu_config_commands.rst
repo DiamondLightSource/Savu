@@ -200,9 +200,7 @@ move
 ref
 ----------------
 
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://youtu.be/qxwgGqRajbs" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+..  youtube:: qxwgGqRajbs
 
 .. cssclass:: argstyle
 
@@ -217,9 +215,7 @@ ref
 level
 ----------------
 
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://youtu.be/qMKSZGqvQYk" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+..  youtube:: qMKSZGqvQYk
 
 .. cssclass:: argstyle
 
@@ -234,9 +230,7 @@ level
 expand
 ----------------
 
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://youtu.be/0CGtaJDrpU0" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+..  youtube:: 0CGtaJDrpU0
 
 .. cssclass:: argstyle
 
@@ -251,9 +245,7 @@ expand
 cite
 ----------------
 
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://youtu.be/qVPHJJ4pw-A" title="YouTube video, Savu" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+..  youtube:: qVPHJJ4pw-A
 
 .. cssclass:: argstyle
 
