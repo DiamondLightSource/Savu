@@ -52,8 +52,6 @@ If you are using the command line please type ``-h`` or ``--help``.
 
 * :ref:`replace`
 
-* :ref:`replace`
-
 .. _open:
 
 open
@@ -315,19 +313,6 @@ history
             :module: scripts.config_generator.arg_parsers
             :func: _history_arg_parser
             :prog: history
-
-
-.. _replace:
-
-replace
-----------------
-
-.. cssclass:: argstyle
-
-    .. argparse::
-            :module: scripts.config_generator.arg_parsers
-            :func: _replace_arg_parser
-            :prog: replace
 
 
 .. _iterate:
