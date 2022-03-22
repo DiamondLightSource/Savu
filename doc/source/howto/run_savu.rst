@@ -1,7 +1,8 @@
 How to run Savu 
 ---------------
 
-To run Savu you require a data file and a process list (a link to process list). If Savu has been installed into the module system:
+To run Savu you require a data file and a process list (a link to process list). If Savu has been installed into the 
+`module <https://modules.readthedocs.io/en/latest/module.html>`_  system:
 
     >>> module load savu
 
