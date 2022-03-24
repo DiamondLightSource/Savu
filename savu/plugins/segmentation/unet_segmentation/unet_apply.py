@@ -33,7 +33,6 @@ from skimage import img_as_float
 import torch
 
 
-
 @register_plugin
 class UnetApply(Plugin, GpuPlugin):
 
@@ -54,14 +53,27 @@ class UnetApply(Plugin, GpuPlugin):
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
+        # Store the precalculated mean and std dev 
+        data = self.get_in_datasets()[0]
+        self.data_mean = self.stats_obj.get_stats_from_dataset(data, 'mean')
+        self.data_std_dev = self.stats_obj.get_stats_from_dataset(data, 'mean_std_dev')
         model_path = Path(self.parameters['model_file_path'])
         torch.cuda.set_device(self.parameters['GPU_index'])
         self.model = create_model_from_zip(model_path)
 
     def process_frames(self, data):
-        # do some processing here
-        # here is how to access a parameter defined in the tools file
         data = img_as_float(data[0])
+        if self.parameters['clip_data']:
+            # Clip the image
+            std_dev_factor = self.parameters['std_dev_factor']
+            lower_bound = self.data_mean - (self.data_std_dev * std_dev_factor)
+            upper_bound = self.data_mean + (self.data_std_dev * std_dev_factor)
+            if np.isnan(data).any():
+                data = np.nan_to_num(data, copy=False, nan=self.data_mean)
+            data = np.clip(data, lower_bound, upper_bound, out=data)
+            data = np.subtract(data, lower_bound, out=data)
+            data = np.divide(data, (upper_bound - lower_bound), out=data)
+            data = np.clip(data, 0.0, 1.0, out=data)
         img = Image(pil2tensor(data, dtype=np.float32))
         flags = fix_odd_sides(img)
         prediction = self.model.predict(img)

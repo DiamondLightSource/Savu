@@ -75,6 +75,9 @@ def create_model_from_zip(model_filepath):
         zf.extractall(output_dir)
     with open(output_dir/f"{model_filepath.stem}_codes.json") as jf:
         codes = json.load(jf)
+    # Convert codes to list if currently dict (e.g. from SuRVoS2)
+    if isinstance(codes, dict):
+        codes = [f"label_val_{i}" for i in codes]
     data = create_dummy_dataset(dummy_dir, codes)
     model = unet_learner(data, models.resnet34, model_dir=output_dir)
     model.load(model_filepath.stem)

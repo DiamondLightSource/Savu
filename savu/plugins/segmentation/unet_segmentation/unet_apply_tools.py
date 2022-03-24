@@ -18,4 +18,14 @@ class UnetApplyTools(PluginTools):
             dtype: str
             description: Path to the model file
             default: my_model.zip
+        clip_data:
+            visibility: intermediate
+            dtype: bool
+            description: Clip data
+            default: True
+        std_dev_factor:
+            visibility: intermediate
+            dtype: float
+            description: Number of std devs from the mean to clip data to
+            default: 2.575
         """
