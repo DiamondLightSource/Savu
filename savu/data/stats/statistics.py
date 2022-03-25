@@ -81,7 +81,7 @@ class Statistics(object):
         cls.n_plugins = len(exp.meta_data.plugin_list.plugin_list)
         for i in range(1, cls.n_plugins + 1):
             cls.global_stats[i] = np.array([])
-            cls.global_times[i] = np.array([])
+            cls.global_times[i] = 0
         cls.global_residuals = {}
         cls.plugin_numbers = {}
         cls.plugin_names = {}
@@ -330,11 +330,7 @@ class Statistics(object):
             self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
     def set_time(self, seconds):
-        self.processing_time = seconds
-        if len(Statistics.global_times[self.p_num]) == 0:
-            Statistics.global_times[self.p_num] = seconds
-        else:
-            Statistics.global_times[self.p_num] = np.append([Statistics.global_times[self.p_num], seconds])
+        Statistics.global_times[self.p_num] += seconds
         comm = self.plugin.get_communicator()
         self._write_times_to_file(comm)
 

@@ -68,7 +68,6 @@ class PluginRunner(object):
         cp = self.exp.checkpoint
         checkpoint_plugin = cp.get_checkpoint_plugin()
         for i in range(checkpoint_plugin, n_plugins):
-            t0 = time.time()
             self.exp._set_experiment_for_current_plugin(i)
             memory_before = cu.get_memory_usage_linux()
 
@@ -101,8 +100,6 @@ class PluginRunner(object):
             self.exp._barrier(msg='PluginRunner: No kill signal... continue.')
             Statistics._count()
             cp.output_plugin_checkpoint()
-            t1 = time.time()
-            plugin.stats_obj.set_time(int(t1-t0))
 
         #  ********* transport function ***********
         logging.info('Running transport_post_plugin_list_run')
@@ -131,6 +128,7 @@ class PluginRunner(object):
 
     def __run_plugin(self, plugin_dict, clean_up_plugin=True, plugin=None):
         # allow plugin objects to be reused for running iteratively
+        t0 = time.time()
         if plugin is None:
             plugin = self._transport_load_plugin(self.exp, plugin_dict)
 
@@ -198,6 +196,9 @@ class PluginRunner(object):
             self._transport_terminate_dataset(data)
 
         self.exp._reorganise_datasets(finalise)
+
+        t1 = time.time()
+        plugin.stats_obj.set_time(int(t1-t0))
 
         return plugin
 

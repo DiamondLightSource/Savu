@@ -14,7 +14,7 @@ class StatsUtils(object):
 
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
-        stats_dict, index_list = self._get_dicts_for_graphs(f)
+        stats_dict, index_list, times_dict = self._get_dicts_for_graphs(f)
         print(stats_dict)
         loop_stats, loop_plugins = self._get_dicts_for_loops(f)
         f.close()
@@ -30,6 +30,13 @@ class StatsUtils(object):
                             table_index_list[space][j] = f"{table_index_list[space][j]} (loop{i})"
 
         self.make_stats_table(stats_dict, table_index_list, f"{savepath}/stats_table.html")
+
+        for p_num in list(times_dict.keys()):
+            for p_name in index_list["projection"] + index_list["reconstruction"]:
+                if p_num == p_name[0]:
+                    times_dict[p_name] = times_dict.pop(p_num)
+
+        self.make_times_figure(times_dict, f"{savepath}/times_chart.png")
 
         if len(stats_dict["projection"]["max"]):
             self.make_stats_graphs(stats_dict["projection"], index_list["projection"], "Projection Stats",
@@ -114,15 +121,32 @@ class StatsUtils(object):
         fig.suptitle(title, fontsize="x-large")
         plt.savefig(savepath, bbox_inches="tight")
 
+
+    def make_times_figure(self, times_dict, savepath):
+        colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(list(times_dict.keys()))))
+        fig, ax = plt.subplots()
+        total = sum(list(times_dict.values()))
+        ax.pie(list(times_dict.values()), labels=list(times_dict.keys()), autopct=lambda pct: self._get_times_pct(pct, total),
+               counterclock=False, startangle=90, colors=colors, radius=3, center=(4, 4), wedgeprops={"linewidth": 1, "edgecolor": "white"})
+        fig.suptitle("Plugin Times", x=0.1, y=1.4, horizontalalignment="right", fontsize="x-large")
+        plt.savefig(savepath, bbox_inches="tight")
+
+    @staticmethod
+    def _get_times_pct(pct, total):
+        absolute = (pct/100)*total
+        return f"{round(pct, 1)}%\n{round(absolute, 0)} (s)"
+
     @staticmethod
     def _get_dicts_for_graphs(file):
         stats_dict = {}
         stats_dict["projection"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                    "NRMSD": [], "time": []}
+                                    "NRMSD": [], "time (s)": []}
         stats_dict["reconstruction"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                        "NRMSD": [], "time": []}
+                                        "NRMSD": [], "time (s)": []}
 
         index_list = {"projection": [], "reconstruction": []}
+
+        times_dict = {}
 
         group = file["stats"]
         for space in ("projection", "reconstruction"):
@@ -143,9 +167,12 @@ class StatsUtils(object):
                                 stats_dict[space][stat].append(None)
             for key in list(group.keys()):
                 if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
-                    stats_dict[space]["time"].append(group[key].attrs.get("time"))
+                    stats_dict[space]["time (s)"].append(group[key].attrs.get("time"))
 
-        return stats_dict, index_list
+        for plugin in list(group.keys()):
+            times_dict[plugin] = group[plugin].attrs.get("time")
+
+        return stats_dict, index_list, times_dict
 
     @staticmethod
     def _get_dicts_for_loops(file):
