@@ -50,6 +50,10 @@ class UnetApply(Plugin, GpuPlugin):
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
+        shape = in_dataset[0].get_shape()
+        out_dataset[0].create_dataset(axis_labels=in_dataset[0],
+                                          patterns=in_dataset[0],
+                                          shape=shape, dtype = np.uint8)
         out_pData[0].plugin_data_setup(self.parameters['pattern'], 'single')
 
     def pre_process(self):
