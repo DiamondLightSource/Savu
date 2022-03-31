@@ -25,9 +25,11 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
+from savu.test.test_utils import get_test_data_path
 from pathlib import Path
 from fastai.vision import Image, pil2tensor
-from .unet_apply_helpers import fix_odd_sides, create_model_from_zip
+from .unet_apply_helpers import (fix_odd_sides, create_model_from_zip,
+                                 create_model_from_scratch)
 import numpy as np
 from skimage import img_as_float
 import torch
@@ -63,7 +65,11 @@ class UnetApply(Plugin, GpuPlugin):
         self.data_std_dev = self.stats_obj.get_stats_from_dataset(data, 'mean_std_dev')
         model_path = Path(self.parameters['model_file_path'])
         torch.cuda.set_device(self.parameters['GPU_index'])
-        self.model = create_model_from_zip(model_path)
+        if self.parameters['testing']:
+            test_path = get_test_data_path('unet_apply')
+            self.model = create_model_from_scratch(test_path)
+        else:
+            self.model = create_model_from_zip(model_path)
 
     def process_frames(self, data):
         data = img_as_float(data[0])

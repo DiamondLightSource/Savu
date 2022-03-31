@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import numpy as np
 from zipfile import ZipFile
 from fastai.vision import (SegmentationItemList, get_transforms,
@@ -84,3 +85,19 @@ def create_model_from_zip(model_filepath):
     # Remove the restriction on the model prediction size
     model.data.single_ds.tfmargs['size'] = None
     return model
+
+def create_model_from_scratch(test_path):
+    """Creates a fastai unet_learner model from scratch
+
+    Returns:
+        fastai.vision.models.unet_learner: A U-Net model.
+    """
+    dummy_dir = Path(test_path, 'dummy_imgs')
+    create_dummy_data_files(dummy_dir)
+    codes = [f"label_val_{i}" for i in range(3)]
+    data = create_dummy_dataset(dummy_dir, codes)
+    model = unet_learner(data, models.resnet34)
+    # Remove the restriction on the model prediction size
+    model.data.single_ds.tfmargs['size'] = None
+    return model
+    

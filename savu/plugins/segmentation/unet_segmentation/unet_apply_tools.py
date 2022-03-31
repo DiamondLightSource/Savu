@@ -28,4 +28,9 @@ class UnetApplyTools(PluginTools):
             dtype: float
             description: Number of std devs from the mean to clip data to
             default: 2.575
+        testing:
+            visibility: advanced
+            dtype: bool
+            description: Switch on testing mode, model will be created in plugin rather than loaded
+            default: False
         """
