@@ -15,7 +15,6 @@ class StatsUtils(object):
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
         stats_dict, index_list, times_dict = self._get_dicts_for_graphs(f)
-        print(stats_dict)
         loop_stats, loop_plugins = self._get_dicts_for_loops(f)
         f.close()
 
@@ -134,7 +133,7 @@ class StatsUtils(object):
     @staticmethod
     def _get_times_pct(pct, total):
         absolute = (pct/100)*total
-        return f"{round(pct, 1)}%\n{round(absolute, 0)} (s)"
+        return f"{round(pct, 1)}%\n{round(absolute, 1)} (s)"
 
     @staticmethod
     def _get_dicts_for_graphs(file):

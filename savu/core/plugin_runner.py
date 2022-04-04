@@ -198,7 +198,7 @@ class PluginRunner(object):
         self.exp._reorganise_datasets(finalise)
 
         t1 = time.time()
-        plugin.stats_obj.set_time(int(t1-t0))
+        plugin.stats_obj.set_time(round(t1-t0, 1))
 
         return plugin
 
