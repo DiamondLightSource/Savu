@@ -117,6 +117,7 @@ class Content(object):
         self.plugin_list._check_loaders()
         if check.lower() == "y":
             print(f"Saving file {filename}")
+            self.filename = filename
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
@@ -127,6 +128,8 @@ class Content(object):
         if check.lower() == "y":
             self.expand_dim = None
             self.plugin_list.plugin_list = []
+            self.filename = None
+            #what if -i ?
 
     def check_plugin_list_exists(self):
         """ Check if plugin list is populated. """

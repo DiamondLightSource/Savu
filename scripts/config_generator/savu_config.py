@@ -367,6 +367,8 @@ def main(test=False):
         file_path = args.check
         hu.check_tomo_data(file_path)
         sys.exit(0)
+    if args.name is not None:
+        args.file = args.name
 
     if args.error:
         utils.error_level = 1
@@ -398,7 +400,8 @@ def main(test=False):
     accumulative_output = ''
     while True:
         try:
-            in_text = input(">>> ").strip()
+            name = f"{Path(content.filename).stem} " if content.filename else ""
+            in_text = input(f"{name}>>> ").strip()
             in_list = in_text.split(' ', 1)
             _write_command_to_log(in_text)
 
