@@ -49,6 +49,8 @@ class TomoPhantomLoader(BaseTomophantomLoader):
 
         super(TomoPhantomLoader, self).post_process(data_obj, data_obj2)
 
+        self.proj_stats_obj.stop_time()
+
     def __set_image_key(self, data_obj):
         proj_slice = \
             data_obj.get_data_patterns()['PROJECTION']['slice_dims'][0]

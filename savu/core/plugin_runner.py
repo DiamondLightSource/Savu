@@ -51,6 +51,7 @@ class PluginRunner(object):
     def _run_plugin_list(self):
         """ Create an experiment and run the plugin list.
         """
+        t0 = time.time()
         self.exp._setup(self)
         Statistics._setup_class(self.exp)
 
@@ -108,7 +109,8 @@ class PluginRunner(object):
         # terminate any remaining datasets
         for data in list(self.exp.index['in_data'].values()):
             self._transport_terminate_dataset(data)
-
+        t1 = time.time()
+        Statistics.total_time = round(t1 - t0, 1)
         self.__output_final_message()
 
         if self.exp.meta_data.get('email'):
@@ -123,14 +125,15 @@ class PluginRunner(object):
         msg = "interrupted by killsignal" if kill else "Complete"
         stars = 40 if kill else 23
         cu.user_message("*" * stars)
-        cu.user_message("* Processing " + msg + " *")
+        cu.user_message("* Processing " + msg + " in " + str(Statistics.total_time) + " seconds *")
         cu.user_message("*" * stars)
 
     def __run_plugin(self, plugin_dict, clean_up_plugin=True, plugin=None):
         # allow plugin objects to be reused for running iteratively
-        t0 = time.time()
         if plugin is None:
             plugin = self._transport_load_plugin(self.exp, plugin_dict)
+
+        plugin.stats_obj.start_time()
 
         iterate_plugin_group = check_if_in_iterative_loop(self.exp)
 
@@ -197,8 +200,7 @@ class PluginRunner(object):
 
         self.exp._reorganise_datasets(finalise)
 
-        t1 = time.time()
-        plugin.stats_obj.set_time(round(t1-t0, 1))
+        plugin.stats_obj.stop_time()
 
         return plugin
 

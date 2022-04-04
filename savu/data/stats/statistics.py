@@ -12,6 +12,7 @@ from savu.data.stats.stats_utils import StatsUtils
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import savu.core.utils as cu
 
+import time
 import h5py as h5
 import numpy as np
 import os
@@ -20,7 +21,7 @@ from mpi4py import MPI
 
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
-    _no_stats_plugins = ["BasicOperations", "Mipmap"]
+    _no_stats_plugins = ["BasicOperations", "Mipmap", "UnetApply"]
     _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
     _has_setup = False
@@ -271,7 +272,7 @@ class Statistics(object):
         return volume_stats
 
     def _set_loop_stats(self):
-        # NEED TO CHANGE THIS - MUST USE SLICES
+        # NEED TO CHANGE THIS - MUST USE SLICES (is never called)
         data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
         data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
         RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
@@ -329,10 +330,20 @@ class Statistics(object):
         if self._iterative_group:
             self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
+    def start_time(self):
+        self.t0 = time.time()
+
+    def stop_time(self):
+        self.t1 = time.time()
+        elapsed = round(self.t1 - self.t0, 1)
+        if self._stats_flag and self.calc_stats:
+            self.set_time(elapsed)
+
     def set_time(self, seconds):
-        Statistics.global_times[self.p_num] += seconds
-        comm = self.plugin.get_communicator()
-        self._write_times_to_file(comm)
+            Statistics.global_times[self.p_num] += seconds  # Gives total time for a plugin in a loop
+            #print(f"{self.p_num}, {seconds}")
+            comm = self.plugin.get_communicator()
+            self._write_times_to_file(comm)
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         combined_stats_list = comm.allgather(slice_stats)
@@ -437,6 +448,7 @@ class Statistics(object):
             with h5.File(filename, "a") as h5file:
                 group = h5file.require_group("stats")
                 dataset = group[str(p_num)]
+                print(time)
                 dataset.attrs.create("time", time)
 
     def write_slice_stats_to_file(self, slice_stats=None, p_num=None, comm=MPI.COMM_WORLD):

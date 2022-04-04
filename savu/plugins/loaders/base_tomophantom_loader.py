@@ -48,6 +48,8 @@ class BaseTomophantomLoader(BaseLoader):
         data_obj = exp.create_data_object('in_data', 'synth_proj_data')
 
         self.proj_stats_obj = Statistics()
+        self.proj_stats_obj.start_time()
+        self.proj_stats_obj.plugin = self
         self.proj_stats_obj.pattern = "PROJECTION"
         self.proj_stats_obj.plugin_name = "TomoPhantomLoader"
         self.proj_stats_obj.p_num = 1
@@ -55,6 +57,7 @@ class BaseTomophantomLoader(BaseLoader):
         self.proj_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
         self.phantom_stats_obj = Statistics()
+        self.phantom_stats_obj.plugin = self
         self.phantom_stats_obj.pattern = "VOLUME_XY"
         self.phantom_stats_obj.plugin_name = "TomoPhantomLoader"
         self.phantom_stats_obj.p_num = 0
@@ -255,7 +258,8 @@ class BaseTomophantomLoader(BaseLoader):
         self._link_nexus_file(data_obj2, 'phantom')
         self._link_nexus_file(data_obj, 'synth_proj_data')
 
-
+    def get_communicator(self):
+        return MPI.COMM_WORLD
 
     def _link_nexus_file(self, data_obj, name):
         """Link phantom + synthetic projection data h5 files to a single nexus file containing both."""
