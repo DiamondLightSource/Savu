@@ -133,9 +133,10 @@ Wrapper for CCPi-Regularisation Toolkit (GPU) for efficient 2D/3D denoising.
             default: "0.0"
         
         pattern:
-            visibility: advanced
+            visibility: intermediate
             dtype: str
             description: Pattern to apply this to.
+            options: "['SINOGRAM', 'PROJECTION', 'VOLUME_XZ', 'VOLUME_XY']"
             default: VOLUME_XZ
         
 {% endblock %}

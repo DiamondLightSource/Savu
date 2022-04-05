@@ -30,6 +30,8 @@ from savu.data.chunking import Chunking
 #from savu.data.data_structures.data_types.data_plus_darks_and_flats \
 #    import NoImageKey
 from savu.data.data_structures.data_types.base_type import BaseType
+from savu.core.iterate_plugin_group_utils import \
+    check_if_end_plugin_in_iterate_group
 
 
 NX_CLASS = 'NX_class'
@@ -69,17 +71,53 @@ class Hdf5Utils(object):
             raise IOError("Failed to open the hdf5 file")
         return backing_file
 
-    def _link_datafile_to_nexus_file(self, data):
+    def _link_datafile_to_nexus_file(self, data, iterate_group=None):
         filename = self.exp.meta_data.get('nxs_filename')
 
         with h5py.File(filename, 'a') as nxs_file:
             # entry path in nexus file
-            name = data.get_name()
-            group_name = self.exp.meta_data.get(['group_name', name])
-            link = self.exp.meta_data.get(['link_type', name])
-            name = data.get_name(orig=True)
-            nxs_entry = self.__add_nxs_entry(nxs_file, link, group_name, name)
-            self.__add_nxs_data(nxs_file, nxs_entry, link, group_name, data)
+            if iterate_group is not None and \
+                check_if_end_plugin_in_iterate_group(self.exp):
+                self.__link_iterative_loop_output(data, nxs_file, iterate_group)
+            else:
+                name = data.get_name()
+                group_name = self.exp.meta_data.get(['group_name', name])
+                link = self.exp.meta_data.get(['link_type', name])
+                nxs_entry = \
+                    self.__add_nxs_entry(nxs_file, link, group_name, name)
+                self.__add_nxs_data(nxs_file, nxs_entry, link, group_name,
+                    data)
+
+    def __link_iterative_loop_output(self, data, nxs_file, iterate_group):
+        """
+        Choose which output dataset (original or clone) to link to in the NeXuS
+        file
+        """
+        is_even_iterations = iterate_group._ip_fixed_iterations % 2 == 0
+        orig_group_name = self.exp.meta_data.get(['group_name',
+            data.get_name(orig=True)])
+        clone_group_name = self.exp.meta_data.get(['group_name',
+            data.get_name(orig=False)])
+        orig_name = data.get_name(orig=True)
+        # the link_type for both the original and clone are the same
+        # ("final_result"), so it seemignly doesn't matter which value is
+        # fetched from the metadata
+        link = self.exp.meta_data.get(['link_type', orig_name])
+        # use the name of the original dataset in both cases to create the
+        # group in the NeXuS file
+        nxs_entry = self.__add_nxs_entry(nxs_file, link, orig_group_name,
+                                         orig_name)
+        if is_even_iterations:
+            # link clone dataset (use a linkname that contains the originl
+            # dataset's name, but references the cloned dataset hdf5 file)
+            self.__add_nxs_data(nxs_file, nxs_entry, link, clone_group_name,
+                data)
+        elif not is_even_iterations:
+            # link original dataset (use a linkname that contains the originl
+            # dataset's name, and also references the original dataset hdf5
+            # file)
+            self.__add_nxs_data(nxs_file, nxs_entry, link, orig_group_name,
+                data)
 
     def __add_nxs_entry(self, nxs_file, link, group_name, name):
         nxs_entry = '/entry/' + link

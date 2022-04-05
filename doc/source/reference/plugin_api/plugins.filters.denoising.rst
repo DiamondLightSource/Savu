@@ -1,6 +1,14 @@
 plugins.filters.denoising package
 =================================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   plugins.filters.denoising.iterative
+
 Submodules
 ----------
 

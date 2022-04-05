@@ -195,6 +195,29 @@ def _add_arg_parser(args=None, doc=True):
     return __arg_parser(parser, args, 'add', doc)
 
 
+def _iterate_arg_parser(args=None, doc=True):
+    """ Argument parser for iterate command. """
+    desc = sc.get_description()['iterate']
+    parser = ArgumentParser(prog='iterate', description=desc)
+    set_arg_help = 'Set the start plugin index, end plugin index, and number of iterations'
+    parser.add_argument('--set', nargs=3, type=int,
+        metavar=('START', 'END', 'ITERATIONS'), help=set_arg_help)
+    remove_arg_help = "Remove a list of specific iterative loops, or all " \
+        "loops in the process list (pass no loop numbers to remove all)"
+    parser.add_argument('--remove', nargs='*', type=int, help=remove_arg_help,
+        metavar=('LOOP_NUMBER'))
+    # TODO: Trying to allow it to be passed only a start index, and if so, to
+    # set the end index the same as the given start index.
+    # It's buggy though: passing more than 3 values causes the plugin_indices
+    # arg to consume more than 2 values, which isn't desired
+#    indices_arg_help = f"The plugin indices for the start and end of the " \
+#                       f"iterative loop"
+#    parser.add_argument('indices', nargs='+', help=indices_arg_help)
+#    iterations_arg_help = 'The number of iterations to perform'
+#    parser.add_argument('iterations', nargs=1, help=iterations_arg_help)
+    return __arg_parser(parser, args, 'iterate', doc)
+
+
 def _dupl_arg_parser(args=None, doc=True):
     """ Argument parser for dupl command. """
     desc = sc.get_description()['dupl']

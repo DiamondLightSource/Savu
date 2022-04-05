@@ -27,6 +27,7 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 from larix.methods.misc_gpu import MEDIAN_FILT_GPU
 
+
 @register_plugin
 class MedianFilterGpu(BaseMedianFilter, GpuPlugin):
 
@@ -36,14 +37,13 @@ class MedianFilterGpu(BaseMedianFilter, GpuPlugin):
         self.res = False
         self.start = 0
 
-
     def process_frames(self, data):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
-        input_temp =np.swapaxes(input_temp,0,1)
+        input_temp = np.swapaxes(input_temp, 0, 1)
         result = MEDIAN_FILT_GPU(input_temp.copy(order='C'), self.parameters['kernel_size'])
-        return np.swapaxes(result,0,1)
+        return np.swapaxes(result, 0, 1)
 
     def set_options(self, cfg):
         return cfg

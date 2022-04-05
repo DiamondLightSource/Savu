@@ -35,7 +35,7 @@ A hdf5 dataset of a specified size is created at runtime using Tomophantom to ge
         patterns:
             visibility: hidden
             dtype: "list[str]"
-            description: Patterns.
+            description: projection data object patterns.
             default: "['SINOGRAM.0c.1s.2c', 'PROJECTION.0s.1c.2c']"
         
         axis_labels_phantom:
@@ -44,11 +44,11 @@ A hdf5 dataset of a specified size is created at runtime using Tomophantom to ge
             description: A list of axis labels.
             default: "['detector_z.pixels', 'detector_y.pixels', 'detector_x.pixels']"
         
-        patterns_tomo:
+        patterns_tomo2:
             visibility: hidden
             dtype: "list[str]"
-            description: Patterns.
-            default: "['VOLUME_XZ.0c.1s.2c']"
+            description: Phantom data object patterns.
+            default: "['VOLUME_XZ.0c.1s.2c', 'VOLUME_XY.0s.1c.2c']"
         
         out_datasets:
             visibility: datasets

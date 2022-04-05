@@ -149,6 +149,15 @@ Denoising
    Wavelet Denoising Gpu <plugin_documentation/plugins/filters/denoising/wavelet_denoising_gpu>
 
 
+Iterative
+--------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1 
+
+   Iterative Ccpi Denoising <plugin_documentation/plugins/filters/denoising/iterative/iterative_ccpi_denoising>
+
+
 Fitters
 ########################################################
 

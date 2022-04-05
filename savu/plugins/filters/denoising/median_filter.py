@@ -28,6 +28,7 @@ from savu.plugins.utils import register_plugin
 import numpy as np
 from larix.methods.misc import MEDIAN_FILT
 
+
 @register_plugin
 class MedianFilter(BaseMedianFilter, CpuPlugin):
 
@@ -38,6 +39,6 @@ class MedianFilter(BaseMedianFilter, CpuPlugin):
         input_temp = data[0]
         indices = np.where(np.isnan(input_temp))
         input_temp[indices] = 0.0
-        input_temp =np.swapaxes(input_temp,0,1)
+        input_temp = np.swapaxes(input_temp, 0, 1)
         result = MEDIAN_FILT(input_temp.copy(order='C'), self.parameters['kernel_size'])
-        return np.swapaxes(result,0,1)
+        return np.swapaxes(result, 0, 1)

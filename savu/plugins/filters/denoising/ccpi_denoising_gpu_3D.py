@@ -25,6 +25,8 @@ from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 import numpy as np
 import subprocess as sp
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group, setup_extra_plugin_data_padding
 
 from ccpi.filters.regularisers import ROF_TV, FGP_TV, SB_TV, PD_TV, LLT_ROF, TGV, NDF, Diff4th
 from ccpi.filters.regularisers import PatchSelect, NLTV
@@ -35,7 +37,10 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def __init__(self):
         super(CcpiDenoisingGpu3d, self).__init__("CcpiDenoisingGpu3d")
+        self.slice_dir = None
+        self.device = None
 
+    @setup_extra_plugin_data_padding
     def set_filter_padding(self, in_pData, out_pData):
         self.pad = self.parameters['padding']
         pad_slice_dir = '%s.%s' % (self.slice_dir[0], self.pad)
@@ -43,6 +48,7 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         in_pData[0].padding = pad_dict
         out_pData[0].padding = pad_dict
 
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         pattern_type = self.parameters['pattern']
@@ -60,28 +66,28 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
         for core_index in core_dims_index:
             core_dims_size *= in_dataset[0].get_shape()[core_index]
         # calculate the amount of slices than would fit the GPU memory
-        gpu_available_mb = self.get_gpu_memory()[0]  # get the free GPU memory of a first device if many
-        slice_dize_mbbytes = int(np.ceil((core_dims_size * 1024 * 4)/(1024**3)))
+        gpu_available_mb = self.get_gpu_memory()[0]/procs  # get the free GPU memory of a first device if many
+        slice_size_mbbytes = int(np.ceil((core_dims_size * 1024 * 4) / (1024 ** 3)))
         # calculate the GPU memory required based on 3D regularisation restrictions (avoiding CUDA-error)
         if 'ROF_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 4.5
+            slice_size_mbbytes *= 8
         if 'FGP_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 8.5
+            slice_size_mbbytes *= 12
         if 'SB_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 6.5
+            slice_size_mbbytes *= 10
         if 'PD_TV' in self.parameters['method']:
-            slice_dize_mbbytes *= 6.5
+            slice_size_mbbytes *= 8
         if 'LLT_ROF' in self.parameters['method']:
-            slice_dize_mbbytes *= 8.5
+            slice_size_mbbytes *= 12
         if 'TGV' in self.parameters['method']:
-            slice_dize_mbbytes *= 11.5
+            slice_size_mbbytes *= 15
         if 'NDF' in self.parameters['method']:
-            slice_dize_mbbytes *= 3.5
+            slice_size_mbbytes *= 5
         if 'Diff4th' in self.parameters['method']:
-            slice_dize_mbbytes *= 3.5
+            slice_size_mbbytes *= 5
         if 'NLTV' in self.parameters['method']:
-            slice_dize_mbbytes *= 4.5
-        slices_fit_total = int(gpu_available_mb/slice_dize_mbbytes)
+            slice_size_mbbytes *= 8
+        slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
         self._set_max_frames(nSlices)
@@ -95,6 +101,15 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
                          'number_of_iterations': self.parameters['max_iterations'],
                          'time_marching_parameter': self.parameters['time_step'],
                          'tolerance_constant': self.parameters['tolerance_constant']}
+        if self.parameters['method'] == 'PD_TV':
+            # set parameters for the PD-TV method
+            self.pars = {'algorithm': self.parameters['method'],
+                         'regularisation_parameter': self.parameters['reg_parameter'],
+                         'number_of_iterations': self.parameters['max_iterations'],
+                         'tolerance_constant': self.parameters['tolerance_constant'],
+                         'methodTV': 0,
+                         'nonneg': 0,
+                         'PD_LipschitzConstant': 8}
         if self.parameters['method'] == 'FGP_TV':
             # set parameters for the FGP-TV method
             self.pars = {'algorithm': self.parameters['method'],
@@ -186,6 +201,15 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
                                        self.pars['tolerance_constant'],
                                        self.pars['methodTV'],
                                        self.pars['nonneg'], self.device)
+        if self.parameters['method'] == 'PD_TV':
+            (im_res, infogpu) = PD_TV(self.pars['input'],
+                                       self.pars['regularisation_parameter'],
+                                       self.pars['number_of_iterations'],
+                                       self.pars['tolerance_constant'],
+                                       self.pars['methodTV'],
+                                       self.pars['nonneg'],
+                                       self.pars['PD_LipschitzConstant'],
+                                       self.parameters['GPU_index'])                                       
         if self.parameters['method'] == 'SB_TV':
             (im_res, infogpu) = SB_TV(self.pars['input'],
                                       self.pars['regularisation_parameter'],
@@ -266,3 +290,17 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
 
     def nOutput_datasets(self):
         return 1
+
+    # total number of output datasets
+    def nOutput_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 2
+        else:
+            return 1
+
+    # total number of output datasets that are clones
+    def nClone_datasets(self):
+        if check_if_end_plugin_in_iterate_group(self.exp):
+            return 1
+        else:
+            return 0
