@@ -41,9 +41,10 @@ Frequently Asked Questions
 
         :blue:`If you are on a diamond workstation and you are developing a plugin
         which you want to be accessible straight away, you can save it to
-        /dls_sw/apps/savu/*savu_version*/savu_plugins_new. Plugins from this directory
-        are automatically accessible from any Diamond workstation after
-        module loading Savu.`
+        either of the following locations. 1. /home/<fed-id>/savu_plugins/
+        which is accessible for your user. 2. /dls_sw/apps/savu/*savu_version*/savu_plugins_new
+        Plugins from this directory are automatically accessible from any
+        Diamond workstation after module loading Savu.`
 
         :blue:`If you don't want to load plugins from this directory, then you should
         clear the` ``SAVU_PLUGINS_PATH`` :blue:`prior to using` ``module load``.
