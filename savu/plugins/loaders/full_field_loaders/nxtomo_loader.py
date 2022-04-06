@@ -27,6 +27,7 @@ import numpy as np
 
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+from savu.data.stats.statistics import Statistics
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
@@ -52,6 +53,20 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = self._get_h5_entry(
             data_obj.backing_file, self.parameters['data_path'])
+        exp.meta_data.set("data_path", self.parameters['data_path'])
+
+        fsplit = self.exp.meta_data["data_path"].split("/")
+        fsplit[-1] = "stats"
+        stats_path = "/".join(fsplit)
+        if stats_path in data_obj.backing_file:
+            stats_obj = Statistics()
+            stats_obj.p_num = 1
+            stats = data_obj.backing_file[stats_path]
+            Statistics.global_stats[1] = stats
+            Statistics.plugin_names[1] = "raw_data"
+            stats_dict = stats_obj._array_to_dict(stats)
+            for key in list(stats_dict.keys()):
+                data_obj.meta_data.set(["stats", key], stats_dict[key])
 
         self._set_dark_and_flat(data_obj)
 

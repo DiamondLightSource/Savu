@@ -91,6 +91,7 @@ class Experiment(object):
         return self.index[dtype][name]
 
     def _setup(self, transport):
+        self.stats_run = True
         self._set_nxs_file()
         self._set_process_list_path()
         self._set_transport(transport)
@@ -214,12 +215,21 @@ class Experiment(object):
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
-        for name, data in self.index['in_data'].items():
-            self.meta_data.set(['link_type', name], 'input_data')
-            self.meta_data.set(['group_name', name], name)
-            self.meta_data.set(['filename', name], data.backing_file)
-            transport._populate_nexus_file(data)
-            h5._link_datafile_to_nexus_file(data)
+        if not self.stats_run:
+            for name, data in self.index['in_data'].items():
+                self.meta_data.set(['link_type', name], 'input_data')
+                self.meta_data.set(['group_name', name], name)
+                self.meta_data.set(['filename', name], data.backing_file)
+                transport._populate_nexus_file(data)
+                h5._link_datafile_to_nexus_file(data)
+        else:
+            for name, data in self.index["in_data"].items():
+                raw_data = data.backing_file
+                folder = self.meta_data['out_path']
+                fname = self.meta_data.get('datafile_name') + '_with_stats.nxs'
+                filename = os.path.join(folder, fname)
+                with h5py.File(filename, "w") as new_file:
+                    raw_data.copy(raw_data["/entry1"], new_file["/"], "entry1")
 
     def _set_dataset_names_complete(self):
         """ Missing in/out_datasets fields have been populated
