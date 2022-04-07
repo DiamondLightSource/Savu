@@ -33,6 +33,7 @@ class BaseDezingerSinogram(Plugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
+        self.std_dev = None
         in_pData, out_pData = self.get_plugin_datasets()
         in_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())
         out_pData[0].plugin_data_setup('SINOGRAM', self.get_max_frames())

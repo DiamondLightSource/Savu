@@ -31,8 +31,7 @@ from savu.data.chunking import Chunking
 from savu.plugins.utils import register_plugin
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
-
-from savu.data.plugin_list import PluginList
+from savu.data.stats.statistics import Statistics
 
 import tomophantom
 from tomophantom import TomoP2D, TomoP3D
@@ -48,6 +47,22 @@ class BaseTomophantomLoader(BaseLoader):
         exp = self.exp
         data_obj = exp.create_data_object('in_data', 'synth_proj_data')
 
+        self.proj_stats_obj = Statistics()
+        self.proj_stats_obj.pattern = "PROJECTION"
+        self.proj_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.proj_stats_obj.p_num = 1
+        self.proj_stats_obj._iterative_group = None
+        self.proj_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+
+        self.phantom_stats_obj = Statistics()
+        self.phantom_stats_obj.pattern = "VOLUME_XY"
+        self.phantom_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.phantom_stats_obj.p_num = 0
+        self.phantom_stats_obj._iterative_group = None
+        self.phantom_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+
+        self.proj_stats_obj.plugin_names[1] = "TomoPhantomLoader"  # This object belongs to the whole statistics class
+        self.proj_stats_obj.plugin_numbers["TomoPhantomLoader"] = 1  # This object belongs to the whole statistics class
 
         data_obj.set_axis_labels(*self.parameters['axis_labels'])
         self.__convert_patterns(data_obj,'synth_proj_data')
@@ -76,6 +91,15 @@ class BaseTomophantomLoader(BaseLoader):
         self.n_entries = data_obj.get_shape()[0]
         cor_val = 0.5*(self.parameters['proj_data_dims'][2])
         self.cor = np.linspace(cor_val, cor_val, self.parameters['proj_data_dims'][1], dtype='float32')
+
+        self.proj_stats_obj.volume_stats = self.proj_stats_obj.calc_volume_stats(self.proj_stats_obj.stats)  # Calculating volume-wide stats for projection
+        Statistics.global_stats[1] = self.proj_stats_obj.volume_stats
+        self.proj_stats_obj._write_stats_to_file(p_num=1, plugin_name="TomoPhantomLoader (synthetic projection)")  # writing these to file (stats/stats.h5)
+
+        self.phantom_stats_obj.volume_stats = self.phantom_stats_obj.calc_volume_stats(self.phantom_stats_obj.stats)  # calculating volume-wide stats for phantom
+        Statistics.global_stats[0] = self.phantom_stats_obj.volume_stats
+        self.phantom_stats_obj._write_stats_to_file(p_num=0, plugin_name="TomoPhantomLoader (phantom)")  # writing these to file (stats/stats.h5)
+
         self._set_metadata(data_obj, self._get_n_entries())
 
         return data_obj, data_obj2
@@ -141,10 +165,12 @@ class BaseTomophantomLoader(BaseLoader):
                 gen_data = TomoP3D.ModelSinoSub(self.tomo_model, proj_data_dims[1], proj_data_dims[2],
                                                 proj_data_dims[1], (tmp.start, tmp.start + 1), -self.angles,
                                                 self.path_library3D)
+                self.proj_stats_obj.set_slice_stats(gen_data, pad=None)  # getting slice stats for projection
             else:
                 #generate phantom data
                 gen_data = TomoP3D.ModelSub(self.tomo_model, proj_data_dims[1], (tmp.start, tmp.start + 1),
                                             self.path_library3D)
+                self.phantom_stats_obj.set_slice_stats(gen_data, pad=None)  #getting slice stats for phantom
             dset[tuple(sl)] = np.swapaxes(gen_data,0,1)
             sl[slice_dirs[idx]] = slice(tmp.start+1, tmp.stop+1)
 
@@ -204,6 +230,7 @@ class BaseTomophantomLoader(BaseLoader):
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set(['rotation_angle'], self.angles)
         data_obj.meta_data.set(['centre_of_rotation'], self.cor)
+        data_obj
 
     def __parameter_checks(self, data_obj):
         if not self.parameters['proj_data_dims']:
@@ -225,26 +252,27 @@ class BaseTomophantomLoader(BaseLoader):
             fsplit[-1] = 'synthetic_data_processed.nxs'
         filename = '/'.join(fsplit)
         self.exp.meta_data.set('nxs_filename', filename)
-
-        plugin_list = PluginList()
-        #plugin_list._save_plugin_list(filename)
-        self._link_nexus_file(data_obj2, 'phantom', plugin_list)
-        self._link_nexus_file(data_obj, 'synth_proj_data', plugin_list)
+        self._link_nexus_file(data_obj2, 'phantom')
+        self._link_nexus_file(data_obj, 'synth_proj_data')
 
 
 
-    def _link_nexus_file(self, data_obj, name, plugin_list):
+    def _link_nexus_file(self, data_obj, name):
         """Link phantom + synthetic projection data h5 files to a single nexus file containing both."""
-
 
         if name == 'phantom':
             data_obj.exp.meta_data.set(['group_name', 'phantom'], 'phantom')
             data_obj.exp.meta_data.set(['link_type', 'phantom'], 'final_result')
-            data_obj.meta_data.set(["meta_data", "PLACEHOLDER", "VOLUME_XZ"], [10])
+            stats_dict = self.phantom_stats_obj._array_to_dict(self.phantom_stats_obj.volume_stats)
+            for key in list(stats_dict.keys()):
+                data_obj.meta_data.set(["stats", key], stats_dict[key])
 
         else:
             data_obj.exp.meta_data.set(['group_name', 'synth_proj_data'], 'entry1/tomo_entry/data')
             data_obj.exp.meta_data.set(['link_type', 'synth_proj_data'], 'entry1')
+            stats_dict = self.proj_stats_obj._array_to_dict(self.proj_stats_obj.volume_stats)
+            for key in list(stats_dict.keys()):
+                data_obj.meta_data.set(["stats", key], stats_dict[key])
 
         self._populate_nexus_file(data_obj)
         self._link_datafile_to_nexus_file(data_obj)
@@ -255,9 +283,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         filename = self.exp.meta_data.get('nxs_filename')
         name = data.data_info.get('name')
-        #driver = "mpio", comm = MPI.COMM_WORLD
         with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
-        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
 
             group_name = self.exp.meta_data.get(['group_name', name])
             link_type = self.exp.meta_data.get(['link_type', name])
@@ -374,7 +400,6 @@ class BaseTomophantomLoader(BaseLoader):
         filename = self.exp.meta_data.get('nxs_filename')
 
         with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
-        #nxs_file = self.hdf5._open_backing_h5(filename, 'a', mpi=False)
             # entry path in nexus file
             name = data.get_name()
             group_name = self.exp.meta_data.get(['group_name', name])

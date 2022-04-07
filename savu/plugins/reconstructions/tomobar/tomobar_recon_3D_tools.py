@@ -167,7 +167,7 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
                    TGV: Total Generalised Variation
                    NLTV: Non Local Total Variation
                    Diff4th: Fourth-order nonlinear diffusion model
-             default: PD_TV
+             default: FGP_TV
              dependency:
                 reconstruction_method:
                  FISTA3D
