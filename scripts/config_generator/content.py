@@ -117,6 +117,7 @@ class Content(object):
         self.plugin_list._check_loaders()
         if check.lower() == "y":
             print(f"Saving file {filename}")
+            self.filename = filename
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
@@ -126,7 +127,9 @@ class Content(object):
     def clear(self, check="y"):
         if check.lower() == "y":
             self.expand_dim = None
+            self.filename = None
             self.plugin_list.plugin_list = []
+            self.plugin_list.clear_iterate_plugin_group_dicts()
 
     def check_plugin_list_exists(self):
         """ Check if plugin list is populated. """
@@ -141,6 +144,16 @@ class Content(object):
         plugin.get_plugin_tools()._populate_default_parameters()
         pos, str_pos = self.convert_pos(str_pos)
         self.insert(plugin, pos, str_pos)
+
+    def iterate(self, args):
+        if args.remove is not None:
+            self.plugin_list.remove_iterate_plugin_groups(args.remove)
+        elif args.set is not None:
+            # create a dict representing a group of plugins to iterate over
+            start = args.set[0]
+            end = args.set[1]
+            iterations = args.set[2]
+            self.plugin_list.add_iterate_plugin_group(start, end, iterations)
 
     def refresh(self, str_pos, defaults=False, change=False):
         pos = self.find_position(str_pos)
@@ -346,6 +359,7 @@ class Content(object):
         self.insert(pu.plugins[name](), new_pos, new)
         self.plugin_list.plugin_list[new_pos] = entry
         self.plugin_list.plugin_list[new_pos]["pos"] = new
+        self.check_iterative_loops([old_pos + 1, new_pos + 1], 0)
 
     def replace(self, old, new_plugin):
         self.check_for_plugin_failure(new_plugin)
@@ -1075,6 +1089,59 @@ class Content(object):
         pos_list = self.get_split_positions()
         self.inc_positions(pos, pos_list, pos_str, -1)
 
+    def check_iterative_loops(self, positions, direction):
+        """
+        When a plugin is added, removed, or moved, check if any iterative loops
+        should be removed or shifted
+        """
+        def moved_plugin(old_pos, new_pos):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(old_pos)
+            if is_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    old_pos, -1)
+
+            if_will_be_in_loop = \
+                self.plugin_list.check_pos_in_iterative_loop(new_pos)
+            if if_will_be_in_loop and old_pos != new_pos:
+                self.plugin_list.remove_associated_iterate_group_dict(
+                    new_pos, -1)
+
+            # shift any relevant loops
+            if new_pos < old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [new_pos, old_pos], 1)
+            elif new_pos > old_pos:
+                self.plugin_list.shift_range_iterative_loops(
+                    [old_pos, new_pos], -1)
+
+        def added_removed_plugin(pos, direction):
+            is_in_loop = self.plugin_list.check_pos_in_iterative_loop(pos)
+            if is_in_loop:
+                # delete the associated loop
+                self.plugin_list.remove_associated_iterate_group_dict(pos,
+                    direction)
+
+            # check if there are any iterative loops in the process list
+            do_loops_exist = len(self.plugin_list.iterate_plugin_groups) > 0
+            if do_loops_exist:
+                if direction == -1:
+                    # shift the start+end of all loops after the plugin down by
+                    # 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, -1)
+                elif direction == 1:
+                    # shift the start+end of all loops after the plugin up by 1
+                    self.plugin_list.shift_subsequent_iterative_loops(pos, 1)
+
+        if direction == 0:
+            # a plugin has been moved
+            moved_plugin(positions[0], positions[1])
+        else:
+            # a plugin has been added or removed
+            added_removed_plugin(positions[0], direction)
+
     @property
     def size(self):
         return len(self.plugin_list.plugin_list)
+
+    def display_iterative_loops(self):
+        self.plugin_list.print_iterative_loops()

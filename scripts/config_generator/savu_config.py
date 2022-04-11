@@ -26,6 +26,8 @@ import sys
 import logging
 from . import hdf_utils as hu
 
+from colorama import Fore
+
 logger = logging.getLogger('documentationLog')
 logger_rst = logging.getLogger('documentationRst')
 
@@ -50,10 +52,11 @@ def _help(content, args):
     command_title = " Savu configurator commands "
     title_separator = "*"*((width-len(command_title))//2)
     print(f"{title_separator}{command_title}{title_separator}")
-    for key in list(commands.keys()):
+    for key in sorted(list(commands.keys()),  key=str.lower):
         doc = commands[key].__doc__
         if doc:
-            print("%8s : %s" % (key, commands[key].__doc__))
+            print(Fore.GREEN + f"{key:>8}" + Fore.RESET
+                  + f" : {commands[key].__doc__}")
     line_separator = "*" * width
     info_text = "* For more information about individual commands type " \
                 "'<command> -h' *"
@@ -188,8 +191,42 @@ def _add(content, args):
     elems = content.get_positions()
     final = str(int(re.findall(r'\d+', elems[-1])[0])+1) if elems else 1
     content.add(args.name, args.pos if args.pos else str(final))
+    content.check_iterative_loops([int(args.pos)] if args.pos else [int(final)], 1)
     _disp(content, '-q')
     return content
+
+
+@parse_args
+@error_catcher
+def _iterate(content, args):
+    """ Set a plugin (or group of plugins) to run iteratively. """
+    # TODO: note the lack of use of _disp(); maybe will need this for
+    # visually displaying the iterative loops in the terminal window?
+    if args.remove is None and args.set is None:
+        # display only the loops, not the rest of the process list
+        content.display_iterative_loops()
+    else:
+        content.iterate(args)
+        # display the process list with the visual markers of where iterative
+        # loops are
+        _disp(content, '-q')
+    return content
+    # TODO: the commented-out code below is associated with the TODO in
+    # arg_parsers._iterate_arg_parser()
+#    plugin_indices = args.indices
+#    iterations = args.iterations
+#
+#    start = plugin_indices[0]
+#    if len(plugin_indices) == 1:
+#        # only the start index has been given, so there is only one element in
+#        # the list
+#        end = plugin_indices[0]
+#    else:
+#        # both the start and end index has been given, so there are two elements
+#        # in the list
+#        end = plugin_indices[1]
+#
+#    content.add_iterate_plugin_group(start, end, iterations[0])
 
 
 @parse_args
@@ -239,6 +276,7 @@ def _rem(content, args):
             pos-=counter
         content.remove(content.find_position(str(pos)))
         counter+=1
+        content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
 
@@ -321,6 +359,7 @@ commands = {'open': _open,
             'clear': _clear,
             'exit': _exit,
             'history': _history,
+            'iterate': _iterate,
             'replace': _replace}
 
 def get_description():
@@ -367,6 +406,8 @@ def main(test=False):
         file_path = args.check
         hu.check_tomo_data(file_path)
         sys.exit(0)
+    if args.name is not None:
+        args.file = args.name
 
     if args.error:
         utils.error_level = 1
@@ -398,7 +439,8 @@ def main(test=False):
     accumulative_output = ''
     while True:
         try:
-            in_text = input(">>> ").strip()
+            name = f"{Path(content.filename).stem} " if content.filename else ""
+            in_text = input(f"{name}>>> ").strip()
             in_list = in_text.split(' ', 1)
             _write_command_to_log(in_text)
 

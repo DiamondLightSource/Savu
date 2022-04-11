@@ -36,7 +36,7 @@ class AstraGpuTest(unittest.TestCase):
         process_list = 'reconstruction/astra_cgls.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
-        tu.cleanup(options)
+        tu.cleanup(options)    
 
 if __name__ == "__main__":
     unittest.main()

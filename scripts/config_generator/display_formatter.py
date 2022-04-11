@@ -65,7 +65,7 @@ class DisplayFormatter(object):
 
         count = start
         plugin_list = self.plugin_list[start:stop]
-        line_break = "%s" % ("-" * width)
+        line_break = "%s" % ("*" * width)
         out_string.append(line_break)
 
         display_args = {
@@ -73,14 +73,40 @@ class DisplayFormatter(object):
             "datasets": datasets,
             "expand_dim": expand_dim,
         }
+
+        iterative_grp = self.plugin_list_inst.get_iterate_plugin_group_dicts()
+        start_indices = {grp['start_index']:grp['iterations']
+                         for grp in iterative_grp}
+        end_indices = [grp['end_index'] for grp in iterative_grp]
+
         for p_dict in plugin_list:
             count += 1
+            if count in start_indices.keys():
+                iter_start = f"Iterative loop of plugin(s) starts " \
+                f"({start_indices[count]} iteration{'s'[:start_indices[count]^1]})"
+                out_string.append(self._separator_string(iter_start, "-", width, 2))
             description = self._get_description(
                 width, level, p_dict, count, verbosity, display_args
             )
             out_string.append(description)
-            out_string.append(line_break)
+            if count in end_indices:
+                iter_end = f"Iterative loop of plugin{'s'[:count^1]} ends"
+                out_string.append(self._separator_string(iter_end, "-", width, 2))
+        out_string.append(line_break)
         return "\n".join(out_string)
+
+    def _separator_string(self, text, symbol, width, offset):
+        """ Create a string to separate lines inside the terminal
+
+        :param text: text to include in the  separator string
+        :param symbol: symbol for the separator
+        :param width: width of the line
+        :param offset: offset of the text
+        :return: a string to separate lines in terminal display
+        """
+        length = width - offset
+        separating_line = symbol * offset + f"{text:{symbol}<{length}}"
+        return separating_line
 
     def _get_description(
         self, width, level, p_dict, count, verbose, display_args
@@ -106,8 +132,21 @@ class DisplayFormatter(object):
         active = f"{active} " if active else ""
         title = f"{active}{pos} {p_dict['name']}"
         title = title if quiet else f"{title} ({p_dict['id']})"
+
+        # determine if the given plugin is in an iterative loop or not
+        is_in_loop = False
+        int_pos = int(p_dict['pos'])
+        for grp in self.plugin_list_inst.iterate_plugin_groups:
+            if grp['start_index'] <= int_pos and int_pos <= grp['end_index']:
+                is_in_loop = True
+
+        text_indent = '   ' if is_in_loop else ''
+        if is_in_loop and active == '':
+            back_colour = Back.BLUE
+
         title_str = self._get_equal_lines(
-            title, width, back_colour+fore_colour, Style.RESET_ALL, " ")
+            text_indent+title, width, back_colour+fore_colour, Style.RESET_ALL,
+            " ")
         return title_str
 
     def _get_quiet(self, p_dict, count, width, quiet=True):
@@ -324,14 +363,14 @@ class DispDisplay(ParameterFormatter):
                 if filter:
                     if key in filter_items:
                         params = \
-                            self._separator(key, p_dict, prev_visibility,
+                            self._level_separator(key, p_dict, prev_visibility,
                                             params, width)
                         params = self._create_display_string(desc, key,
                                        p_dict, params, keycount, longest_key,
                                        width, breakdown, expand_dim)
                 else:
                     params = \
-                        self._separator(key, p_dict, prev_visibility,
+                        self._level_separator(key, p_dict, prev_visibility,
                                         params, width)
                     params = self._create_display_string(desc, key, p_dict,
                                         params, keycount, longest_key, width,
@@ -343,8 +382,9 @@ class DispDisplay(ParameterFormatter):
             print("ERROR: " + str(e))
             raise
 
-    def _separator(self, key, p_dict, prev_visibility, params, width):
-        """Add a line separator to the parameter string 'params'
+    def _level_separator(self, key, p_dict, prev_visibility, params, width):
+        """Add a line separator to the parameter string 'params' based
+        on the parameter visibility level
 
         :param key: parameter name
         :param p_dict: dictionary of parameter definitions
@@ -353,15 +393,10 @@ class DispDisplay(ParameterFormatter):
         :param width: width of the console display
         :return: parameter string
         """
-        offset = 2
-        align = "left"
         cur_visibility = p_dict["param"][key]["visibility"]
-        split = "-" * ((width - len(cur_visibility)) - offset)
         if cur_visibility != prev_visibility:
-            if align == "left":
-                params += "\n" + "-" * offset + cur_visibility + split
-            else:
-                params += "\n" + split + cur_visibility + "-" * offset
+            separating_str = self._separator_string(cur_visibility, "-", width, 2)
+            params += "\n" + separating_str
         return params
 
     def _get_verbose(

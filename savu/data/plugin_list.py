@@ -60,6 +60,7 @@ class PluginList(object):
         self.saver_plugin_status = True
         self._template = None
         self.version = None
+        self.iterate_plugin_groups = []
 
     def add_template(self, create=False):
         self._template = Template(self)
@@ -130,6 +131,23 @@ class PluginList(object):
                             )
                     self.plugin_list.append(plugin)
 
+            # add info about groups of plugins to iterate over into
+            # self.iterate_plugin_groups
+            self.clear_iterate_plugin_group_dicts()
+            try:
+                iterate_groups = plugin_file['entry/iterate_plugin_groups']
+                for key in list(iterate_groups.keys()):
+                    iterate_group_dict = {
+                        'start_index': iterate_groups[key]['start'][()],
+                        'end_index': iterate_groups[key]['end'][()],
+                        'iterations': iterate_groups[key]['iterations'][()]
+                    }
+                    self.iterate_plugin_groups.append(iterate_group_dict)
+            except Exception as e:
+                err_str = f"Process list file {filename} doesn't have the " \
+                          f"iterate_plugin_groups internal hdf5 path"
+                print(err_str)
+
             if template:
                 self.add_template()
                 self._template.update_process_list(template)
@@ -138,12 +156,11 @@ class PluginList(object):
         """If the input process list was created using an older version
         of Savu, then alert the user"""
         from savu.version import __version__
-        pl_version = float(self.version)
-        if float(__version__) > pl_version:
+        if __version__ != self.version:
             separator = "*" * 53
             print(separator)
             print(f"*** This process list was created using Savu "
-                  f"{pl_version}  ***")
+                  f"{self.version}  ***")
             print(separator)
 
     def _save_plugin_list(self, out_filename):
@@ -166,6 +183,9 @@ class PluginList(object):
                 )
                 self.__populate_plugins_group(plugin_group, plugin)
 
+            self.__save_iterate_plugin_groups(self._overwrite_group(
+                entry, 'iterate_plugin_groups', 'NXnote'))
+
         if self._template and self._template.creating:
             fname = os.path.splitext(out_filename)[0] + ".savu"
             self._template._output_template(fname, out_filename)
@@ -176,6 +196,218 @@ class PluginList(object):
         group = entry.create_group(name.encode("ascii"))
         group.attrs[NX_CLASS] = nxclass.encode("ascii")
         return group
+
+    def add_iterate_plugin_group(self, start, end, iterations):
+        """Add an element to self.iterate_plugin_groups"""
+        group_new = {
+            'start_index': start,
+            'end_index': end,
+            'iterations': iterations
+        }
+
+        if iterations <= 0:
+            print("The number of iterations should be larger than zero and nonnegative")
+            return
+        elif start <= 0 or start > len(self.plugin_list) or end <= 0 or end > len(self.plugin_list):
+            print("The given plugin indices are not within the range of existing plugin indices")
+            return
+
+        are_crosschecks_ok = \
+            self._crosscheck_existing_loops(start, end, iterations)
+
+        if are_crosschecks_ok:
+            self.iterate_plugin_groups.append(group_new)
+            info_str = f"The following loop has been added: start plugin " \
+                       f"index {group_new['start_index']}, end plugin index " \
+                       f"{group_new['end_index']}, iterations " \
+                       f"{group_new['iterations']}"
+            print(info_str)
+
+    def _crosscheck_existing_loops(self, start, end, iterations):
+        """
+        Check requested loop to be added against existing loops for potential
+        clashes
+        """
+        are_crosschecks_ok = False
+        list_new_indices = list(range(start, end+1))
+        # crosscheck with the existing iterative loops
+        if len(self.iterate_plugin_groups) != 0:
+            noexactlist = True
+            nointersection = True
+            for count, group in enumerate(self.iterate_plugin_groups, 1):
+                start_int = int(group['start_index'])
+                end_int = int(group['end_index'])
+                list_existing_indices = list(range(start_int, end_int+1))
+                if bool(set(list_new_indices).intersection(list_existing_indices)):
+                    # check if the intersection of lists is exact (number of iterations to change)
+                    nointersection = False
+                    if list_new_indices == list_existing_indices:
+                        print(f"The number of iterations of loop group no. {count}, {list_new_indices} has been set to: {iterations}")
+                        self.iterate_plugin_groups[count-1]["iterations"] = iterations
+                        noexactlist = False
+                    else:
+                        print(f"The plugins of group no. {count} are already set to be iterative: {set(list_new_indices).intersection(list_existing_indices)}")
+            if noexactlist and nointersection:
+                are_crosschecks_ok = True
+        else:
+            are_crosschecks_ok = True
+
+        return are_crosschecks_ok
+
+    def remove_iterate_plugin_groups(self, indices):
+        """ Remove elements from self.iterate_plugin_groups """
+        if len(indices) == 0:
+            # remove all iterative loops in process list
+            prompt_str = 'Are you sure you want to remove all iterative ' \
+                'loops? [y/N]'
+            check = input(prompt_str)
+            should_remove_all = check.lower() == 'y'
+            if should_remove_all:
+                self.clear_iterate_plugin_group_dicts()
+                print('All iterative loops have been removed')
+            else:
+                print('No iterative loops have been removed')
+        else:
+            # remove specified iterative loops in process list
+            sorted_indices = sorted(indices)
+
+            if sorted_indices[0] <= 0:
+                print('The iterative loops are indexed starting from 1')
+                return
+
+            for i in reversed(sorted_indices):
+                try:
+                    # convert the one-based index to a zero-based index
+                    iterate_group = self.iterate_plugin_groups.pop(i - 1)
+                    info_str = f"The following loop has been removed: start " \
+                               f"plugin index " \
+                               f"{iterate_group['start_index']}, " \
+                               f"end plugin index " \
+                               f"{iterate_group['end_index']}, iterations " \
+                               f"{iterate_group['iterations']}"
+                    print(info_str)
+                except IndexError as e:
+                    info_str = f"There doesn't exist an iterative loop with " \
+                               f"number {i}"
+                    print(info_str)
+
+    def clear_iterate_plugin_group_dicts(self):
+        """
+        Reset the list of dicts representing groups of plugins to iterate over
+        """
+        self.iterate_plugin_groups = []
+
+    def get_iterate_plugin_group_dicts(self):
+        """
+        Return the list of dicts representing groups of plugins to iterate over
+        """
+        return self.iterate_plugin_groups
+
+    def print_iterative_loops(self):
+        if len(self.iterate_plugin_groups) == 0:
+            print('There are no iterative loops in the current process list')
+        else:
+            print('Iterative loops in the current process list are:')
+            for count, group in enumerate(self.iterate_plugin_groups, 1):
+                number = f"({count}) "
+                start_str = f"start plugin index: {group['start_index']}"
+                end_str = f"end index: {group['end_index']}"
+                iterations_str = f"iterations number: {group['iterations']}"
+                full_str = number + start_str + ', ' + end_str + ', ' + \
+                    iterations_str
+                print(full_str)
+
+    def remove_associated_iterate_group_dict(self, pos, direction):
+        """
+        Remove an iterative loop associated to a plugin index
+        """
+        operation = 'add' if direction == 1 else 'remove'
+        for i, iterate_group in enumerate(self.iterate_plugin_groups):
+            if operation == 'remove':
+                if iterate_group['start_index'] <= pos and \
+                    pos <= iterate_group['end_index']:
+                    # remove the loop if the plugin being removed is at any
+                    # position within an iterative loop
+                    del self.iterate_plugin_groups[i]
+                    break
+            elif operation == 'add':
+                if iterate_group['start_index'] != iterate_group['end_index']:
+                    # remove the loop only if the plugin is being added between
+                    # the start and end of the loop
+                    if iterate_group['start_index'] < pos and \
+                        pos <= iterate_group['end_index']:
+                        del self.iterate_plugin_groups[i]
+                        break
+
+    def check_pos_in_iterative_loop(self, pos):
+        """
+        Check if the given plugin position is in an iterative loop
+        """
+        is_in_loop = False
+        for iterate_group in self.iterate_plugin_groups:
+            if iterate_group['start_index'] <= pos and \
+                pos <= iterate_group['end_index']:
+                is_in_loop = True
+                break
+
+        return is_in_loop
+
+    def __save_iterate_plugin_groups(self, group):
+        '''
+        Save information regarding the groups of plugins to iterate over
+        '''
+        for count, iterate_group in enumerate(self.iterate_plugin_groups):
+            grp_name = str(count)
+            grp = group.create_group(grp_name.encode('ascii'))
+            shape = () # scalar data
+            grp.create_dataset('start'.encode('ascii'), shape, 'i',
+                iterate_group['start_index'])
+            grp.create_dataset('end'.encode('ascii'), shape, 'i',
+                iterate_group['end_index'])
+            grp.create_dataset('iterations'.encode('ascii'), shape, 'i',
+                iterate_group['iterations'])
+
+    def shift_subsequent_iterative_loops(self, pos, direction):
+        """
+        Shift all iterative loops occurring after a given plugin position
+        """
+        # if removing a plugin that is positioned before a loop, the loop should
+        # be shifted down by 1; but if removing a plugin that is positioned at
+        # the start of the loop, it will be removed instead of shifted (ie, both
+        # < or <= work for this case)
+        #
+        # if adding a plugin that will be positioned before a loop, the loop
+        # should be shifted up by 1; also, if adding a plugin to be positioned
+        # where the start of a loop currently exists, this should shift the loop
+        # up by 1 as well (ie, only <= works for this case, hence the use of <=)
+        for iterate_group in self.iterate_plugin_groups:
+            if pos <= iterate_group['start_index']:
+                self.shift_iterative_loop(iterate_group, direction)
+
+    def shift_range_iterative_loops(self, positions, direction):
+        """
+        Shift all iterative loops within a range of plugin indices
+        """
+        for iterate_group in self.iterate_plugin_groups:
+            if positions[0] <= iterate_group['start_index'] and \
+                iterate_group['end_index'] <= positions[1]:
+                self.shift_iterative_loop(iterate_group, direction)
+
+    def shift_iterative_loop(self, iterate_group, direction):
+        """
+        Shift an iterative loop up or down in the process list, based on if a
+        plugin is added or removed
+        """
+        if direction == 1:
+            iterate_group['start_index'] += 1
+            iterate_group['end_index'] += 1
+        elif direction == -1:
+            iterate_group['start_index'] -= 1
+            iterate_group['end_index'] -= 1
+        else:
+            err_str = f"Bad direction value given to shift iterative loop: " \
+                      f"{direction}"
+            raise ValueError(err_str)
 
     def __save_savu_notes(self, notes):
         """ Save the version number
