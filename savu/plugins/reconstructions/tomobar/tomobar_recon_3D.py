@@ -99,7 +99,10 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
     def pre_process(self):
         in_pData = self.get_plugin_in_datasets()[0]
         self.det_dimX_ind = in_pData.get_data_dimension_by_axis_label('detector_x')
-        self.det_dimY_ind = in_pData.get_data_dimension_by_axis_label('detector_y')
+        try:
+            self.det_dimY_ind = in_pData.get_data_dimension_by_axis_label('detector_y')
+        except ValueError:
+            raise ValueError('<<<The dimension of the given projection data is 2D, while 3D is required! >>>')
         #  getting the value for padded vertical detector
         self.Vert_det = in_pData.get_shape()[self.det_dimY_ind] + 2 * self.pad
 
@@ -144,9 +147,37 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
             CenterOffset[:, 0] = (cor_astra.item() - 0.5) - self.projection_shifts[:, 0]
             CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
 
+        # set parameters and initiate a TomoBar class object for iterative reconstruction
+        RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                   DetectorsDimV=self.Vert_det,   # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=CenterOffset,  # The center of rotation combined with  the shift offsets
+                                   AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                   ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                   datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
+                                   device_projector=self.parameters['GPU_index'])
+
+        # set parameters and initiate a TomoBar class object for direct reconstruction
+        RectoolsDIR = RecToolsDIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
+                                   DetectorsDimV=self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
+                                   CenterRotOffset=CenterOffset,  # The center of rotation combined with the shift offsets
+                                   AnglesVec=-self.anglesRAD,  # the vector of angles in radians
+                                   ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
+                                   device_projector=self.parameters['GPU_index'])
+
+        if self.parameters['reconstruction_method'] == 'FBP3D':
+            recon = RectoolsDIR.FBP(projdata3D) #perform FBP3D
+
+        if self.parameters['reconstruction_method'] == 'CGLS3D':
+            # Run CGLS 3D reconstruction algorithm here
+            recon = RectoolsIter.CGLS(self._data_, self._algorithm_)
+
+        if self.parameters['reconstruction_method'] == 'SIRT3D':
+            # Run SIRT 3D reconstruction algorithm here
+            recon = RectoolsIter.SIRT(self._data_, self._algorithm_)
+
         if self.parameters['reconstruction_method'] == 'FISTA3D':
             if self.parameters['regularisation_method'] == 'PD_TV':
-	            self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})        
+	            self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})
             # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
             if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
                 rawdata3D = data[1].astype(np.float32)
@@ -154,41 +185,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                 rawdata3D = np.swapaxes(rawdata3D, 0, 1) / np.max(np.float32(rawdata3D))
                 self._data_.update({'projection_raw_data': rawdata3D})
                 self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
-
-            # set parameters and initiate a TomoBar class object for FISTA reconstruction
-            RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                       DetectorsDimV=self.Vert_det,   # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with  the shift offsets
-                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
-                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                       datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
-                                       device_projector=self.parameters['GPU_index'])
-
             # Run FISTA reconstruction algorithm here
             recon = RectoolsIter.FISTA(self._data_, self._algorithm_, self._regularisation_)
-
-        if self.parameters['reconstruction_method'] == 'FBP3D':
-            RectoolsDIR = RecToolsDIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                       DetectorsDimV=self.Vert_det,  # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with the shift offsets
-                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
-                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                       device_projector=self.parameters['GPU_index'])
-
-            recon = RectoolsDIR.FBP(projdata3D) #perform FBP3D
-
-        if self.parameters['reconstruction_method'] == 'CGLS3D':
-            # set parameters and initiate a TomoBar class object for FISTA reconstruction
-            RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
-                                       DetectorsDimV=self.Vert_det,   # DetectorsDimV # detector dimension (vertical) for 3D case only
-                                       CenterRotOffset=CenterOffset,  # The center of rotation combined with  the shift offsets
-                                       AnglesVec=-self.anglesRAD,  # the vector of angles in radians
-                                       ObjSize=self.vol_shape[0],  # a scalar to define the reconstructed object dimensions
-                                       datafidelity=self.parameters['data_fidelity'], # data fidelity, choose LS, PWLS, SWLS
-                                       device_projector=self.parameters['GPU_index'])
-
-            # Run CGLS reconstruction algorithm here
-            recon = RectoolsIter.CGLS(self._data_, self._algorithm_)
 
         recon = np.swapaxes(recon, 0, 1)
         return recon
