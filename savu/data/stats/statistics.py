@@ -20,7 +20,7 @@ from mpi4py import MPI
 
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
-    _no_stats_plugins = ["BasicOperations", "Mipmap", "UnetApply"]
+    _no_stats_plugins = ["BasicOperations", "Mipmap"]
     _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
     _has_setup = False
