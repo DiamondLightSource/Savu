@@ -86,6 +86,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                 slice_size_mbbytes *= 5
             if 'NLTV' in self.parameters['regularisation_method']:
                 slice_size_mbbytes *= 8
+        if self.parameters['reconstruction_method'] == 'SIRT3D' or self.parameters['reconstruction_method'] == 'CGLS3D':
+            slice_size_mbbytes *= 3
 
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
@@ -169,10 +171,12 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
         if self.parameters['reconstruction_method'] == 'CGLS3D':
             # Run CGLS 3D reconstruction algorithm here
+            self._algorithm_.update({'lipschitz_const': None})
             recon = RectoolsIter.CGLS(self._data_, self._algorithm_)
 
         if self.parameters['reconstruction_method'] == 'SIRT3D':
             # Run SIRT 3D reconstruction algorithm here
+            self._algorithm_.update({'lipschitz_const': None})
             recon = RectoolsIter.SIRT(self._data_, self._algorithm_)
 
         if self.parameters['reconstruction_method'] == 'FISTA3D':
