@@ -35,16 +35,18 @@ class Statistics(object):
         self._repeat_count = 0
         self.p_num = None
         self.GPU = False
+        self._iterative_group = None
 
     def setup(self, plugin_self, pattern=None):
         if not Statistics._has_setup:
             self._setup_class(plugin_self.exp)
         self.plugin_name = plugin_self.name
         self.p_num = Statistics.count
+        self.plugin = plugin_self
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
-            self.plugin = plugin_self
+
             self._pad_dims = []
             self._already_called = False
             if pattern:
@@ -81,13 +83,13 @@ class Statistics(object):
         cls.loop_stats = []
         cls.n_plugins = len(exp.meta_data.plugin_list.plugin_list)
         for i in range(1, cls.n_plugins + 1):
-            cls.global_stats[i] = np.array([])
+            cls.global_stats[i] = {}
             cls.global_times[i] = 0
         cls.global_residuals = {}
         cls.plugin_numbers = {}
         cls.plugin_names = {}
         cls._loop_counter = 0
-        cls._RMSD = True
+        cls._RMSD = False
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -119,21 +121,16 @@ class Statistics(object):
                 p_num = self.p_num + p_num
             except TypeError:
                 p_num = Statistics.count + p_num
-        if Statistics.global_stats[p_num].ndim == 1 and instance in (None, 0, 1, -1, "all"):
-            stats_array = Statistics.global_stats[p_num]
-        else:
-            if instance == "all":
-                stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
-                n = 2
-                if Statistics.global_stats[p_num].ndim != 1:
-                    while n <= len(Statistics.global_stats[p_num]):
-                        stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
-                        n += 1
-                return stats_list
-            if instance > 0:
-                instance -= 1
-            stats_array = Statistics.global_stats[p_num][instance]
-        stats_dict = self._array_to_dict(stats_array)
+        if instance == "all":
+            stats_list = [self.get_stats(p_num, stat=stat, instance=1)]
+            n = 2
+            while n <= len(Statistics.global_stats[p_num]):
+                stats_list.append(self.get_stats(p_num, stat=stat, instance=n))
+                n += 1
+            return stats_list
+        if instance > 0:
+            instance -= 1
+        stats_dict = Statistics.global_stats[p_num][instance]
         if stat is not None:
             return stats_dict[stat]
         else:
@@ -192,9 +189,10 @@ class Statistics(object):
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         slice_stats_after = self.calc_slice_stats(my_slice, base_slice, pad=pad)
         if base_slice:
-            slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
-            for key in list(self.stats_before_processing.keys()):
-                self.stats_before_processing[key].append(slice_stats_before[key])
+            #slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
+            #for key in list(self.stats_before_processing.keys()):
+            #    self.stats_before_processing[key].append(slice_stats_before[key])
+            pass
         for key in list(self.stats.keys()):
             self.stats[key].append(slice_stats_after[key])
 
@@ -219,6 +217,9 @@ class Statistics(object):
             slice_stats['RSS'] = rss
             return slice_stats
         return None
+
+    def count_zeros(self, my_slice):
+        return my_slice.size - np.count_nonzero(my_slice)
 
     def calc_rss(self, array1, array2):  # residual sum of squares # very slow needs looking at
         if array1.shape == array2.shape:
@@ -257,15 +258,19 @@ class Statistics(object):
         self.residuals['std_dev'].append(residuals['std_dev'])
 
     def calc_volume_stats(self, slice_stats):
-        volume_stats = np.array([max(slice_stats['max']), min(slice_stats['min']), np.mean(slice_stats['mean']),
-                                np.mean(slice_stats['std_dev']), np.median(slice_stats['std_dev'])])
+        slice_stats = slice_stats
+        volume_stats = {"max": max(slice_stats["max"]),
+                        "min": min(slice_stats["min"]),
+                        "mean": np.mean(slice_stats["mean"]),
+                        "mean_std_dev": np.mean(slice_stats["std_dev"]),
+                        "median_std_dev": np.median(slice_stats["std_dev"])}
         if None not in slice_stats['RSS']:
             total_rss = sum(slice_stats['RSS'])
             n = sum(slice_stats['data_points'])
             RMSD = self.rmsd_from_rss(total_rss, n)
             the_range = volume_stats[0] - volume_stats[1]
             NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
-            volume_stats = np.append(volume_stats, NRMSD)
+            volume_stats["NRMSD"] = NRMSD
         else:
             #volume_stats = np.append(volume_stats, None)
             pass
@@ -306,18 +311,17 @@ class Statistics(object):
             Statistics.plugin_names[p_num] = name
         Statistics.plugin_numbers[name] = p_num
         if len(self.stats['max']) != 0:
-            stats_array = self.calc_volume_stats(combined_stats)
+            stats_dict = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
             #before_processing = self.calc_volume_stats(self.stats_before_processing)
             #for key in list(before_processing.keys()):
             #    Statistics.global_residuals[p_num][key] = Statistics.global_stats[p_num][key] - before_processing[key]
 
             if len(Statistics.global_stats[p_num]) == 0:
-                Statistics.global_stats[p_num] = stats_array
+                Statistics.global_stats[p_num] = [stats_dict]
             else:
-                Statistics.global_stats[p_num] = np.vstack([Statistics.global_stats[p_num], stats_array])
+                Statistics.global_stats[p_num].append(stats_dict)
 
-            stats_dict = self._array_to_dict(stats_array)
             self._link_stats_to_datasets(stats_dict, self._iterative_group)
 
         if self._iterative_group:
@@ -353,11 +357,16 @@ class Statistics(object):
                 combined_stats[key] += single_stats[key]
         return combined_stats
 
-    def _array_to_dict(self, stats_array):
+    def _array_to_dict(self, stats_array, key_list=None):
+        if key_list is None:
+            key_list = Statistics._key_list
         stats_dict = {}
         for i, value in enumerate(stats_array):
-            stats_dict[Statistics._key_list[i]] = value
+            stats_dict[key_list[i]] = value
         return stats_dict
+
+    def _dict_to_array(self, stats_dict):
+        return np.array(list(stats_dict.values()))
 
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
@@ -395,8 +404,9 @@ class Statistics(object):
         while group_name in list(my_dataset.meta_data.get_dictionary().keys()):
             group_name = f"stats{i}"
             i += 1
-        for key in list(stats_dict.keys()):
-            my_dataset.meta_data.set([group_name, key], stats_dict[key])
+        for key, value in stats_dict.items():
+            my_dataset.meta_data.set([group_name, key], value)
+        print(self.get_stats_from_dataset(my_dataset))
 
     def _delete_stats_metadata(self, plugin):
         out_dataset = plugin.get_out_datasets()[0]
@@ -409,17 +419,21 @@ class Statistics(object):
             plugin_name = self.plugin_names[p_num]
         path = Statistics.path
         filename = f"{path}/stats.h5"
-        stats = self.global_stats[p_num]
+        stats_dict = self.get_stats(p_num, instance="all")
+        stats_array = self._dict_to_array(stats_dict[0])
+        for i, my_dict in enumerate(stats_dict):
+            if i != 0:
+                stats_array = np.vstack([stats_array, self._dict_to_array(my_dict)])
         self.hdf5 = Hdf5Utils(self.exp)
         self.exp._barrier(communicator=comm)
         if comm.rank == 0:
             with h5.File(filename, "a") as h5file:
                 group = h5file.require_group("stats")
-                if stats.shape != (0,):
+                if stats_array.shape != (0,):
                     if str(p_num) in list(group.keys()):
                         del group[str(p_num)]
-                    dataset = group.create_dataset(str(p_num), shape=stats.shape, dtype=stats.dtype)
-                    dataset[::] = stats[::]
+                    dataset = group.create_dataset(str(p_num), shape=stats_array.shape, dtype=stats_array.dtype)
+                    dataset[::] = stats_array[::]
                     dataset.attrs.create("plugin_name", plugin_name)
                     dataset.attrs.create("pattern", self.pattern)
                 if self._iterative_group:
