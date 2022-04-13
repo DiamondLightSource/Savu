@@ -22,18 +22,25 @@ from mpi4py import MPI
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     _no_stats_plugins = ["BasicOperations", "Mipmap", "UnetApply"]
-    _key_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
+    _key_list = {"max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros"}
+    _volume_to_slice = {"max": "max", "min": "min", "mean": "mean", "mean_std_dev": "std_dev",
+                        "median_std_dev": "std_dev", "NRMSD": ("RSS", "data_points", "max", "min"),
+                        "zeros": ("zeros", "data_points")}
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
     _has_setup = False
 
 
     def __init__(self):
+
         self.calc_stats = True
-        self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
         self.stats_before_processing = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self.residuals = {'max': [], 'min': [], 'mean': [], 'std_dev': []}
         self._repeat_count = 0
+        self.plugin = None
         self.p_num = None
+        self.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"]
+        self.slice_stats_list = None
+        self.stats = None
         self.GPU = False
         self._iterative_group = None
 
@@ -43,10 +50,12 @@ class Statistics(object):
         self.plugin_name = plugin_self.name
         self.p_num = Statistics.count
         self.plugin = plugin_self
+        self.stats_list = Statistics._key_list.intersection(self.stats_list)
+        self.slice_stats_list = set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in self.stats_list)))
+        self.stats = {stat: [] for stat in self.slice_stats_list}
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
-
             self._pad_dims = []
             self._already_called = False
             if pattern:
@@ -187,14 +196,14 @@ class Statistics(object):
         return stats
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
-        slice_stats_after = self.calc_slice_stats(my_slice, base_slice, pad=pad)
+        slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
         if base_slice:
             #slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
             #for key in list(self.stats_before_processing.keys()):
             #    self.stats_before_processing[key].append(slice_stats_before[key])
             pass
-        for key in list(self.stats.keys()):
-            self.stats[key].append(slice_stats_after[key])
+        for key, value in slice_stats.items():
+            self.stats[key].append(value)
 
     def calc_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Calculates and returns slice stats for the current slice.
@@ -206,19 +215,28 @@ class Statistics(object):
             my_slice = self._de_list(my_slice)
             if pad:
                 my_slice = self._unpad_slice(my_slice)
-            slice_stats = {'max': np.amax(my_slice).astype('float64'), 'min': np.amin(my_slice).astype('float64'),
-                           'mean': np.mean(my_slice), 'std_dev': np.std(my_slice), 'data_points': my_slice.size}
-            if base_slice is not None and self._RMSD:
+            slice_stats = {}
+            if "max" in self.slice_stats_list:
+                slice_stats["max"] = np.amax(my_slice).astype('float64')
+            if "min" in self.slice_stats_list:
+                slice_stats["min"] = np.amin(my_slice).astype('float64')
+            if "mean" in self.slice_stats_list:
+                slice_stats["mean"] = np.mean(my_slice)
+            if "std_dev" in self.slice_stats_list:
+                slice_stats["std_dev"] = np.std(my_slice)
+            if "zeros" in self.slice_stats_list:
+                slice_stats["zeros"] = self.calc_zeros(my_slice)
+            if "data_points" in self.slice_stats_list:
+                slice_stats["data_points"] = my_slice.size
+            if "RSS" in self.slice_stats_list and base_slice is not None:
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
-                rss = self.calc_rss(my_slice, base_slice)
-            else:
-                rss = None
-            slice_stats['RSS'] = rss
+                slice_stats["RSS"] = self.calc_rss(my_slice, base_slice)
             return slice_stats
         return None
 
-    def count_zeros(self, my_slice):
+    @staticmethod
+    def calc_zeros(my_slice):
         return my_slice.size - np.count_nonzero(my_slice)
 
     def calc_rss(self, array1, array2):  # residual sum of squares # very slow needs looking at
@@ -259,21 +277,26 @@ class Statistics(object):
 
     def calc_volume_stats(self, slice_stats):
         slice_stats = slice_stats
-        volume_stats = {"max": max(slice_stats["max"]),
-                        "min": min(slice_stats["min"]),
-                        "mean": np.mean(slice_stats["mean"]),
-                        "mean_std_dev": np.mean(slice_stats["std_dev"]),
-                        "median_std_dev": np.median(slice_stats["std_dev"])}
-        if None not in slice_stats['RSS']:
-            total_rss = sum(slice_stats['RSS'])
-            n = sum(slice_stats['data_points'])
+        volume_stats = {}
+        if "max" in self.stats_list:
+            volume_stats["max"] = max(slice_stats["max"])
+        if "min" in self.stats_list:
+            volume_stats["min"] = min(slice_stats["min"])
+        if "mean" in self.stats_list:
+            volume_stats["mean"] = np.mean(slice_stats["mean"])
+        if "mean_std_dev" in self.stats_list:
+            volume_stats["mean_std_dev"] = np.mean(slice_stats["std_dev"])
+        if "median_std_dev" in self.stats_list:
+            volume_stats["median_std_dev"] = np.median(slice_stats["std_dev"])
+        if "zeros" in self.stats_list:
+            volume_stats["zeros"] = sum(slice_stats["zeros"])
+        if "NRMSD" in self.stats_list and None not in slice_stats["RSS"]:
+            total_rss = sum(slice_stats["RSS"])
+            n = sum(slice_stats["data_points"])
             RMSD = self.rmsd_from_rss(total_rss, n)
-            the_range = volume_stats[0] - volume_stats[1]
+            the_range = volume_stats["max"] - volume_stats["min"]
             NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
             volume_stats["NRMSD"] = NRMSD
-        else:
-            #volume_stats = np.append(volume_stats, None)
-            pass
         return volume_stats
 
     def _set_loop_stats(self):
@@ -528,6 +551,15 @@ class Statistics(object):
             return tuple(slice_list), pad
         else:
             return self.plugin.slice_list[0], pad
+
+    def _flatten(self, l):
+        out = []
+        for item in l:
+            if isinstance(item, (list, tuple)):
+                out.extend(self._flatten(item))
+            else:
+                out.append(item)
+        return out
 
     def _de_list(self, slice1):
         """If the slice is in a list, remove it from that list."""

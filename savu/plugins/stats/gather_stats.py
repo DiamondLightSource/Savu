@@ -56,6 +56,7 @@ class GatherStats(Plugin, CpuPlugin):
 
         in_dataset, out_dataset = self.get_datasets()
         self.stats_obj.calc_stats = False
+        self.stats_obj.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "zeros"]
         in_pData, out_pData = self.get_plugin_datasets()
 
         # Each plugin dataset must call this method and define the data access
@@ -80,7 +81,7 @@ class GatherStats(Plugin, CpuPlugin):
     def post_process(self):
         slice_stats = self.stats_obj.stats
         volume_stats = self.stats_obj.calc_volume_stats(slice_stats)
-
+        print(volume_stats)
         if self.exp.meta_data.get("pre_run"):
             folder = self.exp.meta_data['out_path']
             fname = self.exp.meta_data.get('datafile_name') + '_with_stats.nxs'
