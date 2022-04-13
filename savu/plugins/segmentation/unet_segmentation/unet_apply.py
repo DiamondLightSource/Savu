@@ -48,6 +48,7 @@ class UnetApply(Plugin, GpuPlugin):
         return 1
 
     def setup(self):
+        self.stats_obj.calc_stats = False
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
@@ -94,7 +95,7 @@ class UnetApply(Plugin, GpuPlugin):
         if 'x' in flags:
             xmax = list(output_im.shape)[1]
             output_im = output_im[:, :xmax-1]
-        return output_im
+        return output_im.cpu().numpy()
 
     def post_process(self):
         pass
