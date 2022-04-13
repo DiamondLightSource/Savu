@@ -91,7 +91,6 @@ class Experiment(object):
         return self.index[dtype][name]
 
     def _setup(self, transport):
-        self.stats_run = True
         self._set_nxs_file()
         self._set_process_list_path()
         self._set_transport(transport)
@@ -215,7 +214,7 @@ class Experiment(object):
     def _add_input_data_to_nxs_file(self, transport):
         # save the loaded data to file
         h5 = Hdf5Utils(self)
-        if not self.stats_run:
+        if not self.meta_data.get("pre_run"):
             for name, data in self.index['in_data'].items():
                 self.meta_data.set(['link_type', name], 'input_data')
                 self.meta_data.set(['group_name', name], name)

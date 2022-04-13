@@ -169,7 +169,8 @@ class StatsUtils(object):
                     stats_dict[space]["time (s)"].append(group[key].attrs.get("time"))
 
         for plugin in list(group.keys()):
-            times_dict[plugin] = group[plugin].attrs.get("time")
+            if group[plugin].attrs.get("time") is not None:
+                times_dict[plugin] = group[plugin].attrs.get("time")
 
         return stats_dict, index_list, times_dict
 

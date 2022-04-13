@@ -72,7 +72,6 @@ class GatherStats(Plugin, CpuPlugin):
         # Access parameters from the doc string in the parameters dictionary
         # e.g. self.parameters['example']
         in_datasets = self.get_in_datasets()
-        self.stats_obj.plugin = self
 
     def process_frames(self, data):
         self.stats_obj.set_slice_stats(data, pad=False)
@@ -82,16 +81,17 @@ class GatherStats(Plugin, CpuPlugin):
         slice_stats = self.stats_obj.stats
         volume_stats = self.stats_obj.calc_volume_stats(slice_stats)
 
-        folder = self.exp.meta_data['out_path']
-        fname = self.exp.meta_data.get('datafile_name') + '_with_stats.nxs'
-        filename = os.path.join(folder, fname)
-
-        with h5.File(filename, "a") as h5file:
-            fsplit = self.exp.meta_data["data_path"].split("/")
-            fsplit[-1] = ""
-            stats_path = "/".join(fsplit)
-            stats_group = h5file.require_group(stats_path)
-            dataset = stats_group.create_dataset("stats", shape=volume_stats.shape, dtype=volume_stats.dtype)
-            dataset[::] = volume_stats[::]
+        if self.exp.meta_data.get("pre_run"):
+            folder = self.exp.meta_data['out_path']
+            fname = self.exp.meta_data.get('datafile_name') + '_with_stats.nxs'
+            filename = os.path.join(folder, fname)
+            stats_array = self.stats_obj._dict_to_array(volume_stats)
+            with h5.File(filename, "a") as h5file:
+                fsplit = self.exp.meta_data["data_path"].split("/")
+                fsplit[-1] = ""
+                stats_path = "/".join(fsplit)
+                stats_group = h5file.require_group(stats_path)
+                dataset = stats_group.create_dataset("stats", shape=stats_array.shape, dtype=stats_array.dtype)
+                dataset[::] = stats_array[::]
 
 

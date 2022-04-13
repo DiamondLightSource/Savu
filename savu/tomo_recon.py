@@ -49,6 +49,15 @@ def __option_parser(doc=True):
     parser.add_argument('--version', action='version', version=version)
     parser.add_argument("-f", "--folder", help="Override output folder name")
 
+    #subparsers = parser.add_subparsers()
+    #pre_run_parser = subparsers.add_parser("pre_run", help="Pre-run of savu to gather stats and cropping information.")
+    #pre_run_parser.add_argument('in_file', help='Input data file.')
+    #pre_run_parser.add_argument('out_folder', help='Output folder.')
+    #pre_run_parser.add_argument("--pre_run", help="Pre-run of savu to gather stats and cropping information.",
+    #                            action="store_true", default=True)
+    parser.add_argument("--pre_run", help="Pre-run of savu to gather stats and cropping information.",
+                        action="store_true", default=False)
+
     tmp_help = "Store intermediate files in a temp directory."
     parser.add_argument("-d", "--tmp", help=tmp_help)
 
@@ -158,6 +167,7 @@ def _set_options(args):
     options['femail'] = args.femail
     options['system_params'] = args.system_params
     options['stats'] = args.stats
+    options['pre_run'] = args.pre_run
 
     if args.folder:
         out_folder_name = os.path.basename(args.folder)
@@ -220,6 +230,10 @@ def main(input_args=None):
         args = input_args
 
     options = _set_options(args)
+
+    if options["pre_run"] == True:
+        options["process_file"] = 'savu/data/stats/gather_stats.nxs'
+
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     try:

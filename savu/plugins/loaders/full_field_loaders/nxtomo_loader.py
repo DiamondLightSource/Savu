@@ -61,12 +61,14 @@ class NxtomoLoader(BaseLoader):
         if stats_path in data_obj.backing_file:
             stats_obj = Statistics()
             stats_obj.p_num = 1
+            stats_obj.pattern = "PROJECTION"
             stats = data_obj.backing_file[stats_path]
-            Statistics.global_stats[1] = stats
-            Statistics.plugin_names[1] = "raw_data"
             stats_dict = stats_obj._array_to_dict(stats)
+            Statistics.global_stats[1] = [stats_dict]
+            Statistics.plugin_names[1] = "raw_data"
             for key in list(stats_dict.keys()):
                 data_obj.meta_data.set(["stats", key], stats_dict[key])
+            stats_obj._write_stats_to_file(p_num=1, plugin_name="raw_data")
 
         self._set_dark_and_flat(data_obj)
 
