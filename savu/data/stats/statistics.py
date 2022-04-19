@@ -98,7 +98,6 @@ class Statistics(object):
         cls.plugin_numbers = {}
         cls.plugin_names = {}
         cls._loop_counter = 0
-        cls._RMSD = False
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -247,7 +246,7 @@ class Statistics(object):
             rss = 0
             #for value in (np.nditer(residuals)):
             #    rss += value**2
-            rss = np.sum(value**2 for value in np.nditer(residuals))
+            rss = np.sum(residuals.flatten() ** 2)
         else:
             #print("Warning: cannot calculate RSS, arrays different sizes.")
             rss = None
@@ -472,6 +471,7 @@ class Statistics(object):
                     dataset.attrs.create("plugin_name", plugin_name)
                     dataset.attrs.create("pattern", self.pattern)
                     dataset.attrs.create("stats_list", stats_list)
+                    print(stats_list)
                 if self._iterative_group:
                     l_stats = Statistics.loop_stats[self.l_num]
                     group1 = h5file.require_group("iterative")
