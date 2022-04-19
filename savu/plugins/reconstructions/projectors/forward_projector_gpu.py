@@ -49,7 +49,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        in_pData[0].plugin_data_setup('VOLUME_XZ', 'multiple')
 
         in_meta_data = self.get_in_meta_data()[0]
         # extracting parameters from metadata
@@ -90,14 +90,13 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         out_dataset[0].meta_data.set('rotation_angle', copy.deepcopy(angles_meta_deg))
 
     def process_frames(self, data):
-        image = data[0].astype(np.float32)
-        image = np.where(np.isfinite(image), image, 0)
-        image_size = np.shape(image)[0]
+        object = data[0].astype(np.float32)
+        object = np.where(np.isfinite(object), object, 0)
+        object_size = np.shape(object)[0]
         vert_size = None # 2D case
-        gpu_device_index = 'gpu'
         # dealing with 3D data case
-        if image.ndim == 3:
-            vert_size = np.shape(image)[1]
+        if object.ndim == 3:
+            vert_size = np.shape(object)[1]
             iterate_group = check_if_in_iterative_loop(self.exp)
             gpu_device_index = self.parameters['GPU_index']
             if iterate_group is None:
@@ -121,14 +120,14 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                   DetectorsDimV=vert_size,  # DetectorsDimV # detector dimension (vertical)
                                   CenterRotOffset=cor,  # Center of Rotation
                                   AnglesVec=self.angles_rad,  # array of angles in radians
-                                  ObjSize=image_size,  # a scalar to define reconstructed object dimensions
+                                  ObjSize=object_size,  # a scalar to define reconstructed object dimensions
                                   device_projector=gpu_device_index)
         if vert_size is not None:
-            sinogram_new = RectoolsDIR.FORWPROJ(np.swapaxes(image, 0, 1))
-            sinogram_new = np.swapaxes(sinogram_new, 0, 1)
+            projected = RectoolsDIR.FORWPROJ(np.ascontiguousarray(np.swapaxes(object, 0, 1)))
+            projected = np.swapaxes(projected, 0, 1)
         else:
-            sinogram_new = RectoolsDIR.FORWPROJ(image)
-        return sinogram_new
+            projected = RectoolsDIR.FORWPROJ(np.ascontiguousarray(object))
+        return projected
 
     def new_shape(self, full_shape, data):
         # calculate a new output data shape based on the input data shape
