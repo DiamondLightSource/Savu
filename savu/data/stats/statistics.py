@@ -84,7 +84,7 @@ class Statistics(object):
         cls.plugin_numbers = {}
         cls.plugin_names = {}
         cls._loop_counter = 0
-        cls._RMSD = True
+        cls._RMSD = False
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
