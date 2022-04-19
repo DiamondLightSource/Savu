@@ -168,6 +168,7 @@ class StatsUtils(object):
                             else:
                                 stats_dict[space][stat].append(None)
                         elif group[p_num].ndim == 2:
+                            stats_list = list(group[p_num].attrs.get("stats_list"))
                             if stat in stats_list:
                                 stats_dict[space][stat].append(group[p_num][:, stats_list.index(stat)])
                             else:
