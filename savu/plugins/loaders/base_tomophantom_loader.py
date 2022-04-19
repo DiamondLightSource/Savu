@@ -49,20 +49,12 @@ class BaseTomophantomLoader(BaseLoader):
 
         self.proj_stats_obj = Statistics()
         self.proj_stats_obj.start_time()
-        self.proj_stats_obj.plugin = self
-        self.proj_stats_obj.pattern = "PROJECTION"
-        self.proj_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.proj_stats_obj.setup(self, pattern="PROJECTION")
         self.proj_stats_obj.p_num = 1
-        self.proj_stats_obj._iterative_group = None
-        self.proj_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
         self.phantom_stats_obj = Statistics()
-        self.phantom_stats_obj.plugin = self
-        self.phantom_stats_obj.pattern = "VOLUME_XY"
-        self.phantom_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.phantom_stats_obj.setup(self, pattern="VOLUME_XY")
         self.phantom_stats_obj.p_num = 0
-        self.phantom_stats_obj._iterative_group = None
-        self.phantom_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
         self.proj_stats_obj.plugin_names[1] = "TomoPhantomLoader"  # This object belongs to the whole statistics class
         self.proj_stats_obj.plugin_numbers["TomoPhantomLoader"] = 1  # This object belongs to the whole statistics class

@@ -49,8 +49,15 @@ class StatsUtils(object):
 
     @staticmethod
     def make_stats_table(stats_dict, index_list, savepath):
-        p_stats = pd.DataFrame(stats_dict["projection"], index_list["projection"])
-        r_stats = pd.DataFrame(stats_dict["reconstruction"], index_list["reconstruction"])
+        stats_dict_copy = {}
+        for space, value in stats_dict.items():
+            stats_dict_copy[space] = value.copy()
+        for stat in list(stats_dict["projection"].keys()):
+            if all(value is None for value in stats_dict["projection"][stat]) and all(value is None for value in stats_dict["reconstruction"][stat]):
+                del stats_dict_copy["projection"][stat]
+                del stats_dict_copy["reconstruction"][stat]
+        p_stats = pd.DataFrame(stats_dict_copy["projection"], index_list["projection"])
+        r_stats = pd.DataFrame(stats_dict_copy["reconstruction"], index_list["reconstruction"])
         all_stats = pd.concat([p_stats, r_stats], keys=["Projection", "Reconstruction"])
         all_stats.to_html(savepath)  # create table of stats for all plugins
 
@@ -139,9 +146,9 @@ class StatsUtils(object):
     def _get_dicts_for_graphs(file):
         stats_dict = {}
         stats_dict["projection"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                    "NRMSD": [], "time (s)": []}
+                                    "NRMSD": [], "zeros": [], "zeros%": [], "time (s)": []}
         stats_dict["reconstruction"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                        "NRMSD": [], "time (s)": []}
+                                        "NRMSD": [], "zeros": [], "zeros%": [], "time (s)": []}
 
         index_list = {"projection": [], "reconstruction": []}
 
@@ -149,24 +156,25 @@ class StatsUtils(object):
 
         group = file["stats"]
         for space in ("projection", "reconstruction"):
-            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]):
-                for key in list(group.keys()):
-                    if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
-                        if f"{key}: {group[key].attrs.get('plugin_name')}" not in index_list[space]:
-                            index_list[space].append(f"{key}: {group[key].attrs.get('plugin_name')}")
-                        if group[key].ndim == 1:
-                            if len(group[key]) > index:
-                                stats_dict[space][stat].append(group[key][index])
+            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "zeros%"]):
+                for p_num in list(group.keys()):
+                    if group[p_num].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
+                        if f"{p_num}: {group[p_num].attrs.get('plugin_name')}" not in index_list[space]:
+                            index_list[space].append(f"{p_num}: {group[p_num].attrs.get('plugin_name')}")
+                        if group[p_num].ndim == 1:
+                            stats_list = list(group[p_num].attrs.get("stats_list"))
+                            if stat in stats_list:
+                                stats_dict[space][stat].append(group[p_num][stats_list.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
-                        elif group[key].ndim == 2:
-                            if len(group[key][0]) > index:
-                                stats_dict[space][stat].append(group[key][:, index])
+                        elif group[p_num].ndim == 2:
+                            if stat in stats_list:
+                                stats_dict[space][stat].append(group[p_num][:, stats_list.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
-            for key in list(group.keys()):
-                if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
-                    stats_dict[space]["time (s)"].append(group[key].attrs.get("time"))
+            for p_num in list(group.keys()):
+                if group[p_num].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
+                    stats_dict[space]["time (s)"].append(group[p_num].attrs.get("time"))
 
         for plugin in list(group.keys()):
             if group[plugin].attrs.get("time") is not None:

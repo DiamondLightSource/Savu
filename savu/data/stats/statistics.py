@@ -22,10 +22,10 @@ from mpi4py import MPI
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     _no_stats_plugins = ["BasicOperations", "Mipmap", "UnetApply"]
-    _key_list = {"max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros"}
+    _possible_stats = {"max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "range_used"}  # list of possible stats
     _volume_to_slice = {"max": "max", "min": "min", "mean": "mean", "mean_std_dev": "std_dev",
                         "median_std_dev": "std_dev", "NRMSD": ("RSS", "data_points", "max", "min"),
-                        "zeros": ("zeros", "data_points")}
+                        "zeros": ("zeros", "data_points"), "range_used": ("min", "max")}  # volume stat: required slice stat(s)
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
     _has_setup = False
 
@@ -38,7 +38,7 @@ class Statistics(object):
         self._repeat_count = 0
         self.plugin = None
         self.p_num = None
-        self.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"]
+        self.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"] # These are the stats calculated by default
         self.slice_stats_list = None
         self.stats = None
         self.GPU = False
@@ -50,7 +50,7 @@ class Statistics(object):
         self.plugin_name = plugin_self.name
         self.p_num = Statistics.count
         self.plugin = plugin_self
-        self.stats_list = Statistics._key_list.intersection(self.stats_list)
+        self.stats_list = Statistics._possible_stats.intersection(self.stats_list)
         self.slice_stats_list = set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in self.stats_list)))
         self.stats = {stat: [] for stat in self.slice_stats_list}
         if plugin_self.name in Statistics._no_stats_plugins:
@@ -58,7 +58,7 @@ class Statistics(object):
         if self.calc_stats:
             self._pad_dims = []
             self._already_called = False
-            if pattern:
+            if pattern is not None:
                 self.pattern = pattern
             else:
                 self._set_pattern_info()
@@ -232,6 +232,8 @@ class Statistics(object):
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
                 slice_stats["RSS"] = self.calc_rss(my_slice, base_slice)
+            if "dtype" not in self.stats:
+                self.stats["dtype"] = my_slice.dtype
             return slice_stats
         return None
 
@@ -290,6 +292,17 @@ class Statistics(object):
             volume_stats["median_std_dev"] = np.median(slice_stats["std_dev"])
         if "zeros" in self.stats_list:
             volume_stats["zeros"] = sum(slice_stats["zeros"])
+            volume_stats["zeros%"] = (volume_stats["zeros"] / sum(slice_stats["data_points"])) * 100
+        if "range_used" in self.stats_list:
+            my_range = volume_stats["max"] - volume_stats["min"]
+            if "int" in str(self.stats["dtype"]):
+                possible_max = np.iinfo(self.stats["dtype"]).max
+                possible_min = np.iinfo(self.stats["dtype"]).min
+            elif "float" in str(self.stats["dtype"]):
+                possible_max = np.finfo(self.stats["dtype"]).max
+                possible_min = np.finfo(self.stats["dtype"]).min
+            possible_range = possible_max - possible_min
+            volume_stats["range_used"] = (my_range / possible_range) * 100
         if "NRMSD" in self.stats_list and None not in slice_stats["RSS"]:
             total_rss = sum(slice_stats["RSS"])
             n = sum(slice_stats["data_points"])
@@ -355,7 +368,7 @@ class Statistics(object):
         self._already_called = True
         self._repeat_count += 1
         if self._iterative_group:
-            self.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+            self.stats = {stat: [] for stat in self.slice_stats_list}
 
     def start_time(self):
         self.t0 = time.time()
@@ -374,15 +387,15 @@ class Statistics(object):
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         combined_stats_list = comm.allgather(slice_stats)
-        combined_stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
+        combined_stats = {stat: [] for stat in self.slice_stats_list}
         for single_stats in combined_stats_list:
-            for key in list(single_stats.keys()):
+            for key in self.slice_stats_list:
                 combined_stats[key] += single_stats[key]
         return combined_stats
 
     def _array_to_dict(self, stats_array, key_list=None):
         if key_list is None:
-            key_list = Statistics._key_list
+            key_list = self.stats_list
         stats_dict = {}
         for i, value in enumerate(stats_array):
             stats_dict[key_list[i]] = value
@@ -423,13 +436,11 @@ class Statistics(object):
 
         i = 2
         group_name = "stats"
-        #out_dataset.data_info.set([group_name], stats)
         while group_name in list(my_dataset.meta_data.get_dictionary().keys()):
             group_name = f"stats{i}"
             i += 1
         for key, value in stats_dict.items():
             my_dataset.meta_data.set([group_name, key], value)
-        print(self.get_stats_from_dataset(my_dataset))
 
     def _delete_stats_metadata(self, plugin):
         out_dataset = plugin.get_out_datasets()[0]
@@ -444,6 +455,7 @@ class Statistics(object):
         filename = f"{path}/stats.h5"
         stats_dict = self.get_stats(p_num, instance="all")
         stats_array = self._dict_to_array(stats_dict[0])
+        stats_list = list(stats_dict[0].keys())
         for i, my_dict in enumerate(stats_dict):
             if i != 0:
                 stats_array = np.vstack([stats_array, self._dict_to_array(my_dict)])
@@ -459,6 +471,7 @@ class Statistics(object):
                     dataset[::] = stats_array[::]
                     dataset.attrs.create("plugin_name", plugin_name)
                     dataset.attrs.create("pattern", self.pattern)
+                    dataset.attrs.create("stats_list", stats_list)
                 if self._iterative_group:
                     l_stats = Statistics.loop_stats[self.l_num]
                     group1 = h5file.require_group("iterative")
