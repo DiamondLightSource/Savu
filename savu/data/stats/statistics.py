@@ -50,8 +50,7 @@ class Statistics(object):
         self.plugin_name = plugin_self.name
         self.p_num = Statistics.count
         self.plugin = plugin_self
-        self.stats_list = Statistics._possible_stats.intersection(self.stats_list)
-        self.slice_stats_list = set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in self.stats_list)))
+        self.set_stats_list(self.stats_list)
         self.stats = {stat: [] for stat in self.slice_stats_list}
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
@@ -77,13 +76,10 @@ class Statistics(object):
     @classmethod
     def _setup_class(cls, exp):
         """Sets up the statistics class for the whole plugin chain (only called once)"""
-        try:
-            if exp.meta_data.get("stats") == "on":
-                cls._stats_flag = True
-            elif exp.meta_data.get("stats") == "off":
-                cls._stats_flag = False
-        except KeyError:
+        if exp.meta_data.get("stats") == "on":
             cls._stats_flag = True
+        elif exp.meta_data.get("stats") == "off":
+            cls._stats_flag = False
         cls._any_stats = False
         cls.exp = exp
         cls.count = 2
@@ -194,6 +190,11 @@ class Statistics(object):
             stats = stats_list[instance]
         return stats
 
+    def set_stats_list(self, stats_list):
+        stats_list = Statistics._possible_stats.intersection(stats_list)
+        self.stats_list = stats_list
+        self.slice_stats_list = set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in self.stats_list)))
+
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
         if base_slice:
@@ -201,9 +202,11 @@ class Statistics(object):
             #for key in list(self.stats_before_processing.keys()):
             #    self.stats_before_processing[key].append(slice_stats_before[key])
             pass
-        for key, value in slice_stats.items():
-            self.stats[key].append(value)
-
+        if slice_stats is not None:
+            for key, value in slice_stats.items():
+                self.stats[key].append(value)
+        else:
+            self.calc_stats = False
     def calc_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Calculates and returns slice stats for the current slice.
 
@@ -358,12 +361,7 @@ class Statistics(object):
                 Statistics.global_stats[p_num].append(stats_dict)
 
             self._link_stats_to_datasets(stats_dict, self._iterative_group)
-
-        if self._iterative_group:
-            if self._iterative_group.end_index == p_num and self._iterative_group._ip_iteration != 0:
-                #self._set_loop_stats()
-                pass
-        self._write_stats_to_file(p_num, comm=comm)
+            self._write_stats_to_file(p_num, comm=comm)
         self._already_called = True
         self._repeat_count += 1
         if self._iterative_group:
@@ -419,10 +417,9 @@ class Statistics(object):
                     if 1 in patterns.get(pattern)["slice_dims"]:
                         self.pattern = pattern
                         break
-        self.calc_stats = False
-        for dataset in out_datasets:
-            if bool(set(Statistics._pattern_list) & set(dataset.data_info.get("data_patterns"))):
-                self.calc_stats = True
+                self.pattern = None
+        if self.pattern not in Statistics._pattern_list:
+            self.calc_stats = False
 
     def _link_stats_to_datasets(self, stats_dict, iterative=False):
         """Links the volume wide statistics to the output dataset(s)"""
