@@ -3,7 +3,7 @@
 {% block title %}Projection 2D Alignment{% endblock %}
 
 {% block description %}
-A plugin to calculate horizontal-vertical shift vectors for fixing misaligned projection data by comparing with the re-projected data 
+A plugin to perform alignment (registration) if two images, e.g. two projections. The result is horizontal-vertical shift vectors written into the experimental metadata. 
 {% endblock %}
 
 {% block parameter_yaml %}
@@ -11,7 +11,7 @@ A plugin to calculate horizontal-vertical shift vectors for fixing misaligned pr
         in_datasets:
             visibility: datasets
             dtype: "[list[],list[str]]"
-            description: Default input dataset names.
+            description: "Two datasets to register to each other, given as [static_reference, dataset_to_register_to_reference]. The order of datasets in the list is important to avoid divergence in the iterative alignment method."
             default: "[]"
         
         out_datasets:
