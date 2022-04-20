@@ -56,7 +56,7 @@ class GatherStats(Plugin, CpuPlugin):
 
         in_dataset, out_dataset = self.get_datasets()
         self.stats_obj.calc_stats = False
-        self.stats_obj.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "zeros", "range_used"]
+        self.stats_obj.set_stats_list(["max", "min", "mean", "mean_std_dev", "median_std_dev", "zeros", "range_used"])
         in_pData, out_pData = self.get_plugin_datasets()
 
         # Each plugin dataset must call this method and define the data access

@@ -64,8 +64,9 @@ class Plugin(PluginDatasets):
         self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.stats_obj = Statistics()
+        self.stats_obj.set_stats_list(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros",
+                                       "range_used"])
         self.setup()
-        self.stats_obj.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "range_used"]
         self.stats_obj.setup(self)
         self.set_filter_padding(*(self.get_plugin_datasets()))
         self._finalise_plugin_datasets()
