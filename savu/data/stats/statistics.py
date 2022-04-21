@@ -468,7 +468,6 @@ class Statistics(object):
                     dataset.attrs.create("plugin_name", plugin_name)
                     dataset.attrs.create("pattern", self.pattern)
                     dataset.attrs.create("stats_list", stats_list)
-                    print(stats_list)
                 if self._iterative_group:
                     l_stats = Statistics.loop_stats[self.l_num]
                     group1 = h5file.require_group("iterative")
