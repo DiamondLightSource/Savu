@@ -18,3 +18,7 @@
     padding: 6px;
     position:relative
 }
+iframe {
+    display: block;
+    margin: auto;
+}
