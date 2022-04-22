@@ -24,6 +24,7 @@
 import re
 import sys
 import logging
+from pathlib import Path
 from . import hdf_utils as hu
 
 from colorama import Fore

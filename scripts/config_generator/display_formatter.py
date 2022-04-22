@@ -410,6 +410,9 @@ class DispDisplay(ParameterFormatter):
         params = self._get_param_details(
             level, p_dict, width, display_args, desc=param_desc
         )
+        info, warn = self._get_extra_info(
+            p_dict, width, colour_off, colour_on, colour_on
+        )
         if breakdown:
             params = self._get_param_details(
                 level,
@@ -420,7 +423,7 @@ class DispDisplay(ParameterFormatter):
                 breakdown=breakdown,
             )
             return title, synopsis, params
-        return title + synopsis + params
+        return title + synopsis + info + params
 
     def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
         title, synopsis, param_details = self._get_verbose(
