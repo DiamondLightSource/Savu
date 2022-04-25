@@ -225,10 +225,12 @@ class Experiment(object):
             for name, data in self.index["in_data"].items():
                 raw_data = data.backing_file
                 folder = self.meta_data['out_path']
-                fname = self.meta_data.get('datafile_name') + '_with_stats.nxs'
+                fname = self.meta_data.get('datafile_name') + '_pre_run.nxs'
                 filename = os.path.join(folder, fname)
+                self.meta_data.set("pre_run_filename", filename)
                 with h5py.File(filename, "w") as new_file:
-                    raw_data.copy(raw_data["/entry1"], new_file["/"], "entry1")
+                    for group_name in raw_data.keys():
+                        raw_data.copy(raw_data[group_name], new_file["/"], group_name)
 
     def _set_dataset_names_complete(self):
         """ Missing in/out_datasets fields have been populated

@@ -96,10 +96,11 @@ class MPI_setup(object):
         log_dir = self.__get_log_directory(options)
         filename = os.path.join(log_dir, 'log.txt')
         level = cu._get_log_level(options)
-        self.__set_logger(level, log_format, fname=filename)
-        cu.add_user_log_level()
-        self.__add_user_logging(options)
-        self.__add_console_logging()
+        if not options["post_pre_run"]:
+            self.__set_logger(level, log_format, fname=filename)
+            cu.add_user_log_level()
+            self.__add_user_logging(options)
+            self.__add_console_logging()
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.

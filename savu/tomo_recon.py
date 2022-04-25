@@ -231,12 +231,18 @@ def main(input_args=None):
 
     options = _set_options(args)
 
-    if options["pre_run"] == True:
-        options["process_file"] = 'savu/data/stats/gather_stats.nxs'
 
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
-
     try:
+        options["post_pre_run"] = False
+        if options["pre_run"]:
+            pre_run_options = options.copy()
+            pre_run_options["process_file"] = 'savu/data/stats/gather_stats.nxs'
+            pre_plugin_runner = pRunner(pre_run_options)
+            pre_plugin_runner._run_plugin_list()
+            options["data_file"] = pre_plugin_runner.exp.meta_data.get("pre_run_filename")
+            options["pre_run"] = False
+            options["post_pre_run"] = True
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
         if options['process'] == 0:
