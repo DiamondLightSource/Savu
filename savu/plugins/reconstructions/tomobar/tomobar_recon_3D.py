@@ -138,7 +138,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         half_det_width = 0.5 * self.Horiz_det
         projdata3D[projdata3D > 10 ** 15] = 0.0
-        projdata3D = np.swapaxes(projdata3D, 0, 1)
+        projdata3D = np.require(np.swapaxes(projdata3D, 0, 1), requirements='CA')
         self._data_.update({'projection_norm_data': projdata3D})
 
         # dealing with projection shifts and the CoR
@@ -181,7 +181,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
         if self.parameters['reconstruction_method'] == 'FISTA3D':
             if self.parameters['regularisation_method'] == 'PD_TV':
-	            self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})
+                self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})
             # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
             if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
                 rawdata3D = data[1].astype(np.float32)
@@ -191,9 +191,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                 self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
             # Run FISTA reconstruction algorithm here
             recon = RectoolsIter.FISTA(self._data_, self._algorithm_, self._regularisation_)
-
-        recon = np.swapaxes(recon, 0, 1)
-        return recon
+        return np.require(np.swapaxes(recon, 0, 1), requirements='CA')
 
     def nInput_datasets(self):
         return max(len(self.parameters['in_datasets']), 1)

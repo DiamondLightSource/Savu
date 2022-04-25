@@ -113,20 +113,22 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                 # update projection_shifts from experimental metadata
                 self.projection_shifts = \
                     self.exp.meta_data.dict['projection_shifts']
-            cor = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts
+            cor = np.zeros((np.shape(self.projection_shifts)))
+            cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts[:, 0]
+            cor[:, 1] = -self.projection_shifts[:, 1] - 0.5
         else:
             cor = (-self.cor + self.det_horiz_half - 0.5)
-        RectoolsDIR = RecToolsDIR(DetectorsDimH=self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
+        RectoolsDIRECT = RecToolsDIR(DetectorsDimH=self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
                                   DetectorsDimV=vert_size,  # DetectorsDimV # detector dimension (vertical)
                                   CenterRotOffset=cor,  # Center of Rotation
                                   AnglesVec=self.angles_rad,  # array of angles in radians
                                   ObjSize=object_size,  # a scalar to define reconstructed object dimensions
                                   device_projector=gpu_device_index)
         if vert_size is not None:
-            projected = RectoolsDIR.FORWPROJ(np.ascontiguousarray(np.swapaxes(object, 0, 1)))
-            projected = np.swapaxes(projected, 0, 1)
+            projected = RectoolsDIRECT.FORWPROJ(np.require(np.swapaxes(object, 0, 1), requirements='CA'))
+            projected = np.require(np.swapaxes(projected, 0, 1), requirements='CA')
         else:
-            projected = RectoolsDIR.FORWPROJ(np.ascontiguousarray(object))
+            projected = RectoolsDIRECT.FORWPROJ(object)
         return projected
 
     def new_shape(self, full_shape, data):
