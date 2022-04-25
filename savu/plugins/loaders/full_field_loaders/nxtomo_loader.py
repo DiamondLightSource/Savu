@@ -63,6 +63,7 @@ class NxtomoLoader(BaseLoader):
             stats_obj.p_num = 1
             stats_obj.pattern = "PROJECTION"
             stats = data_obj.backing_file[stats_path]
+            stats_obj.stats_list = list(stats.attrs.get("stats_list"))
             stats_dict = stats_obj._array_to_dict(stats)
             Statistics.global_stats[1] = [stats_dict]
             Statistics.plugin_names[1] = "raw_data"

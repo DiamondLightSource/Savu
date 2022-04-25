@@ -17,15 +17,16 @@ import h5py as h5
 import numpy as np
 import os
 from mpi4py import MPI
-
+from collections import OrderedDict
 
 class Statistics(object):
     _pattern_list = ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D", "4D_SCAN", "SINOMOVIE"]
     _no_stats_plugins = ["BasicOperations", "Mipmap", "UnetApply"]
-    _possible_stats = {"max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "range_used"}  # list of possible stats
+    _possible_stats = ("max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "zeros%", "range_used")  # list of possible stats
     _volume_to_slice = {"max": "max", "min": "min", "mean": "mean", "mean_std_dev": "std_dev",
                         "median_std_dev": "std_dev", "NRMSD": ("RSS", "data_points", "max", "min"),
-                        "zeros": ("zeros", "data_points"), "range_used": ("min", "max")}  # volume stat: required slice stat(s)
+                        "zeros": ("zeros", "data_points"), "zeros%": ("zeros", "data_points"),
+                        "range_used": ("min", "max")}  # volume stat: required slice stat(s)
     #_savers = ["Hdf5Saver", "ImageSaver", "MrcSaver", "TiffSaver", "XrfSaver"]
     _has_setup = False
 
@@ -191,9 +192,10 @@ class Statistics(object):
         return stats
 
     def set_stats_list(self, stats_list):
-        stats_list = Statistics._possible_stats.intersection(stats_list)
+        valid = Statistics._possible_stats
+        stats_list = sorted(set(valid).intersection(stats_list), key=lambda stat: valid.index(stat))
         self.stats_list = stats_list
-        self.slice_stats_list = set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in self.stats_list)))
+        self.slice_stats_list = list(set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in stats_list))))
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
@@ -292,8 +294,16 @@ class Statistics(object):
             volume_stats["mean_std_dev"] = np.mean(slice_stats["std_dev"])
         if "median_std_dev" in self.stats_list:
             volume_stats["median_std_dev"] = np.median(slice_stats["std_dev"])
+        if "NRMSD" in self.stats_list and None not in slice_stats["RSS"]:
+            total_rss = sum(slice_stats["RSS"])
+            n = sum(slice_stats["data_points"])
+            RMSD = self.rmsd_from_rss(total_rss, n)
+            the_range = volume_stats["max"] - volume_stats["min"]
+            NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
+            volume_stats["NRMSD"] = NRMSD
         if "zeros" in self.stats_list:
             volume_stats["zeros"] = sum(slice_stats["zeros"])
+        if "zeros%" in self.stats_list:
             volume_stats["zeros%"] = (volume_stats["zeros"] / sum(slice_stats["data_points"])) * 100
         if "range_used" in self.stats_list:
             my_range = volume_stats["max"] - volume_stats["min"]
@@ -305,13 +315,6 @@ class Statistics(object):
                 possible_min = np.finfo(self.stats["dtype"]).min
             possible_range = possible_max - possible_min
             volume_stats["range_used"] = (my_range / possible_range) * 100
-        if "NRMSD" in self.stats_list and None not in slice_stats["RSS"]:
-            total_rss = sum(slice_stats["RSS"])
-            n = sum(slice_stats["data_points"])
-            RMSD = self.rmsd_from_rss(total_rss, n)
-            the_range = volume_stats["max"] - volume_stats["min"]
-            NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
-            volume_stats["NRMSD"] = NRMSD
         return volume_stats
 
     def _set_loop_stats(self):
