@@ -6,6 +6,7 @@
 .. moduleauthor::Jacob Williamson <scientificsoftware@diamond.ac.uk>
 
 """
+import logging
 
 from savu.plugins.savers.utils.hdf5_utils import Hdf5Utils
 from savu.data.stats.stats_utils import StatsUtils
@@ -199,16 +200,12 @@ class Statistics(object):
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
-        if base_slice:
-            #slice_stats_before = self.calc_slice_stats(base_slice, pad=pad)
-            #for key in list(self.stats_before_processing.keys()):
-            #    self.stats_before_processing[key].append(slice_stats_before[key])
-            pass
         if slice_stats is not None:
             for key, value in slice_stats.items():
                 self.stats[key].append(value)
         else:
             self.calc_stats = False
+
     def calc_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Calculates and returns slice stats for the current slice.
 
@@ -245,19 +242,18 @@ class Statistics(object):
     def calc_zeros(my_slice):
         return my_slice.size - np.count_nonzero(my_slice)
 
-    def calc_rss(self, array1, array2):  # residual sum of squares # very slow needs looking at
+    @staticmethod
+    def calc_rss(array1, array2):  # residual sum of squares # Need to benchmark
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
-            rss = 0
-            #for value in (np.nditer(residuals)):
-            #    rss += value**2
             rss = np.sum(residuals.flatten() ** 2)
         else:
-            #print("Warning: cannot calculate RSS, arrays different sizes.")
+            logging.debug("Cannot calculate RSS, arrays different sizes.")
             rss = None
         return rss
 
-    def rmsd_from_rss(self, rss, n):
+    @staticmethod
+    def rmsd_from_rss(rss, n):
         return np.sqrt(rss/n)
 
     def calc_rmsd(self, array1, array2):
@@ -265,7 +261,7 @@ class Statistics(object):
             rss = self.calc_rss(array1, array2)
             rmsd = self.rmsd_from_rss(rss, array1.size)
         else:
-            print("Warning: cannot calculate RMSD, arrays different sizes.")  # need to make this an actual warning
+            logging.error("Cannot calculate RMSD, arrays different sizes.")
             rmsd = None
         return rmsd
 
@@ -310,9 +306,13 @@ class Statistics(object):
             if "int" in str(self.stats["dtype"]):
                 possible_max = np.iinfo(self.stats["dtype"]).max
                 possible_min = np.iinfo(self.stats["dtype"]).min
+                self.stats["possible_max"] = possible_max
+                self.stats["possible_min"] = possible_min
             elif "float" in str(self.stats["dtype"]):
                 possible_max = np.finfo(self.stats["dtype"]).max
                 possible_min = np.finfo(self.stats["dtype"]).min
+                self.stats["possible_max"] = possible_max
+                self.stats["possible_min"] = possible_min
             possible_range = possible_max - possible_min
             volume_stats["range_used"] = (my_range / possible_range) * 100
         return volume_stats

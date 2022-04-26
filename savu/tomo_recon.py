@@ -235,19 +235,26 @@ def main(input_args=None):
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
     try:
         options["post_pre_run"] = False
+        answer = "Y"
         if options["pre_run"]:
             pre_run_options = options.copy()
-            pre_run_options["process_file"] = 'savu/data/stats/gather_stats.nxs'
+            pre_run_options["process_file"] = 'savu/data/stats/pre_run.nxs'
+            pre_run_options["process_file_name"] = pre_run_options["process_file"].split("/")[-1]
             pre_plugin_runner = pRunner(pre_run_options)
             pre_plugin_runner._run_plugin_list()
+            pre_plugin_runner.exp._save_pre_run_log()
             options["data_file"] = pre_plugin_runner.exp.meta_data.get("pre_run_filename")
             options["pre_run"] = False
             options["post_pre_run"] = True
-        plugin_runner = pRunner(options)
-        plugin_runner._run_plugin_list()
-        if options['process'] == 0:
-            in_file = plugin_runner.exp.meta_data['nxs_filename']
-            citation_extractor.main(in_file=in_file, quiet=True)
+            while answer not in ("y", "N"):
+                cu.user_message("Pre-run complete. See run_log/pre_run_log.txt for details. Do you want to continue? [y/N]")
+                answer = input()
+        if answer in ("y", "Y"):
+            plugin_runner = pRunner(options)
+            plugin_runner._run_plugin_list()
+            if options['process'] == 0:
+                in_file = plugin_runner.exp.meta_data['nxs_filename']
+                citation_extractor.main(in_file=in_file, quiet=True)
     except Exception:
         # raise the error in the user log
         trace = traceback.format_exc()

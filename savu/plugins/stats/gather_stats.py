@@ -82,8 +82,11 @@ class GatherStats(Plugin, CpuPlugin):
     def post_process(self):
         slice_stats = self.stats_obj.stats
         volume_stats = self.stats_obj.calc_volume_stats(slice_stats)
-        print(volume_stats)
         if self.exp.meta_data.get("pre_run"):
+
+            self._generate_warnings(volume_stats)
+            self.exp.meta_data.set("pre_process_stats", volume_stats)
+
             folder = self.exp.meta_data['out_path']
             fname = self.exp.meta_data.get('datafile_name') + '_pre_run.nxs'
             filename = os.path.join(folder, fname)
@@ -97,4 +100,12 @@ class GatherStats(Plugin, CpuPlugin):
                 dataset[::] = stats_array[::]
                 dataset.attrs.create("stats_list", list(self.stats_obj.stats_list))
 
-
+    def _generate_warnings(self, volume_stats):
+        warnings = []
+        if volume_stats["zeros%"] > 0.01:
+            warnings.append(f"Percentage of data points that are 0s is {volume_stats['zeros%']}")
+        if volume_stats["range_used"] < 80:
+            warnings.append(f"Only {volume_stats['range_used']}% of the possible range of the datatype (\
+{self.stats_obj.stats['dtype']}) has been used. The datatypeused, {self.stats_obj.stats['dtype']} can go from \
+{self.stats_obj.stats['possible_min']} to {self.stats_obj.stats['possible_max']}")
+        self.exp.meta_data.set("warnings", warnings)
