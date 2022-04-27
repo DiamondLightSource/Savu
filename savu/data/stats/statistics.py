@@ -420,7 +420,7 @@ class Statistics(object):
                     if 1 in patterns.get(pattern)["slice_dims"]:
                         self.pattern = pattern
                         break
-                self.pattern = None
+                    self.pattern = None
         if self.pattern not in Statistics._pattern_list:
             self.calc_stats = False
 
