@@ -98,7 +98,6 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         if object.ndim == 3:
             vert_size = np.shape(object)[1]
             iterate_group = check_if_in_iterative_loop(self.exp)
-            gpu_device_index = self.parameters['GPU_index']
             if iterate_group is None:
                 self.angles_rad = -self.angles_rad
             else:
@@ -123,7 +122,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                   CenterRotOffset=cor,  # Center of Rotation
                                   AnglesVec=self.angles_rad,  # array of angles in radians
                                   ObjSize=object_size,  # a scalar to define reconstructed object dimensions
-                                  device_projector=gpu_device_index)
+                                  device_projector=self.parameters['GPU_index'])
         if vert_size is not None:
             projected = RectoolsDIRECT.FORWPROJ(np.require(np.swapaxes(object, 0, 1), requirements='CA'))
             projected = np.require(np.swapaxes(projected, 0, 1), requirements='CA')
