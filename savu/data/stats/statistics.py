@@ -407,6 +407,8 @@ class Statistics(object):
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
         out_datasets = self.plugin.get_out_datasets()
+        if len(out_datasets) == 0:
+            self.calc_stats = False
         try:
             self.pattern = self.plugin.parameters['pattern']
             if self.pattern == None:
