@@ -92,6 +92,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
+        if nSlices < self.parameters['padding']:
+            print("The padding value is larger than the number of slices in the 3D slab")
         self._set_max_frames(nSlices)
         # get experimental metadata of projection_shifts
         if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):

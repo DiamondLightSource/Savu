@@ -24,6 +24,8 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
+from savu.core.iterate_plugin_group_utils import enable_iterative_loop, \
+    check_if_end_plugin_in_iterate_group, setup_extra_plugin_data_padding
 
 from tomobar.methodsDIR import RecToolsDIR
 import numpy as np
@@ -33,6 +35,7 @@ import copy
 class ForwardProjectorGpu(Plugin, GpuPlugin):
     def __init__(self):
         super(ForwardProjectorGpu, self).__init__('ForwardProjectorGpu')
+        self.pad = None
         self.angles_total = None
         self.det_horiz_half = None
         self.detectors_horiz = None
@@ -40,12 +43,23 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         self.cor = None
         self.angles_rad = None
 
+    @setup_extra_plugin_data_padding
+    def set_filter_padding(self, in_pData, out_pData):
+        self.pad = self.parameters['padding']
+        in_data = self.get_in_datasets()[0]
+        pad_slice_dir_ext = in_data.get_data_dimension_by_axis_label('voxel_y')
+        pad_slice_dir = '%s.%s' % (pad_slice_dir_ext, self.pad)
+        pad_dict = {'pad_directions': [pad_slice_dir], 'pad_mode': 'edge'}
+        in_pData[0].padding = pad_dict
+        out_pData[0].padding = pad_dict
+
     def pre_process(self):
         # getting metadata for CoR
         in_meta_data = self.get_in_meta_data()[0]
         self.cor = in_meta_data.get('centre_of_rotation')
         self.cor = np.mean(self.cor)  # CoR must be a scalar for 3D geometry
 
+    @enable_iterative_loop
     def setup(self):
         in_dataset, out_dataset = self.get_datasets()
         in_pData, out_pData = self.get_plugin_datasets()
@@ -90,13 +104,13 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         out_dataset[0].meta_data.set('rotation_angle', copy.deepcopy(angles_meta_deg))
 
     def process_frames(self, data):
-        object = data[0].astype(np.float32)
-        object = np.where(np.isfinite(object), object, 0)
-        object_size = np.shape(object)[0]
+        object_to_project = data[0].astype(np.float32)
+        object_to_project = np.where(np.isfinite(object_to_project), object_to_project, 0)
+        object_size = np.shape(object_to_project)[0]
         vert_size = None # 2D case
         # dealing with 3D data case
-        if object.ndim == 3:
-            vert_size = np.shape(object)[1]
+        if object_to_project.ndim == 3:
+            vert_size = np.shape(object_to_project)[1]
             iterate_group = check_if_in_iterative_loop(self.exp)
             if iterate_group is None:
                 self.angles_rad = -self.angles_rad
@@ -124,10 +138,10 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                                   ObjSize=object_size,  # a scalar to define reconstructed object dimensions
                                   device_projector=self.parameters['GPU_index'])
         if vert_size is not None:
-            projected = RectoolsDIRECT.FORWPROJ(np.require(np.swapaxes(object, 0, 1), requirements='CA'))
+            projected = RectoolsDIRECT.FORWPROJ(np.require(np.swapaxes(object_to_project, 0, 1), requirements='CA'))
             projected = np.require(np.swapaxes(projected, 0, 1), requirements='CA')
         else:
-            projected = RectoolsDIRECT.FORWPROJ(object)
+            projected = RectoolsDIRECT.FORWPROJ(object_to_project)
         return projected
 
     def new_shape(self, full_shape, data):
