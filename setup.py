@@ -110,6 +110,7 @@ setup(name='savu',
           'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',
           'savu_param_extractor=scripts.savu_config.parameter_extractor:main',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
+          'savu_pre_run=savu.pre_run:main',
       ], },
 
       package_data={
