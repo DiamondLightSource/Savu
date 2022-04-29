@@ -112,13 +112,6 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
         if object_to_project.ndim == 3:
             vert_size = np.shape(object_to_project)[1]
             iterate_group = check_if_in_iterative_loop(self.exp)
-            if iterate_group is None:
-                self.angles_rad = -self.angles_rad
-            else:
-                # only apply the sign change on iteration 0, not on subsequent
-                # iterations
-                if iterate_group._ip_iteration == 0:
-                    self.angles_rad = -self.angles_rad
 
             if iterate_group is not None and \
                 iterate_group._ip_iteration > 0 and \
@@ -130,6 +123,16 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
             cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts[:, 0]
             cor[:, 1] = -self.projection_shifts[:, 1] - 0.5
         else:
+            iterate_group = check_if_in_iterative_loop(self.exp)
+
+            if iterate_group is None:
+                self.angles_rad = -self.angles_rad
+            else:
+                # only apply the sign change on iteration 0, not on subsequent
+                # iterations
+                if iterate_group._ip_iteration == 0:
+                    self.angles_rad = -self.angles_rad
+
             cor = (-self.cor + self.det_horiz_half - 0.5)
         RectoolsDIRECT = RecToolsDIR(DetectorsDimH=self.detectors_horiz,  # DetectorsDimH # detector dimension (horizontal)
                                   DetectorsDimV=vert_size,  # DetectorsDimV # detector dimension (vertical)
