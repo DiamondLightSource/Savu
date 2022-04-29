@@ -27,7 +27,7 @@ https://repo.anaconda.com/pkgs/main/linux-64/gmp-6.2.1-h2531618_2.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/icu-58.2-hf484d3e_1000.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/jpeg-9b-h024ee3a_2.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/lame-3.100-h7b6447c_0.tar.bz2
-https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/libastra-1.9.9.dev6-cuda_10.1_0.tar.bz2
+https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/libastra-2.1.0-cuda_10.1_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/libffi-3.2.1-hd88cf55_4.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libgfortran-ng-7.5.0-h14aa051_18.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/libiconv-1.15-h63c8f33_5.tar.bz2
@@ -219,7 +219,7 @@ https://conda.anaconda.org/conda-forge/linux-64/wurlitzer-2.1.0-py37h89c1867_0.t
 https://conda.anaconda.org/conda-forge/linux-64/arrow-1.0.3-py37h89c1867_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/boost-1.71.0-py37h9de70de_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/bottleneck-1.3.2-py37h161383b_2.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/ccpi-regulariser-2022.03-np118py37_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/ccpi-regulariser-2022.04-np118py37_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/cryptography-2.6.1-py37h1ba5d50_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/cython-blis-0.7.3-py37ha21ca33_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/dask-core-2021.4.0-pyhd8ed1ab_0.tar.bz2
@@ -245,7 +245,7 @@ https://conda.anaconda.org/conda-forge/linux-64/setuptools-49.6.0-py37h89c1867_3
 https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2022.03-np118py37_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/pypwt-0.9_10.1-py37he0f2a6c_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/xraylib-4.0.0-py37h274ba43_5.tar.bz2
-https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/astra-toolbox-1.9.9.dev6-py37hb48bd9c_0.tar.bz2
+https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/astra-toolbox-2.1.0-py37h9d24096_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/astroid-2.5.2-py37h89c1867_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/backports.functools_lru_cache-1.6.3-pyhd8ed1ab_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/bleach-3.3.0-pyh44b312d_0.tar.bz2
@@ -270,7 +270,7 @@ https://repo.anaconda.com/pkgs/main/linux-64/pyopenssl-19.0.0-py37_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/qt-5.9.7-h5867ecd_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/secretstorage-3.3.1-py37h89c1867_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/tifffile-2020.6.3-py_0.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/tomobar-2022.03-py37he0f2a6c_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/tomobar-2022.04-py37he0f2a6c_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/torchvision-0.2.1-py37_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/wheel-0.33.1-py37_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/fabio-0.10.2-py37h161383b_1.tar.bz2

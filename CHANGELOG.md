@@ -25,7 +25,7 @@ All notable changes to this project are documented in this file.
   * FBP3D_CUDA method added (filtering before backprojection with BP3D_CUDA)
   * ForwardProjector works with the 3D geometry
   * 3D geometries can accept metadata for x-y shifts and correct the misalignment
-  * ToMoBAR (3d version) has got different methods working well with iterative alignment
+  * ToMoBAR (3d version) has got different methods (FBP3D, CGLS3D, FISTA3D) working well with iterative alignment
   * GPU memory usage check for *tomobar_recon_3D* plugin to avoid CUDA error
   * *tomobar_recon_3D* access to regularisation using Wavelets, try set regularisation method e.g. to 'PD_TV_WAVELETS'
   * SWLS, PWLS methods for data fidelities are enabled in *tomobar_recon_3D*
@@ -47,13 +47,13 @@ All notable changes to this project are documented in this file.
 ### Corrections
   * *phase_unwrapping* - a plugin for unwrapping phase-retrieved images
 ### Centering
-  * *360_centering* - a plugin to calculate centre of rotation. 
+  * *360_centering* - a plugin to calculate centre of rotation.
 
 ## _Updated and new packages as dependencies_
   * A new [pypwt](https://github.com/pierrepaleo/pypwt "pypwt") GPU wavelet package added through Jenkins build and savu-dep channel
   * ToMoBAR and TomoPhantom packages have been updated
 
-## _Configurator_ 
+## _Configurator_
   *  Allow a list as a single dimension input to the preview parameter
   *  Allow a start keyword inside the preview parameter
   *  Allow a parameter to be a directory path within the Savu folder
@@ -61,7 +61,7 @@ All notable changes to this project are documented in this file.
   *  Line separator added to indicate an iterative plugin loop
 
 ### New Commands
-  * *savu_mod* - a way to modify one parameter present in a plugin list. 
+  * *savu_mod* - a way to modify one parameter present in a plugin list.
 
 ## _Documentation_
   *  Plugin API moved to dropdown boxes on every plugin documentation page
@@ -74,9 +74,9 @@ All notable changes to this project are documented in this file.
 
 ## Other
   * The test dataset 24737.nxs has been changed to tomo-standard.nxs
-  * The synthetic test data has been added 
+  * The synthetic test data has been added
   * Environment variable *type* is replaced with *GPUarch_nodes*
-  * *savu_mod* - Modify one parameter present in a plugin list. 
+  * *savu_mod* - Modify one parameter present in a plugin list.
   * Save the job command to a log file
   * Save the directory the command was run to a log file
 

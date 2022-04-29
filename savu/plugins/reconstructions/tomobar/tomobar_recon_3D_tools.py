@@ -11,10 +11,11 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
             visibility: basic
             dtype: str
             description: The name of the reconstruction method.
-            options: [FBP3D, CGLS3D, FISTA3D]
+            options: [FBP3D, CGLS3D, SIRT3D, FISTA3D]
             options:
                 FBP3D: Filtered Backprojection method
                 CGLS3D: Conjugate Gradient Least Squares
+                SIRT3D: Simultaneous Iterative Reconstruction Technique
                 FISTA3D: Model-Based iterative with regularisation
             default: FBP3D
 
@@ -29,6 +30,7 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
                 reconstruction_method:
                  FISTA3D
                  CGLS3D
+                 SIRT3D
 
         regularisation_parameter:
              visibility: basic
@@ -48,8 +50,9 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
             description: The amount of pixels to pad each slab of the cropped projection data.
             default:
                  reconstruction_method:
-                   FBP3D: 2
-                   CGLS3D: 3
+                   FBP3D: 0
+                   CGLS3D: 0
+                   SIRT3D: 0
                    FISTA3D: 5
             dependency:
                 reconstruction_method
@@ -207,14 +210,6 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
                 reconstruction_method:
                  FISTA3D
 
-        regularisation_methodTV:
-             visibility: advanced
-             dtype: int
-             description: "0/1 - TV specific isotropic/anisotropic choice."
-             default: 0
-             dependency:
-               regularisation_method: [ROF_TV, FGP_TV, SB_TV, NLTV]
-
         regularisation_timestep:
              visibility: advanced
              dtype: float
@@ -260,6 +255,13 @@ ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation
                regularisation_method: NDF
              default: Huber
 
+        regularisation_methodTV:
+             visibility: hidden
+             dtype: int
+             description: "0/1 - TV specific isotropic/anisotropic choice."
+             default: 0
+             dependency:
+               regularisation_method: [ROF_TV, FGP_TV, SB_TV, NLTV]
         """
 
 
