@@ -235,12 +235,17 @@ def main(input_args=None):
             pre_plugin_runner = pRunner(pre_run_options)
             pre_plugin_runner._run_plugin_list()
             pre_plugin_runner.exp._save_pre_run_log()
-            options["data_file"] = pre_plugin_runner.exp.meta_data.get("pre_run_filename")
+            #options["data_file"] = pre_plugin_runner.exp.meta_data.get("pre_run_file")
+            folder = options['out_path']
+            fname = options['datafile_name'] + '_pre_run.nxs'
+            filename = os.path.join(folder, fname)
+            options["data_file"] = filename
             options["pre_run"] = False
             options["post_pre_run"] = True
-            while answer not in ("y", "N"):
-                cu.user_message("Pre-run complete. See run_log/pre_run_log.txt for details. Do you want to continue? [y/N]")
-                answer = input()
+            if MPI.COMM_WORLD.rank == 0:
+                while answer not in ("y", "N"):
+                    cu.user_message("Pre-run complete. See run_log/pre_run_log.txt for details. Do you want to continue? [y/N]")
+                    answer = input()
         if answer in ("y", "Y"):
             plugin_runner = pRunner(options)
             plugin_runner._run_plugin_list()

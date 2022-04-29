@@ -84,6 +84,9 @@ def __option_parser(doc=True):
     # Send an email on completion
     parser.add_argument("-e", "--email", dest="email", help=hide, default=None)
 
+    parser.add_argument("--bllog", dest="bllog", help=hide, default=None)
+    # Location of syslog server
+
     # Location of syslog server
     parser.add_argument("-s", "--syslog", dest="syslog", help=hide,
                         default='localhost')
@@ -122,6 +125,7 @@ def _set_options(args):
     options['syslog_server'] = args.syslog
     options['syslog_port'] = args.syslog_port
     options['test_state'] = args.test_state
+    options['bllog'] = args.bllog
     options['email'] = args.email
     options['femail'] = args.femail
     options['system_params'] = args.system_params

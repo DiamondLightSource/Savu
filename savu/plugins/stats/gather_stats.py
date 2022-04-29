@@ -81,7 +81,10 @@ class GatherStats(Plugin, CpuPlugin):
 
     def post_process(self):
         slice_stats = self.stats_obj.stats
-        volume_stats = self.stats_obj.calc_volume_stats(slice_stats)
+        comm = self.get_communicator()
+        combined_stats = self.stats_obj._combine_mpi_stats(slice_stats, comm=comm)
+
+        volume_stats = self.stats_obj.calc_volume_stats(combined_stats)
         if self.exp.meta_data.get("pre_run"):
 
             self._generate_warnings(volume_stats)
@@ -91,20 +94,21 @@ class GatherStats(Plugin, CpuPlugin):
             fname = self.exp.meta_data.get('datafile_name') + '_pre_run.nxs'
             filename = os.path.join(folder, fname)
             stats_array = self.stats_obj._dict_to_array(volume_stats)
-            with h5.File(filename, "a") as h5file:
-                fsplit = self.exp.meta_data["data_path"].split("/")
-                fsplit[-1] = ""
-                stats_path = "/".join(fsplit)
-                stats_group = h5file.require_group(stats_path)
-                dataset = stats_group.create_dataset("stats", shape=stats_array.shape, dtype=stats_array.dtype)
-                dataset[::] = stats_array[::]
-                dataset.attrs.create("stats_list", list(self.stats_obj.stats_list))
+            if comm.rank == 0:
+                with h5.File(filename, "a") as h5file:
+                    fsplit = self.exp.meta_data["data_path"].split("/")
+                    fsplit[-1] = ""
+                    stats_path = "/".join(fsplit)
+                    stats_group = h5file.require_group(stats_path)
+                    dataset = stats_group.create_dataset("stats", shape=stats_array.shape, dtype=stats_array.dtype)
+                    dataset[::] = stats_array[::]
+                    dataset.attrs.create("stats_list", list(self.stats_obj.stats_list))
 
     def _generate_warnings(self, volume_stats):
         warnings = []
         if volume_stats["zeros%"] > 0.01:
             warnings.append(f"Percentage of data points that are 0s is {volume_stats['zeros%']}")
-        if volume_stats["range_used"] < 80:
+        if volume_stats["range_used"] < 2:
             warnings.append(f"Only {volume_stats['range_used']}% of the possible range of the datatype (\
 {self.stats_obj.stats['dtype']}) has been used. The datatypeused, {self.stats_obj.stats['dtype']} can go from \
 {self.stats_obj.stats['possible_min']} to {self.stats_obj.stats['possible_max']}")
