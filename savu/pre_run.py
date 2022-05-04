@@ -192,6 +192,7 @@ def main(input_args=None):
     try:
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
+        plugin_runner.exp._save_pre_run_log()
         if options['process'] == 0:
             in_file = plugin_runner.exp.meta_data['nxs_filename']
             citation_extractor.main(in_file=in_file, quiet=True)
