@@ -42,6 +42,7 @@ class Content(object):
         self._finished = False
         self.failed = {}
         self.expand_dim = None
+        self._internal = False
 
     def set_finished(self, check="y"):
         self._finished = True if check.lower() == "y" else False
@@ -116,7 +117,8 @@ class Content(object):
         # Check if a loader and saver are present.
         self.plugin_list._check_loaders()
         if check.lower() == "y":
-            print(f"Saving file {filename}")
+            if not self._internal:
+                print(f"Saving file {filename}")
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
