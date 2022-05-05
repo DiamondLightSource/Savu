@@ -120,8 +120,17 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                 self.projection_shifts = \
                     self.exp.meta_data.dict['projection_shifts']
             cor = np.zeros((np.shape(self.projection_shifts)))
-            cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts[:, 0]
-            cor[:, 1] = -self.projection_shifts[:, 1] - 0.5
+            cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5)
+            cor[:, 1] = -0.5
+            registration = False
+            for plugin_dict in self.exp.meta_data.plugin_list.plugin_list:
+                if plugin_dict['name'] == 'Projection2dAlignment':
+                    registration = plugin_dict['data']['registration']
+                    break
+            if not registration:
+                # modify the offset to take into account the shifts
+                cor[:, 0] -= self.projection_shifts[:, 0]
+                cor[:, 1] -= self.projection_shifts[:, 1]
         else:
             iterate_group = check_if_in_iterative_loop(self.exp)
 
