@@ -13,6 +13,12 @@ class Projection2dAlignmentTools(PluginTools):
               description: The upsampling factor. Registration accuracy is inversely propotional to upsample_factor.
               default: 10
 
+        registration:
+              visibility: basic
+              dtype: bool
+              description: Set as True to transform the projections with the shifts that are calculated, or set as False to calculate the shifts but not apply them
+              default: False
+
         in_datasets:
               visibility: datasets
               dtype: [list[],list[str]]

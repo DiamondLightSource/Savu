@@ -143,13 +143,26 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         projdata3D = np.require(np.swapaxes(projdata3D, 0, 1), requirements='CA')
         self._data_.update({'projection_norm_data': projdata3D})
 
-        # dealing with projection shifts and the CoR
+        # setup the CoR and offset
         cor_astra = half_det_width - np.mean(cor)
-        CenterOffset = cor_astra.item() - 0.5
-        if np.sum(self.projection_shifts) != 0.0:
-            CenterOffset = np.zeros(np.shape(self.projection_shifts))
-            CenterOffset[:, 0] = (cor_astra.item() - 0.5) - self.projection_shifts[:, 0]
-            CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
+        CenterOffset_scalar = cor_astra.item() - 0.5
+        CenterOffset = np.zeros(np.shape(self.projection_shifts))
+        CenterOffset[:, 0] = CenterOffset_scalar
+        CenterOffset[:, 1] = -0.5 # TODO: maybe needs to be tweaked?
+
+        # check if Projection2dAlignment is in the process list, and if so,
+        # fetch the value of the "registration" parameter (in order to decide
+        # whether projection shifts need to be taken into account or not)
+        registration = False
+        for plugin_dict in self.exp.meta_data.plugin_list.plugin_list:
+            if plugin_dict['name'] == 'Projection2dAlignment':
+                registration = plugin_dict['data']['registration']
+                break
+
+        if np.sum(self.projection_shifts) != 0.0 and not registration:
+            # modify the offset to take into account the shifts
+            CenterOffset[:, 0] -= self.projection_shifts[:, 0]
+            CenterOffset[:, 1] -= self.projection_shifts[:, 1]
 
         # set parameters and initiate a TomoBar class object for iterative reconstruction
         RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
