@@ -33,6 +33,7 @@ import savu.core.utils as cu
 from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
+from scripts.config_generator import savu_config
 
 
 def __option_parser(doc=True):
@@ -179,6 +180,12 @@ def __create_output_folder(path, folder_name):
             os.makedirs(folder)
     return folder
 
+def _edit_process_list(options):
+    commands = [f"open /scratch/Savu/{options['process_file']}",
+                f"add Rotate90",
+                f"save /scratch/Savu/{options['process_file_name']}"]
+    savu_config.internal_config(*commands)
+
 def main(input_args=None):
     args = __option_parser(doc=False)
 
@@ -190,6 +197,7 @@ def main(input_args=None):
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     try:
+        _edit_process_list(options)
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
         plugin_runner.exp._save_pre_run_log()
