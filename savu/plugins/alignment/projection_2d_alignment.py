@@ -24,6 +24,7 @@ from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from skimage.registration import phase_cross_correlation
+from skimage import transform as tf
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import copy
 
@@ -55,6 +56,14 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())
 
+        # create and setup output dataset that contains projection data
+        # TODO: the projections are either shifted or unshifted for now, but
+        # note that the unshifted ones are redundant information, and have only
+        # currently been included to not have to deal with a variable number of
+        # output datasets for the plugin...
+        out_dataset[1].create_dataset(in_dataset[0])
+        out_pData[1].plugin_data_setup('PROJECTION', self.get_max_frames())
+
         # check if there is an iterative loop and the exp metadata on error shifts exists
         self.iterate_group = check_if_in_iterative_loop(self.exp)
         self.iterations_number = 1
@@ -73,11 +82,29 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         projection = data[0]   # an original data to align to (a static reference)
         projection_align = data[1] # a projection for alignment to the given reference
 
-        # perform alignment
+        # calculate x and y shifts
         shifts, error, diffphase = phase_cross_correlation(
                     projection, projection_align, upsample_factor=self.parameters['upsample_factor'])
 
-        return shifts
+        # apply a transformation (translation) to the projection according to
+        # the calculated shifts, in order to align it
+        transformation = \
+            tf.SimilarityTransform(translation=(shifts[0], shifts[1]))
+        # TODO: the "edge padding" could well be removed if/when smoothing is
+        # introduced into the iterative alignment algorithm
+        transformed_image = tf.warp(projection, transformation, order=5,
+            mode='edge')
+
+        # TODO: probably can make the number of output datasets depend on the
+        # value of the "registration" parameter, so then in the case of NOT
+        # transforming the projections, the projection data isnt't written as
+        # another output of this plugin (since "unshifted" projections are
+        # redundant information, they likely already exist as an intermediate
+        # step when doing iterative alignment)
+        if self.parameters['registration']:
+            return [shifts, transformed_image]
+        else:
+            return [shifts, projection]
 
     def post_process(self):
         out_data = self.get_out_datasets()[0]
@@ -110,4 +137,4 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         return 2
 
     def nOutput_datasets(self):
-        return 1
+        return 2
