@@ -89,7 +89,7 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         # apply a transformation (translation) to the projection according to
         # the calculated shifts, in order to align it
         transformation = \
-            tf.SimilarityTransform(translation=(shifts[0], shifts[1]))
+            tf.SimilarityTransform(translation=(shifts[1], shifts[0]))
         # TODO: the "edge padding" could well be removed if/when smoothing is
         # introduced into the iterative alignment algorithm
         transformed_image = tf.warp(projection, transformation, order=5,
