@@ -36,7 +36,19 @@ class AstraGpuTest(unittest.TestCase):
         process_list = 'reconstruction/astra_cgls.nxs'
         options = tu.initialise_options(self.data_file, self.experiment, process_list)
         run_protected_plugin_runner(options)
-        tu.cleanup(options)    
+        tu.cleanup(options)
+
+    def test_astra_fbp_2d_name_dataset(self):
+        process_list = 'reconstruction/astra_fbp_name_ds.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
+
+    def test_astra_fbp_2d_default_dataset(self):
+        process_list = 'reconstruction/astra_fbp_ds.nxs'
+        options = tu.initialise_options(self.data_file, self.experiment, process_list)
+        run_protected_plugin_runner(options)
+        tu.cleanup(options)
 
 if __name__ == "__main__":
     unittest.main()

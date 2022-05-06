@@ -117,6 +117,7 @@ class Content(object):
         self.plugin_list._check_loaders()
         if check.lower() == "y":
             print(f"Saving file {filename}")
+            self.filename = filename
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
@@ -126,6 +127,7 @@ class Content(object):
     def clear(self, check="y"):
         if check.lower() == "y":
             self.expand_dim = None
+            self.filename = None
             self.plugin_list.plugin_list = []
             self.plugin_list.clear_iterate_plugin_group_dicts()
 

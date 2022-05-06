@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-.. module:: parameter_utils
+.. module:: hdf_utils
    :platform: Unix
    :synopsis: Utilities for checking hdf/nxs files
 

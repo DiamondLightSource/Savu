@@ -423,8 +423,7 @@ class PluginParameters(object):
                     if mod_value in default[parent_name].keys():
                         value = default[parent_name][mod_value]
                         desc = pdict['description']
-                        self.make_recommendation(
-                            name, desc, parent_name, value)
+
 
     def make_recommendation(self, child_name, desc, parent_name, value): 
         if isinstance(desc, dict):
@@ -432,7 +431,7 @@ class PluginParameters(object):
                             f"{parent_name} would be {value}"
         recommendation = f"It's recommended that you update {child_name}"\
                          f" to {value}"
-        print(Fore.RED + recommendation + Fore.RESET)
+        print(recommendation)
 
         
     def check_dependencies(self, parameters):

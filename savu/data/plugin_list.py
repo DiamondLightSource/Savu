@@ -156,12 +156,11 @@ class PluginList(object):
         """If the input process list was created using an older version
         of Savu, then alert the user"""
         from savu.version import __version__
-        pl_version = float(self.version)
-        if float(__version__) > pl_version:
+        if __version__ != self.version:
             separator = "*" * 53
             print(separator)
             print(f"*** This process list was created using Savu "
-                  f"{pl_version}  ***")
+                  f"{self.version}  ***")
             print(separator)
 
     def _save_plugin_list(self, out_filename):

@@ -31,6 +31,7 @@ import inspect
 import itertools
 
 from collections import OrderedDict
+from colorama import Fore, Style
 import numpy as np
 
 from savu.plugins.loaders.utils.my_safe_constructor import MySafeConstructor
@@ -106,6 +107,8 @@ def load_class(name, cls_name=None):
     """
     path = name if os.path.dirname(name) else None
     name = os.path.basename(os.path.splitext(name)[0]) if path else name
+    if "savu_plugins" in name and "tools" not in name:
+        _user_directory_warning(_get_cls_name(name))
     cls_name = _get_cls_name(name) if not cls_name else cls_name
     if cls_name in plugins.keys():
         return plugins[cls_name]
@@ -179,6 +182,22 @@ def get_plugins_paths(examples=True):
                 sys.path.append(os.path.dirname(ppath))
 
     return plugins_paths
+
+
+def _user_directory_warning(plugin_name):
+    """Warn the user that their plugin may override official plugins
+    :plugin_name plugin name
+    """
+    user_path = os.path.join(os.path.expanduser("~"), "savu_plugins")
+    print("-"*58)
+    print(f" You are loading the plugin {plugin_name} from the following")
+    print(f" location: {user_path}")
+    warn_c = Style.RESET_ALL + Fore.RED
+    warn_str1 = f" WARNING The plugin {plugin_name} will be prioritised over a "
+    warn_str2 = f" {plugin_name} plugin if present in the released version."
+    print(warn_c + warn_str1 )
+    print(warn_str2 + Fore.BLACK)
+    print("-"*58)
 
 
 def is_template_param(param):
