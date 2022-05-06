@@ -62,6 +62,8 @@ All notable changes to this project are documented in this file.
 
 ### New Commands
   * *savu_mod* - a way to modify one parameter present in a plugin list.
+  * *mod -g parameter* - a way to modify a parameter in the process list globally (for all plugins)
+
 
 ## _Documentation_
   *  Plugin API moved to dropdown boxes on every plugin documentation page

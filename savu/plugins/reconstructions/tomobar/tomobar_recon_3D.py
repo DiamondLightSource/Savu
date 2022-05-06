@@ -92,6 +92,8 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         slices_fit_total = int(gpu_available_mb / slice_size_mbbytes) - 2*self.parameters['padding']
         if nSlices > slices_fit_total:
             nSlices = slices_fit_total
+        if nSlices < self.parameters['padding']:
+            print("The padding value is larger than the number of slices in the 3D slab")
         self._set_max_frames(nSlices)
         # get experimental metadata of projection_shifts
         if 'projection_shifts' in list(self.exp.meta_data.dict.keys()):
@@ -138,16 +140,29 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
         self.Horiz_det = dim_tuple[self.det_dimX_ind]
         half_det_width = 0.5 * self.Horiz_det
         projdata3D[projdata3D > 10 ** 15] = 0.0
-        projdata3D = np.swapaxes(projdata3D, 0, 1)
+        projdata3D = np.require(np.swapaxes(projdata3D, 0, 1), requirements='CA')
         self._data_.update({'projection_norm_data': projdata3D})
 
-        # dealing with projection shifts and the CoR
+        # setup the CoR and offset
         cor_astra = half_det_width - np.mean(cor)
-        CenterOffset = cor_astra.item() - 0.5
-        if np.sum(self.projection_shifts) != 0.0:
-            CenterOffset = np.zeros(np.shape(self.projection_shifts))
-            CenterOffset[:, 0] = (cor_astra.item() - 0.5) - self.projection_shifts[:, 0]
-            CenterOffset[:, 1] = -self.projection_shifts[:, 1] - 0.5
+        CenterOffset_scalar = cor_astra.item() - 0.5
+        CenterOffset = np.zeros(np.shape(self.projection_shifts))
+        CenterOffset[:, 0] = CenterOffset_scalar
+        CenterOffset[:, 1] = -0.5 # TODO: maybe needs to be tweaked?
+
+        # check if Projection2dAlignment is in the process list, and if so,
+        # fetch the value of the "registration" parameter (in order to decide
+        # whether projection shifts need to be taken into account or not)
+        registration = False
+        for plugin_dict in self.exp.meta_data.plugin_list.plugin_list:
+            if plugin_dict['name'] == 'Projection2dAlignment':
+                registration = plugin_dict['data']['registration']
+                break
+
+        if np.sum(self.projection_shifts) != 0.0 and not registration:
+            # modify the offset to take into account the shifts
+            CenterOffset[:, 0] -= self.projection_shifts[:, 0]
+            CenterOffset[:, 1] -= self.projection_shifts[:, 1]
 
         # set parameters and initiate a TomoBar class object for iterative reconstruction
         RectoolsIter = RecToolsIR(DetectorsDimH=self.Horiz_det,  # DetectorsDimH # detector dimension (horizontal)
@@ -181,7 +196,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
 
         if self.parameters['reconstruction_method'] == 'FISTA3D':
             if self.parameters['regularisation_method'] == 'PD_TV':
-	            self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})
+                self._regularisation_.update({'device_regulariser': self.parameters['GPU_index']})
             # if one selects PWLS or SWLS models then raw data is also required (2 inputs)
             if (self.parameters['data_fidelity'] == 'PWLS') or (self.parameters['data_fidelity'] == 'SWLS'):
                 rawdata3D = data[1].astype(np.float32)
@@ -191,9 +206,7 @@ class TomobarRecon3d(BaseRecon, GpuPlugin):
                 self._data_.update({'beta_SWLS': self.parameters['data_beta_SWLS'] * np.ones(self.Horiz_det)})
             # Run FISTA reconstruction algorithm here
             recon = RectoolsIter.FISTA(self._data_, self._algorithm_, self._regularisation_)
-
-        recon = np.swapaxes(recon, 0, 1)
-        return recon
+        return np.require(np.swapaxes(recon, 0, 1), requirements='CA')
 
     def nInput_datasets(self):
         return max(len(self.parameters['in_datasets']), 1)
