@@ -33,7 +33,7 @@ import savu.core.utils as cu
 from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
-from scripts.config_generator import savu_config
+from scripts.config_generator.savu_config import internal_config
 
 
 def __option_parser(doc=True):
@@ -63,7 +63,9 @@ def __option_parser(doc=True):
     parser.add_argument("-q", "--quiet", action="store_true", dest="quiet",
                         help="Display only Errors and Info.", default=False)
     # temporary flag to fix lustre issue
-
+    parser.add_argument("--lustre_workaround", action="store_true",
+                        dest="lustre", help="Avoid lustre segmentation fault",
+                        default=False)
     sys_params_help = "Override default path to Savu system parameters file."
     parser.add_argument("--system_params", help=sys_params_help, default=None)
 
@@ -126,6 +128,7 @@ def _set_options(args):
     options['syslog_server'] = args.syslog
     options['syslog_port'] = args.syslog_port
     options['test_state'] = args.test_state
+    options['lustre'] = args.lustre
     options['bllog'] = args.bllog
     options['email'] = args.email
     options['femail'] = args.femail
@@ -181,10 +184,10 @@ def __create_output_folder(path, folder_name):
     return folder
 
 def _edit_process_list(options):
-    commands = [f"open /scratch/Savu/{options['process_file']}",
+    commands = [f"open {options['process_file']}",
                 f"add Rotate90",
-                f"save /scratch/Savu/{options['process_file_name']}"]
-    savu_config.internal_config(*commands)
+                f"save {options['process_file']}"]
+    internal_config(*commands)
 
 def main(input_args=None):
     args = __option_parser(doc=False)
@@ -197,7 +200,7 @@ def main(input_args=None):
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     try:
-        _edit_process_list(options)
+        #_edit_process_list(options)
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
         plugin_runner.exp._save_pre_run_log()

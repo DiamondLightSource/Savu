@@ -70,13 +70,14 @@ class Rotate90(Plugin, CpuPlugin):
         new_data_patterns = deepcopy(data_info["data_patterns"])
         for pattern in new_data_patterns:
             for dims in new_data_patterns[pattern]:
-                dims_list = list(new_data_patterns[pattern][dims])
-                for i, dim in enumerate(dims_list):
-                    if dim == c0:
-                        dims_list[i] = c1
-                    elif dim == c1:
-                        dims_list[i] = c0
-                new_data_patterns[pattern][dims] = tuple(dims_list)
+                if dims != "main_dir":
+                    dims_list = list(new_data_patterns[pattern][dims])
+                    for i, dim in enumerate(dims_list):
+                        if dim == c0:
+                            dims_list[i] = c1
+                        elif dim == c1:
+                            dims_list[i] = c0
+                    new_data_patterns[pattern][dims] = tuple(dims_list)
 
         # creating output dataset with new axis, shape and data patterns to reflect rotated image
         out_dataset[0].create_dataset(shape=new_shape, axis_labels=new_axis_labels)
