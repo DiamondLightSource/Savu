@@ -548,6 +548,17 @@ class BaseTransport(object):
             else:
                 self._output_metadata(data, plugin_entry, name)
 
+    def _populate_pre_run_nexus_file(self, data):
+        filename = self.exp.meta_data.get('nxs_filename')
+
+        data_path = self.exp.meta_data["data_path"]
+        name = data.data_info.get('name')
+        group_name = self.exp.meta_data.get(['group_name', name])
+        with h5py.File(filename, 'a') as nxs_file:
+            if data_path in nxs_file:
+                del nxs_file[data_path]
+            nxs_file[data_path] = h5py.ExternalLink(os.path.abspath(data.backing_file.filename), f"{group_name}/data")
+
     def _output_metadata(self, data, entry, name, dump=False):
         self.__output_data_type(entry, data, name)
         mDict = data.meta_data.get_dictionary()
