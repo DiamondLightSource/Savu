@@ -99,7 +99,13 @@ that there is always
 
 * one being used to write the output of the current iteration
 
-TODO: create a diagram of the dataset swapping?
+Diagram of input/output dataset swapping
+----------------------------------------
+
+.. figure:: dataset_swapping_diagram.png
+   :figwidth: 100%
+   :align: left
+   :figclass: align-left
 
 How is the second dataset created in Savu for iterative functionality?
 ----------------------------------------------------------------------
