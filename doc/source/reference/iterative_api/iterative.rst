@@ -112,3 +112,64 @@ the `ToMoBAR` package (`TomobarRecon3d` plugin). Notably the latter converges si
    :figwidth: 100%
    :align: left
    :figclass: align-left
+
+Two implementations of iterative alignment
+==========================================
+
+One implementation is based on the implementation in tomopy, where the
+projections are shifted. The other implementation is a variation, based on the
+idea of using the x and y projection shifts to translate the source/detector(?)
+during the reconstruction process that occurs in the iterative loop.
+
+# TODO: come up with a name for "the other implementation". Will refer to it as
+# "the Savu implementation" for now
+
+Each of the two different implementations are better suited for data depending
+on a few different attributes of the data, so the given misaligned projection
+data will advise which implementation should be used on a case-by-case basis.
+
+Choosing which implementation to use
+------------------------------------
+
+As a rule-of-thumb, if the estimated magnitude of the misalignment is large
+(approximately > 60 pixels(?)) then the tomopy implementation is more suitable,
+and if they're smaller (<= 60 pixels(?)) then the "Savu implementation" is
+preferred.
+
+# TODO: maybe give some advice on how to estimate the magnitude of the shifts in
+# data, to help with choosing an implementation?
+
+A single parameter for the :code:`Projection2dAlignment` plugin called
+:code:`registration` can be set to choose which implementation is used.
+:code:`True` applies the tomopy implementation, and :code:`False` applies the
+"Savu implementation".
+
+# TODO: for all examples below, show:
+# - process list w/ :code:`n` iterations in it
+# - the input data
+# - maybe the aligned projections at the end of the iterations
+# - the final reconstruction from the aligned projections
+
+Tomopy implementation
+---------------------
+
+# TODO: explanation of why this implementation is sometimes preferred (large
+# shifts requires large padding, which breaks Savu/becomes very slow, and this
+# implementation can avoid these issues)?
+
+Synthetic data example
+######################
+
+Real data example
+#################
+
+"Savu implementation"
+---------------------
+
+# TODO: explanation of why this implementation is sometimes preferred?
+
+Synthetic data example
+######################
+
+Real data example
+#################
