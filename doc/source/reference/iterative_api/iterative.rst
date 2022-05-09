@@ -100,8 +100,8 @@ This approach to reconstruct misaligned data is based on an iterative refinement
 
 With iterative plugins API it is possible to build the following iterative pipeline which will enable the iterative alignment algorithm. Plugin no. 3 performs re-projection of the reconstructed image,
 no.4 initialises a registration method to perform alignment of the re-projected data with the original raw data in projection space and no.5  reconstructs the corrected projection data.
-Note that different reconstruction algorithms can be used to reconstruct the corrected data, e.g. it could be the FBP algorithm of the `AstraReconGpu` plugin or a regulairised iterative reconstruction of
-the `ToMoBAR` package (`TomobarRecon3d` plugin). Notably the latter converges significantly faster and delivers a superior reconstruction, hence recommended if the computation time is not the essence (see the images).
+Note that different reconstruction algorithms can be used to reconstruct the corrected data, e.g. it could be the FBP algorithm of the `AstraReconGpu` plugin or 3D reconsutrction algorithms (some ASTRA-wrapped) of
+the `ToMoBAR` package (`TomobarRecon3d` plugin). One can also use the regulairised iterative reconstruction from the `ToMoBAR` package which can converge faster and usually delivers a superior reconstruction, if the computation time is not the essence (see the images).
 
 .. figure:: iterative_ex3.png
    :figwidth: 60%
@@ -115,34 +115,39 @@ the `ToMoBAR` package (`TomobarRecon3d` plugin). Notably the latter converges si
 
 Two implementations of iterative alignment
 ==========================================
-
-One implementation is based on the implementation in tomopy, where the
+One implementation is based on the implementation in `TomoPy`, where the
 projections are shifted. The other implementation is a variation, based on the
-idea of using the x and y projection shifts to translate the source/detector(?)
+idea of using the x and y projection shifts to translate the source and detector using 3D vector geometry 
 during the reconstruction process that occurs in the iterative loop.
 
-# TODO: come up with a name for "the other implementation". Will refer to it as
-# "the Savu implementation" for now
+1. An explicit registration of projections (follows `TomoPy` implementation)
+----------------------------------------------------------------------------
+This implementation should be preferred if the misalignment shifts are significant (e.g. more than 10 pixels).
+In this case the registration of each projection is performed using the interpolation of some chosen order. This means 
+that a some degree of smoothing is expected in the reconstruction due to explicit registration on each iteration of
+the iterative alignment method. To enable this method set a :code:`registration` parameter in :code:`Projection2dAlignment` 
+plugin to :code:`True`. You will also need to provide a registred projection data to the reconstruction plugin that follows. 
 
-Each of the two different implementations are better suited for data depending
-on a few different attributes of the data, so the given misaligned projection
-data will advise which implementation should be used on a case-by-case basis.
+2. An alignment using vector geometry (no explicit registration)
+----------------------------------------------------------------
+This implementation is better suited when the misalignment in projection space is not significant (could be even on the 
+subpixel scale). 
+The misalignment shifts will be calculated and passed automatically to the :code:`TomobarRecon3d` reconstruction plugin afterwards.
+Then reconstructionis performed using 3D vector geometry to compansate for suboptimal source/detector positions. 
+This approach is potentially faster and since no interpolation involved more accurate than the one above.  
+To enable this method set a :code:`registration` parameter in :code:`Projection2dAlignment` 
+plugin to :code:`False`. Here you will need to provide an original raw data to the reconstructor as the shifts are being 
+passed with metadata automatically. 
 
-Choosing which implementation to use
-------------------------------------
+Important additional information
+--------------------------------
+1. In order for the iterative alignment method to work, the raw projection data needed to be scaled in the range [0, 1].
+This can be implemented using the :code:`RescaleIntensity` plugin. 
 
-As a rule-of-thumb, if the estimated magnitude of the misalignment is large
-(approximately > 60 pixels(?)) then the tomopy implementation is more suitable,
-and if they're smaller (<= 60 pixels(?)) then the "Savu implementation" is
-preferred.
+2. The quality of iterative alignment (and the speed of convergence) depends on the reconstruction algorithm choosen. One can try 
+:code:`reconstruction_method` to be SIRT3D, CGLS3D or FISTA3D in :code:`TomobarRecon3d` reconstruction plugin. You might want 
+to consider denoising reconstruction :code:`CcpiDenoisingGpu3d` if the FBP3D method is enabled.
 
-# TODO: maybe give some advice on how to estimate the magnitude of the shifts in
-# data, to help with choosing an implementation?
-
-A single parameter for the :code:`Projection2dAlignment` plugin called
-:code:`registration` can be set to choose which implementation is used.
-:code:`True` applies the tomopy implementation, and :code:`False` applies the
-"Savu implementation".
 
 # TODO: for all examples below, show:
 # - process list w/ :code:`n` iterations in it
@@ -150,23 +155,6 @@ A single parameter for the :code:`Projection2dAlignment` plugin called
 # - maybe the aligned projections at the end of the iterations
 # - the final reconstruction from the aligned projections
 
-Tomopy implementation
----------------------
-
-# TODO: explanation of why this implementation is sometimes preferred (large
-# shifts requires large padding, which breaks Savu/becomes very slow, and this
-# implementation can avoid these issues)?
-
-Synthetic data example
-######################
-
-Real data example
-#################
-
-"Savu implementation"
----------------------
-
-# TODO: explanation of why this implementation is sometimes preferred?
 
 Synthetic data example
 ######################
