@@ -18,7 +18,7 @@
    :synopsis: (Change this) A template to create a simple plugin that takes 
     one dataset as input and returns a similar dataset as output.
 
-.. moduleauthor:: (Change this) Developer Name <email@address.ac.uk>
+.. moduleauthor:: Jacob Williamson <scientificsoftware@diamond.ac.uk>
 """
 from copy import deepcopy
 
@@ -49,13 +49,15 @@ class Rotate90(Plugin, CpuPlugin):
 
         # assumes 3D data and 2D frames
 
+        if self.exp.meta_data.get("pre_run"):
+            self.stats_obj.calc_stats = False
+
         in_dataset, out_dataset = self.get_datasets()
         pattern = self.parameters["pattern"]
         data_info = in_dataset[0].data_info
         core_dims = data_info["data_patterns"][pattern]["core_dims"]
         c0, c1 = core_dims[0], core_dims[1]                        # core dimensions
         s0 = data_info["data_patterns"][pattern]["slice_dims"][0]  # slice dimension
-
 
         # swapping round core dimensions in the shape due to rotation
         new_shape = list(data_info["shape"])
@@ -70,7 +72,7 @@ class Rotate90(Plugin, CpuPlugin):
         new_data_patterns = deepcopy(data_info["data_patterns"])
         for pattern in new_data_patterns:
             for dims in new_data_patterns[pattern]:
-                if dims != "main_dir":
+                if dims != "main_dir":  # not sure what main_dir is ( = slice dim?)
                     dims_list = list(new_data_patterns[pattern][dims])
                     for i, dim in enumerate(dims_list):
                         if dim == c0:

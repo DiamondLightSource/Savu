@@ -384,7 +384,7 @@ def internal_config(*in_lines):
     """ This method can be used to interact with the configurator within Savu
     :param args: The list of commands to be executed.
     """
-    utils.populate_plugins()
+    #utils.populate_plugins()
     content = Content(level="advanced")
     content._internal = True
     for line in in_lines:
@@ -394,7 +394,7 @@ def internal_config(*in_lines):
             _internal_save(content, arg)
         else:
             content = commands[command](content, arg)
-
+    return content.plugin_list.plugin_list
 
 def main(test=False):
     """

@@ -26,6 +26,8 @@ import argparse
 import traceback
 import sys
 import os
+
+import h5py as h5
 from mpi4py import MPI
 from savu.version import __version__
 
@@ -183,11 +185,30 @@ def __create_output_folder(path, folder_name):
             os.makedirs(folder)
     return folder
 
-def _edit_process_list(options):
-    commands = [f"open {options['process_file']}",
-                f"add Rotate90",
-                f"save {options['process_file']}"]
-    internal_config(*commands)
+def __get_beamline(options):
+    try:
+        with h5.File(options["data_file"], "r") as h5file:
+            beamline = h5file['entry1/instrument/name'][()]
+        return beamline
+    except KeyError:
+        return None
+
+def _edit_process_list(options, beamline):
+    #  Only 'open', 'set', 'mod' and 'save' should be used.
+    if beamline == "i23":
+        commands = [f"open {options['process_file']}",
+                    f"set 3 on",
+                    f"save {options['process_file']}"]
+    else:
+        commands = [f"open {options['process_file']}",
+                    f"set 3 off",
+                    f"save {options['process_file']}"]
+    plugin_list = internal_config(*commands)
+    active_plugins = []
+    for plugin in plugin_list:
+        if plugin["active"]:
+            active_plugins.append(plugin["name"])
+    return active_plugins
 
 def main(input_args=None):
     args = __option_parser(doc=False)
@@ -200,7 +221,8 @@ def main(input_args=None):
     pRunner = PluginRunner if options['mode'] == 'full' else BasicPluginRunner
 
     try:
-        #_edit_process_list(options)
+        beamline = __get_beamline(options)
+        _edit_process_list(options, beamline)
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
         plugin_runner.exp._save_pre_run_log()
