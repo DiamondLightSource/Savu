@@ -23,7 +23,7 @@ class OtsuThreshTools(PluginTools):
             visibility: intermediate
             dtype: int
             description: Expand cropping values by this amount to give some space around cropped object.
-            default: 20
+            default: 60
 
 
         pattern:

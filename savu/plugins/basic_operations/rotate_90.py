@@ -82,7 +82,7 @@ class Rotate90(Plugin, CpuPlugin):
                     new_data_patterns[pattern][dims] = tuple(dims_list)
 
         # creating output dataset with new axis, shape and data patterns to reflect rotated image
-        out_dataset[0].create_dataset(shape=new_shape, axis_labels=new_axis_labels)
+        out_dataset[0].create_dataset(shape=new_shape, axis_labels=new_axis_labels, dtype=in_dataset[0].dtype)
         out_dataset[0].data_info.set("data_patterns", new_data_patterns)
 
         in_pData, out_pData = self.get_plugin_datasets()
