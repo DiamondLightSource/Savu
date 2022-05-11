@@ -13,6 +13,15 @@ class Projection2dAlignmentTools(PluginTools):
               description: The upsampling factor. Registration accuracy is inversely propotional to upsample_factor.
               default: 10
 
+        interpolation_order:
+              visibility: advanced
+              dtype: int
+              description: The interpolation order, 0-Nearest-neighbor, 1-bilinear, 2-biquadratic, 3-bicubic, 4-biquartic(splines), 5-biquintic(splines).
+              default: 5
+              dependency:
+                  registration:
+                   True
+
         registration:
               visibility: basic
               dtype: bool
@@ -28,6 +37,6 @@ class Projection2dAlignmentTools(PluginTools):
         out_datasets:
               visibility: datasets
               dtype: [list[],list[str]]
-              description: Default out dataset names.
-              default: ['shifts']
+              description: Default out dataset names. If registration is set to true, remove the second dataset.
+              default: [shifts, shifted_projections]              
         """

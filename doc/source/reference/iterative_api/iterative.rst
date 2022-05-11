@@ -141,23 +141,25 @@ passed with metadata automatically.
 
 Important additional information
 --------------------------------
-1. In order for the iterative alignment method to work, the raw projection data needed to be scaled in the range [0, 1].
-This can be implemented using the :code:`RescaleIntensity` plugin. 
+1. In order for the iterative alignment method to work, the raw projection data needs to be scaled in [0, 1] range.
+This can be implemented by using the :code:`RescaleIntensity` plugin after the loader. 
 
 2. The quality of iterative alignment (and the speed of convergence) depends on the reconstruction algorithm choosen. One can try 
 :code:`reconstruction_method` to be SIRT3D, CGLS3D or FISTA3D in :code:`TomobarRecon3d` reconstruction plugin. You might want 
 to consider denoising reconstruction :code:`CcpiDenoisingGpu3d` if the FBP3D method is enabled.
 
-
-# TODO: for all examples below, show:
-# - process list w/ :code:`n` iterations in it
-# - the input data
-# - maybe the aligned projections at the end of the iterations
-# - the final reconstruction from the aligned projections
-
-
-Synthetic data example
-######################
+3. The alignment error is printed in iterations in :code:`Projection2dAlignment` plugin. It is a good practice to 
+watch the error behaviour in iterations. Ideally, the error should decrease in iterations, however, in practice
+it can slightly increase. If the error goes very large very quick then there is a good chance
+that the alignment doesn't work and it is better to terminate the iterations. 
 
 Real data example
-#################
+------------------
+The example bellow shows a real ptychography data being aligned. The data got a significant misalignment errors (shifts more than 50 pixels in each projection) 
+and therefore the implementation 1 has been chosen. 20 iterations of the iterative algorithm have been performed.
+
+.. figure:: iterative_ex5.png
+   :figwidth: 80%
+   :align: left
+   :figclass: align-left
+   
