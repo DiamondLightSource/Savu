@@ -27,7 +27,6 @@ import copy
 import h5py
 import logging
 import numpy as np
-from fractions import gcd
 
 from savu.data.meta_data import MetaData
 from savu.data.data_structures.data_add_ons import Padding
@@ -345,7 +344,7 @@ class PluginData(object):
             frame_chunk = self.meta_data.get("max_frames_process")
             chunk = self.data_obj.get_preview().get_starts_stops_steps(
                 key='chunks')[self.get_slice_directions()[0]]
-            self.meta_data.set('max_frames_process', gcd(frame_chunk, chunk))
+            self.meta_data.set('max_frames_process', math.gcd(frame_chunk, chunk))
         return self.meta_data.get("max_frames_process")
 
     def _get_max_frames_transfer(self):
@@ -358,17 +357,17 @@ class PluginData(object):
 
     def _get_no_squeeze(self):
         return self.no_squeeze
-    
+
     def _set_rank_inc(self, n):
         """ Increase the rank of the array passed to the plugin by n.
-        
+
         :param int n: Rank increment.
         """
         self._increase_rank = n
-    
+
     def _get_rank_inc(self):
         """ Return the increased rank value
-        
+
         :returns: Rank increment
         :rtype: int
         """
