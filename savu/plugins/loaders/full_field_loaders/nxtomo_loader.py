@@ -71,6 +71,15 @@ class NxtomoLoader(BaseLoader):
                 data_obj.meta_data.set(["stats", key], stats_dict[key])
             stats_obj._write_stats_to_file(p_num=1, plugin_name="raw_data")
 
+        fsplit = self.exp.meta_data["data_path"].split("/")
+        fsplit[-1] = "preview"
+        preview_path = "/".join(fsplit)
+        if preview_path in data_obj.backing_file:
+            print("PREVIEW FOUND")
+            preview_str = data_obj.backing_file[preview_path][()]
+            preview = preview_str.split(",")
+            self.parameters["preview"] = preview
+
         self._set_dark_and_flat(data_obj)
 
         self.nFrames = self.__get_nFrames(data_obj)
