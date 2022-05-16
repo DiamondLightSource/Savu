@@ -67,8 +67,14 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
 
         in_meta_data = self.get_in_meta_data()[0]
         # extracting parameters from metadata
-        angles_meta_deg = in_meta_data.get('rotation_angle')
-        self.angles_rad = np.deg2rad(angles_meta_deg)
+        angles_meta_deg = in_meta_data.get('rotation_angle')        
+        try:
+            if self.exp.meta_data.get("synthetic") == True:
+                self.angles_rad = np.deg2rad(angles_meta_deg)
+            else:
+                self.angles_rad = -np.deg2rad(angles_meta_deg)
+        except:
+            self.angles_rad = -np.deg2rad(angles_meta_deg)
         self.detectors_horiz = in_meta_data.get('detector_x_length')
 
         # get experimental metadata of projection_shifts
