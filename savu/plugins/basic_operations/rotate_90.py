@@ -59,6 +59,16 @@ class Rotate90(Plugin, CpuPlugin):
         c0, c1 = core_dims[0], core_dims[1]                        # core dimensions
         s0 = data_info["data_patterns"][pattern]["slice_dims"][0]  # slice dimension
 
+        dark = in_dataset[0].data.dark()
+        flat = in_dataset[0].data.flat()
+        if dark.size:
+            in_dataset[0].data.update_dark(dark)
+        if flat.size:
+            in_dataset[0].data.update_flat(flat)
+
+        in_dataset[0].data.dark_updated = True
+        in_dataset[0].data.flat_updated = True
+
         # swapping round core dimensions in the shape due to rotation
         new_shape = list(data_info["shape"])
         new_shape[c0], new_shape[c1] = data_info["shape"][c1], data_info["shape"][c0]
