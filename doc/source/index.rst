@@ -5,6 +5,7 @@
    contain the root `toctree` directive.
 
 .. raw:: html
+
     <style> .comment {} </style>
 
 .. role:: comment
