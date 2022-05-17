@@ -4,6 +4,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. raw:: html
+    <style> .comment {} </style>
+
+.. role:: comment
+
 .. image:: files_and_images/Savu_logo_2_L_Res_trans2.png
     :scale: 100%
     :align: right

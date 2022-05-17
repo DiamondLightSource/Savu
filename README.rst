@@ -1,3 +1,9 @@
+
+.. raw:: html
+    <style> .comment {display:none;} </style>
+
+.. role:: comment
+
 |savu_full_tests| |savu_install| |coverage| |codefactor| |scrutinizer| |zenodo|
 
 |savu-lite-v| |savu-lite-latest| |platform| |downloads|
@@ -23,9 +29,9 @@ Savu is currently in use across the tomography beamlines at Diamond to reconstru
 
 .. _[1]: https://doi.org/10.1098/rsta.2014.0398
 
+.. rst-class:: comment
 
-..  youtube:: 7kja-R3WIYA
-
+    .. youtube:: 7kja-R3WIYA
 
 Features
 ========
