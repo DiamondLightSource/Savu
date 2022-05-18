@@ -8,7 +8,7 @@ class StatsUtils(object):
 
     _pattern_dict = {"projection": ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "4D_SCAN", "SINOMOVIE"],
                      "reconstruction": ["VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D"]}
-    _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
+    _stats_key = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
     plt.set_loglevel('WARNING')
 
@@ -105,7 +105,7 @@ class StatsUtils(object):
         i = 0
         for row in ax:
             for axis in row:
-                stat = self._stats_list[i]
+                stat = self._stats_key[i]
                 axis.plot(stats_df_new[stat], "x-", color=colours[i])
                 for plugin in array_plugins:  # adding 'error' bars for plugins with multiple values
                     if stats_df[stat][plugin] is not None:
@@ -162,15 +162,15 @@ class StatsUtils(object):
                         if f"{p_num}: {group[p_num].attrs.get('plugin_name')}" not in index_list[space]:
                             index_list[space].append(f"{p_num}: {group[p_num].attrs.get('plugin_name')}")
                         if group[p_num].ndim == 1:
-                            stats_list = list(group[p_num].attrs.get("stats_list"))
-                            if stat in stats_list:
-                                stats_dict[space][stat].append(group[p_num][stats_list.index(stat)])
+                            stats_key = list(group[p_num].attrs.get("stats_key"))
+                            if stat in stats_key:
+                                stats_dict[space][stat].append(group[p_num][stats_key.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
                         elif group[p_num].ndim == 2:
-                            stats_list = list(group[p_num].attrs.get("stats_list"))
-                            if stat in stats_list:
-                                stats_dict[space][stat].append(group[p_num][:, stats_list.index(stat)])
+                            stats_key = list(group[p_num].attrs.get("stats_key"))
+                            if stat in stats_key:
+                                stats_dict[space][stat].append(group[p_num][:, stats_key.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
             for p_num in list(group.keys()):

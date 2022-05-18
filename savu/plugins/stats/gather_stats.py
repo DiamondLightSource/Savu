@@ -56,7 +56,7 @@ class GatherStats(Plugin, CpuPlugin):
 
         in_dataset, out_dataset = self.get_datasets()
         self.stats_obj.calc_stats = False
-        self.stats_obj.set_stats_list(["max", "min", "mean", "mean_std_dev", "median_std_dev", "zeros", "zeros%",
+        self.stats_obj.set_stats_key(["max", "min", "mean", "mean_std_dev", "median_std_dev", "zeros", "zeros%",
                                        "range_used"])
         in_pData, out_pData = self.get_plugin_datasets()
 
@@ -102,7 +102,7 @@ class GatherStats(Plugin, CpuPlugin):
                     stats_group = h5file.require_group(stats_path)
                     dataset = stats_group.create_dataset("stats", shape=stats_array.shape, dtype=stats_array.dtype)
                     dataset[::] = stats_array[::]
-                    dataset.attrs.create("stats_list", list(self.stats_obj.stats_list))
+                    dataset.attrs.create("stats_key", list(self.stats_obj.stats_key))
 
     def _generate_warnings(self, volume_stats):
         warnings = []

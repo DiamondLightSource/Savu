@@ -40,8 +40,8 @@ class Statistics(object):
         self._repeat_count = 0
         self.plugin = None
         self.p_num = None
-        self.stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev"] # These are the stats calculated by default
-        self.slice_stats_list = None
+        self.stats_key = ["max", "min", "mean", "mean_std_dev", "median_std_dev"] # These are the stats calculated by default
+        self.slice_stats_key = None
         self.stats = None
         self.GPU = False
         self._iterative_group = None
@@ -52,8 +52,8 @@ class Statistics(object):
         self.plugin_name = plugin_self.name
         self.p_num = Statistics.count
         self.plugin = plugin_self
-        self.set_stats_list(self.stats_list)
-        self.stats = {stat: [] for stat in self.slice_stats_list}
+        self.set_stats_key(self.stats_key)
+        self.stats = {stat: [] for stat in self.slice_stats_key}
         if plugin_self.name in Statistics._no_stats_plugins:
             self.calc_stats = False
         if self.calc_stats:
@@ -192,11 +192,11 @@ class Statistics(object):
             stats = stats_list[instance]
         return stats
 
-    def set_stats_list(self, stats_list):
+    def set_stats_key(self, stats_key):
         valid = Statistics._possible_stats
-        stats_list = sorted(set(valid).intersection(stats_list), key=lambda stat: valid.index(stat))
-        self.stats_list = stats_list
-        self.slice_stats_list = list(set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in stats_list))))
+        stats_key = sorted(set(valid).intersection(stats_key), key=lambda stat: valid.index(stat))
+        self.stats_key = stats_key
+        self.slice_stats_key = list(set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in stats_key))))
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
@@ -217,19 +217,19 @@ class Statistics(object):
             if pad:
                 my_slice = self._unpad_slice(my_slice)
             slice_stats = {}
-            if "max" in self.slice_stats_list:
+            if "max" in self.slice_stats_key:
                 slice_stats["max"] = np.amax(my_slice).astype('float64')
-            if "min" in self.slice_stats_list:
+            if "min" in self.slice_stats_key:
                 slice_stats["min"] = np.amin(my_slice).astype('float64')
-            if "mean" in self.slice_stats_list:
+            if "mean" in self.slice_stats_key:
                 slice_stats["mean"] = np.mean(my_slice)
-            if "std_dev" in self.slice_stats_list:
+            if "std_dev" in self.slice_stats_key:
                 slice_stats["std_dev"] = np.std(my_slice)
-            if "zeros" in self.slice_stats_list:
+            if "zeros" in self.slice_stats_key:
                 slice_stats["zeros"] = self.calc_zeros(my_slice)
-            if "data_points" in self.slice_stats_list:
+            if "data_points" in self.slice_stats_key:
                 slice_stats["data_points"] = my_slice.size
-            if "RSS" in self.slice_stats_list and base_slice is not None:
+            if "RSS" in self.slice_stats_key and base_slice is not None:
                 base_slice = self._de_list(base_slice)
                 base_slice = self._unpad_slice(base_slice)
                 slice_stats["RSS"] = self.calc_rss(my_slice, base_slice)
@@ -280,28 +280,28 @@ class Statistics(object):
     def calc_volume_stats(self, slice_stats):
         slice_stats = slice_stats
         volume_stats = {}
-        if "max" in self.stats_list:
+        if "max" in self.stats_key:
             volume_stats["max"] = max(slice_stats["max"])
-        if "min" in self.stats_list:
+        if "min" in self.stats_key:
             volume_stats["min"] = min(slice_stats["min"])
-        if "mean" in self.stats_list:
+        if "mean" in self.stats_key:
             volume_stats["mean"] = np.mean(slice_stats["mean"])
-        if "mean_std_dev" in self.stats_list:
+        if "mean_std_dev" in self.stats_key:
             volume_stats["mean_std_dev"] = np.mean(slice_stats["std_dev"])
-        if "median_std_dev" in self.stats_list:
+        if "median_std_dev" in self.stats_key:
             volume_stats["median_std_dev"] = np.median(slice_stats["std_dev"])
-        if "NRMSD" in self.stats_list and None not in slice_stats["RSS"]:
+        if "NRMSD" in self.stats_key and None not in slice_stats["RSS"]:
             total_rss = sum(slice_stats["RSS"])
             n = sum(slice_stats["data_points"])
             RMSD = self.rmsd_from_rss(total_rss, n)
             the_range = volume_stats["max"] - volume_stats["min"]
             NRMSD = RMSD / the_range  # normalised RMSD (dividing by the range)
             volume_stats["NRMSD"] = NRMSD
-        if "zeros" in self.stats_list:
+        if "zeros" in self.stats_key:
             volume_stats["zeros"] = sum(slice_stats["zeros"])
-        if "zeros%" in self.stats_list:
+        if "zeros%" in self.stats_key:
             volume_stats["zeros%"] = (volume_stats["zeros"] / sum(slice_stats["data_points"])) * 100
-        if "range_used" in self.stats_list:
+        if "range_used" in self.stats_key:
             my_range = volume_stats["max"] - volume_stats["min"]
             if "int" in str(self.stats["dtype"]):
                 possible_max = np.iinfo(self.stats["dtype"]).max
@@ -368,7 +368,7 @@ class Statistics(object):
         self._already_called = True
         self._repeat_count += 1
         if self._iterative_group:
-            self.stats = {stat: [] for stat in self.slice_stats_list}
+            self.stats = {stat: [] for stat in self.slice_stats_key}
 
     def start_time(self):
         self.t0 = time.time()
@@ -387,15 +387,15 @@ class Statistics(object):
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         combined_stats_list = comm.allgather(slice_stats)
-        combined_stats = {stat: [] for stat in self.slice_stats_list}
+        combined_stats = {stat: [] for stat in self.slice_stats_key}
         for single_stats in combined_stats_list:
-            for key in self.slice_stats_list:
+            for key in self.slice_stats_key:
                 combined_stats[key] += single_stats[key]
         return combined_stats
 
     def _array_to_dict(self, stats_array, key_list=None):
         if key_list is None:
-            key_list = self.stats_list
+            key_list = self.stats_key
         stats_dict = {}
         for i, value in enumerate(stats_array):
             stats_dict[key_list[i]] = value
@@ -456,7 +456,7 @@ class Statistics(object):
         filename = f"{path}/stats.h5"
         stats_dict = self.get_stats(p_num, instance="all")
         stats_array = self._dict_to_array(stats_dict[0])
-        stats_list = list(stats_dict[0].keys())
+        stats_key = list(stats_dict[0].keys())
         for i, my_dict in enumerate(stats_dict):
             if i != 0:
                 stats_array = np.vstack([stats_array, self._dict_to_array(my_dict)])
@@ -472,7 +472,7 @@ class Statistics(object):
                     dataset[::] = stats_array[::]
                     dataset.attrs.create("plugin_name", plugin_name)
                     dataset.attrs.create("pattern", self.pattern)
-                    dataset.attrs.create("stats_list", stats_list)
+                    dataset.attrs.create("stats_key", stats_key)
                 if self._iterative_group:
                     l_stats = Statistics.loop_stats[self.l_num]
                     group1 = h5file.require_group("iterative")
