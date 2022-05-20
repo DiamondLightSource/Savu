@@ -197,11 +197,11 @@ def _edit_process_list(options, beamline):
     #  Only 'open', 'set', 'mod' and 'save' should be used.
     if beamline == "i23":
         commands = [f"open {options['process_file']}",
-                    f"set 3 on",
+                    f"set 2 on",
                     f"save {options['process_file']}"]
     else:
         commands = [f"open {options['process_file']}",
-                    f"set 3 off",
+                    f"set 2 off",
                     f"save {options['process_file']}"]
     plugin_list = internal_config(*commands)
     active_plugins = []

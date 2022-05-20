@@ -558,6 +558,7 @@ class BaseTransport(object):
             if data_path in nxs_file:
                 del nxs_file[data_path]
             nxs_file[data_path] = h5py.ExternalLink(os.path.abspath(data.backing_file.filename), f"{group_name}/data")
+            nxs_file[data_path].attrs.create("pre_run", True)
 
     def _output_metadata(self, data, entry, name, dump=False):
         self.__output_data_type(entry, data, name)
