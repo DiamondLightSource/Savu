@@ -35,7 +35,7 @@ import savu.core.utils as cu
 from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
-from scripts.config_generator.savu_config import internal_config
+#from scripts.config_generator.savu_config import internal_config
 
 
 def __option_parser(doc=True):
@@ -193,22 +193,29 @@ def __get_beamline(options):
     except KeyError:
         return None
 
-def _edit_process_list(options, beamline):
+#def _edit_process_list(options, beamline):
+#    #  Only 'open', 'set', 'mod' and 'save' should be used.
+#    if beamline == "i23":
+#        commands = [f"open {options['process_file']}",
+#                    f"set 2 on",
+#                    f"save {options['process_file']}"]
+#    else:
+#        commands = [f"open {options['process_file']}",
+#                   f"set 2 off",
+#                    f"save {options['process_file']}"]
+#    plugin_list = internal_config(*commands)
+#    active_plugins = []
+#    for plugin in plugin_list:
+#        if plugin["active"]:
+#            active_plugins.append(plugin["name"])
+#    return active_plugins
+
+def _choose_process_list(options, beamline):
     #  Only 'open', 'set', 'mod' and 'save' should be used.
     if beamline == "i23":
-        commands = [f"open {options['process_file']}",
-                    f"set 2 on",
-                    f"save {options['process_file']}"]
-    else:
-        commands = [f"open {options['process_file']}",
-                    f"set 2 off",
-                    f"save {options['process_file']}"]
-    plugin_list = internal_config(*commands)
-    active_plugins = []
-    for plugin in plugin_list:
-        if plugin["active"]:
-            active_plugins.append(plugin["name"])
-    return active_plugins
+        options['process_file'] = 'savu/data/stats/pre_run_i23.nxs'
+        options["process_file_name"] = options["process_file"].split("/")[-1]
+
 
 def main(input_args=None):
     args = __option_parser(doc=False)
@@ -222,7 +229,7 @@ def main(input_args=None):
 
     try:
         beamline = __get_beamline(options)
-        _edit_process_list(options, beamline)
+        _choose_process_list(options, beamline)
         plugin_runner = pRunner(options)
         plugin_runner._run_plugin_list()
         plugin_runner.exp._save_pre_run_log()
