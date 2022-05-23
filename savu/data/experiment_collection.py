@@ -259,10 +259,10 @@ class Experiment(object):
                 #new_filename = os.path.join(folder, link.filename)
                 #with h5py.File(location, "r") as linked_file:
                 #    self.__copy_input_file_to_output_folder(linked_file, new_filename)
-            with h5py.File(filename, "r+") as new_file:
-                del new_file[data_path]
-                new_file[data_path] = h5py.ExternalLink(location, link.path)
-                pass
+                with h5py.File(filename, "r+") as new_file:
+                    del new_file[data_path]
+                    new_file[data_path] = h5py.ExternalLink(location, link.path)
+                    pass
 
     def __copy_input_file_to_output_folder(self, file, new_filename):
         with h5py.File(new_filename, "w") as new_file:
