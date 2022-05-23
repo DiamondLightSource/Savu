@@ -243,15 +243,31 @@ class Experiment(object):
             h5._link_datafile_to_nexus_file(data)
 
     def _create_pre_run_nxs_file(self):
+        data_path = self.meta_data["data_path"]
+
         for name, data in self.index["in_data"].items():
             raw_data = data.backing_file
             folder = self.meta_data['out_path']
             fname = self.meta_data.get('datafile_name') + '_pre_run.nxs'
             filename = os.path.join(folder, fname)
             self.meta_data.set("pre_run_filename", filename)
-            with h5py.File(filename, "w") as new_file:
-                for group_name in raw_data.keys():
-                    raw_data.copy(raw_data[group_name], new_file["/"], group_name)
+            self.__copy_input_file_to_output_folder(raw_data, filename)
+
+            if isinstance(raw_data.get(data_path, getlink=True), h5py.ExternalLink):
+                link = raw_data.get(data_path, getlink=True)
+                location = f'{"/".join(self.meta_data.get("data_file").split("/")[:-1])}/{link.filename}'
+                #new_filename = os.path.join(folder, link.filename)
+                #with h5py.File(location, "r") as linked_file:
+                #    self.__copy_input_file_to_output_folder(linked_file, new_filename)
+            with h5py.File(filename, "r+") as new_file:
+                del new_file[data_path]
+                new_file[data_path] = h5py.ExternalLink(location, link.path)
+                pass
+
+    def __copy_input_file_to_output_folder(self, file, new_filename):
+        with h5py.File(new_filename, "w") as new_file:
+            for group_name in file.keys():
+                file.copy(file[group_name], new_file["/"], group_name)
 
     def _set_dataset_names_complete(self):
         """ Missing in/out_datasets fields have been populated
