@@ -24,6 +24,7 @@ import numpy as np
 
 from savu.plugins.reconstructions.astra_recons.base_astra_vector_recon \
     import BaseAstraVectorRecon
+from savu.plugins.reconstructions.base_recon import BaseRecon
 from savu.plugins.driver.gpu_plugin import GpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.core.iterate_plugin_group_utils import \
@@ -72,6 +73,15 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
     def astra_2D_vector_recon(self, data):
         sino = data[0]
         cor, angles, vol_shape, init = self.get_frame_params()
+        skip = self.parameters['skip_projections']
+        if skip is not None:
+            skip_idx = self.get_skipping_indices(skip)
+        if skip_idx is not None:
+            max_idx = sino.shape[0]
+            skip_idx = np.unique(np.clip(skip_idx, 0, max_idx - 1))
+            use_idx = np.setdiff1d(np.arange(max_idx), skip_idx)
+            sino = sino[use_idx]
+            angles = angles[use_idx]
         if self.res:
             res = np.zeros(self.len_res)
         # create volume geom
@@ -127,6 +137,14 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
     def astra_3D_vector_recon(self, data):
         proj_data3d = data[0]  # get 3d block of projection data
         cor, angles, vol_shape, init = self.get_frame_params()
+        skip = self.parameters['skip_projections']
+        skip_idx = self.get_skipping_indices(skip)
+        if skip_idx is not None:
+            max_idx = proj_data3d.shape[0]
+            skip_idx = np.unique(np.clip(skip_idx, 0, max_idx - 1))
+            use_idx = np.setdiff1d(np.arange(max_idx), skip_idx)
+            proj_data3d = proj_data3d[use_idx]
+            angles = angles[use_idx]
         projection_shifts2d = self.get_frame_shifts()
         half_det_width = 0.5 * proj_data3d.shape[self.sino_dim_detX]
         cor_astra_scalar = half_det_width - np.mean(cor)  # works with scalar CoR only atm
