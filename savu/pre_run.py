@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-.. module:: tomo_recon
+.. module:: pre-run
    :platform: Unix
-   :synopsis: Runner for the Savu framework
+   :synopsis: Runner for the Savu framework during a pre-run
 
 .. moduleauthor:: Jacob Williamson <scientificsoftware@diamond.ac.uk>
 
