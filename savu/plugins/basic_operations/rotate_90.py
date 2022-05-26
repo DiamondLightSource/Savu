@@ -31,7 +31,7 @@ from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey
 
 import numpy as np
-
+import h5py
 @register_plugin
 class Rotate90(Plugin, CpuPlugin):
 # Each class must inherit from the Plugin class and a driver
@@ -89,7 +89,6 @@ class Rotate90(Plugin, CpuPlugin):
         if dtype is None:
             dtype = in_dataset[0].data.data.dtype
 
-
         # creating output dataset with new axis, shape and data patterns to reflect rotated image
         if dtype:
             out_dataset[0].create_dataset(shape=new_shape, axis_labels=new_axis_labels, dtype=dtype)
@@ -139,27 +138,16 @@ class Rotate90(Plugin, CpuPlugin):
             dark = in_dataset[0].data.dark_updated
             flat = in_dataset[0].data.flat_updated
 
-            file = out_dataset[0].backing_file
+            new_image_key = [0] * len(image_key)
+            new_image_key[- len(dark):] = [2] * len(dark)
+            new_image_key[- len(dark) - len(flat): - len(dark)] = [1] * len(flat)
 
-            shape = out_dataset[0].data.shape
-            dtype = in_dataset[0].data.dtype
-            copy_dataset = file.create_dataset("copy", shape=shape, dtype=dtype)
-            dataset_name = list(file.keys())[0]
+            out_dataset[0].data[- len(dark):] = dark
+            out_dataset[0].data[- len(dark) - len(flat): - len(dark)] = flat
 
-            i_dark = 0
-            i_flat = 0
-            i_data = 0
-            for i, key in enumerate(image_key):
-                if int(key) == 2:
-                    copy_dataset[i] = dark[i_dark]
-                    i_dark += 1
-                elif int(key) == 1:
-                    copy_dataset[i] = flat[i_flat]
-                    i_flat += 1
-                elif int(key) == 0:
-                    copy_dataset[i] = out_dataset[0].data[i_data]
-                    i_data += 1
+            out_dataset[0].data.image_key = new_image_key
 
-            file[dataset_name]["data"][::] = file["copy"][::]
-            out_dataset[0].data = ImageKey(out_dataset[0], image_key, 0)
-            del file["copy"]
+            out_dataset[0].data = ImageKey(out_dataset[0], new_image_key, 0)
+
+
+
