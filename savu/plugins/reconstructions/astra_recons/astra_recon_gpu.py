@@ -74,8 +74,7 @@ class AstraReconGpu(BaseAstraVectorRecon, GpuPlugin):
         sino = data[0]
         cor, angles, vol_shape, init = self.get_frame_params()
         skip = self.parameters['skip_projections']
-        if skip is not None:
-            skip_idx = self.get_skipping_indices(skip)
+        skip_idx = self.get_skipping_indices(skip)
         if skip_idx is not None:
             max_idx = sino.shape[0]
             skip_idx = np.unique(np.clip(skip_idx, 0, max_idx - 1))
