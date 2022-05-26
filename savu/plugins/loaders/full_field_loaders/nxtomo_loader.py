@@ -104,7 +104,6 @@ class NxtomoLoader(BaseLoader):
             for key in list(stats_dict.keys()):
                 data_obj.meta_data.set(["stats", key], stats_dict[key])
             stats_obj._write_stats_to_file(p_num=1, plugin_name="raw_data")
-            print(stats_dict)
 
         fsplit = self.exp.meta_data["data_path"].split("/")
         fsplit[-1] = "preview"
@@ -114,7 +113,6 @@ class NxtomoLoader(BaseLoader):
             preview_str = data_obj.backing_file[preview_path][()]
             preview = preview_str.split(",")
             self.parameters["preview"] = preview
-            print(preview)
 
     def _get_h5_entry(self, filename, path):
         if path in filename:

@@ -138,9 +138,9 @@ class Rotate90(Plugin, CpuPlugin):
             dark = in_dataset[0].data.dark_updated
             flat = in_dataset[0].data.flat_updated
 
-            new_image_key = [0] * len(image_key)
-            new_image_key[- len(dark):] = [2] * len(dark)
-            new_image_key[- len(dark) - len(flat): - len(dark)] = [1] * len(flat)
+            new_image_key = np.array([0.] * len(image_key))
+            new_image_key[- len(dark):] = [2.] * len(dark)
+            new_image_key[- len(dark) - len(flat): - len(dark)] = [1.] * len(flat)
 
             out_dataset[0].data[- len(dark):] = dark
             out_dataset[0].data[- len(dark) - len(flat): - len(dark)] = flat
@@ -148,6 +148,3 @@ class Rotate90(Plugin, CpuPlugin):
             out_dataset[0].data.image_key = new_image_key
 
             out_dataset[0].data = ImageKey(out_dataset[0], new_image_key, 0)
-
-
-
