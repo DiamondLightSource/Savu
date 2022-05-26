@@ -53,7 +53,8 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = self._get_h5_entry(
             data_obj.backing_file, self.parameters['data_path'])
-        exp.meta_data.set("data_path", self.parameters['data_path'])
+        exp.meta_data.set('data_path', self.parameters['data_path'])
+        exp.meta_data.set('image_key_path', self.parameters['image_key_path'])
 
         self._setup_after_pre_run(data_obj)
 
@@ -86,18 +87,12 @@ class NxtomoLoader(BaseLoader):
         data_obj.data._set_dark_and_flat()
 
     def _setup_after_pre_run(self, data_obj):
-        try:
-            if data_obj.backing_file[self.exp.meta_data["data_path"]].attrs.get("pre_run"):
-                self.after_pre_run = True
-            else:
-                self.after_pre_run = False
-        except KeyError:
-            self.after_pre_run = False
 
         fsplit = self.exp.meta_data["data_path"].split("/")
         fsplit[-1] = "stats"
         stats_path = "/".join(fsplit)
         if stats_path in data_obj.backing_file:
+            print("STATS FOUND IN INPUT DATA")
             stats_obj = Statistics()
             stats_obj.p_num = 1
             stats_obj.pattern = "PROJECTION"
@@ -109,15 +104,17 @@ class NxtomoLoader(BaseLoader):
             for key in list(stats_dict.keys()):
                 data_obj.meta_data.set(["stats", key], stats_dict[key])
             stats_obj._write_stats_to_file(p_num=1, plugin_name="raw_data")
+            print(stats_dict)
 
         fsplit = self.exp.meta_data["data_path"].split("/")
         fsplit[-1] = "preview"
         preview_path = "/".join(fsplit)
         if preview_path in data_obj.backing_file:
-            print("PREVIEW FOUND")
+            print("PREVIEW FOUND IN INPUT DATA")
             preview_str = data_obj.backing_file[preview_path][()]
             preview = preview_str.split(",")
             self.parameters["preview"] = preview
+            print(preview)
 
     def _get_h5_entry(self, filename, path):
         if path in filename:

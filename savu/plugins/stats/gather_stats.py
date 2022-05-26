@@ -106,10 +106,10 @@ class GatherStats(Plugin, CpuPlugin):
 
     def _generate_warnings(self, volume_stats):
         warnings = []
-        if volume_stats["zeros%"] > 0.01:
+        if volume_stats["zeros%"] > 10:
             warnings.append(f"Percentage of data points that are 0s is {volume_stats['zeros%']}")
         if volume_stats["range_used"] < 2:
             warnings.append(f"Only {volume_stats['range_used']}% of the possible range of the datatype (\
-{self.stats_obj.stats['dtype']}) has been used. The datatypeused, {self.stats_obj.stats['dtype']} can go from \
+{self.stats_obj.stats['dtype']}) has been used. The datatype used, {self.stats_obj.stats['dtype']} can go from \
 {self.stats_obj.stats['possible_min']} to {self.stats_obj.stats['possible_max']}")
         self.exp.meta_data.set("warnings", warnings)
