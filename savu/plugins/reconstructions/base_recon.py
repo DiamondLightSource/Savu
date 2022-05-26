@@ -550,3 +550,63 @@ class BaseRecon(Plugin):
         memory_free_info = sp.check_output(command.split()).decode('ascii').split('\n')[:-1][1:]
         memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)]
         return memory_free_values
+
+    def _handle_case_1(self, in_text):
+        final_idx = eval(in_text)
+        return final_idx
+
+    def _handle_case_2(self, in_text):
+        pos1 = [idx - 2 for idx, char in enumerate(in_text) if char == "."]
+        pos2 = [idx for idx, char in enumerate(in_text) if char == ")"]
+        list_idx1 = []
+        for i, pos in enumerate(pos1):
+            cmd = in_text[pos:pos2[i] + 1]
+            list_idx1.extend(eval(cmd))
+        for i, pos in enumerate(pos1):
+            tmp = "-1"
+            for j in range(2, 1 + pos2[i] - pos):
+                tmp = tmp + " "
+            in_text = in_text.replace(in_text[pos:pos2[i] + 1], tmp)
+        text = in_text.replace("[", "")
+        text = text.replace("]", "")
+        out_text = text.split(",")
+        list_idx = [int(x) for x in out_text]
+        list_idx = np.asarray(list_idx)
+        list_idx = list_idx[list_idx != -1]
+        final_idx = np.sort(np.concatenate((np.asarray(list_idx1), list_idx)))
+        return np.unique(np.int16(final_idx))
+
+    def _handle_case_3(self, in_text):
+        text = in_text.replace("[", "")
+        text = text.replace("]", "")
+        out_text = text.split(",")
+        final_idx = []
+        for x in out_text:
+            try:
+                num = int(x)
+                final_idx.append(num)
+            except ValueError:
+                pass
+        if final_idx:
+            final_idx = np.unique(np.sort(final_idx))
+        else:
+            final_idx = None
+        return final_idx
+
+    def get_skipping_indices(self, in_text):
+        if isinstance(in_text, str):
+            if "np." in in_text:
+                final_idx = self._handle_case_1(in_text)
+                if not isinstance(final_idx, np.ndarray):
+                    final_idx = self._handle_case_2(in_text)
+                else:
+                    final_idx = np.unique(np.sort(np.ndarray.flatten(final_idx)))
+            else:
+                final_idx = self._handle_case_3(in_text)
+            if not isinstance(final_idx, np.ndarray):
+                raise ValueError("Incorrect syntax!!!")
+        elif isinstance(in_text, list):
+            final_idx = np.unique(np.sort(np.asarray(in_text)))
+        else:
+            final_idx = None
+        return final_idx
