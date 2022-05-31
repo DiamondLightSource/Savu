@@ -179,6 +179,7 @@ class OtsuThresh(Plugin, CpuPlugin):
                 if self.volume_crop[direction] > self.orig_edges[direction]:
                     self.volume_crop[direction] = self.orig_edges[direction]
         preview = f":, {self.volume_crop['above']}:{self.volume_crop['below']}, {self.volume_crop['left']}:{self.volume_crop['right']}"
+        self.exp.meta_data.set("pre_run_preview", preview)
 
         return preview
 

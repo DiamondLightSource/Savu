@@ -176,8 +176,12 @@ class Experiment(object):
                 pre_run_log.write(f"# During the pre-run, the following process list was run:\n")
                 pre_run_log.write(f"{self.meta_data.get('process_file_name')}\n")
                 pre_run_log.write(f"# The following statistics were calculated on the input data:\n")
-                for key, value in self.meta_data.get("pre_process_stats").items():
-                    pre_run_log.write(f" ~ {key}: {value}\n")
+                if "pre_run_stats" in self.meta_data.get_dictionary().keys():
+                    for key, value in self.meta_data.get("pre_run_stats").items():
+                        pre_run_log.write(f"   {key}: {value}\n")
+                if "pre_run_preview" in self.meta_data.get_dictionary().keys():
+                    pre_run_log.write(f"# The following value for the preview parameter was calculated from the input data:\n")
+                    pre_run_log.write(f"   {self.meta_data.get('pre_run_preview')}")
                 if len(self.meta_data.get("warnings")) != 0:
                     pre_run_log.write(f"# Please read the following warnings before deciding whether to continue:\n")
                     for warning in self.meta_data.get("warnings"):

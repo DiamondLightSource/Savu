@@ -88,7 +88,7 @@ class GatherStats(Plugin, CpuPlugin):
         if self.exp.meta_data.get("pre_run"):
 
             self._generate_warnings(volume_stats)
-            self.exp.meta_data.set("pre_process_stats", volume_stats)
+            self.exp.meta_data.set("pre_run_stats", volume_stats)
 
             folder = self.exp.meta_data['out_path']
             fname = self.exp.meta_data.get('datafile_name') + '_pre_run.nxs'
