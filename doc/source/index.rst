@@ -50,6 +50,7 @@ Table of Contents
     reference/framework_contents
     reference/stats_documentation/stats
     reference/iterative_api/iterative
+    reference/pre_run_documentation/pre_run
 
 .. _tutorials_content:
 
