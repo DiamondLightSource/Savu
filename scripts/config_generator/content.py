@@ -646,6 +646,16 @@ class Content(object):
         pos = self.find_position(str_pos)
         self.plugin_list.plugin_list[pos]["active"] = status
 
+    def split_pos_to_list(self, str_pos):
+        """Split the position string into a list of numbers and letters
+        :param str_pos: the plugin display position string.
+        :returns: a list with the position number and letter
+        """
+        num = re.findall(r"\d+", str_pos)[0]
+        letter = re.findall("[a-z]", str_pos)
+        entry = [num, letter[0]] if letter else [num]
+        return entry
+
     def convert_pos(self, str_pos):
         """ Converts the display position (input) to the equivalent numerical
         position and updates the display position if required.
@@ -656,9 +666,7 @@ class Content(object):
         :rtype: (pos, str_pos)
         """
         pos_list = self.get_split_positions()
-        num = re.findall(r"\d+", str_pos)[0]
-        letter = re.findall("[a-z]", str_pos)
-        entry = [num, letter[0]] if letter else [num]
+        entry = self.split_pos_to_list(str_pos)
 
         # full value already exists in the list
         if entry in pos_list:
@@ -745,6 +753,12 @@ class Content(object):
             return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
+        """ Increment plugin positions following index start, by provided inc
+        :param start: Plugin starting index
+        :param pos_list: plugin position list
+        :param entry: entry list
+        :param inc: increment value
+        """
         if len(entry) == 1:
             self.inc_numbers(start, pos_list, inc)
         else:
@@ -1078,16 +1092,12 @@ class Content(object):
         else:
             print(f"Level is set at '{self.disp_level}'")
 
-    def remove(self, pos):
-        if pos >= self.size:
-            raise Exception(
-                "Cannot remove plugin %s as it does not exist."
-                % self.plugin_list.plugin_list[pos]["name"]
-            )
-        pos_str = self.plugin_list.plugin_list[pos]["pos"]
+    def remove(self, str_pos):
+        pos = self.find_position(str_pos)
+        entry = self.split_pos_to_list(str_pos)
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
-        self.inc_positions(pos, pos_list, pos_str, -1)
+        self.inc_positions(pos, pos_list, entry, -1)
 
     def check_iterative_loops(self, positions, direction):
         """
