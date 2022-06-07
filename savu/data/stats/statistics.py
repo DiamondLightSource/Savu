@@ -40,7 +40,7 @@ class Statistics(object):
         self._repeat_count = 0
         self.plugin = None
         self.p_num = None
-        self.stats_key = ["max", "min", "mean", "mean_std_dev", "median_std_dev"] # These are the stats calculated by default
+        self.stats_key = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "RMSD"]
         self.slice_stats_key = None
         self.stats = None
         self.GPU = False
@@ -193,12 +193,22 @@ class Statistics(object):
         return stats
 
     def set_stats_key(self, stats_key):
+        """Changes which stats are to be calculated for the current plugin.
+
+        :param stats_key: List of stats to be calculated.
+        """
         valid = Statistics._possible_stats
         stats_key = sorted(set(valid).intersection(stats_key), key=lambda stat: valid.index(stat))
         self.stats_key = stats_key
         self.slice_stats_key = list(set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in stats_key))))
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
+        """Sets slice stats for the current slice.
+
+        :param my_slice: The slice whose stats are being set.
+        :param base_slice: Provide a base slice to calculate residuals from, to calculate RMSD.
+        :param pad: Specify whether slice is padded or not (usually can leave as True even if slice is not padded).
+        """
         slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
         if slice_stats is not None:
             for key, value in slice_stats.items():
@@ -211,6 +221,7 @@ class Statistics(object):
 
         :param my_slice: The slice whose stats are being calculated.
         :param base_slice: Provide a base slice to calculate residuals from, to calculate RMSD.
+        :param pad: Specify whether slice is padded or not (usually can leave as True even if slice is not padded).
         """
         if my_slice is not None:
             my_slice = self._de_list(my_slice)
@@ -265,13 +276,13 @@ class Statistics(object):
             rmsd = None
         return rmsd
 
-    def calc_stats_residuals(self, stats_before, stats_after):
+    def calc_stats_residuals(self, stats_before, stats_after):  # unused
         residuals = {'max': None, 'min': None, 'mean': None, 'std_dev': None}
         for key in list(residuals.keys()):
             residuals[key] = stats_after[key] - stats_before[key]
         return residuals
 
-    def set_stats_residuals(self, residuals):
+    def set_stats_residuals(self, residuals):  #unused
         self.residuals['max'].append(residuals['max'])
         self.residuals['min'].append(residuals['min'])
         self.residuals['mean'].append(residuals['mean'])
@@ -386,6 +397,11 @@ class Statistics(object):
             self._write_times_to_file(comm)
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
+        """Combines slice stats from different processes, so volume stats can be calculated.
+
+        :param slice_stats: slice stats (each process will have a different set).
+        :param comm: MPI communicator being used.
+        """
         combined_stats_list = comm.allgather(slice_stats)
         combined_stats = {stat: [] for stat in self.slice_stats_key}
         for single_stats in combined_stats_list:
@@ -394,6 +410,7 @@ class Statistics(object):
         return combined_stats
 
     def _array_to_dict(self, stats_array, key_list=None):
+        """"""
         if key_list is None:
             key_list = self.stats_key
         stats_dict = {}
