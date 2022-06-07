@@ -112,6 +112,9 @@ class NxtomoLoader(BaseLoader):
             print("PREVIEW FOUND IN INPUT DATA")
             preview_str = data_obj.backing_file[preview_path][()]
             preview = preview_str.split(",")
+            for i, crop in enumerate(self.parameters["preview"]):
+                if crop != ":":  # Take preview dimensions from user parameter where they exist
+                    preview[i] = crop
             self.parameters["preview"] = preview
 
     def _get_h5_entry(self, filename, path):
