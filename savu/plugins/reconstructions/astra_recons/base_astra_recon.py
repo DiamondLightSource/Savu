@@ -133,6 +133,14 @@ class BaseAstraRecon(BaseRecon):
     def astra_2D_recon(self, data):
         sino = data[0]
         cor, angles, vol_shape, init = self.get_frame_params()
+        skip = self.parameters['skip_projections']
+        skip_idx = self.get_skipping_indices(skip)
+        if skip_idx is not None:
+            max_idx = sino.shape[0]
+            skip_idx = np.unique(np.clip(skip_idx, 0, max_idx - 1))
+            use_idx = np.setdiff1d(np.arange(max_idx), skip_idx)
+            sino = sino[use_idx]
+            angles = angles[use_idx]
         angles = np.deg2rad(angles)
         if self.res:
             res = np.zeros(self.len_res)

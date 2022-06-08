@@ -79,10 +79,21 @@ class TomopyRecon(BaseRecon, CpuPlugin):
                        key in options.keys()}
         self._finalise_data = self._transpose if self.parameters['outer_pad']\
             else self._apply_mask
+        skip = self.parameters['skip_projections']
+        if skip is not None:
+            self.skip_idx = self.get_skipping_indices(skip)
+        else:
+            self.skip_idx = None
 
     def process_frames(self, data):
         self.sino = data[0]
         self.cors, angles, vol_shape, init = self.get_frame_params()
+        if self.skip_idx is not None:
+            max_idx = self.sino.shape[0]
+            skip_idx = np.unique(np.clip(self.skip_idx, 0, max_idx - 1))
+            use_idx = np.setdiff1d(np.arange(max_idx), skip_idx)
+            self.sino = self.sino[use_idx]
+            angles = angles[use_idx]
         if init:
             self.kwargs['init_recon'] = init
         recon = tomopy.recon(self.sino, np.deg2rad(angles),
