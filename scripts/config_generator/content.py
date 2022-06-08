@@ -352,13 +352,14 @@ class Content(object):
 
     def move(self, old, new):
         old_pos = self.find_position(old)
+        n_pos = self.find_position(new)
         entry = self.plugin_list.plugin_list[old_pos]
         self.remove(old)
-        new_pos, new = self.convert_pos(new)
+        new_pos, new_pos_str = self.convert_pos(new)
         name = entry["name"]
-        self.insert(pu.plugins[name](), new_pos, new)
+        self.insert(pu.plugins[name](), new_pos, new_pos_str)
         self.plugin_list.plugin_list[new_pos] = entry
-        self.plugin_list.plugin_list[new_pos]["pos"] = new
+        self.plugin_list.plugin_list[new_pos]["pos"] = new_pos_str
         self.check_iterative_loops([old_pos + 1, new_pos + 1], 0)
 
     def replace(self, old, new_plugin):
