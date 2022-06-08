@@ -353,7 +353,7 @@ class Content(object):
     def move(self, old, new):
         old_pos = self.find_position(old)
         entry = self.plugin_list.plugin_list[old_pos]
-        self.remove(old_pos)
+        self.remove(old)
         new_pos, new = self.convert_pos(new)
         name = entry["name"]
         self.insert(pu.plugins[name](), new_pos, new)
@@ -363,8 +363,7 @@ class Content(object):
 
     def replace(self, old, new_plugin):
         self.check_for_plugin_failure(new_plugin)
-        old_pos = self.find_position(old)
-        self.remove(old_pos)
+        self.remove(old)
         pos, str_pos = self.convert_pos(old)
         plugin = pu.plugins[new_plugin]()
         plugin.get_plugin_tools()._populate_default_parameters()
