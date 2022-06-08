@@ -271,12 +271,12 @@ def _rem(content, args):
     for pos in args.pos:
         pos_sort.append(int(pos))
     pos_sort.sort()
-    counter=0
+    counter = 0
     for pos in pos_sort:
-        if ((counter>0 and pos>0)):
-            pos-=counter
-        content.remove(content.find_position(str(pos)))
-        counter+=1
+        if ((counter > 0 and pos > 0)):
+            pos -= counter
+        content.remove(str(pos))
+        counter += 1
         content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
