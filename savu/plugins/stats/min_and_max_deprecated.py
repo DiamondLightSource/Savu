@@ -31,7 +31,7 @@ import savu.core.utils as cu
 class MinAndMaxDeprecated(Plugin, CpuPlugin):
 
     def __init__(self):
-        super(MinAndMaxDeprecated, self).__init__("MinAndMax")
+        super(MinAndMaxDeprecated, self).__init__("MinAndMaxDeprecated")
 
     def circle_mask(self, width, ratio):
         # Create a circle mask.
