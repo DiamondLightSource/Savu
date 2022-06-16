@@ -55,11 +55,11 @@ def enable_iterative_loop(setup_fn):
                 # start plugin's 'plugin_in_datasets'
                 orig_start_pData = PluginData(out_dataset[0], start_plugin)
                 orig_start_pData.padding = in_padding
-                orig_start_pData.plugin_data_setup(in_pattern, 'single')
+                orig_start_pData.plugin_data_setup(in_pattern, max_frames)
                 start_plugin.parameters['plugin_in_datasets'].append(orig_start_pData)
                 clone_start_pData = PluginData(out_dataset[1], start_plugin)
                 clone_start_pData.padding = in_padding
-                clone_start_pData.plugin_data_setup(in_pattern, 'single')
+                clone_start_pData.plugin_data_setup(in_pattern, max_frames)
                 start_plugin.parameters['plugin_in_datasets'].append(clone_start_pData)
                 # "re-finalise" the plugin datasets for the start plugin, now
                 # that these new PluginData obejcts have been added

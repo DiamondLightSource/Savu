@@ -84,7 +84,7 @@ class Statistics(object):
         cls.plugin_numbers = {}
         cls.plugin_names = {}
         cls._loop_counter = 0
-        cls._RMSD = True
+        cls._RMSD = False
         cls.path = exp.meta_data['out_path']
         if cls.path[-1] == '/':
             cls.path = cls.path[0:-1]
@@ -347,6 +347,8 @@ class Statistics(object):
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
         out_datasets = self.plugin.get_out_datasets()
+        if len(out_datasets) == 0:
+            self.calc_stats = False
         try:
             self.pattern = self.plugin.parameters['pattern']
             if self.pattern == None:
@@ -360,10 +362,9 @@ class Statistics(object):
                     if 1 in patterns.get(pattern)["slice_dims"]:
                         self.pattern = pattern
                         break
-        self.calc_stats = False
-        for dataset in out_datasets:
-            if bool(set(Statistics._pattern_list) & set(dataset.data_info.get("data_patterns"))):
-                self.calc_stats = True
+                    self.pattern = None
+        if self.pattern not in Statistics._pattern_list:
+            self.calc_stats = False
 
     def _link_stats_to_datasets(self, stats_dict, iterative=False):
         """Links the volume wide statistics to the output dataset(s)"""

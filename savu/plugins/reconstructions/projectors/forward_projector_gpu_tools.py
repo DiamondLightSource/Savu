@@ -7,6 +7,12 @@ In case when angles set to None, the metadata projection geometry will be used.
     """
     def define_parameters(self):
         """
+        padding:
+            visibility: intermediate
+            dtype: int
+            description: The amount of pixels to pad each slab of the cropped data.
+            default: 0
+
         angles_deg:
             visibility: advanced
             dtype: [None, list[float,float,int]]

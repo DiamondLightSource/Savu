@@ -1,0 +1,1651 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="iterative-plugin-dataset-swapping_cont.svg"
+   inkscape:export-filename="/home/twi18192/iterative-plugin-dataset-swapping_cont.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker10225"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Lend">
+      <path
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path10223"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Mend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path5011"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         transform="scale(0.4) rotate(180) translate(10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Lend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path5023"
+         style="fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round;stroke:#000000;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(1.1) rotate(180) translate(1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-5"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-5"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-9"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-9"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-4"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-7"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-9-8"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-9-6"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-0"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-79"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-7"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-1"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-7-0"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-1-8"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-1"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-8"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-9-8-6"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-9-6-3"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker10225-9"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Lend">
+      <path
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         id="path10223-7"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-9-8-6-8"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-9-6-3-2"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-7-0-4"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-1-8-3"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-1-0"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-8-6"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-3-1-0-2"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path5023-6-8-6-3"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.25"
+     inkscape:cx="-3472.7088"
+     inkscape:cy="6323.1619"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1136"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Boxes"
+     style="display:inline" />
+  <g
+     inkscape:label="Text"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1555.1833"
+       y="-1128.0508"
+       id="text3701"><tspan
+         sodipodi:role="line"
+         id="tspan3699"
+         x="-1555.1833"
+         y="-1128.0508"
+         style="font-size:14.11111069px;stroke-width:0.26458332px">Iteration 0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1561.5558"
+       y="-825.67316"
+       id="text3705"><tspan
+         sodipodi:role="line"
+         id="tspan3703"
+         x="-1561.5558"
+         y="-825.67316"
+         style="font-size:14.11111069px;stroke-width:0.26458332px">Iteration 1</tspan></text>
+    <g
+       id="g14400">
+      <rect
+         y="-1697.1541"
+         x="-1053.3511"
+         height="198.64481"
+         width="509.50076"
+         id="rect3711"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.27613711;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544" />
+      <text
+         id="text3709"
+         y="-1665.2584"
+         x="-973.90619"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:14.11111069px;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1665.2584"
+           x="-973.90619"
+           id="tspan3707"
+           sodipodi:role="line">Prelliminary info: the <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace"
+   id="tspan1799">IteratePluginGroup</tspan> class</tspan></text>
+      <text
+         id="text3717"
+         y="-1547.4811"
+         x="-1035.9697"
+         style="font-style:normal;font-weight:normal;font-size:11.28888893px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           id="tspan3727"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.28888893px;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1547.4811"
+           x="-1035.9697"
+           sodipodi:role="line">__set_datasets()</tspan></text>
+      <text
+         id="text3723"
+         y="-1620.8085"
+         x="-1026.8983"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           id="tspan3737"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1620.8085"
+           x="-1026.8983"
+           sodipodi:role="line">_ip_data_dict</tspan></text>
+      <text
+         id="text3743"
+         y="-1634.4155"
+         x="-911.99359"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1634.4155"
+           x="-911.99359"
+           id="tspan3741"
+           sodipodi:role="line">This is the attribute that holds all the datasets involved:</tspan><tspan
+           id="tspan3745"
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1621.1864"
+           x="-911.99359"
+           sodipodi:role="line">- input file for very first iteration</tspan><tspan
+           id="tspan3747"
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1607.9572"
+           x="-911.99359"
+           sodipodi:role="line">- input dataset to plugin</tspan><tspan
+           id="tspan3749"
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1594.728"
+           x="-911.99359"
+           sodipodi:role="line">- &quot;original&quot; dataset for output</tspan><tspan
+           id="tspan3751"
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1581.4989"
+           x="-911.99359"
+           sodipodi:role="line">- &quot;cloned&quot; dataset for output (different backing file to the &quot;original&quot;)</tspan></text>
+      <text
+         id="text3759"
+         y="-1554.2847"
+         x="-913.50549"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1554.2847"
+           x="-913.50549"
+           id="tspan3757"
+           sodipodi:role="line">This is the method that swaps the</tspan><tspan
+           id="tspan3761"
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1541.0555"
+           x="-913.50549"
+           sodipodi:role="line">datasets around before every iteration.</tspan><tspan
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1527.8263"
+           x="-913.50549"
+           sodipodi:role="line"
+           id="tspan3816">It does this by modifying <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace"
+   id="tspan1723">self.parameters['in_datasets']</tspan></tspan><tspan
+           style="stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+           y="-1514.5972"
+           x="-913.50549"
+           sodipodi:role="line"
+           id="tspan1725">and <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none"
+   id="tspan3820">self.parameters['out_datasets']</tspan></tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1227.6497"
+       y="-1842.9189"
+       id="text1553"><tspan
+         sodipodi:role="line"
+         id="tspan1551"
+         x="-1227.6497"
+         y="-1833.5552"
+         style="stroke-width:0.26458332px" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-798.9679"
+       y="-1446.5728"
+       id="text1619"><tspan
+         sodipodi:role="line"
+         id="tspan1617"
+         x="-798.9679"
+         y="-1446.5728"
+         style="font-size:19.75555611px;text-align:center;text-anchor:middle;stroke-width:0.26458332px">Running a process list with an iterative loop,</tspan><tspan
+         sodipodi:role="line"
+         x="-798.9679"
+         y="-1421.8783"
+         style="font-size:19.75555611px;text-align:center;text-anchor:middle;stroke-width:0.26458332px"
+         id="tspan1621">iterating over a single plugin</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1404.4469"
+       y="-1246.1312"
+       id="text3863"><tspan
+         sodipodi:role="line"
+         id="tspan3861"
+         x="-1404.4469"
+         y="-1246.1312"
+         style="font-size:14.11111069px;stroke-width:0.26458332px">Before running <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace"
+   id="tspan4962">__set_datasets()</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-896.97571"
+       y="-1241.1417"
+       id="text3867"><tspan
+         sodipodi:role="line"
+         id="tspan3865"
+         x="-896.97571"
+         y="-1241.1417"
+         style="font-size:14.11111069px;stroke-width:0.26458332px">After running <tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace"
+   id="tspan1728">__set_datasets()</tspan></tspan></text>
+    <g
+       id="g14418">
+      <rect
+         y="-1401.2932"
+         x="-1006.7704"
+         height="98.234718"
+         width="417.24661"
+         id="rect4034"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.30408964;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544" />
+      <text
+         id="text3879"
+         y="-1369.3359"
+         x="-991.21735"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+         xml:space="preserve"><tspan
+           style="fill:none;stroke:#000000;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+           y="-1359.9722"
+           x="-991.21735"
+           id="tspan3877"
+           sodipodi:role="line" /><tspan
+           id="tspan3881"
+           style="fill:#000000;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+           y="-1346.743"
+           x="-991.21735"
+           sodipodi:role="line">1. TomoPhantomLoader</tspan><tspan
+           id="tspan4022"
+           style="fill:#000000;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+           y="-1333.5138"
+           x="-991.21735"
+           sodipodi:role="line">2. TomoPhantomArtifacts</tspan><tspan
+           id="tspan1603"
+           style="fill:#000000;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+           y="-1320.2847"
+           x="-991.21735"
+           sodipodi:role="line">3. CcpiDenoisingGpu - an iterative loop is defined over this single plugin</tspan></text>
+      <text
+         id="text4028"
+         y="-1372.0574"
+         x="-844.03339"
+         style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+         xml:space="preserve"><tspan
+           style="font-size:14.11111069px;fill:#000000;stroke:none;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.99239544"
+           y="-1372.0574"
+           x="-844.03339"
+           id="tspan4026"
+           sodipodi:role="line">Process list</tspan></text>
+    </g>
+    <g
+       id="g14377">
+      <rect
+         y="-1229.9519"
+         x="-1455.7756"
+         height="86.178574"
+         width="322.79166"
+         id="rect4128"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:0.99239544" />
+      <text
+         id="text3871"
+         y="-1175.5233"
+         x="-1440.6565"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="-1175.5233"
+           x="-1440.6565"
+           id="tspan3869"
+           sodipodi:role="line"><tspan
+   id="tspan3875"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="-1162.2942"
+           x="-1440.6565"
+           sodipodi:role="line">phantom.h5</tspan></text>
+      <text
+         id="text4108"
+         y="-1205.0055"
+         x="-1411.9303"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="-1205.0055"
+           x="-1411.9303"
+           id="tspan4106"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <g
+       id="g4960"
+       transform="translate(-1171.5375,-1214.1389)">
+      <rect
+         y="89.264282"
+         x="-282.7262"
+         height="135.31548"
+         width="327.32736"
+         id="rect4935"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:0.99239544" />
+      <text
+         id="text3871-6"
+         y="139.11926"
+         x="-262.65912"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="139.11926"
+           x="-262.65912"
+           id="tspan3869-5"
+           sodipodi:role="line"><tspan
+   id="tspan3875-9"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-2"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="152.34843"
+           x="-262.65912"
+           sodipodi:role="line">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+      <text
+         id="text3871-6-4"
+         y="182.81723"
+         x="-263.57455"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="182.81723"
+           x="-263.57455"
+           id="tspan3869-5-8"
+           sodipodi:role="line"><tspan
+   id="tspan3875-9-6"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">self.parameters['out_datasets'][1]</tspan> has backing file</tspan><tspan
+           id="tspan3873-2-9"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="196.0464"
+           x="-263.57455"
+           sodipodi:role="line">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+      <text
+         id="text4108-6"
+         y="111.5403"
+         x="-237.37384"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="111.5403"
+           x="-237.37384"
+           id="tspan4106-0"
+           sodipodi:role="line">len(self.parameters['out_datasets']) = 2</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g4946-8"
+       transform="translate(-668.61834,-1233.0377)">
+      <path
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:0.99239544"
+         d="M -292.4548,6.6990905 H 39.317108 V 89.135889 H -292.4548 Z"
+         id="rect4128-9"
+         inkscape:connector-curvature="0" />
+      <text
+         id="text3871-0"
+         y="59.630943"
+         x="-267.60715"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="59.630943"
+           x="-267.60715"
+           id="tspan3869-2"
+           sodipodi:role="line"><tspan
+   id="tspan3875-1"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="72.860107"
+           x="-267.60715"
+           sodipodi:role="line">phantom.h5</tspan></text>
+      <text
+         id="text4108-0"
+         y="30.148808"
+         x="-238.88095"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="30.148808"
+           x="-238.88095"
+           id="tspan4106-4"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.74996996;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m -1121.8482,-1192.2359 146.56313,3.224"
+       id="path5000"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1106.3927"
+       y="-1205.4167"
+       id="text5652"><tspan
+         sodipodi:role="line"
+         id="tspan5650"
+         x="-1106.3927"
+         y="-1205.4167"
+         style="stroke-width:0.26458332px">the same backing file</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1102.6509"
+       y="-1086.4272"
+       id="text5656"><tspan
+         sodipodi:role="line"
+         id="tspan5654"
+         x="-1102.6509"
+         y="-1086.4272"
+         style="stroke-width:0.26458332px">different length list,</tspan><tspan
+         sodipodi:role="line"
+         x="-1102.6509"
+         y="-1073.1981"
+         style="stroke-width:0.26458332px"
+         id="tspan5658">only one Data object now</tspan></text>
+    <g
+       style="display:inline"
+       id="g4960-7"
+       transform="translate(-682.00145,-1205.9308)">
+      <g
+         id="g5715"
+         transform="translate(6.7351921,8.2319014)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.20058507;stroke-opacity:0.99239544"
+           id="rect4935-6"
+           width="327.39136"
+           height="77.756165"
+           x="-282.75821"
+           y="89.232285" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-262.65912"
+           y="139.11926"
+           id="text3871-6-0"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2"
+             x="-262.65912"
+             y="139.11926"
+             style="stroke-width:0.26458332px"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan3875-9-3">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+             sodipodi:role="line"
+             x="-262.65912"
+             y="152.34843"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-237.37384"
+           y="111.5403"
+           id="text4108-6-8"><tspan
+             sodipodi:role="line"
+             id="tspan4106-0-8"
+             x="-237.37384"
+             y="111.5403"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+      </g>
+    </g>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.74997008;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-5)"
+       d="m -1113.7754,-1057.7768 146.56306,3.224"
+       id="path5000-6"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.25733316;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-9)"
+       d="m -629.42463,-1125.2183 65.05821,-0.6563"
+       id="path5000-65"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-548.54401"
+       y="-1130.7107"
+       id="text6540"><tspan
+         sodipodi:role="line"
+         x="-548.54401"
+         y="-1130.7107"
+         style="stroke-width:0.26458332px"
+         id="tspan6542">run processing for iteration <tspan
+   style="font-weight:bold"
+   id="tspan9739">0</tspan> and write output data to</tspan><tspan
+         sodipodi:role="line"
+         x="-548.54401"
+         y="-1117.4816"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+         id="tspan6546">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+    <g
+       style="display:inline"
+       id="g4946-8-9"
+       transform="translate(-1158.6319,-923.15239)">
+      <rect
+         y="5.2023811"
+         x="-282.7262"
+         height="86.178574"
+         width="322.79166"
+         id="rect4128-9-5"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:0.99239544" />
+      <text
+         id="text3871-0-7"
+         y="59.630943"
+         x="-267.60715"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="59.630943"
+           x="-267.60715"
+           id="tspan3869-2-9"
+           sodipodi:role="line"><tspan
+   id="tspan3875-1-4"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="72.860107"
+           x="-267.60715"
+           sodipodi:role="line">phantom.h5</tspan></text>
+      <text
+         id="text4108-0-3"
+         y="30.148808"
+         x="-238.88095"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="30.148808"
+           x="-238.88095"
+           id="tspan4106-4-7"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g4960-7-7"
+       transform="translate(-1169.1864,-909.77841)">
+      <g
+         id="g5715-3"
+         transform="translate(6.7351921,8.2319014)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.20058507;stroke-opacity:0.99239544"
+           id="rect4935-6-1"
+           width="327.39136"
+           height="77.756165"
+           x="-282.75821"
+           y="89.232285" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-262.65912"
+           y="139.11926"
+           id="text3871-6-0-6"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2-0"
+             x="-262.65912"
+             y="139.11926"
+             style="stroke-width:0.26458332px"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan3875-9-3-3">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+             sodipodi:role="line"
+             x="-262.65912"
+             y="152.34843"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1-8">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-237.37384"
+           y="111.5403"
+           id="text4108-6-8-5"><tspan
+             sodipodi:role="line"
+             id="tspan4106-0-8-4"
+             x="-237.37384"
+             y="111.5403"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+      </g>
+    </g>
+    <g
+       style="display:inline"
+       id="g4946-8-8"
+       transform="translate(-664.33789,-924.58249)">
+      <path
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.27781254;stroke-opacity:0.99239544"
+         d="M -292.44819,6.7057051 H 39.310493 V 97.595941 H -292.44819 Z"
+         id="rect4128-9-4"
+         inkscape:connector-curvature="0" />
+      <text
+         id="text3871-0-0"
+         y="59.630943"
+         x="-267.60715"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="59.630943"
+           x="-267.60715"
+           id="tspan3869-2-2"
+           sodipodi:role="line"><tspan
+   id="tspan3875-1-40"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-9"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="72.860107"
+           x="-267.60715"
+           sodipodi:role="line">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';stroke-width:0.26458332px"
+           y="86.089279"
+           x="-267.60715"
+           sodipodi:role="line"
+           id="tspan7020">(which was the <tspan
+   style="font-weight:bold"
+   id="tspan7026">output</tspan> of iteration <tspan
+   style="font-weight:bold"
+   id="tspan9387">0</tspan>)</tspan></text>
+      <text
+         id="text4108-0-1"
+         y="30.148808"
+         x="-238.88095"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="30.148808"
+           x="-238.88095"
+           id="tspan4106-4-5"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g4960-7-9"
+       transform="translate(-679.70474,-903.28406)">
+      <g
+         id="g5715-8"
+         transform="translate(6.7351921,8.2319014)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.20058507;stroke-opacity:0.99239544"
+           id="rect4935-6-9"
+           width="327.39136"
+           height="77.756165"
+           x="-282.75821"
+           y="89.232285" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-266.89246"
+           y="131.71092"
+           id="text3871-6-0-1"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2-1"
+             x="-266.89246"
+             y="131.71092"
+             style="stroke-width:0.26458332px"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan3875-9-3-2">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+             sodipodi:role="line"
+             x="-266.89246"
+             y="144.94009"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1-1">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan><tspan
+             sodipodi:role="line"
+             x="-266.89246"
+             y="158.16925"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';stroke-width:0.26458332px"
+             id="tspan7067">(which has been unused so far)</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-237.37384"
+           y="111.5403"
+           id="text4108-6-8-3"><tspan
+             sodipodi:role="line"
+             id="tspan4106-0-8-5"
+             x="-237.37384"
+             y="111.5403"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+      </g>
+    </g>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.66293025;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-3)"
+       d="m -1100.8746,-864.71872 128.47118,3.3212"
+       id="path5000-8"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1092.8752"
+       y="-891.28546"
+       id="text5652-0"><tspan
+         sodipodi:role="line"
+         id="tspan5650-4"
+         x="-1092.8752"
+         y="-891.28546"
+         style="stroke-width:0.26458332px"><tspan
+   style="font-weight:bold"
+   id="tspan7436">different</tspan> backing file</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.25733316;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-9-8)"
+       d="m -614.69255,-814.19088 65.05758,0.7162"
+       id="path5000-65-7"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-533.66479"
+       y="-818.85236"
+       id="text6540-9"><tspan
+         sodipodi:role="line"
+         x="-533.66479"
+         y="-818.85236"
+         style="stroke-width:0.26458332px"
+         id="tspan6542-4">run processing for iteration <tspan
+   style="font-weight:bold"
+   id="tspan9737">1</tspan> and write output data to</tspan><tspan
+         sodipodi:role="line"
+         x="-533.66479"
+         y="-805.62317"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+         id="tspan6546-6">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.63562846;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-3-7)"
+       d="m -1095.2782,-767.0286 123.15633,3.3517"
+       id="path5000-8-7"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1088.3953"
+       y="-787.68304"
+       id="text5652-0-2"><tspan
+         sodipodi:role="line"
+         id="tspan5650-4-1"
+         x="-1088.3953"
+         y="-787.68304"
+         style="stroke-width:0.26458332px"><tspan
+   style="font-weight:bold"
+   id="tspan7436-4">different</tspan> backing file</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-925.45312"
+       y="-253.07616"
+       id="text3705-2"><tspan
+         sodipodi:role="line"
+         x="-925.45312"
+         y="-253.07616"
+         style="font-size:14.11111069px;stroke-width:0.26458332px"
+         id="tspan1298">After the final Iteration has completed</tspan></text>
+    <g
+       style="display:inline"
+       id="g4946-8-9-7"
+       transform="translate(-1145.9247,-589.91176)">
+      <rect
+         y="5.2023811"
+         x="-282.7262"
+         height="86.178574"
+         width="322.79166"
+         id="rect4128-9-5-0"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:0.99239544" />
+      <text
+         id="text3871-0-7-1"
+         y="59.630943"
+         x="-267.60715"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"
+         inkscape:export-xdpi="96"
+         inkscape:export-ydpi="96"><tspan
+           style="stroke-width:0.26458332px"
+           y="59.630943"
+           x="-267.60715"
+           id="tspan3869-2-9-5"
+           sodipodi:role="line"><tspan
+   id="tspan3875-1-4-0"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-0-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="72.860107"
+           x="-267.60715"
+           sodipodi:role="line">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+      <text
+         id="text4108-0-3-2"
+         y="30.148808"
+         x="-238.88095"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="30.148808"
+           x="-238.88095"
+           id="tspan4106-4-7-9"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g4960-7-7-3"
+       transform="translate(-1156.4792,-576.53779)">
+      <g
+         id="g5715-3-1"
+         transform="translate(6.7351921,8.2319014)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.20058507;stroke-opacity:0.99239544"
+           id="rect4935-6-1-0"
+           width="327.39136"
+           height="77.756165"
+           x="-282.75821"
+           y="89.232285" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-262.65912"
+           y="139.11926"
+           id="text3871-6-0-6-1"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2-0-2"
+             x="-262.65912"
+             y="139.11926"
+             style="stroke-width:0.26458332px"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan3875-9-3-3-1">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+             sodipodi:role="line"
+             x="-262.65912"
+             y="152.34843"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1-8-4">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-237.37384"
+           y="111.5403"
+           id="text4108-6-8-5-8"><tspan
+             sodipodi:role="line"
+             id="tspan4106-0-8-4-6"
+             x="-237.37384"
+             y="111.5403"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+      </g>
+    </g>
+    <g
+       style="display:inline"
+       id="g4946-8-8-8"
+       transform="translate(-659.12335,-595.832)">
+      <path
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.27781254;stroke-opacity:0.99239544"
+         d="M -292.44819,6.7057051 H 39.310493 V 97.595941 H -292.44819 Z"
+         id="rect4128-9-4-7"
+         inkscape:connector-curvature="0" />
+      <text
+         id="text3871-0-0-9"
+         y="59.630943"
+         x="-267.60715"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="59.630943"
+           x="-267.60715"
+           id="tspan3869-2-2-6"
+           sodipodi:role="line"><tspan
+   id="tspan3875-1-40-4"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-9-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="72.860107"
+           x="-267.60715"
+           sodipodi:role="line">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';stroke-width:0.26458332px"
+           y="86.089279"
+           x="-267.60715"
+           sodipodi:role="line"
+           id="tspan7020-7">(which was the <tspan
+   style="font-weight:bold"
+   id="tspan7026-0">output</tspan> of iteration <tspan
+   style="font-weight:bold"
+   id="tspan9385">1</tspan>)</tspan></text>
+      <text
+         id="text4108-0-1-6"
+         y="30.148808"
+         x="-238.88095"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="30.148808"
+           x="-238.88095"
+           id="tspan4106-4-5-1"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g4960-7-9-1"
+       transform="translate(-674.49019,-574.53357)">
+      <g
+         id="g5715-8-4"
+         transform="translate(6.7351921,8.2319014)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.20058507;stroke-opacity:0.99239544"
+           id="rect4935-6-9-2"
+           width="327.39136"
+           height="77.756165"
+           x="-282.75821"
+           y="89.232285" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-266.89246"
+           y="131.71092"
+           id="text3871-6-0-1-1"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2-1-3"
+             x="-266.89246"
+             y="131.71092"
+             style="stroke-width:0.26458332px"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan3875-9-3-2-2">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+             sodipodi:role="line"
+             x="-266.89246"
+             y="144.94009"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan7067-8">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-237.37384"
+           y="111.5403"
+           id="text4108-6-8-3-5"><tspan
+             sodipodi:role="line"
+             id="tspan4106-0-8-5-2"
+             x="-237.37384"
+             y="111.5403"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+      </g>
+    </g>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.61883581;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-3-1)"
+       d="m -1088.0653,-531.52062 119.96891,3.37047"
+       id="path5000-8-3"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1086.5179"
+       y="-558.0437"
+       id="text5652-0-4"><tspan
+         sodipodi:role="line"
+         id="tspan5650-4-6"
+         x="-1086.5179"
+         y="-558.0437"
+         style="stroke-width:0.26458332px"><tspan
+   style="font-weight:bold;stroke-width:0.26458332px"
+   id="tspan7436-6">different</tspan> backing file</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.59012055;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-3-7-0)"
+       d="m -1082.4715,-433.83186 114.6592,3.40255"
+       id="path5000-8-7-4"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1083.6254"
+       y="-454.44086"
+       id="text5652-0-2-7"><tspan
+         sodipodi:role="line"
+         id="tspan5650-4-1-8"
+         x="-1083.6254"
+         y="-454.44086"
+         style="stroke-width:0.26458332px"><tspan
+   style="font-weight:bold;stroke-width:0.26458332px"
+   id="tspan7436-4-8">different</tspan> backing file</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:14.11111069px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1552.3387"
+       y="-500.61963"
+       id="text3705-3"><tspan
+         sodipodi:role="line"
+         id="tspan3703-8"
+         x="-1552.3387"
+         y="-500.61963"
+         style="font-size:14.11111069px;stroke-width:0.26458332px">Iteration 2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-421.27023"
+       y="-1252.3712"
+       id="text9395"><tspan
+         sodipodi:role="line"
+         id="tspan9393"
+         x="-421.27023"
+         y="-1252.3712"
+         style="font-size:14.11111069px;text-align:center;text-anchor:middle;stroke-width:0.26458332px">Execute an iteration via<tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;text-align:center;text-anchor:middle"
+   id="tspan1801" /></tspan><tspan
+         sodipodi:role="line"
+         x="-421.27023"
+         y="-1234.7323"
+         style="font-size:14.11111069px;text-align:center;text-anchor:middle;stroke-width:0.26458332px"
+         id="tspan1803"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;text-align:center;text-anchor:middle"
+           id="tspan1805">PluginRunner.</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;text-align:center;text-anchor:middle"
+           id="tspan1730">__run_plugin()</tspan></tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.25733316;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-9-8-6)"
+       d="m -605.32782,-486.11994 65.06136,-0.14372"
+       id="path5000-65-7-5"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-530.13031"
+       y="-491.16342"
+       id="text6540-9-5"><tspan
+         sodipodi:role="line"
+         x="-530.13031"
+         y="-491.16342"
+         style="stroke-width:0.26458332px"
+         id="tspan6542-4-0">run processing for iteration <tspan
+   style="font-weight:bold"
+   id="tspan9735">2</tspan> and write output data to</tspan><tspan
+         sodipodi:role="line"
+         x="-530.13031"
+         y="-477.93427"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+         id="tspan6546-6-1">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.86211443;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker10225)"
+       d="m -240.49055,-1123.8969 c 582.44557,319.43869 -1778.82905,16.5711 -1194.59195,307.36939"
+       id="path10129"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.86048937;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker10225-9)"
+       d="m -226.90405,-831.47668 c 581.78467,319.43857 -1776.80965,16.57107 -1193.23575,307.36926"
+       id="path10129-4"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <g
+       id="g1317"
+       transform="translate(-715.16494,-33.578717)">
+      <rect
+         y="-180.75288"
+         x="-418.67313"
+         height="196.48647"
+         width="322.6568"
+         id="rect4128-9-5-0-3"
+         style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.39942792;stroke-opacity:0.99239544" />
+      <text
+         id="text3871-0-7-1-0"
+         y="-84.483887"
+         x="-403.18314"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="-84.483887"
+           x="-403.18314"
+           id="tspan3869-2-9-5-7"
+           sodipodi:role="line"><tspan
+             id="tspan3875-1-4-0-1"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace">If the number of iterations is EVEN, then</tspan></tspan><tspan
+           style="stroke-width:0.26458332px"
+           y="-71.254723"
+           x="-403.18314"
+           sodipodi:role="line"
+           id="tspan1255"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace"
+   id="tspan1257">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-0-7-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="-58.025555"
+           x="-403.18314"
+           sodipodi:role="line">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+      <text
+         id="text4108-0-3-2-5"
+         y="-116.95944"
+         x="-380.88214"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="-116.95944"
+           x="-380.88214"
+           id="tspan4106-4-7-9-4"
+           sodipodi:role="line">len(self.parameters['in_datasets']) = 1</tspan></text>
+      <text
+         id="text3871-0-7-1-0-5"
+         y="-30.142298"
+         x="-401.94354"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="-30.142298"
+           x="-401.94354"
+           id="tspan3869-2-9-5-7-0"
+           sodipodi:role="line"><tspan
+             id="tspan3875-1-4-0-1-3"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">IF the number of iterations is ODD, then </tspan></tspan><tspan
+           style="stroke-width:0.26458332px"
+           y="-16.913132"
+           x="-401.94354"
+           sodipodi:role="line"
+           id="tspan1255-3"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan1257-5">self.parameters['in_datasets'][0]</tspan> has backing file</tspan><tspan
+           id="tspan3873-7-0-7-7-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           y="-3.6839652"
+           x="-401.94354"
+           sodipodi:role="line">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="-374.82806"
+         y="-151.36169"
+         id="text1641"><tspan
+           sodipodi:role="line"
+           id="tspan1639"
+           x="-374.82806"
+           y="-151.36169"
+           style="font-size:12.69999981px;stroke-width:0.26458332px">Input datasets of CcpiDenoisingGpu</tspan></text>
+    </g>
+    <rect
+       style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.31626746;stroke-opacity:0.99239544"
+       id="rect4935-6-1-0-3"
+       width="327.27567"
+       height="193.37488"
+       x="-766.22394"
+       y="-212.42209" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-754.59619"
+       y="-116.94332"
+       id="text3871-6-0-6-1-7"><tspan
+         sodipodi:role="line"
+         id="tspan3869-5-2-0-2-4"
+         x="-754.59619"
+         y="-116.94332"
+         style="stroke-width:0.26458332px"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           id="tspan3875-9-3-3-1-2">If the number of iteration is EVEN, then</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="-754.59619"
+         y="-103.71416"
+         style="stroke-width:0.26458332px"
+         id="tspan1334"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan1336">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+         sodipodi:role="line"
+         x="-754.59619"
+         y="-90.484985"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+         id="tspan3873-2-1-8-4-6">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-731.81281"
+       y="-148.26405"
+       id="text4108-6-8-5-8-1"><tspan
+         sodipodi:role="line"
+         id="tspan4106-0-8-4-6-2"
+         x="-731.81281"
+         y="-148.26405"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">len(self.parameters['out_datasets']) = 1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-753.71423"
+       y="-59.102478"
+       id="text3871-6-0-6-1-7-1"><tspan
+         sodipodi:role="line"
+         id="tspan3869-5-2-0-2-4-6"
+         x="-753.71423"
+         y="-59.102478"
+         style="stroke-width:0.26458332px"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+           id="tspan3875-9-3-3-1-2-9">If the number of iteration is ODD, then</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="-753.71423"
+         y="-45.87331"
+         style="stroke-width:0.26458332px"
+         id="tspan1334-5"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+   id="tspan1336-7">self.parameters['out_datasets'][0]</tspan> has backing file</tspan><tspan
+         sodipodi:role="line"
+         x="-753.71423"
+         y="-32.644146"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+         id="tspan3873-2-1-8-4-6-3">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan></text>
+    <path
+       style="display:inline;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.86866874;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Lend-3-1-0-2)"
+       d="M -717.47119,-0.12039923 -745.03772,69.139082"
+       id="path5000-8-3-0-8"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-706.50714"
+       y="11.940145"
+       id="text5652-0-4-1-6"><tspan
+         sodipodi:role="line"
+         id="tspan5650-4-6-3-1"
+         x="-706.50714"
+         y="11.940145"
+         style="stroke-width:0.26458332px">linking final result in</tspan><tspan
+         sodipodi:role="line"
+         x="-706.50714"
+         y="25.169312"
+         style="stroke-width:0.26458332px"
+         id="tspan1508">output NeXuS file</tspan></text>
+    <g
+       style="display:inline"
+       id="g1383-8"
+       transform="translate(-939.23189,278.01255)">
+      <g
+         id="g1506"
+         transform="translate(0,-17.991667)">
+        <rect
+           style="display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.30204654;stroke-opacity:0.99239544"
+           id="rect4935-6-1-0-3-2"
+           width="314.58987"
+           height="183.48804"
+           x="-5.5578051"
+           y="-182.02548" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="9.1988878"
+           y="-153.35591"
+           id="text3871-6-0-6-1-7-5"><tspan
+             sodipodi:role="line"
+             x="9.1988878"
+             y="-153.35591"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan1334-8">If the number of iteration is EVEN, then</tspan><tspan
+             sodipodi:role="line"
+             x="9.1988878"
+             y="-140.12674"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1-8-4-6-1">itr_clone0_p2_iterative_ccpi_denoising.h5</tspan><tspan
+             id="tspan1479"
+             sodipodi:role="line"
+             x="9.1988878"
+             y="-126.89758"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">contains the final result:</tspan><tspan
+             id="tspan1481"
+             sodipodi:role="line"
+             x="9.1988878"
+             y="-113.66841"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">link to this file in the output NeXuS file as</tspan><tspan
+             id="tspan1483"
+             sodipodi:role="line"
+             x="9.1988878"
+             y="-100.43925"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">/entry/final_result_phantom_proc/data</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="10.791598"
+           y="-65.881721"
+           id="text3871-6-0-6-1-7-1-6"><tspan
+             sodipodi:role="line"
+             id="tspan3869-5-2-0-2-4-6-4"
+             x="10.791598"
+             y="-65.881721"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">If the number of iteration is ODD, then</tspan><tspan
+             sodipodi:role="line"
+             x="10.791598"
+             y="-52.652554"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px"
+             id="tspan3873-2-1-8-4-6-3-5">phantom_proc_p2_iterative_ccpi_denoising.h5</tspan><tspan
+             id="tspan1487"
+             sodipodi:role="line"
+             x="10.791598"
+             y="-39.423389"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">contains the final result:</tspan><tspan
+             id="tspan1489"
+             sodipodi:role="line"
+             x="10.791598"
+             y="-26.194223"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">link to this file in the output NeXuS file as</tspan><tspan
+             id="tspan1491"
+             sodipodi:role="line"
+             x="10.791598"
+             y="-12.965056"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458332px">/entry/final_result_phantom_proc/data</tspan></text>
+      </g>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-1178.9664"
+       y="-1723.7479"
+       id="text1601"><tspan
+         sodipodi:role="line"
+         id="tspan1599"
+         x="-1178.9664"
+         y="-1723.7479"
+         style="font-size:25.39999962px;stroke-width:0.26458332px">Input/Output Dataset Swapping in Savu's Iterative Functionality</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-799.02069"
+       y="-353.02124"
+       id="text1631"><tspan
+         sodipodi:role="line"
+         id="tspan1629"
+         x="-799.02069"
+         y="-353.02124"
+         style="font-size:11.28888893px;text-align:center;text-anchor:middle;stroke-width:0.26458332px">Carry on iterating</tspan><tspan
+         sodipodi:role="line"
+         x="-799.02069"
+         y="-338.91013"
+         style="font-size:11.28888893px;text-align:center;text-anchor:middle;stroke-width:0.26458332px"
+         id="tspan1633">.</tspan><tspan
+         sodipodi:role="line"
+         x="-799.02069"
+         y="-324.79901"
+         style="font-size:11.28888893px;text-align:center;text-anchor:middle;stroke-width:0.26458332px"
+         id="tspan1635">.</tspan><tspan
+         sodipodi:role="line"
+         x="-799.02069"
+         y="-310.6879"
+         style="font-size:11.28888893px;text-align:center;text-anchor:middle;stroke-width:0.26458332px"
+         id="tspan1637">.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:'Bitstream Vera Sans';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-719.06921"
+       y="-185.0141"
+       id="text1641-9"><tspan
+         sodipodi:role="line"
+         id="tspan1639-9"
+         x="-719.06921"
+         y="-185.0141"
+         style="font-size:12.69999981px;stroke-width:0.26458332px">Output datasets of CcpiDenoisingGpu</tspan></text>
+  </g>
+</svg>

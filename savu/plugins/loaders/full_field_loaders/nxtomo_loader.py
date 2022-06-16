@@ -53,6 +53,11 @@ class NxtomoLoader(BaseLoader):
         data_obj.data = self._get_h5_entry(
             data_obj.backing_file, self.parameters['data_path'])
 
+        synthetic_path = f"{'/'.join(self.parameters['data_path'].split('/')[:-1])}/synthetic/synthetic"
+        if synthetic_path in data_obj.backing_file:
+            if data_obj.backing_file[synthetic_path][()] == True:
+                self.exp.meta_data.set("synthetic", True)
+
         self._set_dark_and_flat(data_obj)
 
         self.nFrames = self.__get_nFrames(data_obj)

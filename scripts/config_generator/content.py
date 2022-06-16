@@ -404,6 +404,27 @@ class Content(object):
             )
         return valid_modification
 
+    def modify_global(self, pos_no, args):
+        """Modify the plugin parameter using the global value.
+
+        :param pos_no: The plugin position (integer)
+        :param args: arguments
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter
+        """
+        valid_modification = False
+        plugin_entry = self.plugin_list.plugin_list[pos_no-1]
+        params = plugin_entry["param"]
+        tools = plugin_entry["tools"]
+        parameters = plugin_entry["data"]
+        param_name = args.param
+        value_new = args.value[0]
+        if param_name in parameters:
+            self._change_value(param_name, value_new, tools, parameters)
+            valid_modification = True
+        return valid_modification
+
     def _catch_parameter_tuning_syntax(self, value, param_name):
         """Check if the new parameter value seems like it is written
         in parameter tuning syntax with colons. If it is, then append
