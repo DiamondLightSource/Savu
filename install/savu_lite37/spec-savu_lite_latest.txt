@@ -20,7 +20,7 @@ https://repo.anaconda.com/pkgs/main/linux-64/bzip2-1.0.8-h7b6447c_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/expat-2.2.9-he1b5a44_2.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/gettext-0.19.8.1-hf34092f_1004.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/icu-58.2-hf484d3e_1000.tar.bz2
-https://conda.anaconda.org/astra-toolbox/label/main/linux-64/libastra-2.1.0-cuda_10.1_0.tar.bz2
+https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/libastra-1.9.9.dev4-cuda_10.1_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libgfortran-ng-7.5.0-hae1eefd_17.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/libiconv-1.16-h516909a_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/liblief-0.10.1-he6710b0_0.tar.bz2
@@ -274,11 +274,11 @@ https://repo.anaconda.com/pkgs/main/linux-64/mkl_random-1.1.1-py37h0573a6f_0.tar
 https://repo.anaconda.com/pkgs/main/linux-64/numpy-1.15.4-py37h7e9f1db_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/ccpi-regulariser-2022.06-np115py37_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/geodistk-0.1.6-py37hdeaff10_0.tar.bz2
-https://conda.anaconda.org/savu-dep/linux-64/larix-2021.03-py37hdeaff10_0.tar.bz2
+https://conda.anaconda.org/savu-dep/linux-64/larix-2022.06_no_openmp-py37hdeaff10_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/pmacparser-4.0-py37hdeaff10_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/scipy-1.5.2-py37h0b6359f_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/tomophantom-2022.03-np115py37_0.tar.bz2
-https://conda.anaconda.org/astra-toolbox/label/main/linux-64/astra-toolbox-2.1.0-py37h9d24096_0.tar.bz2
+https://conda.anaconda.org/astra-toolbox/label/dev/linux-64/astra-toolbox-1.9.9.dev4-py37hb48bd9c_0.tar.bz2
 https://conda.anaconda.org/ccpi/linux-64/ccpi-reconstruction-20.09-np115py37h3be76a2_0.tar.bz2
 https://conda.anaconda.org/savu-dep/linux-64/morphsnakes-1.0-py37hdeaff10_0.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/peakutils-1.3.3-py_0.tar.bz2
