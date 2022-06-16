@@ -73,7 +73,7 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                 self.angles_rad = np.deg2rad(angles_meta_deg)
             else:
                 self.angles_rad = -np.deg2rad(angles_meta_deg)
-        except:
+        except NameError:
             self.angles_rad = -np.deg2rad(angles_meta_deg)
         self.detectors_horiz = in_meta_data.get('detector_x_length')
 
