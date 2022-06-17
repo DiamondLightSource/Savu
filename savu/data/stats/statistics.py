@@ -289,6 +289,10 @@ class Statistics(object):
         self.residuals['std_dev'].append(residuals['std_dev'])
 
     def calc_volume_stats(self, slice_stats):
+        """Calculates and returns volume-wide stats from slice-wide stats.
+
+        :param slice_stats: The slice-wide stats that the volume-wide stats are calculated from.
+        """
         slice_stats = slice_stats
         volume_stats = {}
         if "max" in self.stats_key:
@@ -329,7 +333,7 @@ class Statistics(object):
         return volume_stats
 
     def _set_loop_stats(self):
-        # NEED TO CHANGE THIS - MUST USE SLICES (is never called)
+        # NEED TO CHANGE THIS - MUST USE SLICES (unused)
         data_obj1 = list(self._iterative_group._ip_data_dict["iterating"].keys())[0]
         data_obj2 = self._iterative_group._ip_data_dict["iterating"][data_obj1]
         RMSD = self.calc_rmsd(data_obj1.data, data_obj2.data)
@@ -382,19 +386,22 @@ class Statistics(object):
             self.stats = {stat: [] for stat in self.slice_stats_key}
 
     def start_time(self):
+        """Called at the start of a plugin."""
         self.t0 = time.time()
 
     def stop_time(self):
+        """Called at the ebd of a plugin."""
         self.t1 = time.time()
         elapsed = round(self.t1 - self.t0, 1)
         if self._stats_flag and self.calc_stats:
             self.set_time(elapsed)
 
     def set_time(self, seconds):
-            Statistics.global_times[self.p_num] += seconds  # Gives total time for a plugin in a loop
-            #print(f"{self.p_num}, {seconds}")
-            comm = self.plugin.get_communicator()
-            self._write_times_to_file(comm)
+        """Sets time taken for plugin to complete."""
+        Statistics.global_times[self.p_num] += seconds  # Gives total time for a plugin in a loop
+        #print(f"{self.p_num}, {seconds}")
+        comm = self.plugin.get_communicator()
+        self._write_times_to_file(comm)
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
         """Combines slice stats from different processes, so volume stats can be calculated.
@@ -410,7 +417,11 @@ class Statistics(object):
         return combined_stats
 
     def _array_to_dict(self, stats_array, key_list=None):
-        """"""
+        """Converts an array of stats to a dictionary of stats.
+
+        :param stats_array: Array of stats to be converted.
+        :param key_list: List of keys indicating the names of the stats in the stats_array.
+        """
         if key_list is None:
             key_list = self.stats_key
         stats_dict = {}
@@ -419,6 +430,10 @@ class Statistics(object):
         return stats_dict
 
     def _dict_to_array(self, stats_dict):
+        """Converts stats dict into a numpy array (keys will be lost).
+
+        :param stats_dict: dictionary of stats.
+        """
         return np.array(list(stats_dict.values()))
 
     def _set_pattern_info(self):
@@ -444,7 +459,11 @@ class Statistics(object):
             self.calc_stats = False
 
     def _link_stats_to_datasets(self, stats_dict, iterative=False):
-        """Links the volume wide statistics to the output dataset(s)"""
+        """Links the volume wide statistics to the output dataset(s).
+
+        :param stats_dict: Dictionary of stats being linked.
+        :param iterative: boolean indicating if the plugin is iterative or not.
+        """
         out_dataset = self.plugin.get_out_datasets()[0]
         my_dataset = out_dataset
         if iterative:
@@ -460,11 +479,14 @@ class Statistics(object):
         for key, value in stats_dict.items():
             my_dataset.meta_data.set([group_name, key], value)
 
-    def _delete_stats_metadata(self, plugin):
-        out_dataset = plugin.get_out_datasets()[0]
-        out_dataset.meta_data.delete("stats")
-
     def _write_stats_to_file(self, p_num=None, plugin_name=None, comm=MPI.COMM_WORLD):
+        """Writes stats to a h5 file. This file is used to create figures and tables from the stats.
+
+        :param p_num: The plugin number of the plugin the stats belong to (usually left as None except
+            for special cases)
+        :param plugin_name: Same as above (but for the name of the plugin).
+        :param comm: The MPI communicator the plugin is using.
+        """
         if p_num is None:
             p_num = self.p_num
         if plugin_name is None:
@@ -520,7 +542,7 @@ class Statistics(object):
                 dataset.attrs.create("time", time)
 
     def write_slice_stats_to_file(self, slice_stats=None, p_num=None, comm=MPI.COMM_WORLD):
-        """Writes slice statistics to a h5 file. Placed in the stats folder in the output directory."""
+        """Writes slice statistics to a h5 file. Placed in the stats folder in the output directory. Currently unused."""
         if not slice_stats:
             slice_stats = self.stats
         if not p_num:
@@ -546,7 +568,7 @@ class Statistics(object):
                 datasets[key] = self.hdf5.create_dataset_nofill(group, key, (len(slice_stats_arrays[key]),), slice_stats_arrays[key].dtype)
                 datasets[key][::] = slice_stats_arrays[key]
 
-    def _unpad_slice(self, slice1):
+    def _unpad_slice(self, my_slice):
         """If data is padded in the slice dimension, removes this pad."""
         out_datasets = self.plugin.get_out_datasets()
         if len(out_datasets) == 1:
@@ -558,32 +580,34 @@ class Statistics(object):
                     break
         slice_dims = out_dataset.get_slice_dimensions()
         if self.plugin.pcount == 0:
-            self._slice_list, self._pad = self._get_unpadded_slice_list(slice1, slice_dims)
+            self._slice_list, self._pad = self._get_unpadded_slice_list(my_slice, slice_dims)
         if self._pad:
             #for slice_dim in slice_dims:
             slice_dim = slice_dims[0]
-            temp_slice = np.swapaxes(slice1, 0, slice_dim)
+            temp_slice = np.swapaxes(my_slice, 0, slice_dim)
             temp_slice = temp_slice[self._slice_list[slice_dim]]
-            slice1 = np.swapaxes(temp_slice, 0, slice_dim)
-        return slice1
+            my_slice = np.swapaxes(temp_slice, 0, slice_dim)
+        return my_slice
 
-    def _get_unpadded_slice_list(self, slice1, slice_dims):
+    def _get_unpadded_slice_list(self, my_slice, slice_dims):
         """Creates slice object(s) to un-pad slices in the slice dimension(s)."""
         slice_list = list(self.plugin.slice_list[0])
         pad = False
-        if len(slice_list) == len(slice1.shape):
+        if len(slice_list) == len(my_slice.shape):
             #for i in slice_dims:
             i = slice_dims[0]
             slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
-            if slice_width != slice1.shape[i]:
+            if slice_width != my_slice.shape[i]:
                 pad = True
-                pad_width = (slice1.shape[i] - slice_width) // 2  # Assuming symmetrical padding
+                pad_width = (my_slice.shape[i] - slice_width) // 2  # Assuming symmetrical padding
                 slice_list[i] = slice(pad_width, pad_width + 1, 1)
             return tuple(slice_list), pad
         else:
             return self.plugin.slice_list[0], pad
 
+    @staticmethod
     def _flatten(self, l):
+        """Function to flatten nested lists."""
         out = []
         for item in l:
             if isinstance(item, (list, tuple)):
@@ -592,14 +616,13 @@ class Statistics(object):
                 out.append(item)
         return out
 
-    def _de_list(self, slice1):
+    def _de_list(self, my_slice):
         """If the slice is in a list, remove it from that list."""
-        if type(slice1) == list:
-            if len(slice1) != 0:
-                slice1 = slice1[0]
-                slice1 = self._de_list(slice1)
-        return slice1
-
+        if type(my_slice) == list:
+            if len(my_slice) != 0:
+                my_slice = my_slice[0]
+                my_slice = self._de_list(my_slice)
+        return my_slice
 
     @classmethod
     def _count(cls):
@@ -607,6 +630,7 @@ class Statistics(object):
 
     @classmethod
     def _post_chain(cls):
+        """Called after all plugins have run."""
         if cls._any_stats & cls._stats_flag:
             stats_utils = StatsUtils()
             stats_utils.generate_figures(f"{cls.path}/stats.h5", cls.path)
