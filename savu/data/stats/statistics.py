@@ -605,7 +605,6 @@ class Statistics(object):
         else:
             return self.plugin.slice_list[0], pad
 
-    @staticmethod
     def _flatten(self, l):
         """Function to flatten nested lists."""
         out = []
