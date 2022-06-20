@@ -181,7 +181,10 @@ class PluginRunner(object):
             plugin._clean_up()
         else:
             info_msg = f"Not cleaning up plugin {plugin.name}, as it is in a " \
-                f"group to iterate over"
+                f"group to iterate over, will only copy metadata"
+            # TODO: maybe other things in Plugin._clean_up() should also be
+            # done?
+            plugin._Plugin__copy_meta_data()
             logging.debug(info_msg)
 
         finalise = self.exp._finalise_experiment_for_current_plugin()

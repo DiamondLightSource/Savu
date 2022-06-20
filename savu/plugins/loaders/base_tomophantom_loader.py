@@ -45,6 +45,7 @@ class BaseTomophantomLoader(BaseLoader):
 
     def setup(self):
         exp = self.exp
+        exp.meta_data.set("synthetic", True)
         data_obj = exp.create_data_object('in_data', 'synth_proj_data')
 
         self.proj_stats_obj = Statistics()
@@ -101,6 +102,10 @@ class BaseTomophantomLoader(BaseLoader):
         self.phantom_stats_obj._write_stats_to_file(p_num=0, plugin_name="TomoPhantomLoader (phantom)")  # writing these to file (stats/stats.h5)
 
         self._set_metadata(data_obj, self._get_n_entries())
+        data_obj.data_info.set("synthetic", True)
+        data_obj2.data_info.set("synthetic", True)
+        data_obj.meta_data.set("synthetic", True)
+        data_obj2.meta_data.set("synthetic", True)
 
         return data_obj, data_obj2
 
@@ -230,7 +235,6 @@ class BaseTomophantomLoader(BaseLoader):
                             "dimension length %s", n_angles, data_angles)
         data_obj.meta_data.set(['rotation_angle'], self.angles)
         data_obj.meta_data.set(['centre_of_rotation'], self.cor)
-        data_obj
 
     def __parameter_checks(self, data_obj):
         if not self.parameters['proj_data_dims']:
@@ -283,7 +287,7 @@ class BaseTomophantomLoader(BaseLoader):
 
         filename = self.exp.meta_data.get('nxs_filename')
         name = data.data_info.get('name')
-        with h5py.File(filename, 'a', driver="mpio", comm = MPI.COMM_WORLD) as nxs_file:
+        with h5py.File(filename, 'a', driver="mpio", comm=MPI.COMM_WORLD) as nxs_file:
 
             group_name = self.exp.meta_data.get(['group_name', name])
             link_type = self.exp.meta_data.get(['link_type', name])

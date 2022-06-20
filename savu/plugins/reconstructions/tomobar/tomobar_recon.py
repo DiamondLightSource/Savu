@@ -90,7 +90,7 @@ class TomobarRecon(BaseRecon, GpuPlugin):
                     AnglesVec = self.anglesRAD, # the vector of angles in radians
                     ObjSize = self.vol_shape[0] , # a scalar to define the reconstructed object dimensions
                     datafidelity=self.parameters['data_fidelity'],# data fidelity, choose LS, PWLS, SWLS
-                    device_projector='gpu')
+                    device_projector=self.parameters['GPU_index'])
 
         # Run FISTA reconstrucion algorithm here
         recon = self.Rectools.FISTA(self._data_, self._algorithm_, self._regularisation_)

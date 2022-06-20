@@ -193,14 +193,14 @@ class CcpiDenoisingGpu3d(Plugin, GpuPlugin):
                                        self.pars['number_of_iterations'],
                                        self.pars['time_marching_parameter'],
                                        self.pars['tolerance_constant'],
-                                       self.device)
+                                       self.parameters['GPU_index'])
         if self.parameters['method'] == 'FGP_TV':
             (im_res, infogpu) = FGP_TV(self.pars['input'],
                                        self.pars['regularisation_parameter'],
                                        self.pars['number_of_iterations'],
                                        self.pars['tolerance_constant'],
                                        self.pars['methodTV'],
-                                       self.pars['nonneg'], self.device)
+                                       self.pars['nonneg'],self.parameters['GPU_index'])
         if self.parameters['method'] == 'PD_TV':
             (im_res, infogpu) = PD_TV(self.pars['input'],
                                        self.pars['regularisation_parameter'],
