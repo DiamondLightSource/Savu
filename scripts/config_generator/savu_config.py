@@ -135,11 +135,26 @@ def _save(content, args):
 @error_catcher
 def _mod(content, args):
     """ Modify plugin parameters."""
-    pos_str, subelem, dims, command = \
-        content.separate_plugin_subelem(args.param, False)
+    if args.globalpar:
+        # deal with the global parameter
+        command = 'global'
+    else:
+        pos_str, subelem, dims, command = \
+            content.separate_plugin_subelem(args.param, False)
     if 'expand' in command:
         # Run the start stop step view for that dimension alone
         _expand(content, f"{pos_str} {dims} {True}")
+    if 'global' in command:
+        pos_list = content.get_positions()
+        modified_list = False
+        for pos_no in pos_list:
+            valid_modification = content.modify_global(int(pos_no), args)
+            if valid_modification:
+                modified_list = True
+        if modified_list:
+            print("Parameter '{}' has been changed globally to '{}'".format(args.param, args.value[0]))
+        else:
+            print("Parameter '{}' has not been found in the process list".format(args.param))
     else:
         if not args.default:
             content.check_required_args(args.value, True)
@@ -153,7 +168,6 @@ def _mod(content, args):
             # Display the selected parameter only
             _disp(content, str(args.param))
     return content
-
 
 @parse_args
 @error_catcher

@@ -36,6 +36,11 @@ class Dezinger(BaseFilter, CpuPlugin):
         inData = self.get_in_datasets()[0]
         self.proj_dim = inData.data.proj_dim
 
+        try:
+            self.volume_std_dev = self.stats_obj.get_stats_from_dataset(inData, stat="median_std_dev")
+        except KeyError:
+            self.volume_std_dev = None
+
         self._kernel = [1]*3
         self._kernel[self.proj_dim] = self.kernel_size
 
@@ -68,9 +73,14 @@ class Dezinger(BaseFilter, CpuPlugin):
     def _dezing(self, data):
         result = data[...]
         indices = np.where(np.isnan(result))
-        result[indices] = 0.0
-        std_dev = np.std(result)
-        result = MEDIAN_DEZING(result.copy(order='C'), self.parameters['kernel_size'], std_dev*self.parameters['outlier_mu'])
+        result[indices] = 0.0  # Replacing Nans with 0s
+        if self.volume_std_dev is not None:
+            std_dev = self.volume_std_dev
+        else:
+            std_dev = np.std(result)
+        if std_dev != 0:
+            result = MEDIAN_DEZING(result.copy(order='C').astype(np.uint16), self.parameters['kernel_size'],
+                                   std_dev * self.parameters['outlier_mu'])
         return result
 
     def process_frames(self, data):

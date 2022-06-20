@@ -17,10 +17,9 @@ be passed with METADATA OR by providing as an input.
               dtype: [None,float]
               description: the global maximum data value.
               default: None
-        pattern:
-            visibility: intermediate
-            dtype: str
-            options: [SINOGRAM, PROJECTION, VOLUME_XZ, VOLUME_YZ]
-            description: Pattern to apply this to.
-            default: 'VOLUME_XZ'
+        stats_source:
+              visibility: basic
+              dtype: [None,int]
+              description: the plugin number for the dataset whose min and max will be used when rescaling. If None, input dataset's stats will be used.
+              default: None
         """

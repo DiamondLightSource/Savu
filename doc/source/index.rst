@@ -53,6 +53,7 @@ Table of Contents
     reference/framework_contents
     reference/stats_documentation/stats
     reference/iterative_api/iterative
+    reference/iterative_api_developer_documentation/dev
 
 .. _tutorials_content:
 

@@ -38,20 +38,24 @@ class RescaleIntensity(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        pattern_type=self.parameters['pattern']
-        in_pData[0].plugin_data_setup(pattern_type, 'single')
-        out_pData[0].plugin_data_setup(pattern_type, 'single')
+        pattern = list(in_dataset[0].get_data_patterns().keys())[0]
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def pre_process(self):
         data = self.get_in_datasets()[0]
-        try:
-            the_max = self.stats_obj.get_stats_from_dataset(data, "max")
-        except KeyError:
-            the_max = self.parameters['max_value']
-        try:
-            the_min = self.stats_obj.get_stats_from_dataset(data, "min")
-        except KeyError:
-            the_min = self.parameters['min_value']
+        if self.parameters["stats_source"] is None:
+            try:
+                the_max = self.stats_obj.get_stats_from_dataset(data, "max")
+            except KeyError:
+                the_max = self.parameters['max_value']
+            try:
+                the_min = self.stats_obj.get_stats_from_dataset(data, "min")
+            except KeyError:
+                the_min = self.parameters['min_value']
+        else:
+            the_max = self.stats_obj.get_stats(self.parameters["stats_source"], stat="max")
+            the_min = self.stats_obj.get_stats(self.parameters["stats_source"], stat="min")
 
         self._data_range = (the_min, the_max)
 
@@ -70,4 +74,4 @@ class RescaleIntensity(Plugin, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 'single'
+        return 'multiple'
