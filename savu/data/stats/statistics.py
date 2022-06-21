@@ -65,6 +65,7 @@ class Statistics(object):
                 self._set_pattern_info()
         if self.calc_stats:
             Statistics._any_stats = True
+        self._setup_4d()
         self._setup_iterative()
 
     def _setup_iterative(self):
@@ -74,6 +75,15 @@ class Statistics(object):
                 Statistics._loop_counter += 1
                 Statistics.loop_stats.append({"NRMSD": np.array([])})
             self.l_num = Statistics._loop_counter - 1
+
+    def _setup_4d(self):
+        in_dataset, out_dataset = self.plugin.get_datasets()
+        if in_dataset[0].data_info["nDims"] == 4:
+            self._4d = True
+            shape = out_dataset[0].data_info["shape"]
+            self._volume_total_points = shape[0] * shape[1] * shape[2]
+        else:
+            self._4d = False
 
     @classmethod
     def _setup_class(cls, exp):
@@ -114,9 +124,9 @@ class Statistics(object):
             By default will gather stats for the current plugin.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD': }
         :param instance: In cases where there are multiple set of stats associated with a plugin
-            due to loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
+            due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
             By default will retrieve the most recent set.
         """
@@ -150,7 +160,7 @@ class Statistics(object):
             specify the nth instance. Not specifying will select the first (or only) instance.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD' }
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD': }
         :param instance: In cases where there are multiple set of stats associated with a plugin
             due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
@@ -168,7 +178,7 @@ class Statistics(object):
         :param dataset: The dataset whose associated stats are being fetched.
         :param stat: Specify the stat parameter you want to fetch, i.e 'max', 'mean', 'median_std_dev'.
             If left blank will return the whole dictionary of stats:
-            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD'}
+            {'max': , 'min': , 'mean': , 'mean_std_dev': , 'median_std_dev': , 'NRMSD': }
         :param instance: In cases where there are multiple set of stats associated with a dataset
             due to iterative loops or multi-parameters, specify which set you want to retrieve, i.e 3 to retrieve the
             stats associated with the third run of a plugin. Pass 'all' to get a list of all sets.
@@ -201,6 +211,8 @@ class Statistics(object):
         stats_key = sorted(set(valid).intersection(stats_key), key=lambda stat: valid.index(stat))
         self.stats_key = stats_key
         self.slice_stats_key = list(set(self._flatten(list(Statistics._volume_to_slice[stat] for stat in stats_key))))
+        if "data_points" not in self.slice_stats_key:
+            self.slice_stats_key.append("data_points")  # Data points is essential
 
     def set_slice_stats(self, my_slice, base_slice=None, pad=True):
         """Sets slice stats for the current slice.
@@ -213,6 +225,9 @@ class Statistics(object):
         if slice_stats is not None:
             for key, value in slice_stats.items():
                 self.stats[key].append(value)
+            if self._4d:
+                if sum(self.stats["data_points"]) >= self._volume_total_points:
+                    self.set_volume_stats()
         else:
             self.calc_stats = False
 
@@ -382,7 +397,7 @@ class Statistics(object):
             self._write_stats_to_file(p_num, comm=comm)
         self._already_called = True
         self._repeat_count += 1
-        if self._iterative_group:
+        if self._iterative_group or self._4d:
             self.stats = {stat: [] for stat in self.slice_stats_key}
 
     def start_time(self):
