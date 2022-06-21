@@ -81,15 +81,14 @@ def _open(content, args):
 @error_catcher
 def _disp(content, args):
     """ Display the plugins in the current list."""
-    if not content._internal:
-        range_dict = content.split_plugin_string(args.start, args.stop,
-                                                 subelem_view=True)
-        formatter = DispDisplay(content.plugin_list)
-        verbosity = parsers._get_verbosity(args)
-        level = 'advanced' if args.all else content.disp_level
-        datasets = True if args.datasets else False
-        content.display(formatter, current_level=level, verbose=verbosity,
-                        datasets=datasets, disp_level=args.level, **range_dict)
+    range_dict = content.split_plugin_string(args.start, args.stop,
+                                             subelem_view=True)
+    formatter = DispDisplay(content.plugin_list)
+    verbosity = parsers._get_verbosity(args)
+    level = 'advanced' if args.all else content.disp_level
+    datasets = True if args.datasets else False
+    content.display(formatter, current_level=level, verbose=verbosity,
+                    datasets=datasets, disp_level=args.level, **range_dict)
     return content
 
 
@@ -128,15 +127,6 @@ def _save(content, args):
     content.save(out_file, check=input("Are you sure you want to save the "
                  "current data to %s [y/N]" % (out_file)),
                  template=args.template)
-    return content
-
-
-def _internal_save(content, arg):
-    """ Save the current process list to file."""
-    out_file = content.filename if arg == '' else arg
-    content.check_file(out_file)
-    DispDisplay(content.plugin_list)._notices()
-    content.save(out_file, check="y")
     return content
 
 
@@ -380,21 +370,6 @@ def get_description():
                          for command, function_name in commands.items()}
     return command_desc_dict
 
-def internal_config(*in_lines):
-    """ This method can be used to interact with the configurator within Savu
-    :param args: The list of commands to be executed.
-    """
-    #utils.populate_plugins()
-    content = Content(level="advanced")
-    content._internal = True
-    for line in in_lines:
-        in_list = line.split(' ', 1)
-        command, arg = in_list if len(in_list) == 2 else in_list + ['']
-        if command == "save":
-            _internal_save(content, arg)
-        else:
-            content = commands[command](content, arg)
-    return content.plugin_list.plugin_list
 
 def main(test=False):
     """
