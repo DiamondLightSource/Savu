@@ -191,9 +191,6 @@ class PluginDatasets(object):
         if len(names) is not (nSets - clones):
             if nSets == 0:
                 names = []
-            elif nSets>0:
-                # If number of datasets > 0, then select the first dataset by default
-                names = [names[0]]
             else:
                 msg = "ERROR: Broken plugin chain. \n Please name the %s %s " \
                 "sets associated with the plugin %s in the process file." % \
