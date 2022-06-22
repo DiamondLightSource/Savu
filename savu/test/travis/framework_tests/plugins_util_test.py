@@ -29,7 +29,8 @@ import os
 from savu.plugins import utils as pu
 from savu.plugins import plugin as test_plugin
 
-class Test(unittest.TestCase):
+
+class PluginsUtilTest(unittest.TestCase):
     def testGetPlugin(self):
         mod = "savu.plugins.plugin"
         plugin = pu.load_class(mod)()
