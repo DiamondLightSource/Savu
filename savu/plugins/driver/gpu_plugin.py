@@ -80,7 +80,8 @@ class GpuPlugin(_base):
             expInfo.set('process', MPI.COMM_WORLD.Get_rank())
         else:
             logging.info('Not a GPU process: Waiting...')
-
+        if self.stats_obj.calc_stats:
+            self.stats_obj._broadcast_gpu_stats(gpu_processes, process)
         self.exp._barrier()
         expInfo.set('processes', processes)
         return
