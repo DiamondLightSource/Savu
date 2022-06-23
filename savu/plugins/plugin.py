@@ -135,7 +135,7 @@ class Plugin(PluginDatasets):
         return data
 
     def plugin_process_frames(self, data):
-        data_copy = data.copy()  # is it ok to copy every frame like this? Enough memory?
+        data_copy = data.copy()
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
 

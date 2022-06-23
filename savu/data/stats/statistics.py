@@ -221,13 +221,19 @@ class Statistics(object):
         :param base_slice: Provide a base slice to calculate residuals from, to calculate RMSD.
         :param pad: Specify whether slice is padded or not (usually can leave as True even if slice is not padded).
         """
-        slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
-        if slice_stats is not None:
-            for key, value in slice_stats.items():
-                self.stats[key].append(value)
-            if self._4d:
-                if sum(self.stats["data_points"]) >= self._volume_total_points:
-                    self.set_volume_stats()
+        if 0 not in my_slice.shape:
+            try:
+                slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
+            except:
+                pass
+            if slice_stats is not None:
+                for key, value in slice_stats.items():
+                    self.stats[key].append(value)
+                if self._4d:
+                    if sum(self.stats["data_points"]) >= self._volume_total_points:
+                        self.set_volume_stats()
+            else:
+                self.calc_stats = False
         else:
             self.calc_stats = False
 
@@ -612,7 +618,7 @@ class Statistics(object):
             #for i in slice_dims:
             i = slice_dims[0]
             slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
-            if slice_width != my_slice.shape[i]:
+            if slice_width < my_slice.shape[i]:
                 pad = True
                 pad_width = (my_slice.shape[i] - slice_width) // 2  # Assuming symmetrical padding
                 slice_list[i] = slice(pad_width, pad_width + 1, 1)
