@@ -21,6 +21,7 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import savu.core.utils as cu
 
 import logging
@@ -281,15 +282,23 @@ class VoCentering(BaseFilter, CpuPlugin):
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
         self.orig_shape = \
             (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
+        # check if the plugin is in an iterative loop:
+        # - if not, then mark the two output datasets as "to remove" as normal
+        # - but if so, then don't mark the two output datasets as "to remove",
+        # since they need to be re-used in subsequent iterations
+        iterate_group = check_if_in_iterative_loop(self.exp)
+        to_remove = True
+        if iterate_group is not None:
+            to_remove = False
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True,
+                                      remove=to_remove,
                                       transport='hdf5')
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True,
+                                      remove=to_remove,
                                       transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())

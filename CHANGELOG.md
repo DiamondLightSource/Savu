@@ -20,6 +20,8 @@ All notable changes to this project are documented in this file.
   is provided to the experimental metadata.
 
 ### Centering
+  * Modify *vo_centering* to enable its use in the iterative alignment
+  implementation which shifts the projections.
 
 ### Simulation
   * A sub-pixel misalignment simulation for projections from TomoPhantom
