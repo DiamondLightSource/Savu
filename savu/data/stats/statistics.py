@@ -304,7 +304,7 @@ class Statistics(object):
         if p_num not in list(Statistics.plugin_names.keys()):
             Statistics.plugin_names[p_num] = name
         Statistics.plugin_numbers[name] = p_num
-        if len(self.stats['max']) != 0:
+        if len(combined_stats['max']) != 0:
             stats_array = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
             #before_processing = self.calc_volume_stats(self.stats_before_processing)
