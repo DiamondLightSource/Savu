@@ -457,6 +457,18 @@ class Statistics(object):
         """
         return np.array(list(stats_dict.values()))
 
+    def _broadcast_gpu_stats(self, gpu_processes, process):
+        p_num = self.p_num
+        Statistics.global_stats[p_num] = MPI.COMM_WORLD.bcast(Statistics.global_stats[p_num], root=0)
+        if not gpu_processes[process]:
+            if Statistics.global_stats[p_num].ndim == 1:
+                stats_dict = self._array_to_dict(Statistics.global_stats[p_num])
+                self._link_stats_to_datasets(stats_dict, self._iterative_group)
+            elif Statistics.global_stats[p_num].ndim > 1:
+                for stats_array in Statistics.global_stats[p_num]:
+                    stats_dict = self._array_to_dict(stats_array)
+                    self._link_stats_to_datasets(stats_dict, self._iterative_group)
+
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
         out_datasets = self.plugin.get_out_datasets()

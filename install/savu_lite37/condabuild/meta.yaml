@@ -7,7 +7,6 @@ package:
 source:
   url: https://github.com/DiamondLightSource/Savu/archive/refs/heads/4_2release.tar.gz
   
-
 build:
   preserve_egg_dir: True
   number: 0

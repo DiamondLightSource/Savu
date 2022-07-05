@@ -44,14 +44,18 @@ class RescaleIntensity(Plugin, CpuPlugin):
 
     def pre_process(self):
         data = self.get_in_datasets()[0]
-        try:
-            the_max = self.stats_obj.get_stats_from_dataset(data, "max")
-        except KeyError:
-            the_max = self.parameters['max_value']
-        try:
-            the_min = self.stats_obj.get_stats_from_dataset(data, "min")
-        except KeyError:
-            the_min = self.parameters['min_value']
+        if self.parameters["stats_source"] is None:
+            try:
+                the_max = self.stats_obj.get_stats_from_dataset(data, "max")
+            except KeyError:
+                the_max = self.parameters['max_value']
+            try:
+                the_min = self.stats_obj.get_stats_from_dataset(data, "min")
+            except KeyError:
+                the_min = self.parameters['min_value']
+        else:
+            the_max = self.stats_obj.get_stats(self.parameters["stats_source"], stat="max")
+            the_min = self.stats_obj.get_stats(self.parameters["stats_source"], stat="min")
 
         self._data_range = (the_min, the_max)
 

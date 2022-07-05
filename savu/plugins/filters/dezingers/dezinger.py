@@ -73,12 +73,14 @@ class Dezinger(BaseFilter, CpuPlugin):
     def _dezing(self, data):
         result = data[...]
         indices = np.where(np.isnan(result))
-        result[indices] = 0.0
+        result[indices] = 0.0  # Replacing Nans with 0s
         if self.volume_std_dev is not None:
             std_dev = self.volume_std_dev
         else:
             std_dev = np.std(result)
-        result = MEDIAN_DEZING(result.copy(order='C'), self.parameters['kernel_size'], std_dev*self.parameters['outlier_mu'])
+        if std_dev != 0:
+            result = MEDIAN_DEZING(result.copy(order='C').astype(np.uint16), self.parameters['kernel_size'],
+                                   std_dev * self.parameters['outlier_mu'])
         return result
 
     def process_frames(self, data):

@@ -67,8 +67,14 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
 
         in_meta_data = self.get_in_meta_data()[0]
         # extracting parameters from metadata
-        angles_meta_deg = in_meta_data.get('rotation_angle')
-        self.angles_rad = np.deg2rad(angles_meta_deg)
+        angles_meta_deg = in_meta_data.get('rotation_angle')        
+        try:
+            if self.exp.meta_data.get("synthetic") == True:
+                self.angles_rad = np.deg2rad(angles_meta_deg)
+            else:
+                self.angles_rad = -np.deg2rad(angles_meta_deg)
+        except KeyError:
+            self.angles_rad = -np.deg2rad(angles_meta_deg)
         self.detectors_horiz = in_meta_data.get('detector_x_length')
 
         # get experimental metadata of projection_shifts
@@ -120,8 +126,17 @@ class ForwardProjectorGpu(Plugin, GpuPlugin):
                 self.projection_shifts = \
                     self.exp.meta_data.dict['projection_shifts']
             cor = np.zeros((np.shape(self.projection_shifts)))
-            cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5) - self.projection_shifts[:, 0]
-            cor[:, 1] = -self.projection_shifts[:, 1] - 0.5
+            cor[:, 0] = (-self.cor + self.det_horiz_half - 0.5)
+            cor[:, 1] = -0.5
+            registration = False
+            for plugin_dict in self.exp.meta_data.plugin_list.plugin_list:
+                if plugin_dict['name'] == 'Projection2dAlignment':
+                    registration = plugin_dict['data']['registration']
+                    break
+            if not registration:
+                # modify the offset to take into account the shifts
+                cor[:, 0] -= self.projection_shifts[:, 0]
+                cor[:, 1] -= self.projection_shifts[:, 1]
         else:
             iterate_group = check_if_in_iterative_loop(self.exp)
 

@@ -14,7 +14,14 @@ All notable changes to this project are documented in this file.
 
 ## _Existing Plugins_
 
+### Alignment
+  * For the case of `projection_2d_alignment` creating an output dataset that
+  contains the shifted projections, preview information about this dataset
+  is provided to the experimental metadata.
+
 ### Centering
+  * Modify *vo_centering* to enable its use in the iterative alignment
+  implementation which shifts the projections.
 
 ### Simulation
   * A sub-pixel misalignment simulation for projections from TomoPhantom
@@ -62,6 +69,8 @@ All notable changes to this project are documented in this file.
 
 ### New Commands
   * *savu_mod* - a way to modify one parameter present in a plugin list.
+  * *mod -g parameter* - a way to modify a parameter in the process list globally (for all plugins)
+
 
 ## _Documentation_
   *  Plugin API moved to dropdown boxes on every plugin documentation page

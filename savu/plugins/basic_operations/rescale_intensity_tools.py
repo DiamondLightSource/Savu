@@ -17,4 +17,9 @@ be passed with METADATA OR by providing as an input.
               dtype: [None,float]
               description: the global maximum data value.
               default: None
+        stats_source:
+              visibility: basic
+              dtype: [None,int]
+              description: the plugin number for the dataset whose min and max will be used when rescaling. If None, input dataset's stats will be used.
+              default: None
         """
