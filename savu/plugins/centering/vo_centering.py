@@ -179,15 +179,19 @@ class VoCentering(BaseFilter, CpuPlugin):
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
+        # the preview parameters from the centering plugin (calculated as absolute values - not related to the loader preview values)
         starts, stops, steps = data.get_preview().get_starts_stops_steps()[0:3]
         start_ind = starts[1]
         stop_ind = stops[1]
         step_ind = steps[1]
         name = data.get_name()
+        # the preview parameters from the original loader (note that this metadata might be absent if the data has been modified
+        # after loader and the preview metadata is not copied !)
         pre_start = self.exp.meta_data.get(name + '_preview_starts')[1]
         pre_stop = self.exp.meta_data.get(name + '_preview_stops')[1]
         pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]
         self.origin_prev = np.arange(pre_start, pre_stop, pre_step)
+        # making the plugin preview parameters relative to the loader preview parameters
         self.plugin_prev = self.origin_prev[start_ind:stop_ind:step_ind]
         num_sino = len(self.plugin_prev)
         if num_sino > 20:
