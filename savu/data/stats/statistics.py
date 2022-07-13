@@ -77,12 +77,17 @@ class Statistics(object):
             self.l_num = Statistics._loop_counter - 1
 
     def _setup_4d(self):
-        in_dataset, out_dataset = self.plugin.get_datasets()
-        if in_dataset[0].data_info["nDims"] == 4:
-            self._4d = True
-            shape = out_dataset[0].data_info["shape"]
-            self._volume_total_points = shape[0] * shape[1] * shape[2]
-        else:
+        try:
+            in_dataset, out_dataset = self.plugin.get_datasets()
+            if in_dataset[0].data_info["nDims"] == 4:
+                self._4d = True
+                shape = out_dataset[0].data_info["shape"]
+                self._volume_total_points = 1
+                for i in shape[:-1]:
+                    self._volume_total_points *= i
+            else:
+                self._4d = False
+        except KeyError:
             self._4d = False
 
     @classmethod
@@ -221,6 +226,7 @@ class Statistics(object):
         :param base_slice: Provide a base slice to calculate residuals from, to calculate RMSD.
         :param pad: Specify whether slice is padded or not (usually can leave as True even if slice is not padded).
         """
+        my_slice = self._de_list(my_slice)
         if 0 not in my_slice.shape:
             try:
                 slice_stats = self.calc_slice_stats(my_slice, base_slice=base_slice, pad=pad)
@@ -422,6 +428,10 @@ class Statistics(object):
         Statistics.global_times[self.p_num] += seconds  # Gives total time for a plugin in a loop
         #print(f"{self.p_num}, {seconds}")
         comm = self.plugin.get_communicator()
+        try:
+            rank = comm.rank
+        except MPI.Exception:        # Sometimes get_communicator() returns an invalid communicator.
+            comm = MPI.COMM_WORLD    # So using COMM_WORLD in this case.
         self._write_times_to_file(comm)
 
     def _combine_mpi_stats(self, slice_stats, comm=MPI.COMM_WORLD):
