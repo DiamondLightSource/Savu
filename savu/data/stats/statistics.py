@@ -517,8 +517,8 @@ class Statistics(object):
         i = 2
         group_name = "stats"
         while group_name in list(my_dataset.meta_data.get_dictionary().keys()):
-            group_name = f"stats{i}"
-            i += 1
+            group_name = f"stats{i}"  # If more than one set of stats for a plugin (such as iterative plugin)
+            i += 1                    # the groups will be named stats, stats2, stats3 etc.
         for key, value in stats_dict.items():
             my_dataset.meta_data.set([group_name, key], value)
 
@@ -526,7 +526,7 @@ class Statistics(object):
         """Writes stats to a h5 file. This file is used to create figures and tables from the stats.
 
         :param p_num: The plugin number of the plugin the stats belong to (usually left as None except
-            for special cases)
+            for special cases).
         :param plugin_name: Same as above (but for the name of the plugin).
         :param comm: The MPI communicator the plugin is using.
         """
