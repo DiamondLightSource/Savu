@@ -238,9 +238,9 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def post_process(self):
         in_datasets, out_datasets = self.get_datasets()
-        cor_prev = out_datasets[0].data[...]
+        cor_prev = out_datasets[0].data[...]                
         cor_broad = out_datasets[1].data[...]
-        cor_broad[:] = np.median(np.squeeze(cor_prev))
+        cor_broad[:] = np.median(np.squeeze(np.trim_zeros(cor_prev)))
         self.cor_for_executive_summary = np.median(cor_broad[:])
         if self.broadcast_method == 'mean':
             cor_broad[:] = np.mean(np.squeeze(cor_prev))

@@ -60,11 +60,8 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         if self.parameters['registration']:
             # generate a dataset with shifted (registered) projections
             out_dataset[1].create_dataset(in_dataset[1])
-            # set preview metadata for the dataset containing the shifted
-            # projections
-            # get the original preview parameters from the loader
-            get_original_preview = self.exp.meta_data.plugin_list.plugin_list[0]['data']['preview']
-            out_dataset[1].get_preview().set_preview(get_original_preview, load=True)
+            preview = [':',':',':']
+            out_dataset[1].get_preview().set_preview(preview, load=True)
             out_pData[1].plugin_data_setup('PROJECTION', self.get_max_frames())
 
         # check if there is an iterative loop and the exp metadata on error shifts exists
