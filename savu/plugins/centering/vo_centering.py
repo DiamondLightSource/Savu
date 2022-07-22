@@ -179,6 +179,16 @@ class VoCentering(BaseFilter, CpuPlugin):
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
+
+        iterate_group = check_if_in_iterative_loop(self.exp)
+        if iterate_group is not None and iterate_group._ip_iteration > 0:
+            # reset the preview value of the input dataset (since in
+            # PluginDriver._run_plugin_instances() the value is changed after
+            # the VoCentering plugin runs on the previous iteration)
+            in_dataset, out_dataset = self.get_datasets()
+            self.set_preview(in_dataset[0], self.parameters['preview'])
+            self._finalise_plugin_datasets()
+
         # the preview parameters from the centering plugin (calculated as absolute values - not related to the loader preview values)
         starts, stops, steps = data.get_preview().get_starts_stops_steps()[0:3]
         start_ind = starts[1]
