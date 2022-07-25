@@ -24,6 +24,7 @@
 from savu.plugins.plugin import Plugin
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
+import savu.core.utils as cu
 from skimage.registration import phase_cross_correlation
 from skimage import transform as tf
 from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
@@ -113,8 +114,11 @@ class Projection2dAlignment(Plugin, CpuPlugin):
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         if rank == 0:
-            print(f"The alignment error is:  {error_scalar}")
-            logging.debug("The alignment error is %f" % error_scalar)
+            info_msg = "The alignment error is : %s" % (
+                str(error_scalar))
+            #print(f"The alignment error is:  {error_scalar}")
+            logging.debug(info_msg)
+            cu.user_message(info_msg)
         if self.iterations_number == 1:
             self.error_alignment_vector[0] = error_scalar
         else:
