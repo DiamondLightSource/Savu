@@ -304,7 +304,7 @@ class Statistics(object):
         if p_num not in list(Statistics.plugin_names.keys()):
             Statistics.plugin_names[p_num] = name
         Statistics.plugin_numbers[name] = p_num
-        if len(self.stats['max']) != 0:
+        if len(combined_stats['max']) != 0:
             stats_array = self.calc_volume_stats(combined_stats)
             Statistics.global_residuals[p_num] = {}
             #before_processing = self.calc_volume_stats(self.stats_before_processing)
@@ -343,6 +343,18 @@ class Statistics(object):
         for i, value in enumerate(stats_array):
             stats_dict[Statistics._key_list[i]] = value
         return stats_dict
+
+    def _broadcast_gpu_stats(self, gpu_processes, process):
+        p_num = self.p_num
+        Statistics.global_stats[p_num] = MPI.COMM_WORLD.bcast(Statistics.global_stats[p_num], root=0)
+        if not gpu_processes[process]:
+            if Statistics.global_stats[p_num].ndim == 1:
+                stats_dict = self._array_to_dict(Statistics.global_stats[p_num])
+                self._link_stats_to_datasets(stats_dict, self._iterative_group)
+            elif Statistics.global_stats[p_num].ndim > 1:
+                for stats_array in Statistics.global_stats[p_num]:
+                    stats_dict = self._array_to_dict(stats_array)
+                    self._link_stats_to_datasets(stats_dict, self._iterative_group)
 
     def _set_pattern_info(self):
         """Gathers information about the pattern of the data in the current plugin."""
@@ -479,7 +491,7 @@ class Statistics(object):
             #for i in slice_dims:
             i = slice_dims[0]
             slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
-            if slice_width != slice1.shape[i]:
+            if slice_width < slice1.shape[i]:
                 pad = True
                 pad_width = (slice1.shape[i] - slice_width) // 2  # Assuming symmetrical padding
                 slice_list[i] = slice(pad_width, pad_width + 1, 1)
