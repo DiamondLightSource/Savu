@@ -281,7 +281,7 @@ class Statistics(object):
         return my_slice.size - np.count_nonzero(my_slice)
 
     @staticmethod
-    def calc_rss(array1, array2):  # residual sum of squares # Need to benchmark
+    def calc_rss(array1, array2):  # residual sum of squares
         if array1.shape == array2.shape:
             residuals = np.subtract(array1, array2)
             rss = np.sum(residuals.flatten() ** 2)
@@ -309,7 +309,7 @@ class Statistics(object):
             residuals[key] = stats_after[key] - stats_before[key]
         return residuals
 
-    def set_stats_residuals(self, residuals):  #unused
+    def set_stats_residuals(self, residuals):  # unused
         self.residuals['max'].append(residuals['max'])
         self.residuals['min'].append(residuals['min'])
         self.residuals['mean'].append(residuals['mean'])
@@ -468,6 +468,12 @@ class Statistics(object):
         return np.array(list(stats_dict.values()))
 
     def _broadcast_gpu_stats(self, gpu_processes, process):
+        """During GPU plugins, most processes are unused, and don't have access to stats.
+        This method shares stats between processes so all have access to stats.
+
+        :param gpu_processes: List that determines whether a process is a GPU process.
+        :param process: Process number.
+        """
         p_num = self.p_num
         Statistics.global_stats[p_num] = MPI.COMM_WORLD.bcast(Statistics.global_stats[p_num], root=0)
         if not gpu_processes[process]:
@@ -571,6 +577,7 @@ class Statistics(object):
         self.exp._barrier(communicator=comm)
 
     def _write_times_to_file(self, comm):
+        """Writes times into the file containing all the stats."""
         p_num = self.p_num
         plugin_name = self.plugin_name
         path = Statistics.path
@@ -581,7 +588,6 @@ class Statistics(object):
             with h5.File(filename, "a") as h5file:
                 group = h5file.require_group("stats")
                 dataset = group[str(p_num)]
-                print(time)
                 dataset.attrs.create("time", time)
 
     def write_slice_stats_to_file(self, slice_stats=None, p_num=None, comm=MPI.COMM_WORLD):
@@ -637,7 +643,6 @@ class Statistics(object):
         slice_list = list(self.plugin.slice_list[0])
         pad = False
         if len(slice_list) == len(my_slice.shape):
-            #for i in slice_dims:
             i = slice_dims[0]
             slice_width = self.plugin.slice_list[0][i].stop - self.plugin.slice_list[0][i].start
             if slice_width < my_slice.shape[i]:
@@ -659,7 +664,7 @@ class Statistics(object):
         return out
 
     def _de_list(self, my_slice):
-        """If the slice is in a list, remove it from that list."""
+        """If the slice is in a list, remove it from that list (takes 0th element)."""
         if type(my_slice) == list:
             if len(my_slice) != 0:
                 my_slice = my_slice[0]
