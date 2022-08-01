@@ -25,7 +25,7 @@ from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 
 import numpy as np
-from larix.methods.misc import INPAINT_NDF, INPAINT_NM, INPAINT_LINCOMB
+from larix.methods.misc import INPAINT_NDF, INPAINT_NM, INPAINT_EUCL_WEIGHTED
 
 @register_plugin
 class Inpainting(Plugin, CpuPlugin):
@@ -60,19 +60,19 @@ class Inpainting(Plugin, CpuPlugin):
             mask[(input_temp >= self.mask_range[0]) & (input_temp < self.mask_range[1])] = 1
         input_temp = np.ascontiguousarray(input_temp, dtype=np.float32)
         mask = np.ascontiguousarray(mask, dtype=np.uint8)
+        # modify input to crop out masked values
+        input_temp[mask == 1] = 0.0
 
-        if self.parameters['method'] == 'LINEARCOMB':
+        if self.parameters['method'] == 'INPAINT_EUCL_WEIGHTED':
             pars = {'input' : input_temp,
                 'maskData' : mask,
                 'number_of_iterations' : self.parameters['iterations'],
-                'windowsize_half' : self.parameters['windowsize_half'],
-                'sigma' : np.exp(self.parameters['sigma'])}
+                'windowsize_half' : self.parameters['windowsize_half']}
 
-            (result, mask_upd) = INPAINT_LINCOMB(pars['input'],
+            (result, mask_upd) = INPAINT_EUCL_WEIGHTED(pars['input'],
                               pars['maskData'],
                               pars['number_of_iterations'],
-                              pars['windowsize_half'],
-                              pars['sigma'])
+                              pars['windowsize_half'])
 
         elif self.parameters['method'] == 'NONLOCAL_MARCH':
             pars = {'input' : input_temp,

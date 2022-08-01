@@ -14,21 +14,21 @@ is a chunk of data missing or one needs to inpaint some data features.
         method:
               visibility: intermediate
               dtype: str
-              options: [LINEARCOMB, NONLOCAL_MARCH, DIFFUSION]
+              options: [INPAINT_EUCL_WEIGHTED, NONLOCAL_MARCH, DIFFUSION]
               description: Choose inpainting method
-              default: LINEARCOMB
+              default: INPAINT_EUCL_WEIGHTED
         iterations:
               visibility: basic
               dtype: int
               description: the number of iterations to perform the inpainting (controls the smoothing level)
-              default: 50
+              default: 5
         windowsize_half:
               visibility: intermediate
               dtype: int
               description: half-size of the smoothing window, increase size for more smoothing
-              default: 3
+              default: 7
               dependency:
-                method: [LINEARCOMB]
+                method: [INPAINT_EUCL_WEIGHTED]
         search_window_increment:
               visibility: advanced
               dtype: int
@@ -36,13 +36,6 @@ is a chunk of data missing or one needs to inpaint some data features.
               default: 1
               dependency:
                 method: [NONLOCAL_MARCH]
-        sigma:
-              visibility: basic
-              dtype: float
-              description: maximum intensity value for the inpainted region.
-              default: 0.5
-              dependency:
-                method: [LINEARCOMB]
         regularisation_parameter:
               visibility: basic
               dtype: float
