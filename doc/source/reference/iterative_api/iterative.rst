@@ -100,8 +100,8 @@ This approach to reconstruct misaligned data is based on an iterative refinement
 
 With iterative plugins API it is possible to build the following iterative pipeline which will enable the iterative alignment algorithm. Plugin no. 3 performs re-projection of the reconstructed image,
 no.4 initialises a registration method to perform alignment of the re-projected data with the original raw data in projection space and no.5  reconstructs the corrected projection data.
-Note that different reconstruction algorithms can be used to reconstruct the corrected data, e.g. it could be the FBP algorithm of the `AstraReconGpu` plugin or a regulairised iterative reconstruction of
-the `ToMoBAR` package (`TomobarRecon3d` plugin). Notably the latter converges significantly faster and delivers a superior reconstruction, hence recommended if the computation time is not the essence (see the images).
+Note that different reconstruction algorithms can be used to reconstruct the corrected data, e.g. it could be the FBP algorithm of the `AstraReconGpu` plugin or 3D reconsutrction algorithms (some ASTRA-wrapped) of
+the `ToMoBAR` package (`TomobarRecon3d` plugin). One can also use the regulairised iterative reconstruction from the `ToMoBAR` package which can converge faster and usually delivers a superior reconstruction, if the computation time is not the essence (see the images).
 
 .. figure:: iterative_ex3.png
    :figwidth: 60%
@@ -110,5 +110,55 @@ the `ToMoBAR` package (`TomobarRecon3d` plugin). Notably the latter converges si
 
 .. figure:: iterative_ex4.png
    :figwidth: 100%
+   :align: left
+   :figclass: align-left
+
+Two implementations of iterative alignment
+==========================================
+One implementation is based on the implementation in `TomoPy`, where the
+projections are shifted. The other implementation is a variation, based on the
+idea of using the x and y projection shifts to translate the source and detector using 3D vector geometry
+during the reconstruction process that occurs in the iterative loop.
+
+1. An explicit registration of projections (follows `TomoPy` implementation)
+----------------------------------------------------------------------------
+This implementation should be preferred if the misalignment shifts are significant (e.g. more than 10 pixels).
+In this case the registration of each projection is performed using the interpolation of some chosen order. This means
+that a some degree of smoothing is expected in the reconstruction due to explicit registration on each iteration of
+the iterative alignment method. To enable this method set a :code:`registration` parameter in :code:`Projection2dAlignment`
+plugin to :code:`True`. You will also need to provide a registred projection data to the reconstruction plugin that follows.
+
+2. An alignment using vector geometry (no explicit registration)
+----------------------------------------------------------------
+This implementation is better suited when the misalignment in projection space is not significant (could be even on the
+subpixel scale).
+The misalignment shifts will be calculated and passed automatically to the :code:`TomobarRecon3d` reconstruction plugin afterwards.
+Then reconstructionis performed using 3D vector geometry to compansate for suboptimal source/detector positions.
+This approach is potentially faster and since no interpolation involved more accurate than the one above.
+To enable this method set a :code:`registration` parameter in :code:`Projection2dAlignment`
+plugin to :code:`False`. Here you will need to provide an original raw data to the reconstructor as the shifts are being
+passed with metadata automatically.
+
+Important additional information
+--------------------------------
+1. In order for the iterative alignment method to work, the raw projection data needs to be scaled in [0, 1] range.
+This can be implemented by using the :code:`RescaleIntensity` plugin after the loader.
+
+2. The quality of iterative alignment (and the speed of convergence) depends on the reconstruction algorithm choosen. One can try
+:code:`reconstruction_method` to be SIRT3D, CGLS3D or FISTA3D in :code:`TomobarRecon3d` reconstruction plugin. You might want
+to consider denoising reconstruction :code:`CcpiDenoisingGpu3d` if the FBP3D method is enabled.
+
+3. The alignment error is printed in iterations in :code:`Projection2dAlignment` plugin. It is a good practice to
+watch the error behaviour in iterations. Ideally, the error should decrease in iterations, however, in practice
+it can slightly increase. If the error goes very large very quick then there is a good chance
+that the alignment doesn't work and it is better to terminate the iterations.
+
+Real data example
+------------------
+The example bellow shows a real ptychography data being  iteratively aligned. The data has got large misalignment errors (projection shifts more than 50 pixels)
+and therefore the implementation 1 has been chosen. 20 iterations of the iterative algorithm have been performed to achieve the results bellow.
+
+.. figure:: iterative_ex5.png
+   :figwidth: 80%
    :align: left
    :figclass: align-left

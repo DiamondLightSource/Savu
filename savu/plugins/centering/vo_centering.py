@@ -21,6 +21,7 @@
 from savu.plugins.driver.cpu_plugin import CpuPlugin
 from savu.plugins.utils import register_plugin
 from savu.plugins.filters.base_filter import BaseFilter
+from savu.core.iterate_plugin_group_utils import check_if_in_iterative_loop
 import savu.core.utils as cu
 
 import logging
@@ -178,15 +179,29 @@ class VoCentering(BaseFilter, CpuPlugin):
             self.broadcast_method = 'median'
         in_pData = self.get_plugin_in_datasets()[0]
         data = self.get_in_datasets()[0]
+
+        iterate_group = check_if_in_iterative_loop(self.exp)
+        if iterate_group is not None and iterate_group._ip_iteration > 0:
+            # reset the preview value of the input dataset (since in
+            # PluginDriver._run_plugin_instances() the value is changed after
+            # the VoCentering plugin runs on the previous iteration)
+            in_dataset, out_dataset = self.get_datasets()
+            self.set_preview(in_dataset[0], self.parameters['preview'])
+            self._finalise_plugin_datasets()
+
+        # the preview parameters from the centering plugin (calculated as absolute values - not related to the loader preview values)
         starts, stops, steps = data.get_preview().get_starts_stops_steps()[0:3]
         start_ind = starts[1]
         stop_ind = stops[1]
         step_ind = steps[1]
         name = data.get_name()
+        # the preview parameters from the original loader (note that this metadata might be absent if the data has been modified
+        # after loader and the preview metadata is not copied !)
         pre_start = self.exp.meta_data.get(name + '_preview_starts')[1]
         pre_stop = self.exp.meta_data.get(name + '_preview_stops')[1]
         pre_step = self.exp.meta_data.get(name + '_preview_steps')[1]
         self.origin_prev = np.arange(pre_start, pre_stop, pre_step)
+        # making the plugin preview parameters relative to the loader preview parameters
         self.plugin_prev = self.origin_prev[start_ind:stop_ind:step_ind]
         num_sino = len(self.plugin_prev)
         if num_sino > 20:
@@ -233,9 +248,9 @@ class VoCentering(BaseFilter, CpuPlugin):
 
     def post_process(self):
         in_datasets, out_datasets = self.get_datasets()
-        cor_prev = out_datasets[0].data[...]
+        cor_prev = out_datasets[0].data[...]                
         cor_broad = out_datasets[1].data[...]
-        cor_broad[:] = np.median(np.squeeze(cor_prev))
+        cor_broad[:] = np.median(np.squeeze(np.trim_zeros(cor_prev)))
         self.cor_for_executive_summary = np.median(cor_broad[:])
         if self.broadcast_method == 'mean':
             cor_broad[:] = np.mean(np.squeeze(cor_prev))
@@ -281,15 +296,23 @@ class VoCentering(BaseFilter, CpuPlugin):
         new_shape = (np.prod(np.array(fullData.get_shape())[slice_dirs]), 1)
         self.orig_shape = \
             (np.prod(np.array(self.orig_full_shape)[slice_dirs]), 1)
+        # check if the plugin is in an iterative loop:
+        # - if not, then mark the two output datasets as "to remove" as normal
+        # - but if so, then don't mark the two output datasets as "to remove",
+        # since they need to be re-used in subsequent iterations
+        iterate_group = check_if_in_iterative_loop(self.exp)
+        to_remove = True
+        if iterate_group is not None:
+            to_remove = False
         out_dataset[0].create_dataset(shape=new_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True,
+                                      remove=to_remove,
                                       transport='hdf5')
         out_dataset[0].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
 
         out_dataset[1].create_dataset(shape=self.orig_shape,
                                       axis_labels=['x.pixels', 'y.pixels'],
-                                      remove=True,
+                                      remove=to_remove,
                                       transport='hdf5')
         out_dataset[1].add_pattern("METADATA", core_dims=(1,), slice_dims=(0,))
         out_pData[0].plugin_data_setup('METADATA', self.get_max_frames())

@@ -18,22 +18,22 @@ import scripts.configurator_tests.savu_config_test_utils as sctu
 
 class SavuConfigTest(unittest.TestCase):
 
-    def testExit(self):
+    def test_exit(self):
         input_list = ['exit', 'y']
         output_checks = ['Thanks for using the application']
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testHelpBlank(self):
+    def test_help_blank(self):
         input_list = ['', 'exit', 'y']
         output_checks = ['Close the program']
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testHelpCommand(self):
+    def test_help_command(self):
         input_list = ['help', 'exit', 'y']
         output_checks = ['Display the help information']
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testAdd(self):
+    def test_add(self):
         input_list = ['add NxtomoLoader',
                       'exit',
                       'y']
@@ -41,7 +41,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testAddMod(self):
+    def test_add_mod(self):
         input_list = ['add NxtomoLoader',
                       'disp',
                       'mod 1.3 Test text',
@@ -51,7 +51,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testAddMod_2(self):
+    def test_add_mod_2(self):
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
                       'mod 1.4 FBP',
@@ -61,7 +61,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testAddMod_3(self):
+    def test_add_mod_3(self):
         # Exception due to invalid parameter number
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
@@ -72,7 +72,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testAddDupl(self):
+    def test_add_dupl(self):
         # Exception due to invalid plugin number
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
@@ -82,7 +82,7 @@ class SavuConfigTest(unittest.TestCase):
         output_checks = ['ValueError']
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testAddDupl_1(self):
+    def test_add_dupl_1(self):
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
                       'dupl 1',
@@ -189,7 +189,62 @@ class SavuConfigTest(unittest.TestCase):
         output_checks = [output_str]
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testReplace(self):
+    def test_rem(self):
+        # Exception due to invalid plugin number
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'rem 3',
+                      'exit',
+                      'y']
+        output_checks = ['ValueError']
+        sctu.savu_config_runner(input_list, output_checks)
+
+    def test_rem_1(self):
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'rem 2',
+                      'exit',
+                      'y']
+        output_checks = ['Exception']
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
+
+    def test_rem_2(self):
+        input_list = ['add NxtomoLoader',
+                      'add DarkFlatFieldCorrection',
+                      'add RingRemovalFitting',
+                      'add MedianFilter',
+                      'add MedianFilter',
+                      'add MedianFilter',
+                      'add MedianFilter'
+                      'add Pymca',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'add AstraReconCpu',
+                      'rem 10 11 12',
+                      'exit',
+                      'y']
+        output_checks = ['Exception','Error']
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
+
+    def test_rem_3(self):
+        input_list = ['add NxtomoLoader',
+                      'add AstraReconCpu',
+                      'rem 2',
+                      'exit',
+                      'y']
+        output_checks = ['Exception']
+        sctu.savu_config_runner(input_list, output_checks,
+                                error_str=True)
+
+    def test_replace(self):
         # Exception due to invalid plugin number
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
@@ -200,7 +255,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testReplace_1(self):
+    def test_replace_1(self):
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
                       'replace 1 SavuNexusLoader',
@@ -210,7 +265,7 @@ class SavuConfigTest(unittest.TestCase):
         sctu.savu_config_runner(input_list, output_checks,
                                 error_str=True)
 
-    def testReplace_2(self):
+    def test_replace_2(self):
         input_list = ['add NxtomoLoader',
                       'add AstraReconCpu',
                       'replace 1 IncorrectString',
@@ -219,7 +274,7 @@ class SavuConfigTest(unittest.TestCase):
         output_checks = ['Unknown plugin']
         sctu.savu_config_runner(input_list, output_checks)
 
-    def testrunconfig(self):
+    def test_run_config(self):
         result = subprocess.run(['savu_config', '-h'], stdout=subprocess.PIPE)
         str_stdout=str(result.stdout)
         if "Create" not in str_stdout:

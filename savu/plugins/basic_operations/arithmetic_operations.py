@@ -39,8 +39,11 @@ class ArithmeticOperations(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
-        in_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
-        out_pData[0].plugin_data_setup('VOLUME_XZ', 'single')
+        preview = [':',':',':']
+        out_dataset[0].get_preview().set_preview(preview, load=True)
+        pattern = list(in_dataset[0].get_data_patterns().keys())[0]
+        in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
+        out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
 
     def pre_process(self):
         data = self.get_in_datasets()[0]
@@ -67,7 +70,7 @@ class ArithmeticOperations(Plugin, CpuPlugin):
         if (self.parameters['metadata_value'] == 'mean'):
             if (the_mean is not None):
                 self.scalar_res = the_mean
-        
+
     def process_frames(self, data):
         if (self.scalar_res != 0.0):
             if (self.parameters['operation'] == 'addition'):
@@ -79,12 +82,12 @@ class ArithmeticOperations(Plugin, CpuPlugin):
             if (self.parameters['operation'] == 'division'):
                 corr_data = np.true_divide(data[0], self.scalar_res)
         return corr_data
-    
+
     def nInput_datasets(self):
         return 1
-    
+
     def nOutput_datasets(self):
         return 1
-    
+
     def get_max_frames(self):
         return 'single'

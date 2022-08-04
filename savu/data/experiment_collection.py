@@ -126,8 +126,11 @@ class Experiment(object):
             # Save original process list
             plugin_list._save_plugin_list(self.meta_data.get('process_list_path'))
             # links the input data to the nexus file
-            plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
-            self._add_input_data_to_nxs_file(self._get_transport())
+            if self.meta_data.get("pre_run"):
+                self._create_pre_run_nxs_file()
+            else:
+                plugin_list._save_plugin_list(self.meta_data.get('nxs_filename'))
+                self._add_input_data_to_nxs_file(self._get_transport())
         self._set_dataset_names_complete()
         self._save_command_log()
 
@@ -161,6 +164,28 @@ class Experiment(object):
         input_command = self.meta_data.get('command')
         updated_command = input_command.replace(pl_path, new_pl_path)
         return updated_command
+
+    def _save_pre_run_log(self):
+        current_path = os.getcwd()
+        folder = self.meta_data.get('out_path')
+        log_folder = os.path.join(folder, "run_log")
+        filename = os.path.join(log_folder, "pre_run_log.txt")
+        if not os.path.isfile(filename):
+            with open(filename, 'w') as pre_run_log:
+                pre_run_log.write(f"# SAVU PRE-RUN\n")
+                pre_run_log.write(f"# During the pre-run, the following process list was run:\n")
+                pre_run_log.write(f"{self.meta_data.get('process_file_name')}\n")
+                pre_run_log.write(f"# The following statistics were calculated on the input data:\n")
+                if "pre_run_stats" in self.meta_data.get_dictionary().keys():
+                    for key, value in self.meta_data.get("pre_run_stats").items():
+                        pre_run_log.write(f"   {key}: {value}\n")
+                if "pre_run_preview" in self.meta_data.get_dictionary().keys():
+                    pre_run_log.write(f"# The following value for the preview parameter was calculated from the input data:\n")
+                    pre_run_log.write(f"   {self.meta_data.get('pre_run_preview')}")
+                if len(self.meta_data.get("warnings")) != 0:
+                    pre_run_log.write(f"# Please read the following warnings before deciding whether to continue:\n")
+                    for warning in self.meta_data.get("warnings"):
+                        pre_run_log.write(f" ~ {warning}")
 
     def _set_process_list_path(self):
         """Create the path the process list should be saved to"""
@@ -221,6 +246,33 @@ class Experiment(object):
             transport._populate_nexus_file(data)
             h5._link_datafile_to_nexus_file(data)
 
+    def _create_pre_run_nxs_file(self):
+        data_path = self.meta_data["data_path"]
+
+        for name, data in self.index["in_data"].items():
+            raw_data = data.backing_file
+            folder = self.meta_data['out_path']
+            fname = self.meta_data.get('datafile_name') + '_pre_run.nxs'
+            filename = os.path.join(folder, fname)
+            self.meta_data.set("pre_run_filename", filename)
+            self.__copy_input_file_to_output_folder(raw_data, filename)
+
+            if isinstance(raw_data.get(data_path, getlink=True), h5py.ExternalLink):
+                link = raw_data.get(data_path, getlink=True)
+                location = f'{"/".join(self.meta_data.get("data_file").split("/")[:-1])}/{link.filename}'
+                #new_filename = os.path.join(folder, link.filename)
+                #with h5py.File(location, "r") as linked_file:
+                #    self.__copy_input_file_to_output_folder(linked_file, new_filename)
+                with h5py.File(filename, "r+") as new_file:
+                    del new_file[data_path]
+                    new_file[data_path] = h5py.ExternalLink(location, link.path)
+                    pass
+
+    def __copy_input_file_to_output_folder(self, file, new_filename):
+        with h5py.File(new_filename, "w") as new_file:
+            for group_name in file.keys():
+                file.copy(file[group_name], new_file["/"], group_name)
+
     def _set_dataset_names_complete(self):
         """ Missing in/out_datasets fields have been populated
         """
@@ -273,7 +325,10 @@ class Experiment(object):
 
     def _set_nxs_file(self):
         folder = self.meta_data.get('out_path')
-        fname = self.meta_data.get('datafile_name') + '_processed.nxs'
+        if self.meta_data.get("pre_run") == True:
+            fname = self.meta_data.get('datafile_name') + '_pre_run.nxs'
+        else:
+            fname = self.meta_data.get('datafile_name') + '_processed.nxs'
         filename = os.path.join(folder, fname)
         self.meta_data.set('nxs_filename', filename)
 

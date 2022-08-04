@@ -10,6 +10,7 @@ facility = 'dls'
 facility_path = 'system_files/dls'
 utils_path = 'savu/plugins/loaders/utils'
 templates_path = 'savu/plugins/loaders/templates/'
+plugin_guide_path = 'doc/source/plugin_guides/plugins'
 
 from savu.version import __version__, __install__
 
@@ -74,6 +75,7 @@ mod_file = os.path.join(facility_path, "modulefile", __version__)
 mod_file = [mod_file] if os.path.exists(mod_file) else []
 conda_recipes = get_files(os.path.join(__install__, '..', 'conda-recipes'))
 test_data = get_files("test_data")
+plugin_guides = get_files(plugin_guide_path)
 
 
 setup(name='savu',
@@ -110,6 +112,7 @@ setup(name='savu',
           'savu_profile=scripts.log_evaluation.GraphicalThreadProfiler:main',
           'savu_param_extractor=scripts.savu_config.parameter_extractor:main',
           'savu_template_extractor=scripts.savu_config.hdf5_template_extractor:main',
+          'savu_pre_run=savu.pre_run:main',
       ], },
 
       package_data={
@@ -124,7 +127,7 @@ setup(name='savu',
                   (os.path.dirname(sys_file), [sys_file]),
                   (os.path.dirname(utils_file), [utils_file]),
                       (os.path.dirname(env_file), [env_file])] \
-                  + conda_recipes + test_data + mod_file,
+                  + conda_recipes + test_data + mod_file + plugin_guides,
 
       include_package_data=True,
       zip_safe=False)

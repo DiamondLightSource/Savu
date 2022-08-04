@@ -34,7 +34,7 @@ class MultipleDatasetsTest(unittest.TestCase):
 
     def test_mm(self):
         data_file = tu.get_test_data_path('mm.nxs')
-        process_file = tu.get_test_process_path('multiple_mm_inputs_test.nxs')
+        process_file = tu.get_test_process_path('datasets/multiple_mm_inputs_test.nxs')
         run_protected_plugin_runner(tu.set_options(data_file,
                                                    process_file=process_file))
 

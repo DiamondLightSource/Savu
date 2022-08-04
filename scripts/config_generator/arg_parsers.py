@@ -68,6 +68,9 @@ def _config_arg_parser(doc=True):
                         action='store_true', default=False)
     parser.add_argument("--examples", dest="examples", action='store_true',
                         help="Add example plugins.", default=False)
+    parser.add_argument("--name", dest="name",
+                        help="Display the name of the process list file opened.",
+                        type=str, default=None, required=False)
     parser.add_argument("--tree", dest="tree",
                         help="Display the tree view of a hdf/nxs file.",
                         type=str, default=None, required=False)
@@ -168,6 +171,8 @@ def _mod_arg_parser(args=None, doc=True):
     parser.add_argument("value", nargs='*', help=val_str)
     parser.add_argument("-d", "--default", action="store_true", default=False,
                         help="Revert to default value.")
+    parser.add_argument("-g", "--globalpar", action="store_true", default=False,
+                        help="A global change of a parameter.")
     return __arg_parser(parser, args, 'mod', doc)
 
 

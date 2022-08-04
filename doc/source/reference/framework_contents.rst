@@ -94,3 +94,13 @@ Transport Data
    Slice Lists <framework_api/savu.data.transport_data.slice_lists>
 
 
+Stats
+########################################################
+
+.. toctree::
+   :maxdepth: 1 
+
+   Statistics <framework_api/savu.data.stats.statistics>
+   Stats Utils <framework_api/savu.data.stats.stats_utils>
+
+

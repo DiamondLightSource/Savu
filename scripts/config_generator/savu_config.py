@@ -24,6 +24,7 @@
 import re
 import sys
 import logging
+from pathlib import Path
 from . import hdf_utils as hu
 
 from colorama import Fore
@@ -134,11 +135,26 @@ def _save(content, args):
 @error_catcher
 def _mod(content, args):
     """ Modify plugin parameters."""
-    pos_str, subelem, dims, command = \
-        content.separate_plugin_subelem(args.param, False)
+    if args.globalpar:
+        # deal with the global parameter
+        command = 'global'
+    else:
+        pos_str, subelem, dims, command = \
+            content.separate_plugin_subelem(args.param, False)
     if 'expand' in command:
         # Run the start stop step view for that dimension alone
         _expand(content, f"{pos_str} {dims} {True}")
+    if 'global' in command:
+        pos_list = content.get_positions()
+        modified_list = False
+        for pos_no in pos_list:
+            valid_modification = content.modify_global(int(pos_no), args)
+            if valid_modification:
+                modified_list = True
+        if modified_list:
+            print("Parameter '{}' has been changed globally to '{}'".format(args.param, args.value[0]))
+        else:
+            print("Parameter '{}' has not been found in the process list".format(args.param))
     else:
         if not args.default:
             content.check_required_args(args.value, True)
@@ -152,7 +168,6 @@ def _mod(content, args):
             # Display the selected parameter only
             _disp(content, str(args.param))
     return content
-
 
 @parse_args
 @error_catcher
@@ -270,12 +285,12 @@ def _rem(content, args):
     for pos in args.pos:
         pos_sort.append(int(pos))
     pos_sort.sort()
-    counter=0
+    counter = 0
     for pos in pos_sort:
-        if ((counter>0 and pos>0)):
-            pos-=counter
-        content.remove(content.find_position(str(pos)))
-        counter+=1
+        if ((counter > 0 and pos > 0)):
+            pos -= counter
+        content.remove(str(pos))
+        counter += 1
         content.check_iterative_loops([pos], -1)
     _disp(content, '-q')
     return content
@@ -370,6 +385,7 @@ def get_description():
                          for command, function_name in commands.items()}
     return command_desc_dict
 
+
 def main(test=False):
     """
     :param test: If test is True the last argument from sys.argv is removed,
@@ -406,6 +422,8 @@ def main(test=False):
         file_path = args.check
         hu.check_tomo_data(file_path)
         sys.exit(0)
+    if args.name is not None:
+        args.file = args.name
 
     if args.error:
         utils.error_level = 1
@@ -437,7 +455,8 @@ def main(test=False):
     accumulative_output = ''
     while True:
         try:
-            in_text = input(">>> ").strip()
+            name = f"{Path(content.filename).stem} " if content.filename else ""
+            in_text = input(f"{name}>>> ").strip()
             in_list = in_text.split(' ', 1)
             _write_command_to_log(in_text)
 

@@ -7,6 +7,9 @@
     :align: center
     :alt: savu_logo
 
+.. |video| image:: doc/source/files_and_images/savu_video.png
+    :target: https://youtu.be/7kja-R3WIYA
+
 .. start_of_main_text
 
 Tomography Reconstruction and Processing Pipeline
@@ -22,6 +25,8 @@ Savu is currently in use across the tomography beamlines at Diamond to reconstru
 
 
 .. _[1]: https://doi.org/10.1098/rsta.2014.0398
+
+|video|
 
 Features
 ========

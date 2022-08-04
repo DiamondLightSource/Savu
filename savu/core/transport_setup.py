@@ -96,10 +96,11 @@ class MPI_setup(object):
         log_dir = self.__get_log_directory(options)
         filename = os.path.join(log_dir, 'log.txt')
         level = cu._get_log_level(options)
-        self.__set_logger(level, log_format, fname=filename)
-        cu.add_user_log_level()
-        self.__add_user_logging(options)
-        self.__add_console_logging()
+        if not options["post_pre_run"]:
+            self.__set_logger(level, log_format, fname=filename)
+            cu.add_user_log_level()
+            self.__add_user_logging(options)
+            self.__add_console_logging()
 
     def __set_logger_parallel(self, number, rank, options):
         """ Set parallel logger.
@@ -108,14 +109,15 @@ class MPI_setup(object):
         log_format = 'L %(relativeCreated)12d ' + machine +\
                      ' %(levelname)-6s %(message)s'
         level = cu._get_log_level(options)
-        self.__set_logger(level, log_format)
+        if not options["post_pre_run"]:
+            self.__set_logger(level, log_format)
 
-        # Only add user logging to the 0 rank process
-        cu.add_user_log_level()
-        if MPI.COMM_WORLD.rank == 0:
-            self.__add_user_logging(options)
-            if not options['cluster']:
-                self.__add_console_logging()
+            # Only add user logging to the 0 rank process
+            cu.add_user_log_level()
+            if MPI.COMM_WORLD.rank == 0:
+                self.__add_user_logging(options)
+                if not options['cluster']:
+                    self.__add_console_logging()
 
     def __set_logger(self, level, fmat, fname=None):
         datefmt = '%H:%M:%S'

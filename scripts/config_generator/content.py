@@ -117,6 +117,7 @@ class Content(object):
         self.plugin_list._check_loaders()
         if check.lower() == "y":
             print(f"Saving file {filename}")
+            self.filename = filename
             if template:
                 self.plugin_list.add_template(create=True)
             self.plugin_list._save_plugin_list(filename)
@@ -126,6 +127,7 @@ class Content(object):
     def clear(self, check="y"):
         if check.lower() == "y":
             self.expand_dim = None
+            self.filename = None
             self.plugin_list.plugin_list = []
             self.plugin_list.clear_iterate_plugin_group_dicts()
 
@@ -350,19 +352,19 @@ class Content(object):
 
     def move(self, old, new):
         old_pos = self.find_position(old)
+        n_pos = self.find_position(new)
         entry = self.plugin_list.plugin_list[old_pos]
-        self.remove(old_pos)
-        new_pos, new = self.convert_pos(new)
+        self.remove(old)
+        new_pos, new_pos_str = self.convert_pos(new)
         name = entry["name"]
-        self.insert(pu.plugins[name](), new_pos, new)
+        self.insert(pu.plugins[name](), new_pos, new_pos_str)
         self.plugin_list.plugin_list[new_pos] = entry
-        self.plugin_list.plugin_list[new_pos]["pos"] = new
+        self.plugin_list.plugin_list[new_pos]["pos"] = new_pos_str
         self.check_iterative_loops([old_pos + 1, new_pos + 1], 0)
 
     def replace(self, old, new_plugin):
         self.check_for_plugin_failure(new_plugin)
-        old_pos = self.find_position(old)
-        self.remove(old_pos)
+        self.remove(old)
         pos, str_pos = self.convert_pos(old)
         plugin = pu.plugins[new_plugin]()
         plugin.get_plugin_tools()._populate_default_parameters()
@@ -400,6 +402,27 @@ class Content(object):
             valid_modification = self.modify_main(
                 param_name, value, tools, parameters, dim, pos_str
             )
+        return valid_modification
+
+    def modify_global(self, pos_no, args):
+        """Modify the plugin parameter using the global value.
+
+        :param pos_no: The plugin position (integer)
+        :param args: arguments
+
+        returns: A boolean True if the value is a valid input for the
+          selected parameter
+        """
+        valid_modification = False
+        plugin_entry = self.plugin_list.plugin_list[pos_no-1]
+        params = plugin_entry["param"]
+        tools = plugin_entry["tools"]
+        parameters = plugin_entry["data"]
+        param_name = args.param
+        value_new = args.value[0]
+        if param_name in parameters:
+            self._change_value(param_name, value_new, tools, parameters)
+            valid_modification = True
         return valid_modification
 
     def _catch_parameter_tuning_syntax(self, value, param_name):
@@ -644,6 +667,16 @@ class Content(object):
         pos = self.find_position(str_pos)
         self.plugin_list.plugin_list[pos]["active"] = status
 
+    def split_pos_to_list(self, str_pos):
+        """Split the position string into a list of numbers and letters
+        :param str_pos: the plugin display position string.
+        :returns: a list with the position number and letter
+        """
+        num = re.findall(r"\d+", str_pos)[0]
+        letter = re.findall("[a-z]", str_pos)
+        entry = [num, letter[0]] if letter else [num]
+        return entry
+
     def convert_pos(self, str_pos):
         """ Converts the display position (input) to the equivalent numerical
         position and updates the display position if required.
@@ -654,9 +687,7 @@ class Content(object):
         :rtype: (pos, str_pos)
         """
         pos_list = self.get_split_positions()
-        num = re.findall(r"\d+", str_pos)[0]
-        letter = re.findall("[a-z]", str_pos)
-        entry = [num, letter[0]] if letter else [num]
+        entry = self.split_pos_to_list(str_pos)
 
         # full value already exists in the list
         if entry in pos_list:
@@ -743,6 +774,12 @@ class Content(object):
             return pos_list.index(pos)
 
     def inc_positions(self, start, pos_list, entry, inc):
+        """ Increment plugin positions following index start, by provided inc
+        :param start: Plugin starting index
+        :param pos_list: plugin position list
+        :param entry: entry list
+        :param inc: increment value
+        """
         if len(entry) == 1:
             self.inc_numbers(start, pos_list, inc)
         else:
@@ -1076,16 +1113,12 @@ class Content(object):
         else:
             print(f"Level is set at '{self.disp_level}'")
 
-    def remove(self, pos):
-        if pos >= self.size:
-            raise Exception(
-                "Cannot remove plugin %s as it does not exist."
-                % self.plugin_list.plugin_list[pos]["name"]
-            )
-        pos_str = self.plugin_list.plugin_list[pos]["pos"]
+    def remove(self, str_pos):
+        pos = self.find_position(str_pos)
+        entry = self.split_pos_to_list(str_pos)
         self.plugin_list.plugin_list.pop(pos)
         pos_list = self.get_split_positions()
-        self.inc_positions(pos, pos_list, pos_str, -1)
+        self.inc_positions(pos, pos_list, entry, -1)
 
     def check_iterative_loops(self, positions, direction):
         """

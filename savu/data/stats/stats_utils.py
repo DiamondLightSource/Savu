@@ -8,13 +8,13 @@ class StatsUtils(object):
 
     _pattern_dict = {"projection": ["SINOGRAM", "PROJECTION", "TANGENTOGRAM", "4D_SCAN", "SINOMOVIE"],
                      "reconstruction": ["VOLUME_YZ", "VOLUME_XZ", "VOLUME_XY", "VOLUME_3D"]}
-    _stats_list = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
+    _stats_key = ["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]
 
     plt.set_loglevel('WARNING')
 
     def generate_figures(self, filepath, savepath):
         f = h5.File(filepath, 'r')
-        stats_dict, index_list = self._get_dicts_for_graphs(f)
+        stats_dict, index_list, times_dict = self._get_dicts_for_graphs(f)
         loop_stats, loop_plugins = self._get_dicts_for_loops(f)
         f.close()
 
@@ -30,6 +30,13 @@ class StatsUtils(object):
 
         self.make_stats_table(stats_dict, table_index_list, f"{savepath}/stats_table.html")
 
+        for p_num in list(times_dict.keys()):
+            for p_name in index_list["projection"] + index_list["reconstruction"]:
+                if p_num == p_name[0]:
+                    times_dict[p_name] = times_dict.pop(p_num)
+
+        self.make_times_figure(times_dict, f"{savepath}/times_chart.png")
+
         if len(stats_dict["projection"]["max"]):
             self.make_stats_graphs(stats_dict["projection"], index_list["projection"], "Projection Stats",
                                    f"{savepath}/projection_stats.png")
@@ -42,8 +49,15 @@ class StatsUtils(object):
 
     @staticmethod
     def make_stats_table(stats_dict, index_list, savepath):
-        p_stats = pd.DataFrame(stats_dict["projection"], index_list["projection"])
-        r_stats = pd.DataFrame(stats_dict["reconstruction"], index_list["reconstruction"])
+        stats_dict_copy = {}
+        for space, value in stats_dict.items():
+            stats_dict_copy[space] = value.copy()
+        for stat in list(stats_dict["projection"].keys()):
+            if all(value is None for value in stats_dict["projection"][stat]) and all(value is None for value in stats_dict["reconstruction"][stat]):
+                del stats_dict_copy["projection"][stat]
+                del stats_dict_copy["reconstruction"][stat]
+        p_stats = pd.DataFrame(stats_dict_copy["projection"], index_list["projection"])
+        r_stats = pd.DataFrame(stats_dict_copy["reconstruction"], index_list["reconstruction"])
         all_stats = pd.concat([p_stats, r_stats], keys=["Projection", "Reconstruction"])
         all_stats.to_html(savepath)  # create table of stats for all plugins
 
@@ -91,7 +105,7 @@ class StatsUtils(object):
         i = 0
         for row in ax:
             for axis in row:
-                stat = self._stats_list[i]
+                stat = self._stats_key[i]
                 axis.plot(stats_df_new[stat], "x-", color=colours[i])
                 for plugin in array_plugins:  # adding 'error' bars for plugins with multiple values
                     if stats_df[stat][plugin] is not None:
@@ -113,34 +127,61 @@ class StatsUtils(object):
         fig.suptitle(title, fontsize="x-large")
         plt.savefig(savepath, bbox_inches="tight")
 
+
+    def make_times_figure(self, times_dict, savepath):
+        colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(list(times_dict.keys()))))
+        fig, ax = plt.subplots()
+        total = sum(list(times_dict.values()))
+        ax.pie(list(times_dict.values()), labels=list(times_dict.keys()), autopct=lambda pct: self._get_times_pct(pct, total),
+               counterclock=False, startangle=90, colors=colors, radius=3, center=(4, 4), wedgeprops={"linewidth": 1, "edgecolor": "white"})
+        fig.suptitle("Plugin Times", x=0.1, y=1.4, horizontalalignment="right", fontsize="x-large")
+        plt.savefig(savepath, bbox_inches="tight")
+
+    @staticmethod
+    def _get_times_pct(pct, total):
+        absolute = (pct/100)*total
+        return f"{round(pct, 1)}%\n{round(absolute, 1)} (s)"
+
     @staticmethod
     def _get_dicts_for_graphs(file):
         stats_dict = {}
         stats_dict["projection"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                    "NRMSD": []}
+                                    "NRMSD": [], "zeros": [], "zeros%": [], "time (s)": []}
         stats_dict["reconstruction"] = {"max": [], "min": [], "mean": [], "mean_std_dev": [], "median_std_dev": [],
-                                        "NRMSD": []}
+                                        "NRMSD": [], "zeros": [], "zeros%": [], "time (s)": []}
 
         index_list = {"projection": [], "reconstruction": []}
 
+        times_dict = {}
+
         group = file["stats"]
         for space in ("projection", "reconstruction"):
-            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD"]):
-                for key in list(group.keys()):
-                    if group[key].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
-                        if f"{key}: {group[key].attrs.get('plugin_name')}" not in index_list[space]:
-                            index_list[space].append(f"{key}: {group[key].attrs.get('plugin_name')}")
-                        if group[key].ndim == 1:
-                            if len(group[key]) > index:
-                                stats_dict[space][stat].append(group[key][index])
+            for index, stat in enumerate(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros", "zeros%"]):
+                for p_num in list(group.keys()):
+                    if group[p_num].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
+                        if f"{p_num}: {group[p_num].attrs.get('plugin_name')}" not in index_list[space]:
+                            index_list[space].append(f"{p_num}: {group[p_num].attrs.get('plugin_name')}")
+                        if group[p_num].ndim == 1:
+                            stats_key = list(group[p_num].attrs.get("stats_key"))
+                            if stat in stats_key:
+                                stats_dict[space][stat].append(group[p_num][stats_key.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
-                        elif group[key].ndim == 2:
-                            if len(group[key][0]) > index:
-                                stats_dict[space][stat].append(group[key][:, index])
+                        elif group[p_num].ndim == 2:
+                            stats_key = list(group[p_num].attrs.get("stats_key"))
+                            if stat in stats_key:
+                                stats_dict[space][stat].append(group[p_num][:, stats_key.index(stat)])
                             else:
                                 stats_dict[space][stat].append(None)
-        return stats_dict, index_list
+            for p_num in list(group.keys()):
+                if group[p_num].attrs.get("pattern") in StatsUtils._pattern_dict[space]:
+                    stats_dict[space]["time (s)"].append(group[p_num].attrs.get("time"))
+
+        for plugin in list(group.keys()):
+            if group[plugin].attrs.get("time") is not None:
+                times_dict[plugin] = group[plugin].attrs.get("time")
+
+        return stats_dict, index_list, times_dict
 
     @staticmethod
     def _get_dicts_for_loops(file):

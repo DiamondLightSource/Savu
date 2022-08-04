@@ -27,6 +27,7 @@ import numpy as np
 
 from savu.plugins.loaders.base_loader import BaseLoader
 from savu.plugins.utils import register_plugin
+from savu.data.stats.statistics import Statistics
 
 from savu.data.data_structures.data_types.data_plus_darks_and_flats \
     import ImageKey, NoImageKey
@@ -52,6 +53,15 @@ class NxtomoLoader(BaseLoader):
 
         data_obj.data = self._get_h5_entry(
             data_obj.backing_file, self.parameters['data_path'])
+        exp.meta_data.set('data_path', self.parameters['data_path'])
+        exp.meta_data.set('image_key_path', self.parameters['image_key_path'])
+
+        self._setup_after_pre_run(data_obj)
+
+        synthetic_path = f"{'/'.join(self.parameters['data_path'].split('/')[:-1])}/synthetic/synthetic"
+        if synthetic_path in data_obj.backing_file:
+            if data_obj.backing_file[synthetic_path][()] == True:
+                self.exp.meta_data.set("synthetic", True)
 
         self._set_dark_and_flat(data_obj)
 
@@ -80,6 +90,37 @@ class NxtomoLoader(BaseLoader):
 
         self.set_data_reduction_params(data_obj)
         data_obj.data._set_dark_and_flat()
+
+    def _setup_after_pre_run(self, data_obj):
+
+        fsplit = self.exp.meta_data["data_path"].split("/")
+        fsplit[-1] = "stats"
+        stats_path = "/".join(fsplit)
+        if stats_path in data_obj.backing_file:
+            print("STATS FOUND IN INPUT DATA")
+            stats_obj = Statistics()
+            stats_obj.p_num = 1
+            stats_obj.pattern = "PROJECTION"
+            stats = data_obj.backing_file[stats_path]
+            stats_obj.stats_key = list(stats.attrs.get("stats_key"))
+            stats_dict = stats_obj._array_to_dict(stats)
+            Statistics.global_stats[1] = [stats_dict]
+            Statistics.plugin_names[1] = "raw_data"
+            for key in list(stats_dict.keys()):
+                data_obj.meta_data.set(["stats", key], stats_dict[key])
+            stats_obj._write_stats_to_file(p_num=1, plugin_name="raw_data")
+
+        fsplit = self.exp.meta_data["data_path"].split("/")
+        fsplit[-1] = "preview"
+        preview_path = "/".join(fsplit)
+        if preview_path in data_obj.backing_file:
+            print("PREVIEW FOUND IN INPUT DATA")
+            preview_str = data_obj.backing_file[preview_path][()]
+            preview = preview_str.split(",")
+            for i, crop in enumerate(self.parameters["preview"]):
+                if crop != ":":  # Take preview dimensions from user parameter where they exist
+                    preview[i] = crop
+            self.parameters["preview"] = preview
 
     def _get_h5_entry(self, filename, path):
         if path in filename:

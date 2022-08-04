@@ -179,6 +179,9 @@ def set_options(path, **kwargs):
     options['system_params'] = None
     options['nPlugin'] = 0
     options['command'] = ''
+    options['pre_run'] = False
+    options['post_pre_run'] = False
+    options['stats'] = "on"
     return options
 
 
