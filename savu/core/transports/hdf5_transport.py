@@ -84,14 +84,17 @@ class Hdf5Transport(BaseTransport):
                 self.exp._barrier(msg=msg)
                 if self.exp.meta_data.get('process') == \
                         len(self.exp.meta_data.get('processes'))-1:
-                    self._populate_nexus_file(data, iterate_group=iterate_group)
-                    if iterate_group is None:
-                        # currently not in an iterative loop, link output h5
-                        # file as normal
-                        self.hdf5._link_datafile_to_nexus_file(data)
+                    if self.exp.meta_data.get("pre_run") == True:
+                        self._populate_pre_run_nexus_file(data)
                     else:
-                        self._transport_post_plugin_in_iterative_loop(data,
-                            iterate_group)
+                        self._populate_nexus_file(data, iterate_group=iterate_group)
+                        if iterate_group is None:
+                            # currently not in an iterative loop, link output h5
+                            # file as normal
+                            self.hdf5._link_datafile_to_nexus_file(data)
+                        else:
+                            self._transport_post_plugin_in_iterative_loop(data,
+                                iterate_group)
                 self.exp._barrier(msg=msg)
                 if iterate_group is not None:
                     # reopen file with write permissiosn still present

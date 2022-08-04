@@ -64,6 +64,7 @@ class Plugin(PluginDatasets):
         self._set_plugin_datasets()
         self._reset_process_frames_counter()
         self.stats_obj = Statistics()
+        self.stats_obj.set_stats_key(["max", "min", "mean", "mean_std_dev", "median_std_dev", "NRMSD", "zeros"])
         self.setup()
         self.stats_obj.setup(self)
         self.set_filter_padding(*(self.get_plugin_datasets()))
@@ -134,7 +135,7 @@ class Plugin(PluginDatasets):
         return data
 
     def plugin_process_frames(self, data):
-        data_copy = data.copy()  # is it ok to copy every frame like this? Enough memory?
+        data_copy = data.copy()
         frames = self.base_process_frames_after(self.process_frames(
                 self.base_process_frames_before(data)))
 

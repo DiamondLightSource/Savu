@@ -385,6 +385,7 @@ def get_description():
                          for command, function_name in commands.items()}
     return command_desc_dict
 
+
 def main(test=False):
     """
     :param test: If test is True the last argument from sys.argv is removed,

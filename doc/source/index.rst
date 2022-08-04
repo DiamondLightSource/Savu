@@ -54,6 +54,7 @@ Table of Contents
     reference/stats_documentation/stats
     reference/iterative_api/iterative
     reference/iterative_api_developer_documentation/dev
+    reference/pre_run_documentation/pre_run
 
 .. _tutorials_content:
 

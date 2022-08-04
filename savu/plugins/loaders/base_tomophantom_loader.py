@@ -49,18 +49,13 @@ class BaseTomophantomLoader(BaseLoader):
         data_obj = exp.create_data_object('in_data', 'synth_proj_data')
 
         self.proj_stats_obj = Statistics()
-        self.proj_stats_obj.pattern = "PROJECTION"
-        self.proj_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.proj_stats_obj.start_time()
+        self.proj_stats_obj.setup(self, pattern="PROJECTION")
         self.proj_stats_obj.p_num = 1
-        self.proj_stats_obj._iterative_group = None
-        self.proj_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
         self.phantom_stats_obj = Statistics()
-        self.phantom_stats_obj.pattern = "VOLUME_XY"
-        self.phantom_stats_obj.plugin_name = "TomoPhantomLoader"
+        self.phantom_stats_obj.setup(self, pattern="VOLUME_XY")
         self.phantom_stats_obj.p_num = 0
-        self.phantom_stats_obj._iterative_group = None
-        self.phantom_stats_obj.stats = {'max': [], 'min': [], 'mean': [], 'std_dev': [], 'RSS': [], 'data_points': []}
 
         self.proj_stats_obj.plugin_names[1] = "TomoPhantomLoader"  # This object belongs to the whole statistics class
         self.proj_stats_obj.plugin_numbers["TomoPhantomLoader"] = 1  # This object belongs to the whole statistics class
@@ -94,11 +89,11 @@ class BaseTomophantomLoader(BaseLoader):
         self.cor = np.linspace(cor_val, cor_val, self.parameters['proj_data_dims'][1], dtype='float32')
 
         self.proj_stats_obj.volume_stats = self.proj_stats_obj.calc_volume_stats(self.proj_stats_obj.stats)  # Calculating volume-wide stats for projection
-        Statistics.global_stats[1] = self.proj_stats_obj.volume_stats
+        Statistics.global_stats[1] = [self.proj_stats_obj.volume_stats]
         self.proj_stats_obj._write_stats_to_file(p_num=1, plugin_name="TomoPhantomLoader (synthetic projection)")  # writing these to file (stats/stats.h5)
 
         self.phantom_stats_obj.volume_stats = self.phantom_stats_obj.calc_volume_stats(self.phantom_stats_obj.stats)  # calculating volume-wide stats for phantom
-        Statistics.global_stats[0] = self.phantom_stats_obj.volume_stats
+        Statistics.global_stats[0] = [self.phantom_stats_obj.volume_stats]
         self.phantom_stats_obj._write_stats_to_file(p_num=0, plugin_name="TomoPhantomLoader (phantom)")  # writing these to file (stats/stats.h5)
 
         self._set_metadata(data_obj, self._get_n_entries())
@@ -249,8 +244,8 @@ class BaseTomophantomLoader(BaseLoader):
 
         filename = self.exp.meta_data.get('nxs_filename')
         fsplit = filename.split('/')
-        plugin_number = len(self.exp.meta_data.plugin_list.plugin_list)
-        if plugin_number == 1:
+        n_plugins = len(self.exp.meta_data.plugin_list.plugin_list)
+        if n_plugins == 1:
             fsplit[-1] = 'synthetic_data.nxs'
         else:
             fsplit[-1] = 'synthetic_data_processed.nxs'
@@ -259,7 +254,8 @@ class BaseTomophantomLoader(BaseLoader):
         self._link_nexus_file(data_obj2, 'phantom')
         self._link_nexus_file(data_obj, 'synth_proj_data')
 
-
+    def get_communicator(self):
+        return MPI.COMM_WORLD
 
     def _link_nexus_file(self, data_obj, name):
         """Link phantom + synthetic projection data h5 files to a single nexus file containing both."""
@@ -267,17 +263,16 @@ class BaseTomophantomLoader(BaseLoader):
         if name == 'phantom':
             data_obj.exp.meta_data.set(['group_name', 'phantom'], 'phantom')
             data_obj.exp.meta_data.set(['link_type', 'phantom'], 'final_result')
-            stats_dict = self.phantom_stats_obj._array_to_dict(self.phantom_stats_obj.volume_stats)
-            for key in list(stats_dict.keys()):
-                data_obj.meta_data.set(["stats", key], stats_dict[key])
+            stats_dict = self.phantom_stats_obj.volume_stats
+            for key, value in stats_dict.items():
+                data_obj.meta_data.set(["stats", key], value)
 
-        else:
+        elif name == "synth_proj_data":
             data_obj.exp.meta_data.set(['group_name', 'synth_proj_data'], 'entry1/tomo_entry/data')
             data_obj.exp.meta_data.set(['link_type', 'synth_proj_data'], 'entry1')
-            stats_dict = self.proj_stats_obj._array_to_dict(self.proj_stats_obj.volume_stats)
-            for key in list(stats_dict.keys()):
-                data_obj.meta_data.set(["stats", key], stats_dict[key])
-
+            stats_dict = self.proj_stats_obj.get_stats()
+            for key, value in stats_dict.items():
+                data_obj.meta_data.set(["stats", key], value)
         self._populate_nexus_file(data_obj)
         self._link_datafile_to_nexus_file(data_obj)
 
