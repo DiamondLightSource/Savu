@@ -79,7 +79,7 @@ class Statistics(object):
     def _setup_4d(self):
         try:
             in_dataset, out_dataset = self.plugin.get_datasets()
-            if in_dataset[0].data_info["nDims"] == 4:
+            if in_dataset[0].data_info["nDims"] == 4 and len(out_dataset) != 0:
                 self._4d = True
                 shape = out_dataset[0].data_info["shape"]
                 self._volume_total_points = 1
