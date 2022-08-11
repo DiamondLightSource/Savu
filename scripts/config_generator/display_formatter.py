@@ -168,18 +168,18 @@ class DisplayFormatter(object):
         )
         return "\n" + synopsis
 
+    def _get_doc_link(self, p_dict):
+        doc_str = p_dict["doc"]
+        doc_link = doc_str.get("documentation_link")
+        return f"\n  {doc_link}" if doc_link else ""
+
     def _get_extra_info(self, p_dict, width, colour_off, info_colour,
                         warn_colour):
         doc_str = p_dict["doc"]
         info = self._get_equal_lines(doc_str.get("info"), width, info_colour,
                                      colour_off, " " * 2)
         info = "\n"+info if info else ''
-
-        doc_link = doc_str.get("documentation_link")
-        if doc_link:
-            documentation_link = f"  {doc_link}"
-            info +="\n"+documentation_link
-
+        info = info + self._get_doc_link(p_dict)
         warn = self._get_equal_lines(doc_str.get('warn'), width, warn_colour,
                                      colour_off, " "*2)
         warn = "\n"+warn if warn else ""
@@ -410,6 +410,7 @@ class DispDisplay(ParameterFormatter):
         params = self._get_param_details(
             level, p_dict, width, display_args, desc=param_desc
         )
+        doc_link = self._get_doc_link(p_dict)
         if breakdown:
             params = self._get_param_details(
                 level,
@@ -420,7 +421,7 @@ class DispDisplay(ParameterFormatter):
                 breakdown=breakdown,
             )
             return title, synopsis, params
-        return title + synopsis + params
+        return title + synopsis + doc_link + params
 
     def _get_verbose_verbose(self, level, p_dict, count, width, display_args):
         title, synopsis, param_details = self._get_verbose(

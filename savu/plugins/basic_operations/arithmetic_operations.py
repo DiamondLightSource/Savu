@@ -39,6 +39,8 @@ class ArithmeticOperations(Plugin, CpuPlugin):
         in_dataset, out_dataset = self.get_datasets()
         out_dataset[0].create_dataset(in_dataset[0])
         in_pData, out_pData = self.get_plugin_datasets()
+        preview = [':',':',':']
+        out_dataset[0].get_preview().set_preview(preview, load=True)
         pattern = list(in_dataset[0].get_data_patterns().keys())[0]
         in_pData[0].plugin_data_setup(pattern, self.get_max_frames())
         out_pData[0].plugin_data_setup(pattern, self.get_max_frames())
@@ -88,4 +90,4 @@ class ArithmeticOperations(Plugin, CpuPlugin):
         return 1
 
     def get_max_frames(self):
-        return 'multiple'
+        return 'single'

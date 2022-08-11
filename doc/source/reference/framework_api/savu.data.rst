@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    savu.data.data_structures
+   savu.data.stats
    savu.data.transport_data
 
 Submodules

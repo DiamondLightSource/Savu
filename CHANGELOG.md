@@ -66,6 +66,9 @@ All notable changes to this project are documented in this file.
   *  Allow a parameter to be a directory path within the Savu folder
   *  Asterix line added to indicate the start and end of the process list
   *  Line separator added to indicate an iterative plugin loop
+  *  Include a link to relevant online plugin guides
+  *  Warning added when loading plugins from a user directory
+  *  First dataset passed by default to the next plugin
 
 ### New Commands
   * *savu_mod* - a way to modify one parameter present in a plugin list.
@@ -75,11 +78,13 @@ All notable changes to this project are documented in this file.
 ## _Documentation_
   *  Plugin API moved to dropdown boxes on every plugin documentation page
   *  Plugin template links updated
+  *  Video demos added
 
 ## _BUGS_
   *  res_norm bug when using AstaReconGPU with CGLS_CUDA
   *  Fix indentation for the plugin_generator command
   *  Allow saving to inner plugin directories when using the plugin_generator command
+  *  Plugin number and order error fixed
 
 ## Other
   * The test dataset 24737.nxs has been changed to tomo-standard.nxs

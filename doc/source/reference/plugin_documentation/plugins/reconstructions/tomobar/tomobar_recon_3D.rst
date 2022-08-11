@@ -3,7 +3,7 @@
 {% block title %}Tomobar Recon 3D{% endblock %}
 
 {% block description %}
-A Plugin to reconstruct full-field tomographic projection data using state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR includes FISTA and ADMM iterative methods and depends on the ASTRA toolbox and the CCPi RGL toolkit. 
+A Plugin to reconstruct tomographic projection data using analytical or state-of-the-art regularised iterative algorithms from the ToMoBAR package. ToMoBAR depends on the ASTRA toolbox and the CCPi RGL toolkit for regularisation. 
 {% endblock %}
 
 {% block parameter_yaml %}
@@ -80,49 +80,91 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
                 verbose: When fixed, you get the dimension of the horizontal detector or you can specify any reconstruction size you like with an integer.
             default: fixed
         
+        reconstruction_method:
+            visibility: basic
+            dtype: str
+            description: The name of the reconstruction method.
+            options: 
+                FBP3D: Filtered Backprojection method
+                CGLS3D: Conjugate Gradient Least Squares
+                FISTA3D: Model-Based iterative with regularisation
+            default: FBP3D
+        
+        algorithm_iterations:
+            visibility: basic
+            dtype: int
+            default: "15"
+            description: 
+                summary: Number of (outer) iterations for iterative algorithm.
+                verbose: Less than 10 iterations for the iterative method (FISTA3D) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
+            dependency: 
+                reconstruction_method: FISTA3D CGLS3D
+        
+        regularisation_parameter:
+            visibility: basic
+            dtype: float
+            description: 
+                summary: Regularisation (filter) parameter. The higher the value, the stronger the smoothing effect
+                range: Recommended between 1e-06 and 1e-04
+            default: "3e-06"
+            dependency: 
+                reconstruction_method: FISTA3D
+        
         padding:
             visibility: advanced
             dtype: int
             description: The amount of pixels to pad each slab of the cropped projection data.
-            default: "5"
+            default: 
+                reconstruction_method: 
+                    FBP3D: "2"
+                    CGLS3D: "3"
+                    FISTA3D: "5"
+            dependency: reconstruction_method
         
         data_fidelity:
             visibility: advanced
             dtype: str
-            description: Data fidelity, choose LS, PWLS, SWLS or KL.
+            description: A data fidelity model for model-based iterative method.
+            options: 
+                LS: Least-Squares
+                PWLS: Penalised Weighted Least-Squares (raw data required as input)
+                SWLS: Stripe weighted Least-Squares (raw data required as input)
+                KL: Kullback-Leibler
             default: LS
+            dependency: 
+                reconstruction_method: FISTA3D
         
         data_Huber_thresh:
             visibility: advanced
             dtype: "[None,float]"
             description: Threshold parameter for __Huber__ data fidelity.
             default: None
+            dependency: 
+                reconstruction_method: FISTA3D
         
         data_beta_SWLS:
             visibility: advanced
             dtype: float
-            description: A parameter for stripe-weighted model
+            description: A parameter for stripe-weighted SWLS model
             default: "0.1"
+            dependency: 
+                reconstruction_method: FISTA3D
         
         data_full_ring_GH:
             visibility: advanced
             dtype: "[None,str]"
-            description: Regularisation variable for full constant ring removal (GH model).
+            description: Regularisation variable for full constant ring removal (Group-Huber model).
             default: None
+            dependency: 
+                reconstruction_method: FISTA3D
         
         data_full_ring_accelerator_GH:
             visibility: advanced
             dtype: float
-            description: Acceleration constant for GH ring removal. (use with care)
+            description: Acceleration constant for Group-Huber ring removal (use with care).
             default: "10.0"
-        
-        algorithm_iterations:
-            visibility: basic
-            dtype: int
-            description: 
-                summary: Number of outer iterations for FISTA (default)or ADMM methods.
-                verbose: Less than 10 iterations for the iterative method (FISTA) can deliver a blurry reconstruction. The suggested value is 15 iterations, however the algorithm can stop prematurely based on the tolerance value.
-            default: "17"
+            dependency: 
+                reconstruction_method: FISTA3D
         
         algorithm_verbose:
             visibility: advanced
@@ -130,18 +172,24 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
             description: Print iterations number and other messages (off by default).
             options: "['on', 'off']"
             default: off
+            dependency: 
+                reconstruction_method: FISTA3D
         
         algorithm_mask:
-            visibility: advanced
+            visibility: intermediate
             dtype: float
             description: set to 1.0 to enable a circular mask diameter or < 1.0 to shrink the mask.
             default: "1.0"
+            dependency: 
+                reconstruction_method: FISTA3D
         
         algorithm_ordersubsets:
             visibility: advanced
             dtype: int
             description: The number of ordered-subsets to accelerate reconstruction.
             default: "6"
+            dependency: 
+                reconstruction_method: FISTA3D
         
         algorithm_nonnegativity:
             visibility: advanced
@@ -150,6 +198,8 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
             description: 
                 summary: ENABLE or DISABLE nonnegativity constraint.
             default: ENABLE
+            dependency: 
+                reconstruction_method: FISTA3D
         
         regularisation_method:
             visibility: intermediate
@@ -169,21 +219,14 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
                     NLTV: Non Local Total Variation
                     Diff4th: Fourth-order nonlinear diffusion model
             default: FGP_TV
-        
-        regularisation_parameter:
-            visibility: basic
-            dtype: float
-            description: 
-                summary: Regularisation parameter. The higher the value, the stronger the smoothing effect
-                range: Recommended between 1e-06 and 1e-04
-            default: "5e-06"
+            dependency: 
+                reconstruction_method: FISTA3D
         
         regularisation_iterations:
             visibility: intermediate
             dtype: int
             description: 
                 summary: Total number of regularisation iterations. The smaller the number of iterations, the smaller the effect of the filtering is. A larger number will affect the speed of the algorithm.
-                range: Recommended value dependent upon method.
             default: 
                 regularisation_method: 
                     ROF_TV: "300"
@@ -195,10 +238,11 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
                     Diff4th: "300"
                     TGV: "150"
                     NLTV: "30"
-            dependency: regularisation_method
+            dependency: 
+                reconstruction_method: FISTA3D
         
         regularisation_device:
-            visibility: advanced
+            visibility: hidden
             dtype: str
             description: The device for regularisation
             default: gpu
@@ -209,7 +253,7 @@ A Plugin to reconstruct full-field tomographic projection data using state-of-th
             description: Primal-dual parameter for convergence.
             default: "8"
             dependency: 
-                regularisation_method: PD_TV
+                reconstruction_method: FISTA3D
         
         regularisation_methodTV:
             visibility: advanced

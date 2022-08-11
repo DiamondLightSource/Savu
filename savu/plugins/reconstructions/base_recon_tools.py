@@ -53,6 +53,12 @@ class BaseReconTools(PluginTools):
                is given, the second value is used to fill up the area outside
                the mask.
              default: 0.95
+        skip_projections:
+             visibility: intermediate
+             dtype: [None, str, list]
+             description: Use to skip unwanted projections in a dataset. E.g.
+               "np.arange(80, 90), 93, 97, 99, np.arange(100, 110)".
+             default: None
         log_func:
              visibility: advanced
              dtype: str
