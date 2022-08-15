@@ -65,7 +65,7 @@ class Statistics(object):
                 self._set_pattern_info()
         if self.calc_stats:
             Statistics._any_stats = True
-            self._setup_4d()
+        self._setup_4d()
         self._setup_iterative()
 
     def _setup_iterative(self):
@@ -79,7 +79,7 @@ class Statistics(object):
     def _setup_4d(self):
         try:
             in_dataset, out_dataset = self.plugin.get_datasets()
-            if in_dataset[0].data_info["nDims"] == 4:
+            if in_dataset[0].data_info["nDims"] == 4 and len(out_dataset) != 0:
                 self._4d = True
                 shape = out_dataset[0].data_info["shape"]
                 self._volume_total_points = 1
@@ -477,12 +477,8 @@ class Statistics(object):
         p_num = self.p_num
         Statistics.global_stats[p_num] = MPI.COMM_WORLD.bcast(Statistics.global_stats[p_num], root=0)
         if not gpu_processes[process]:
-            if Statistics.global_stats[p_num].ndim == 1:
-                stats_dict = self._array_to_dict(Statistics.global_stats[p_num])
-                self._link_stats_to_datasets(stats_dict, self._iterative_group)
-            elif Statistics.global_stats[p_num].ndim > 1:
-                for stats_array in Statistics.global_stats[p_num]:
-                    stats_dict = self._array_to_dict(stats_array)
+            if len(Statistics.global_stats[p_num]) != 0:
+                for stats_dict in Statistics.global_stats[p_num]:
                     self._link_stats_to_datasets(stats_dict, self._iterative_group)
 
     def _set_pattern_info(self):
