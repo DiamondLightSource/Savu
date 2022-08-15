@@ -430,7 +430,7 @@ class Statistics(object):
         comm = self.plugin.get_communicator()
         try:
             rank = comm.rank
-        except MPI.Exception:        # Sometimes get_communicator() returns an invalid communicator.
+        except (MPI.Exception, AttributeError):        # Sometimes get_communicator() returns an invalid communicator.
             comm = MPI.COMM_WORLD    # So using COMM_WORLD in this case.
         self._write_times_to_file(comm)
 
