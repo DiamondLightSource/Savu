@@ -79,7 +79,7 @@ class Statistics(object):
     def _setup_4d(self):
         try:
             in_dataset, out_dataset = self.plugin.get_datasets()
-            if in_dataset[0].data_info["nDims"] == 4:
+            if in_dataset[0].data_info["nDims"] == 4 and len(out_dataset) != 0:
                 self._4d = True
                 shape = out_dataset[0].data_info["shape"]
                 self._volume_total_points = 1
@@ -430,7 +430,7 @@ class Statistics(object):
         comm = self.plugin.get_communicator()
         try:
             rank = comm.rank
-        except MPI.Exception:        # Sometimes get_communicator() returns an invalid communicator.
+        except (MPI.Exception, AttributeError):        # Sometimes get_communicator() returns an invalid communicator.
             comm = MPI.COMM_WORLD    # So using COMM_WORLD in this case.
         self._write_times_to_file(comm)
 
@@ -477,12 +477,8 @@ class Statistics(object):
         p_num = self.p_num
         Statistics.global_stats[p_num] = MPI.COMM_WORLD.bcast(Statistics.global_stats[p_num], root=0)
         if not gpu_processes[process]:
-            if Statistics.global_stats[p_num].ndim == 1:
-                stats_dict = self._array_to_dict(Statistics.global_stats[p_num])
-                self._link_stats_to_datasets(stats_dict, self._iterative_group)
-            elif Statistics.global_stats[p_num].ndim > 1:
-                for stats_array in Statistics.global_stats[p_num]:
-                    stats_dict = self._array_to_dict(stats_array)
+            if len(Statistics.global_stats[p_num]) != 0:
+                for stats_dict in Statistics.global_stats[p_num]:
                     self._link_stats_to_datasets(stats_dict, self._iterative_group)
 
     def _set_pattern_info(self):
