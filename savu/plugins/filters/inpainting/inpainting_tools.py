@@ -9,27 +9,45 @@ is a chunk of data missing or one needs to inpaint some data features.
         mask_range:
               visibility: basic
               dtype: list[float,float]
-              description: mask for inpainting is set as a threshold in a range.
+              description: generate mask as a threshold of the input image given the intensity range (ignored if the mask is provided).
               default: [1.0,100]
+        method:
+              visibility: intermediate
+              dtype: str
+              options: [INPAINT_EUCL_WEIGHTED, NONLOCAL_MARCH, DIFFUSION]
+              description: Choose inpainting method
+              default: INPAINT_EUCL_WEIGHTED
         iterations:
               visibility: basic
-              dtype: float
-              description: controls the smoothing level of the inpainted region.
-              default: 50
-        windowsize_half:
-              visibility: basic
               dtype: int
-              description: half-size of the smoothing window.
-              default: 3
-        sigma:
+              description: the number of iterations to perform the inpainting (controls the smoothing level)
+              default: 5
+        windowsize_half:
+              visibility: intermediate
+              dtype: int
+              description: half-size of the smoothing window, increase size for more smoothing
+              default: 7
+              dependency:
+                method: [INPAINT_EUCL_WEIGHTED]
+        search_window_increment:
+              visibility: advanced
+              dtype: int
+              description: the increment value with which the searching window is growing in iterations
+              default: 1
+              dependency:
+                method: [NONLOCAL_MARCH]
+        regularisation_parameter:
               visibility: basic
               dtype: float
-              description: maximum value for the inpainted region.
-              default: 0.5
-        pattern:
-              visibility: basic
-              dtype: str
-              description: Pattern to apply these to.
-              default: SINOGRAM
-
+              description: regularisation parameter for diffusion
+              default: 1000
+              dependency:
+                method: [DIFFUSION]
+        time_marching_parameter:
+              visibility: intermediate
+              dtype: float
+              description: ensuring convergence of the diffusion scheme
+              default: 0.00001
+              dependency:
+                method: [DIFFUSION]
         """

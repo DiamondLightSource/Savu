@@ -281,8 +281,8 @@ if [ ! $test_flag ]; then
 
     if [ $EXPLICIT_FILE = false ]; then
     echo "Installing mpi4py from savu-dep conda channel"
-    export VERSION_BUILD_MPI4PI=$mpi4py_version"_openmpi_"$openmpi_version
-    conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PI --no-deps
+    export VERSION_BUILD_MPI4PY=$mpi4py_version"_openmpi_"$openmpi_version
+    conda install --yes -c savu-dep mpi4py=$VERSION_BUILD_MPI4PY --no-deps
 
     echo "Installing hdf5 from savu-dep conda channel"
     export VERSION_BUILD_HDF5=$hdf5_version"_openmpi_"$openmpi_version
