@@ -55,9 +55,14 @@ When Savu is being run with MPI, the slice-wide stats are split between each pro
 
 .. automethod:: savu.data.stats.statistics.Statistics._combine_mpi_stats
 
-API
-===
+During GPU plugins, only GPU processes are active, meaning some processes are left without stats. The following method occurs after the processes have re-synchronised, and broadcasts the stats available to the GPU processes to all other processes.
+
+.. automethod:: savu.data.stats.statistics.Statistics._broadcast_gpu_stats
+
+Methods
+=======
 
 .. autoclass:: savu.data.stats.statistics.Statistics
-   :undoc-members:
+   :members:
+   :private-members:
 
