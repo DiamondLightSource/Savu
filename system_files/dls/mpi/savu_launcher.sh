@@ -3,29 +3,6 @@
 all_args=$*
 original_command="savu_mpi $all_args"
 
-# function for checking which data centre
-# assuming only gpfs03 in new data centre - to be updated
-function is_gpfs03 ()
-{
-  file=$1
-  return=$2
-  check=$3
-  pathtofile=`readlink -f $file`
-  if [ "$check" = true ] && [ ! -f $pathtofile ] ; then
-	if [ ! -d $pathtofile ]; then
-		echo $file": No such file or directory"
-		return 1
-	fi
-  fi
-
-  gpfs03="$(df $pathtofile | grep gpfs03)"
-  if [ ! "$gpfs03" ] ; then
-	eval "$return"=false
-  else
-    eval "$return"=true
-  fi
-}
-
 # input optional arguments
 zocalo=false
 keep=false
@@ -48,8 +25,10 @@ shift $((OPTIND -1))
 if [ -z $version ] ; then
 	echo -ne "\n*** Loading the latest stable version of Savu as "
 	echo -e "a specific version has not been requested ***\n"
-	module load savu
-    version=default
+	# TODO: Hardcoded `savu/5.0-tomo` as this uses `openmpi/4.1.2` which is
+	# compatible with SLURM
+	module load savu/5.0-tomo
+	version="5.0-tomo"
 else
 	module load savu/$version
 fi
@@ -83,17 +62,6 @@ if [ -n "${infile+set}" ]; then
 	outpath=${var[7]}
 	options=${var[8]}
 	project=tomography
-
-
-	# check cluster and data path are compatible
-	is_gpfs03 $data_file gpfs03 false
-	if { [ "$gpfs03" = true ] && [ $cluster != 'hamilton' ] ; \
-			} || { [ "$gpfs03" = false ] && [ $cluster == 'hamilton' ] ; }; then
-		echo "The data is not visible on "$cluster
-		exit 1
-	fi
-
-
 else
 	#echo "Running Savu in production mode"
 	# parse additional command line arguments
@@ -132,7 +100,9 @@ else
 	shift 3
 	options=$@
 
-	# which project?
+	# TODO: For Grid Engine, the code below sets the project based on the
+	# filepath of the input data. For SLURM, does setting the "account" in the
+	# same way make sense, or is there a more reliable way of doing it?
 	pathtodatafile=`readlink -f $data_file`
 	if [[ $pathtodatafile == /dls/staging* ]] ; then
 		pathtodatafile=${pathtodatafile#/dls/staging}
@@ -144,126 +114,71 @@ else
 	  project=tomography
 	fi
 
-	# determine the cluster from the data path
-    is_gpfs03 $data_file gpfs03 true # ***********************Error here for folders
+	# TODO: The only "account" currently available on Wilson is "test05r", so
+	# will hardcode that for now
+	account=test05r
 
-	if [ "$gpfs03" = false ] ; then
-		cluster=cluster
-		# determine cluster setup based on the provided variable "GPUarch_nodes"
-		if [[ -z "${GPUarch_nodes}" ]]; then
-			# define STANDARD resources
-  			GPUarch_nodes="STANDARD"
-  			arch='Kepler'
-  			num=2
-		else
-			arch=${GPUarch_nodes%_*}
-			num=${GPUarch_nodes##*_}
-		fi
-		case $arch in
-			'Kepler')
-			  gpu_arch=Kepler ;
-			  nNodes=$num
-			  ;;
-			'Pascal')
-			  gpu_arch=Pascal ;
-			  nNodes=$num
-			  ;;
-			*)
-			  echo -e "\nUnknown 'GPUarch_nodes' optional argument"
-			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
-			  exit 1
-			  ;;
-		esac
+	# No longer choose number of GPU nodes and GPU architecture based on if the
+	# data is on GPFS03 or not, let SLURM config handle this instead.
 
+	# If the number of GPU nodes and GPU architecture is not provided, then
+	# default to 2 GPU nodes with Pascal's
+	if [[ -z "${GPUarch_nodes}" ]]; then
+		GPUarch_nodes="STANDARD"
+		arch='Pascal'
+		num=2
 	else
-		cluster='hamilton'
-		# determine cluster setup based on the provided variable "GPUarch_nodes"
-		if [[ -z "${GPUarch_nodes}" ]]; then
-			# define STANDARD resources
-  			GPUarch_nodes="STANDARD"
-  			arch='Pascal'
-  			num=2
-		else
-			arch=${GPUarch_nodes%_*}
-			num=${GPUarch_nodes##*_}
-		fi
-		case $arch in
-			'Volta')
-			  gpu_arch=$arch ;
-			  nNodes=$num
-			  ;;
-			'Pascal')
-			  gpu_arch=$arch ;
-			  nNodes=$num
-			  ;;
-			 *)
-			  echo -e "\nUnknown 'GPUarch_nodes' optional argument\n"
-			  echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Volta_2', 'Pascal_2'"
-				exit 1
-				;;
-		esac
-		case $project in
-			"k11")
-			  gpu_arch='Volta'
-			  ;;
-			*)
-			  gpu_arch='Pascal'
-			  ;;
-		esac
+		arch=${GPUarch_nodes%_*}
+		num=${GPUarch_nodes##*_}
+	fi
+	nNodes=$num
+
+	# Set number of CPUs and GPUs to request
+	case $arch in
+		'Fermi')
+			gpu_arch=Fermi
+			cpus_per_node=12
+			gpus_per_node=2
+			;;
+		'Kepler')
+			gpu_arch=Kepler
+			cpus_per_node=20
+			gpus_per_node=4
+			;;
+		'Pascal')
+			gpu_arch=Pascal
+			cpus_per_node=20
+			gpus_per_node=2
+			;;
+		'Volta')
+			gpu_arch=Volta
+			cpus_per_node=40
+			if [ $dev_mode==false ]; then
+				cpus_to_use_per_node=30
+			fi
+			gpus_per_node=4
+			;;
+		*)
+			echo -e "\nUnknown 'GPUarch_nodes' optional argument"
+			echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
+			exit 1
+			;;
+	esac
+
+	# Previously there was a special case for K11/DIAD for when input data was
+	# on GPFS03, to default to using Volta's. For the migration to SLURM (where
+	# being aware of GPFS03 in the launcher script is no longer necessary),
+	# this has been translated into requesting Volta's for K11/DIAD data.
+	if [ $project == k11 ]; then
+		gpu_arch=Volta
 	fi
 
+	# Set "partition" (the SLURM equivalent of a "queue" in Grid Engine)
+	# TODO: Currently on Wilson, cs05r is the only partition which reports
+	# having GPU nodes, so have naively chosen this for all jobs, but this may
+	# not be correct.
+	partition=cs05r
 fi
-
-
-# which cluster?
-case $cluster in
-	'test_cluster')
-    	module load global/testcluster-quiet
-		cluster_queue=test-medium.q ;;
-  	'cluster')
-		module load global/cluster-quiet
-		cluster_queue=high.q
-	    	# which gpu architecture?
-		case $gpu_arch in
-			'Fermi')
-				cluster_queue=$cluster_queue@@com07
-				cpus_per_node=12
-				gpus_per_node=2 ;;
-     		'Kepler')
-				cluster_queue=$cluster_queue@@com10
-				cpus_per_node=20
-				gpus_per_node=4 ;;
-     		'Pascal')
-				cluster_queue=$cluster_queue@@com14
-				cpus_per_node=20
-				gpus_per_node=2 ;;
-			*) echo -ne "\nERROR: Unknown GPU architecture for the cluster. "
-			   echo -e "Please choose from 'Fermi', 'Kepler' or 'Pascal'\n"
-  			   exit 1 ;;
-		esac ;;
-	'hamilton')
-		module load hamilton-quiet
-		cluster_queue=all.q
-		cpus_per_node=40
-		if [ $dev_mode==false ]; then
-			cpus_to_use_per_node=30
-		fi
-		gpus_per_node=4
-
-    	# which gpu architecture?
-		if [ -z $gpu_arch ] ; then
-			case $project in
-				"k11") gpu_arch='Volta' ;;
-				*) gpu_arch='Pascal' ;;
-			esac
-		elif [ $gpu_arch != 'Pascal' ] && [ $gpu_arch != 'Volta' ] ; then
-			echo -ne "\nERROR: Unknown GPU architecture for Hamilton. "
-			echo -e "Please choose from 'Pascal' or 'Volta'\n"
-			exit 1
-		fi ;;
-	*)	echo "Unknown cluster, please choose from 'test_cluster', 'cluster' or 'hamilton'"
-		exit 1 ;;
-esac
 
 # override cpu and gpu values if the full node is not required
 if [ -z $cpus_to_use_per_node ] ; then cpus_to_use_per_node=$cpus_per_node; fi
@@ -365,24 +280,6 @@ else
 	fi
 fi
 
-# check all files are in the same data centre
-is_gpfs03 $data_file is_gpfs03_in false
-is_gpfs03 $interfolder is_gpfs03_inter false
-is_gpfs03 $outfolder is_gpfs03_out false
-if ! ([ $is_gpfs03_in = $is_gpfs03_inter ] && [ $is_gpfs03_inter = $is_gpfs03_out ]) ; then
-tput setaf 3
-	echo -e "\n\t**************************** ERROR MESSAGE ****************************"
-tput setaf 1
-#tput sgr0
-	echo -e "\tAll the input and output data locations must be in the same data centre."
-	echo -e "\tPlease email scientific.software@diamond.ac.uk for more information."
-
-tput setaf 3
-	echo -e "\t***********************************************************************\n"
-tput sgr0
-	exit 1
-fi
-
 # copy process list to the intermediate folder
 orig_process_file=$process_file
 process_file=`readlink -f $process_file`
@@ -401,54 +298,75 @@ fi
 
 # create a modified command with the new process list path
 log_process_file=$logfolder/$basename
-# replace the original process list path with the process list resaved into the log file
+# replace the original process list path with the process list resaved into the
+# log file
 modified_command=${original_command/$orig_process_file/$log_process_file}
 
-# =========================== qsub =======================================
+# =========================== sbatch =======================================
 # general arguments
-# openmpi-savu stops greater than requested number of nodes being assigned to the job if memory
-# requirements are not satisfied.'
 
-qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
--q $cluster_queue -P $project"
+# openmpi-savu stops greater than requested number of nodes being assigned to
+# the job if memory requirements are not satisfied.'
+#qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
+#-q $cluster_queue -P $project"
+# TODO: How is the "parallel environment" openmpi-savu from Grid Engine
+# translated to SLURM?
+out_file_base="$interfolder/$outname.o"
+out_file_slurm_jobid="$out_file_base%j"
+sbatch_args="--job-name=$outname -o $out_file_slurm_jobid -n $processes \
+--exclusive -p $partition --account=$account -N $nNodes"
 
 # blocking
 if [ $zocalo == true ] ; then
-	qsub_args="${qsub_args} -sync y"
+	#qsub_args="${qsub_args} -sync y"
+	# TODO: Is `--wait` the correct SLURM analogue of GE's `-sync y`?
+	sbatch_args="$sbatch_args --wait"
 fi
 
 # gpu processing
 if [ $cpu == false ] ; then
 	#qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
-	qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
+	# TODO: Is this the correct way to use the `--constraint` flag to select
+	# the GPU architecture?
+	#sbatch_args="$sbatch_args --gpus-per-node=$gpus_per_node --constraint=$gpu_arch"
+	sbatch_args="$sbatch_args --gpus-per-node=$gpus_per_node"
 fi
 
 # savu_mpijob.sh args
-mpijob_args="$filepath $version $savupath $data_file $process_file $outpath $cpus_to_use_per_node \
-$gpus_to_use_per_node $delete"
+mpijob_args="$filepath $version $savupath $data_file $process_file $outpath \
+$cpus_to_use_per_node $gpus_to_use_per_node $delete"
 
 # savu args
 savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
-args="${qsub_args} ${mpijob_args} ${savu_args}"
+#args="${qsub_args} ${mpijob_args} ${savu_args}"
+args="${sbatch_args} ${mpijob_args} ${savu_args}"
 
-case $cluster in
-	"test_cluster")
-		sbmt_cmd="qsub -l infiniband $args" ;;
-	"cluster")
-		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-		sbmt_cmd="qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -l infiniband $args" ;;
-	"hamilton")
-		# RAM 384G per core (but 377G available?) ~ 9G per core
-		# requesting 7G per core as minimum (required to be available on startup),but will use all
-		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-		sbmt_cmd="qsub -l m_mem_free=7G $args" ;;
-esac
+# TODO: Not sure how to request certain things based on the cluster that the
+# job will get scheduled on (for example, below has parts that some require
+# infiniband, and different amounts of free RAM per CPU core)
+#
+# Also note that there's a perl script for the science cluster case which is
+# apparently requesting 12GB of RAM per CPU core to be free, not sure how to
+# migrate this to SLURM either.
+#case $cluster in
+#	"test_cluster")
+#		sbmt_cmd="qsub -l infiniband $args" ;;
+#	"cluster")
+#		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
+#		sbmt_cmd="qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -l infiniband $args" ;;
+#	"hamilton")
+#		# RAM 384G per core (but 377G available?) ~ 9G per core
+#		# requesting 7G per core as minimum (required to be available on startup),but will use all
+#		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
+#		sbmt_cmd="qsub -l m_mem_free=7G $args" ;;
+#esac
 
+sbmt_cmd="sbatch $args"
 $sbmt_cmd > /dls/tmp/savu/$USER.out
 
-# =========================== end qsub ===================================
+# =========================== end sbatch ===================================
 
 # copy original command to the log folder
 command_file="$logfolder/run_command.txt"
@@ -462,16 +380,27 @@ $PWD
 $original_command
 # Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
 $modified_command
-# The qsub run command is the following:
+# The sbatch run command is the following:
 $sbmt_cmd
 ENDFILE
 
 # get the job number here
-filename=`echo $outname.o`
-jobnumber=`awk '{print $3}' /dls/tmp/savu/$USER.out | head -n 1`
+# TODO: Currently the code below does not work, due to the output file not
+# existing when the `find` command runs, so perhaps a better way of getting the
+# job ID is needed (REST API?)
+#
+# The file storing stdout and stderr will be named like "$outname.o%j" where %j
+# is the job ID assigned by SLURM. Find the output file, then use a regex to
+# grab the job ID from the output file's name.
 
-interpath=`readlink -f $interfolder`
-ln -s $interpath/savu.o$jobnumber /dls/tmp/savu/savu.o$jobnumber
+# There should be only one file in `interfolder` that matches the `find`
+# command's search
+out_file=$(find $out_file_base*)
+regex=".*savu\.o([0-9]+)$"
+[[ $out_file =~ $regex ]]
+jobnumber=${BASH_REMATCH[1]}
+
+ln -s $out_file /dls/tmp/savu/$outname.o$jobnumber
 
 echo -e "\n\t************************************************************************"
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
@@ -481,14 +410,7 @@ echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
-
-if [ $cluster == 'hamilton' ] ; then
-  echo -e "\t\t   >> module load hamilton"
-else
-  echo -e "\t\t   >> module load global/cluster"
-fi
-
-echo -e "\t\t   >> qstat"
+echo -e "\t\t   >> sstat $jobnumber"
 tput setaf 3
 echo -e "\n\t\t* Monitor the progression of your Savu job:"
 tput sgr0
@@ -496,6 +418,6 @@ echo -e "\t\t   >> tail -f $logfolder/user.log"
 echo -e "\t\t   >> Ctrl+C (to quit)"
 tput setaf 6
 echo -e "\n\t For a more detailed log file see: "
-echo -e "\t   $interfolder/savu.o$jobnumber"
+echo -e "\t   $out_file"
 tput sgr0
 echo -e "\n\t************************************************************************\n"
