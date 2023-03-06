@@ -185,7 +185,7 @@ fi
 
 
 # set total processes required
-processes=$((nNodes*cpus_per_node))
+processes=$cpus_per_node
 
 # function for parsing optional arguments
 function arg_parse ()
@@ -303,8 +303,8 @@ modified_command=${original_command/$orig_process_file/$log_process_file}
 # translated to SLURM?
 out_file_base="$interfolder/$outname.o"
 out_file_slurm_jobid="$out_file_base%j"
-sbatch_args="--job-name=$outname -o $out_file_slurm_jobid -n $processes \
---exclusive -p $partition --account=$account -N $nNodes"
+sbatch_args="--job-name=$outname -o $out_file_slurm_jobid --exclusive \
+-p $partition --account=$account --nodes $nNodes --ntasks-per-node $processes"
 
 # blocking
 if [ $zocalo == true ] ; then
