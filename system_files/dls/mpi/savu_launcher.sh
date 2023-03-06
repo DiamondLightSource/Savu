@@ -369,14 +369,6 @@ $sbmt_cmd
 ENDFILE
 
 # get the job number here
-# TODO: Currently the code below does not work, due to the output file not
-# existing when the `find` command runs, so perhaps a better way of getting the
-# job ID is needed (REST API?)
-#
-# The file storing stdout and stderr will be named like "$outname.o%j" where %j
-# is the job ID assigned by SLURM. Find the output file, then use a regex to
-# grab the job ID from the output file's name.
-
 # The output text of the job submission is the string "Submitted batch job
 # <JOBID>", where <JOBID> is the job ID consisting of an unknown number of
 # integers, so can find the ID with a regex
