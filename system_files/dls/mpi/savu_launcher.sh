@@ -4,7 +4,6 @@ all_args=$*
 original_command="savu_mpi $all_args"
 
 # input optional arguments
-zocalo=false
 keep=false
 cpu=false
 while getopts ":t:i:s:z:ck::" opt; do
@@ -12,7 +11,6 @@ while getopts ":t:i:s:z:ck::" opt; do
 		t ) GPUarch_nodes=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
-        z ) zocalo=$OPTARG ;;
 		c ) cpu=true ;;
         k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
@@ -306,13 +304,6 @@ out_file_slurm_jobid="$out_file_base%j"
 sbatch_args="--job-name=$outname --output $out_file_slurm_jobid --exclusive \
 --partition $partition --account=$account --nodes $nNodes \
 --ntasks-per-node $processes"
-
-# blocking
-if [ $zocalo == true ] ; then
-	#qsub_args="${qsub_args} -sync y"
-	# TODO: Is `--wait` the correct SLURM analogue of GE's `-sync y`?
-	sbatch_args="$sbatch_args --wait"
-fi
 
 # gpu processing
 if [ $cpu == false ] ; then
