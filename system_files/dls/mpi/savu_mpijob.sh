@@ -47,18 +47,8 @@ if [ ! $delete == false ]; then
 fi
        #-mca btl sm,self,openib \
 
-if [[ $HOSTNAME =~ .*com10.*  || $HOSTNAME =~ .*com14.* ]]; then
-	mpirun -np ${processes} \
-       -mca pml ucx -x UCX_NET_DEVICES=mlx4_0:1 \
-       -x LD_LIBRARY_PATH \
-       python $filename $datafile $processfile $outfile -n $CPUs $@
-else
-   	mpirun -np ${processes} \
-       -mca pml ucx -x UCX_NET_DEVICES=mlx5_0:1 \
-       -x LD_LIBRARY_PATH \
-       python $filename $datafile $processfile $outfile -n $CPUs $@
-fi
-
+# Run Savu processes
+srun python $filename $datafile $processfile $outfile -n $CPUs $@
 
 if [ ! $delete == false ]; then
   cd /dls/tmp/savu
