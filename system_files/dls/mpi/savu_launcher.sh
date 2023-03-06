@@ -135,16 +135,6 @@ else
 
 	# Set number of CPUs and GPUs to request
 	case $arch in
-		'Fermi')
-			gpu_arch=Fermi
-			cpus_per_node=12
-			gpus_per_node=2
-			;;
-		'Kepler')
-			gpu_arch=Kepler
-			cpus_per_node=20
-			gpus_per_node=4
-			;;
 		'Pascal')
 			gpu_arch=Pascal
 			cpus_per_node=20
