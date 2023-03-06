@@ -364,7 +364,9 @@ args="${sbatch_args} ${mpijob_args} ${savu_args}"
 #esac
 
 sbmt_cmd="sbatch $args"
-$sbmt_cmd > /dls/tmp/savu/$USER.out
+# Save the output text of the job submission in a variable to get the job ID
+# later
+job_output_str=$($sbmt_cmd)
 
 # =========================== end sbatch ===================================
 
@@ -393,12 +395,13 @@ ENDFILE
 # is the job ID assigned by SLURM. Find the output file, then use a regex to
 # grab the job ID from the output file's name.
 
-# There should be only one file in `interfolder` that matches the `find`
-# command's search
-out_file=$(find $out_file_base*)
-regex=".*savu\.o([0-9]+)$"
-[[ $out_file =~ $regex ]]
+# The output text of the job submission is the string "Submitted batch job
+# <JOBID>", where <JOBID> is the job ID consisting of an unknown number of
+# integers, so can find the ID with a regex
+regex="Submitted\ batch\ job\ ([0-9]*)$"
+[[ $job_output_str =~ $regex ]]
 jobnumber=${BASH_REMATCH[1]}
+out_file="$out_file_base$jobnumber"
 
 ln -s $out_file /dls/tmp/savu/$outname.o$jobnumber
 
