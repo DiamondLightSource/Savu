@@ -5,13 +5,9 @@ original_command="savu_mpi $all_args"
 
 # input optional arguments
 keep=false
-cpu=false
 while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
-		t ) GPUarch=$OPTARG ;;
-		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
-		c ) cpu=true ;;
         k ) keep=$OPTARG ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
@@ -31,118 +27,43 @@ else
 	module load savu/$version
 fi
 
-
 # set output log/error file prefix
 outname=savu
 
-# If this is developer mode
-if [ -n "${infile+set}" ]; then
-	echo "Running Savu in developer mode"
-    dev_mode=true
-    GPUarch=Pascal
-  	# read the values from file (ignoring lines starting with #)
-	count=0
-	while read -r entry; do
-		if [ ! -z "$entry" ] && [[ ! $entry = \#* ]] ; then
-		    var[count]=${entry#*=}
-		    count=$(( $count + 1 ))
-    	fi
-  	done < $infile
+# parse additional command line arguments
+# Check required arguments exist
+vars=$@
+x="${vars%%' -'*}"
+[[ $x = $vars ]] && temp=${#vars} || temp=${#x}
+args=(${vars:0:$temp})
+nargs=${#args[@]}
 
-	cluster=${var[0],,}
-	gpu_arch=${var[1],,}
-	gpu_arch=${gpu_arch^}
-	data_file=${var[2]}
-	process_file=${var[3]}
-	outpath=${var[4]}
-	options=${var[5]}
-	project=tomography
-else
-	#echo "Running Savu in production mode"
-	# parse additional command line arguments
-	# Check required arguments exist
-    dev_mode=false
-	vars=$@
-	x="${vars%%' -'*}"
-	[[ $x = $vars ]] && temp=${#vars} || temp=${#x}
-	args=(${vars:0:$temp})
-	nargs=${#args[@]}
-
-	if [ $nargs != 3 ] ; then
-	    tput setaf 1
-	    echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
-	    tput setaf 6
-	    echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
-	    echo -e "\t the template below:"
-	    tput sgr0
-	    echo -e "\n\t >>> savu_mpi  <in_file>  <process_list>  <out_folder>  <optional_args>"
-	    tput setaf 6
-	    echo -e "\n\t For a list of optional arguments type:"
-	    tput sgr0
-	    echo -e "\t >>> savu --help"
-	#    tput setaf 6
-	    echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
-	    tput setaf 1
-	    echo -e "\n\t*************************************************************************\n"
-	    tput sgr0
-	    exit
-	fi
-
-	# set parameters
-	data_file=$1
-	process_file=$2
-	outpath=$3
-	shift 3
-	options=$@
-
-	# TODO: For Grid Engine, the code below sets the project based on the
-	# filepath of the input data. For SLURM, does setting the "account" in the
-	# same way make sense, or is there a more reliable way of doing it?
-	pathtodatafile=`readlink -f $data_file`
-	if [[ $pathtodatafile == /dls/staging* ]] ; then
-		pathtodatafile=${pathtodatafile#/dls/staging}
-	fi
-	project=`echo $pathtodatafile | grep -o -P '(?<=/dls/).*?(?=/data)'`
-	# in the case there is more than once instance of the pattern above
-	project=`echo $project | head -n1 | awk '{print $1;}'`
-	if [ -z "$project" ] ; then
-	  project=tomography
-	fi
-
-	# No longer choose number of GPU nodes and GPU architecture based on if the
-	# data is on GPFS03 or not, let SLURM config handle this instead.
-
-	# If the GPU architecture is not provided, then default to Pascal
-	if [[ -z "${GPUarch}" ]]; then
-		GPUarch='Pascal'
-		arch='Pascal'
-	else
-		arch=${GPUarch}
-	fi
-
-	# Set number of CPUs and GPUs to request
-	case $arch in
-		'Pascal')
-			gpu_arch=Pascal
-			;;
-		'Volta')
-			gpu_arch=Volta
-			;;
-		*)
-			echo -e "\nUnknown 'GPUarch' optional argument"
-			echo -e "Example: 'Pascal', 'Volta'"
-			exit 1
-			;;
-	esac
-
-	# Previously there was a special case for K11/DIAD for when input data was
-	# on GPFS03, to default to using Volta's. For the migration to SLURM (where
-	# being aware of GPFS03 in the launcher script is no longer necessary),
-	# this has been translated into requesting Volta's for K11/DIAD data.
-	if [ $project == k11 ]; then
-		gpu_arch=Volta
-	fi
+if [ $nargs != 3 ] ; then
+	tput setaf 1
+	echo -e "\n\t************************* SAVU INPUT ERROR ******************************"
+	tput setaf 6
+	echo -e "\n\t You have entered an incorrect number of input arguments.  Please follow"
+	echo -e "\t the template below:"
+	tput sgr0
+	echo -e "\n\t >>> savu_mpi  <in_file>  <process_list>  <out_folder>  <optional_args>"
+	tput setaf 6
+	echo -e "\n\t For a list of optional arguments type:"
+	tput sgr0
+	echo -e "\t >>> savu --help"
+#    tput setaf 6
+	echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
+	tput setaf 1
+	echo -e "\n\t*************************************************************************\n"
+	tput sgr0
+	exit
 fi
+
+# set parameters
+data_file=$1
+process_file=$2
+outpath=$3
+shift 3
+options=$@
 
 # function for parsing optional arguments
 function arg_parse ()
@@ -331,7 +252,6 @@ echo -e "\n\t*******************************************************************
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
 echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
-echo -e "\t The computing configuration has been passed as $arch GPU."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
