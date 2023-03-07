@@ -35,13 +35,6 @@ echo "number of unique hosts: ${uniqslots}"
 echo "running on these hosts:"
 cat ${UNIQHOSTS}
 
-# Adding slots flag to each unique host to replace
-# multiple entries in file.
-typeset TMP_FILE=$( mktemp )
-touch "${TMP_FILE}"
-cp -p ${UNIQHOSTS} "${TMP_FILE}"
-sed -e "s/$/ slots=${nCPUs}/" -i ${TMP_FILE}
-
 processes=`bc <<< "$((uniqslots*nCPUs))"`
 
 for i in $(seq 0 $((nGPUs-1))); do GPUs+="GPU$i " ; done
