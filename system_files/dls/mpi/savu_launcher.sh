@@ -171,14 +171,8 @@ log_process_file=$logfolder/$basename
 modified_command=${original_command/$orig_process_file/$log_process_file}
 
 # =========================== sbatch =======================================
-# general arguments
 
-# openmpi-savu stops greater than requested number of nodes being assigned to
-# the job if memory requirements are not satisfied.'
-#qsub_args="-N $outname -j y -o $interfolder -e $interfolder -pe openmpi-savu $processes -l exclusive \
-#-q $cluster_queue -P $project"
-# TODO: How is the "parallel environment" openmpi-savu from Grid Engine
-# translated to SLURM?
+# `sbatch` args
 out_file_base="$interfolder/$outname.o"
 out_file_slurm_jobid="$out_file_base%j"
 sbatch_args="--output $out_file_slurm_jobid"
@@ -191,29 +185,8 @@ $delete"
 savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
 --facility_email scientificsoftware@diamond.ac.uk -l $outfolder"
 
-#args="${qsub_args} ${mpijob_args} ${savu_args}"
+# Collect all args for `sbatch` command
 args="${sbatch_args} ${mpijob_args} ${savu_args}"
-
-# TODO: Not sure how to request certain things based on the cluster that the
-# job will get scheduled on (for example, below has parts that some require
-# infiniband, and different amounts of free RAM per CPU core)
-#
-# Also note that there's a perl script for the science cluster case which is
-# apparently requesting 12GB of RAM per CPU core to be free, not sure how to
-# migrate this to SLURM either.
-#case $cluster in
-#	"test_cluster")
-#		sbmt_cmd="qsub -l infiniband $args" ;;
-#	"cluster")
-#		# RAM com10 252G com14 252G ~ 12G per core  - m_mem_free requested in JSV script
-#		sbmt_cmd="qsub -jsv /dls_sw/cluster/common/JSVs/savu_20191122.pl -l infiniband $args" ;;
-#	"hamilton")
-#		# RAM 384G per core (but 377G available?) ~ 9G per core
-#		# requesting 7G per core as minimum (required to be available on startup),but will use all
-#		# memory unless system jobs need it (then could be rolled back to the minimum 7G)
-#		sbmt_cmd="qsub -l m_mem_free=7G $args" ;;
-#esac
-
 sbmt_cmd="sbatch $args"
 # Save the output text of the job submission in a variable to get the job ID
 # later
