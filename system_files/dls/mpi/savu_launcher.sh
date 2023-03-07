@@ -8,7 +8,7 @@ keep=false
 cpu=false
 while getopts ":t:i:s:z:ck::" opt; do
 	case ${opt} in
-		t ) GPUarch_nodes=$OPTARG ;;
+		t ) GPUarch=$OPTARG ;;
 		i ) infile=$OPTARG ;;
 		s ) version=$OPTARG ;;
 		c ) cpu=true ;;
@@ -39,7 +39,7 @@ outname=savu
 if [ -n "${infile+set}" ]; then
 	echo "Running Savu in developer mode"
     dev_mode=true
-    GPUarch_nodes=STANDARD
+    GPUarch=Pascal
   	# read the values from file (ignoring lines starting with #)
 	count=0
 	while read -r entry; do
@@ -52,13 +52,10 @@ if [ -n "${infile+set}" ]; then
 	cluster=${var[0],,}
 	gpu_arch=${var[1],,}
 	gpu_arch=${gpu_arch^}
-	nNodes=${var[2]}
-	cpus_to_use_per_node=${var[3]}
-	gpus_to_use_per_node=${var[4]}
-	data_file=${var[5]}
-	process_file=${var[6]}
-	outpath=${var[7]}
-	options=${var[8]}
+	data_file=${var[2]}
+	process_file=${var[3]}
+	outpath=${var[4]}
+	options=${var[5]}
 	project=tomography
 else
 	#echo "Running Savu in production mode"
@@ -112,43 +109,28 @@ else
 	  project=tomography
 	fi
 
-	# TODO: The only "account" currently available on Wilson is "test05r", so
-	# will hardcode that for now
-	account=test05r
-
 	# No longer choose number of GPU nodes and GPU architecture based on if the
 	# data is on GPFS03 or not, let SLURM config handle this instead.
 
-	# If the number of GPU nodes and GPU architecture is not provided, then
-	# default to 2 GPU nodes with Pascal's
-	if [[ -z "${GPUarch_nodes}" ]]; then
-		GPUarch_nodes="STANDARD"
+	# If the GPU architecture is not provided, then default to Pascal
+	if [[ -z "${GPUarch}" ]]; then
+		GPUarch='Pascal'
 		arch='Pascal'
-		num=2
 	else
-		arch=${GPUarch_nodes%_*}
-		num=${GPUarch_nodes##*_}
+		arch=${GPUarch}
 	fi
-	nNodes=$num
 
 	# Set number of CPUs and GPUs to request
 	case $arch in
 		'Pascal')
 			gpu_arch=Pascal
-			cpus_per_node=20
-			gpus_per_node=2
 			;;
 		'Volta')
 			gpu_arch=Volta
-			cpus_per_node=40
-			if [ $dev_mode==false ]; then
-				cpus_to_use_per_node=30
-			fi
-			gpus_per_node=4
 			;;
 		*)
-			echo -e "\nUnknown 'GPUarch_nodes' optional argument"
-			echo -e "Please use the following syntax '<GPU_architecture>_<number_of_nodes>'. Example: 'Kepler_2', 'Pascal_2'"
+			echo -e "\nUnknown 'GPUarch' optional argument"
+			echo -e "Example: 'Pascal', 'Volta'"
 			exit 1
 			;;
 	esac
@@ -160,30 +142,7 @@ else
 	if [ $project == k11 ]; then
 		gpu_arch=Volta
 	fi
-
-	# Set "partition" (the SLURM equivalent of a "queue" in Grid Engine)
-	# TODO: Currently on Wilson, cs05r is the only partition which reports
-	# having GPU nodes, so have naively chosen this for all jobs, but this may
-	# not be correct.
-	partition=cs05r
 fi
-
-# override cpu and gpu values if the full node is not required
-if [ -z $cpus_to_use_per_node ] ; then cpus_to_use_per_node=$cpus_per_node; fi
-if [ -z $gpus_to_use_per_node ] ; then gpus_to_use_per_node=$gpus_per_node; fi
-
-if [ $cpus_to_use_per_node -gt $cpus_per_node ] ; then
-	echo "The number of CPUs requested per node ($cpus_to_use_per_node) is greater than the maximum ($cpus_per_node)."
-	exit 1
-fi
-if [ $gpus_to_use_per_node -gt $gpus_per_node ] ; then
-	echo "The number of GPUs requested per node ($gpus_to_use_per_node) is greater than the maximum ($gpus_per_node)."
-	exit 1
-fi
-
-
-# set total processes required
-processes=$cpus_per_node
 
 # function for parsing optional arguments
 function arg_parse ()
@@ -301,22 +260,11 @@ modified_command=${original_command/$orig_process_file/$log_process_file}
 # translated to SLURM?
 out_file_base="$interfolder/$outname.o"
 out_file_slurm_jobid="$out_file_base%j"
-sbatch_args="--job-name=$outname --output $out_file_slurm_jobid --exclusive \
---partition $partition --account=$account --nodes $nNodes \
---ntasks-per-node $processes"
-
-# gpu processing
-if [ $cpu == false ] ; then
-	#qsub_args="${qsub_args} -l gpu=$gpus_per_node -l gpu_arch=$gpu_arch"
-	# TODO: Is this the correct way to use the `--constraint` flag to select
-	# the GPU architecture?
-	#sbatch_args="$sbatch_args --gpus-per-node=$gpus_per_node --constraint=$gpu_arch"
-	sbatch_args="$sbatch_args --gpus-per-node=$gpus_per_node"
-fi
+sbatch_args="--output $out_file_slurm_jobid"
 
 # savu_mpijob.sh args
 mpijob_args="$filepath $version $savupath $data_file $process_file $outpath \
-$cpus_to_use_per_node $gpus_to_use_per_node $delete"
+$delete"
 
 # savu args
 savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
@@ -383,7 +331,7 @@ echo -e "\n\t*******************************************************************
 echo -e "\n\t\t\t *** THANK YOU FOR USING SAVU! ***"
 tput setaf 6
 echo -e "\n\t Your job has been submitted to the cluster with job number $jobnumber."
-echo -e "\t The computing configuration has been passed as $GPUarch_nodes with $arch GPU and $num node(s)."
+echo -e "\t The computing configuration has been passed as $arch GPU."
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0

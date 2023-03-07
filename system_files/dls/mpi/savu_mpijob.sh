@@ -1,5 +1,12 @@
 #!/bin/sh
-# update for singularity run
+#SBATCH --job-name=savu
+#SBATCH --partition=cs05r
+#SBATCH --account=test05r
+#SBATCH --exclusive
+#SBATCH --nodes=2
+#SBATCH --gpus-per-node=4
+#SBATCH --ntasks-per-node=40
+#SBATCH --cpus-per-task=1
 
 version=$1
 shift 1
@@ -9,10 +16,13 @@ savupath=$1
 datafile=$2
 processfile=$3
 outfile=$4
-nCPUs=$5
-nGPUs=$6
-delete=$7
-shift 7
+delete=$5
+shift 5
+
+# These should match the values for `--ntasks-per-node` and `--gpus-per-node`
+# respectively
+nCPUs=40
+nGPUs=4
 
 export PYTHONPATH=$savupath:$PYTHONPATH
 filename=$savupath/savu/tomo_recon.py
