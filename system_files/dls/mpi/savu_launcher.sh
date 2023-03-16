@@ -148,18 +148,13 @@ else
 	fi
 fi
 
-# copy process list to the intermediate folder
-orig_process_file=$process_file
-process_file=`readlink -f $process_file`
+# When Savu runs, it will copy the process list file from its original location
+# to the log folder; create a modified command with the path to the copy of the
+# process list file that will exist once Savu has begun running, and put it into
+# a log file
 basename=`basename $process_file`
-cp $process_file $interfolder
-process_file=$interfolder/$basename
-
-# create a modified command with the new process list path
 log_process_file=$logfolder/$basename
-# replace the original process list path with the process list resaved into the
-# log file
-modified_command=${original_command/$orig_process_file/$log_process_file}
+modified_command=${original_command/$process_file/$log_process_file}
 
 # =========================== sbatch =======================================
 
@@ -169,8 +164,13 @@ out_file_slurm_jobid="$out_file_base%j"
 sbatch_args="--output $out_file_slurm_jobid"
 
 # savu_mpijob.sh args
+# Use the original process list file for the Savu run, but use the copy of the
+# process list file for generating the command that goes into a log file that
+# will reproduce the run
 mpijob_args="$filepath $version $savupath $data_file $process_file $outpath \
 $delete"
+mpijob_args_log_process_file="$filepath $version $savupath $data_file \
+$log_process_file $outpath $delete"
 
 # savu args
 savu_args="$options -c -f $outfolder -s graylog2.diamond.ac.uk -p 12203 \
@@ -198,7 +198,7 @@ $original_command
 # Please use the command below to reproduce the obtained results exactly. The -s savu_version flag will set the correct Savu environment for you automatically
 $modified_command
 # The sbatch run command is the following:
-$sbmt_cmd
+sbatch $sbatch_args $mpijob_args_log_process_file $savu_args
 ENDFILE
 
 # get the job number here
