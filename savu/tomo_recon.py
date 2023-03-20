@@ -33,7 +33,7 @@ import savu.core.utils as cu
 from scripts.citation_extractor import citation_extractor
 from savu.core.basic_plugin_runner import BasicPluginRunner
 from savu.core.plugin_runner import PluginRunner
-import pre_run as pr
+from savu import pre_run as pr
 
 def __option_parser(doc=True):
     """ Option parser for command line arguments.
