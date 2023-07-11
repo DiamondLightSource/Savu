@@ -19,10 +19,10 @@ shift $((OPTIND -1))
 if [ -z $version ] ; then
 	echo -ne "\n*** Loading the latest stable version of Savu as "
 	echo -e "a specific version has not been requested ***\n"
-	# TODO: Hardcoded `savu/5.0-tomo` as this uses `openmpi/4.1.2` which is
+	# NOTE: Hardcoded `savu/4.2-slurm` as this uses `openmpi/4.1.2` which is
 	# compatible with SLURM
-	module load savu/5.0-tomo
-	version="5.0-tomo"
+	module load savu/4.2-slurm
+	version="4.2-slurm"
 else
 	module load savu/$version
 fi
