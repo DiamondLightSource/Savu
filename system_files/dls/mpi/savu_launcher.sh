@@ -219,7 +219,7 @@ echo -e "\n\t Your job has been submitted to the cluster with job number $jobnum
 tput setaf 3
 echo -e "\n\t\t* Monitor the status of your job on the cluster:"
 tput sgr0
-echo -e "\t\t   >> sstat $jobnumber"
+echo -e "\t\t   >> squeue -j $jobnumber"
 tput setaf 3
 echo -e "\n\t\t* Monitor the progression of your Savu job:"
 tput sgr0
