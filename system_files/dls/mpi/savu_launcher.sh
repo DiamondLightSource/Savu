@@ -3,12 +3,17 @@
 all_args=$*
 original_command="savu_mpi $all_args"
 
+# Define var for holding whether the job should be multi-process (regular case)
+# or single-process (edge case)
+single_proc_job=0
+
 # input optional arguments
 keep=false
-while getopts ":t:i:s:z:ck::" opt; do
+while getopts ":t:i:s:z:uck::" opt; do
 	case ${opt} in
 		s ) version=$OPTARG ;;
         k ) keep=$OPTARG ;;
+        u ) single_proc_job=1 ;;
 		\? ) echo "Invalid option: $OPTARG" 1>&2 ;;
 		: ) echo "Invalid option: $OPTARG requires an argument" 1>&2 ;;
 	esac
@@ -91,6 +96,14 @@ function create_folder()
 # get the Savu path
 DIR="$(cd "$(dirname "$0")" && pwd)"
 filepath=$DIR'/savu_mpijob.sh'
+filepath_single=$DIR'/savu_mpijob_single.sh'
+# Check if the flag for denoting a single process job (1 CPU, 1 GPU) has been
+# passed
+if [ $single_proc_job -eq 1 ] ; then
+	filepath=$filepath_single
+else
+	filepath=$filepath
+fi
 savupath=$(python -c "import savu, os; print (savu.__path__[0])")
 savupath=${savupath%/savu}
 
