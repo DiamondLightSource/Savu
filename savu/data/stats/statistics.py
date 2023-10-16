@@ -235,7 +235,14 @@ class Statistics(object):
             if slice_stats is not None:
                 for key, value in slice_stats.items():
                     self.stats[key].append(value)
-                if self._4d:
+                in_datasets = self.plugin.get_in_datasets()
+                in_pData = [d._get_plugin_data() for d in in_datasets]
+                patterns = [pData.get_pattern_name() for pData in in_pData]
+                EXCLUDED_4D_PATTERNS = ["PROJECTION_STACK", "SINOGRAM_STACK"]
+                any_stitch_patterns = list(
+                    map(lambda pattern: pattern in EXCLUDED_4D_PATTERNS, patterns)
+                )
+                if self._4d and not any(any_stitch_patterns):
                     if sum(self.stats["data_points"]) >= self._volume_total_points:
                         self.set_volume_stats()
             else:
